@@ -22,11 +22,12 @@ export function getLearnedWords(): LearnedWord[] {
   }
 }
 
-export function saveLearnedWord(entry: LearnedWord): void {
+export function saveLearnedWord(entry: LearnedWord): boolean {
   const words = getLearnedWords();
-  if (words.some((word) => word.word === entry.word)) return;
+  if (words.some((word) => word.word === entry.word)) return false;
 
   localStorage.setItem(KEY, JSON.stringify([...words, entry]));
+  return true;
 }
 
 export function deleteLearnedWord(word: string): void {

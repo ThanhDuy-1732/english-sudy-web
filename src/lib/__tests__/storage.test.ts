@@ -26,9 +26,15 @@ test("saveLearnedWord persists a word", () => {
   expect(getLearnedWords()).toEqual([mockWord]);
 });
 
-test("saveLearnedWord does not save duplicate words", () => {
+test("saveLearnedWord returns true on first save", () => {
+  const result = saveLearnedWord(mockWord);
+  expect(result).toBe(true);
+});
+
+test("saveLearnedWord does not save duplicate words and returns false", () => {
   saveLearnedWord(mockWord);
-  saveLearnedWord(mockWord);
+  const result = saveLearnedWord(mockWord);
+  expect(result).toBe(false);
   expect(getLearnedWords()).toHaveLength(1);
 });
 
