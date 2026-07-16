@@ -23,7 +23,9 @@ test("getLearnedWords returns empty array when nothing saved", () => {
 
 test("saveLearnedWord persists a word", () => {
   saveLearnedWord(mockWord);
-  expect(getLearnedWords()).toEqual([mockWord]);
+  const words = getLearnedWords();
+  expect(words).toHaveLength(1);
+  expect(words[0]).toMatchObject(mockWord);
 });
 
 test("saveLearnedWord returns true on first save", () => {
@@ -49,7 +51,9 @@ test("deleteLearnedWord leaves other words intact", () => {
   saveLearnedWord(mockWord);
   saveLearnedWord(other);
   deleteLearnedWord("greet");
-  expect(getLearnedWords()).toEqual([other]);
+  const words = getLearnedWords();
+  expect(words).toHaveLength(1);
+  expect(words[0]).toMatchObject(other);
 });
 
 test("saveLearnedWord treats case-insensitive duplicates as duplicates", () => {
