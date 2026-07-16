@@ -8,6 +8,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "word is required" }, { status: 400 });
   }
 
-  const sentence = await generateSentence(word);
-  return NextResponse.json({ sentence });
+  try {
+    const sentence = await generateSentence(word);
+    return NextResponse.json({ sentence });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

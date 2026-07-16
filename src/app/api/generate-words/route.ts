@@ -8,6 +8,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "topic is required" }, { status: 400 });
   }
 
-  const words = await generateWords(topic);
-  return NextResponse.json(words);
+  try {
+    const words = await generateWords(topic);
+    return NextResponse.json(words);
+  } catch (error) {
+    console.error("Failed to generate words", error);
+    return NextResponse.json(
+      { error: "Không thể sinh từ mới lúc này. Vui lòng thử lại." },
+      { status: 503 }
+    );
+  }
 }

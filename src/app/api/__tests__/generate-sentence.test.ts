@@ -30,3 +30,17 @@ test("returns 400 when word is missing", async () => {
   const res = await POST(req);
   expect(res.status).toBe(400);
 });
+
+test("returns 500 with JSON body when generateSentence throws", async () => {
+  const { generateSentence } = await import("@/lib/gemini");
+  (generateSentence as jest.Mock).mockRejectedValueOnce(new Error("Gemini API failure"));
+  const req = new NextRequest("http://localhost/api/generate-sentence", {
+    method: "POST",
+    body: JSON.stringify({ word: "negotiate" }),
+    headers: { "Content-Type": "application/json" },
+  });
+  const res = await POST(req);
+  expect(res.status).toBe(500);
+  const data = await res.json();
+  expect(data).toEqual({ error: "Gemini API failure" });
+});

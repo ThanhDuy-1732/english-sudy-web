@@ -30,3 +30,17 @@ test("returns 400 when topic is missing", async () => {
   const res = await POST(req);
   expect(res.status).toBe(400);
 });
+
+test("returns 500 with JSON body when generateWords throws", async () => {
+  const { generateWords } = await import("@/lib/gemini");
+  (generateWords as jest.Mock).mockRejectedValueOnce(new Error("Gemini API failure"));
+  const req = new NextRequest("http://localhost/api/generate-words", {
+    method: "POST",
+    body: JSON.stringify({ topic: "TOEIC" }),
+    headers: { "Content-Type": "application/json" },
+  });
+  const res = await POST(req);
+  expect(res.status).toBe(500);
+  const data = await res.json();
+  expect(data).toEqual({ error: "Gemini API failure" });
+});
