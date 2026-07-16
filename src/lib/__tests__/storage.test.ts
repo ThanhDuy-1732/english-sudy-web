@@ -51,3 +51,15 @@ test("deleteLearnedWord leaves other words intact", () => {
   deleteLearnedWord("greet");
   expect(getLearnedWords()).toEqual([other]);
 });
+
+test("saveLearnedWord treats case-insensitive duplicates as duplicates", () => {
+  const lowerWord: LearnedWord = { ...mockWord, word: "negotiate" };
+  const capitalWord: LearnedWord = { ...mockWord, word: "Negotiate" };
+
+  const result1 = saveLearnedWord(lowerWord);
+  const result2 = saveLearnedWord(capitalWord);
+
+  expect(result1).toBe(true);
+  expect(result2).toBe(false);
+  expect(getLearnedWords()).toHaveLength(1);
+});

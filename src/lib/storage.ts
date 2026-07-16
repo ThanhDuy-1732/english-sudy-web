@@ -24,7 +24,7 @@ export function getLearnedWords(): LearnedWord[] {
 
 export function saveLearnedWord(entry: LearnedWord): boolean {
   const words = getLearnedWords();
-  if (words.some((word) => word.word === entry.word)) return false;
+  if (words.some((w) => w.word.toLowerCase() === entry.word.toLowerCase())) return false;
 
   localStorage.setItem(KEY, JSON.stringify([...words, entry]));
   return true;
