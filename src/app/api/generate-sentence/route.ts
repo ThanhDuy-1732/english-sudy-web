@@ -12,7 +12,10 @@ export async function POST(req: NextRequest) {
     const sentence = await generateSentence(word);
     return NextResponse.json({ sentence });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Failed to generate sentence", error);
+    return NextResponse.json(
+      { error: "Không thể tạo câu ví dụ lúc này. Vui lòng thử lại." },
+      { status: 503 }
+    );
   }
 }
