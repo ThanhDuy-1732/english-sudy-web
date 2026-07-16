@@ -13,11 +13,11 @@ function getModel() {
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  return genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  return genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 }
 
 function stripJsonCodeFence(text: string) {
-  return text.trim().replace(/^```[a-z]*\n?/, "").replace(/\n?```$/, "");
+  return text.trim().replace(/^```[a-z]*\n?/i, "").replace(/\n?```$/i, "");
 }
 
 export async function generateWords(topic: string): Promise<GeneratedWord[]> {
@@ -25,7 +25,13 @@ export async function generateWords(topic: string): Promise<GeneratedWord[]> {
   const result = await getModel().generateContent(prompt);
   const text = stripJsonCodeFence(result.response.text());
 
-  return JSON.parse(text) as GeneratedWord[];
+  let parsed: GeneratedWord[];
+  try {
+    parsed = JSON.parse(text) as GeneratedWord[];
+  } catch {
+    throw new Error(`Gemini returned invalid JSON: ${text.slice(0, 100)}`);
+  }
+  return parsed;
 }
 
 export async function generateSentence(word: string): Promise<string> {

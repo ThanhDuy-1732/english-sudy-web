@@ -26,6 +26,16 @@ test("generateWords returns parsed word array", async () => {
   expect(mockGenerateContent).toHaveBeenCalledTimes(1);
 });
 
+test("generateWords throws descriptive error on malformed JSON", async () => {
+  mockGenerateContent.mockResolvedValue({
+    response: { text: () => "Sorry, I cannot help with that." },
+  });
+
+  await expect(generateWords("TOEIC")).rejects.toThrow(
+    "Gemini returned invalid JSON"
+  );
+});
+
 test("generateSentence returns trimmed string", async () => {
   mockGenerateContent.mockResolvedValue({
     response: { text: () => "  We need to negotiate.  " },
