@@ -1,13 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { saveLearnedWord, updateWordReview } from "@/lib/storage";
+import { useApiFetch } from "@/lib/useApiFetch";
 import PronunciationButton from "./PronunciationButton";
+import WritingChallenge from "./WritingChallenge";
+import FillBlank from "./FillBlank";
+import DictationMode from "./DictationMode";
+
+type CardMode = "study" | "write" | "fill" | "dictation";
 
 interface FlashcardProps {
   word: string;
   meaning: string;
   topic: string;
+  initialExample?: string;
+  initialSynonymData?: { synonyms: string[]; antonyms: string[] };
   isReviewMode?: boolean;
   onReviewed?: () => void;
   onFlip?: () => void;
@@ -17,56 +25,71 @@ export default function Flashcard({
   word,
   meaning,
   topic,
+  initialExample,
+  initialSynonymData,
   isReviewMode,
   onReviewed,
   onFlip,
 }: FlashcardProps) {
+  const { fetchWithProvider } = useApiFetch();
   const [flipped, setFlipped] = useState(false);
-  const [example, setExample] = useState<string | null>(null);
+  const hasFlippedOnce = useRef(false);
+  const [example, setExample] = useState<string | null>(initialExample ?? null);
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [synonymData, setSynonymData] = useState<{
     synonyms: string[];
     antonyms: string[];
-  } | null>(null);
+  } | null>(initialSynonymData ?? null);
+  const [mode, setMode] = useState<CardMode>("study");
+  const [fillSentence, setFillSentence] = useState<string | null>(null);
+  const [fillLoading, setFillLoading] = useState(false);
 
   async function handleFlip() {
-    if (!flipped && !example && !loading) {
+    if (!flipped && !loading) {
+      const needsSentence = !example;
+      const needsSynonyms = !synonymData;
+
+      if (!needsSentence && !needsSynonyms) {
+        setFlipped(true);
+        if (!hasFlippedOnce.current) {
+          hasFlippedOnce.current = true;
+          onFlip?.();
+        }
+        return;
+      }
+
       setLoading(true);
       setError(null);
       try {
-        const [sentenceResult, synonymsResult] = await Promise.allSettled([
-          fetch("/api/generate-sentence", {
-            method: "POST",
-            cache: "no-store",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ word }),
-          }),
-          fetch("/api/generate-synonyms", {
-            method: "POST",
-            cache: "no-store",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ word }),
-          }),
-        ]);
+        const requests: Promise<Response>[] = [];
+        if (needsSentence) requests.push(fetchWithProvider("/api/generate-sentence", { word }));
+        if (needsSynonyms) requests.push(fetchWithProvider("/api/generate-synonyms", { word }));
+        const results = await Promise.allSettled(requests);
+        let requestIndex = 0;
 
-        if (sentenceResult.status === "rejected" || !sentenceResult.value.ok) {
-          throw new Error();
+        if (needsSentence) {
+          const sentenceResult = results[requestIndex++];
+          if (sentenceResult?.status === "rejected" || !sentenceResult?.value.ok) throw new Error();
+          const data = (await sentenceResult.value.json()) as { sentence: string };
+          setExample(data.sentence);
         }
-        const data = (await sentenceResult.value.json()) as { sentence: string };
-        setExample(data.sentence);
-
-        if (synonymsResult.status === "fulfilled" && synonymsResult.value.ok) {
-          const synData = (await synonymsResult.value.json()) as {
+        if (needsSynonyms) {
+          const synonymsResult = results[requestIndex++];
+          if (synonymsResult?.status === "fulfilled" && synonymsResult.value.ok) {
+            const synData = (await synonymsResult.value.json()) as {
             synonyms: string[];
             antonyms: string[];
-          };
-          setSynonymData(synData);
+            };
+            setSynonymData(synData);
+          }
         }
-
         setFlipped(true);
-        onFlip?.();
+        if (!hasFlippedOnce.current) {
+          hasFlippedOnce.current = true;
+          onFlip?.();
+        }
       } catch {
         setError("Không thể tạo câu ví dụ.");
       } finally {
@@ -75,6 +98,23 @@ export default function Flashcard({
     } else if (!loading) {
       setFlipped((current) => !current);
     }
+  }
+
+  async function loadFillSentence() {
+    if (fillSentence || fillLoading) return;
+    setFillLoading(true);
+    try {
+      const response = await fetchWithProvider("/api/generate-fillblank", { word });
+      if (!response.ok) throw new Error();
+      setFillSentence(((await response.json()) as { sentence: string }).sentence);
+    } catch {
+      setError("Không thể tạo bài điền từ.");
+    } finally { setFillLoading(false); }
+  }
+
+  function selectMode(nextMode: CardMode) {
+    setMode(nextMode);
+    if (nextMode === "fill") void loadFillSentence();
   }
 
   function handleSave(event: React.MouseEvent<HTMLButtonElement>) {
@@ -86,6 +126,8 @@ export default function Flashcard({
       example,
       topic,
       learnedAt: new Date().toISOString(),
+      synonyms: synonymData?.synonyms,
+      antonyms: synonymData?.antonyms,
     });
     if (didSave) setSaved(true);
   }
@@ -130,30 +172,21 @@ export default function Flashcard({
           aria-hidden={!flipped}
           className="absolute inset-0 flex flex-col items-center gap-3 overflow-y-auto rounded-xl bg-blue-50 p-4 text-center shadow-md [backface-visibility:hidden] [transform:rotateY(180deg)]"
         >
-          <p className="break-words font-semibold text-blue-800 [overflow-wrap:anywhere]">
-            {meaning}
-          </p>
-          {example && (
-            <p className="break-words text-sm italic leading-6 text-gray-700 [overflow-wrap:anywhere]">
-              {example}
-            </p>
-          )}
-          {synonymData && (
-            <div className="text-sm">
-              {synonymData.synonyms.length > 0 && (
-                <p>
-                  <span className="text-green-600 font-medium">Đồng nghĩa:</span>{" "}
-                  {synonymData.synonyms.join(", ")}
-                </p>
-              )}
-              {synonymData.antonyms.length > 0 && (
-                <p>
-                  <span className="text-red-500 font-medium">Trái nghĩa:</span>{" "}
-                  {synonymData.antonyms.join(", ")}
-                </p>
-              )}
-            </div>
-          )}
+          <div className="flex w-full gap-1" onClick={(event) => event.stopPropagation()}>
+            {(["study", "write", "fill", "dictation"] as CardMode[]).map((cardMode) => (
+              <button key={cardMode} type="button" onClick={() => selectMode(cardMode)} className={`min-h-10 flex-1 rounded-lg px-1 text-[11px] font-medium transition-colors ${mode === cardMode ? "bg-blue-500 text-white" : "bg-white text-gray-600 hover:bg-blue-100"}`}>
+                {cardMode === "study" ? "Nghĩa" : cardMode === "write" ? "Viết câu" : cardMode === "fill" ? "Điền từ" : "Nghe"}
+              </button>
+            ))}
+          </div>
+          {mode === "study" && <>
+            <p className="break-words font-semibold text-blue-800 [overflow-wrap:anywhere]">{meaning}</p>
+            {example && <p className="break-words text-sm italic leading-6 text-gray-700 [overflow-wrap:anywhere]">{example}</p>}
+            {synonymData && <div className="text-sm">{synonymData.synonyms.length > 0 && <p><span className="font-medium text-green-600">Đồng nghĩa:</span>{" "}{synonymData.synonyms.join(", ")}</p>}{synonymData.antonyms.length > 0 && <p><span className="font-medium text-red-500">Trái nghĩa:</span>{" "}{synonymData.antonyms.join(", ")}</p>}</div>}
+          </>}
+          {mode === "write" && <WritingChallenge word={word} />}
+          {mode === "fill" && (fillSentence ? <FillBlank word={word} sentence={fillSentence} /> : <p className="text-sm text-gray-500">{fillLoading ? "Đang tạo câu điền từ..." : "Chưa có câu điền từ."}</p>)}
+          {mode === "dictation" && (example ? <DictationMode sentence={example} /> : <p className="text-sm text-gray-500">Đang tạo câu ví dụ...</p>)}
           <div className="mt-auto flex flex-wrap items-center justify-center gap-2 pt-1">
             <button
               type="button"
@@ -163,7 +196,7 @@ export default function Flashcard({
             >
               Lật lại
             </button>
-            {example && (
+            {example && !isReviewMode && (
               <button
                 type="button"
                 tabIndex={flipped ? 0 : -1}
