@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getLearnedWords } from "@/lib/storage";
 import QuizCard from "./QuizCard";
 
@@ -19,30 +19,51 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 function buildOptions(correct: string, allWords: WordPair[]): string[] {
-  const distractors = shuffle(allWords.filter((w) => w.word !== correct)).slice(0, 3);
+  const distractors = shuffle(
+    allWords.filter((w) => w.word.toLowerCase() !== correct.toLowerCase()),
+  ).slice(0, 3);
   return shuffle([correct, ...distractors.map((w) => w.word)]);
 }
 
 export default function QuizMode({ words, onClose }: Props) {
-  const history = getLearnedWords();
-  const allWords: WordPair[] = [
-    ...words,
-    ...history.map((w) => ({ word: w.word, meaning: w.meaning })),
-  ];
+  const [history] = useState(() => getLearnedWords());
+  const allWords = useMemo(() => {
+    const unique = new Map<string, WordPair>();
+    [...words, ...history.map((w) => ({ word: w.word, meaning: w.meaning }))].forEach((entry) => {
+      const key = entry.word.toLowerCase();
+      if (!unique.has(key)) unique.set(key, entry);
+    });
+    return Array.from(unique.values());
+  }, [history, words]);
 
   const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
   const [lastCorrect, setLastCorrect] = useState<boolean | null>(null);
+  const [answered, setAnswered] = useState(false);
+  const answeredRef = useRef(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const current = words[index];
-  const options = buildOptions(current.word, allWords);
+  const options = useMemo(
+    () => (current ? buildOptions(current.word, allWords) : []),
+    [allWords, current],
+  );
+
+  useEffect(() => () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }, []);
 
   function handleAnswer(correct: boolean) {
+    if (answeredRef.current) return;
+    answeredRef.current = true;
+    setAnswered(true);
     setLastCorrect(correct);
     if (correct) setScore((s) => s + 1);
-    setTimeout(() => {
+    timerRef.current = setTimeout(() => {
       setLastCorrect(null);
+      setAnswered(false);
+      answeredRef.current = false;
       if (index + 1 >= words.length) {
         setDone(true);
       } else {
@@ -103,6 +124,7 @@ export default function QuizMode({ words, onClose }: Props) {
           options={options}
           correctAnswer={current.word}
           onAnswer={handleAnswer}
+          disabled={answered}
         />
       </div>
     </div>

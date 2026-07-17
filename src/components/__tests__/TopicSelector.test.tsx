@@ -17,5 +17,7 @@ test("calls onChange with selected topic", () => {
 test("active topic button has different style", () => {
   render(<TopicSelector value="TOEIC" onChange={jest.fn()} />);
   const active = screen.getByText("TOEIC");
-  expect(active.className).toContain("bg-blue-600");
+  expect(active.className).toContain("bg-[#7f56d9]");
+  expect(active).toHaveAttribute("aria-pressed", "true");
+  expect(screen.getByText("Daily Communication")).toHaveAttribute("aria-pressed", "false");
 });

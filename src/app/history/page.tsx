@@ -10,6 +10,7 @@ import {
 export default function HistoryPage() {
   const [words, setWords] = useState<LearnedWord[]>([]);
   const [filter, setFilter] = useState("Tất cả");
+  const [masteryFilter, setMasteryFilter] = useState<"all" | "weak">("all");
 
   useEffect(() => {
     setWords(getLearnedWords());
@@ -26,51 +27,98 @@ export default function HistoryPage() {
   }
 
   const topics = ["Tất cả", ...Array.from(new Set(words.map((word) => word.topic)))];
-  const filtered =
-    filter === "Tất cả" ? words : words.filter((word) => word.topic === filter);
+  const filtered = words
+    .filter((word) => filter === "Tất cả" || word.topic === filter)
+    .filter((word) => masteryFilter === "all" || (word.mastery ?? 0) < 3);
+  const dueCount = words.filter((word) => {
+    return new Date(word.nextReviewAt ?? 0).getTime() <= Date.now();
+  }).length;
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10">
-      <h1 className="mb-6 text-3xl font-bold text-gray-900">Từ đã học</h1>
+    <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:py-14">
+      <div className="mb-8 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#d9ecff]">
+            Learning library
+          </p>
+          <h1 className="mt-2 font-display text-4xl font-bold text-white">Từ đã học</h1>
+          <p className="mt-2 text-[#b0b0d1]">Theo dõi vốn từ và chọn nhóm cần ôn lại.</p>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:min-w-64">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.08] p-4">
+            <p className="font-display text-3xl font-bold text-white">{words.length}</p>
+            <p className="mt-1 text-sm text-[#b0b0d1]">Từ đã lưu</p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/[0.08] p-4">
+            <p className="font-display text-3xl font-bold text-white">{dueCount}</p>
+            <p className="mt-1 text-sm text-[#b0b0d1]">Đến hạn ôn</p>
+          </div>
+        </div>
+      </div>
 
       <div className="mb-6 flex flex-wrap gap-2">
         {topics.map((topic) => (
           <button
+            type="button"
             key={topic}
             onClick={() => setFilter(topic)}
-            className={`rounded-full px-4 py-1 text-sm font-medium transition-colors ${
+            aria-pressed={filter === topic}
+            className={`min-h-11 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
               filter === topic
                 ? "bg-blue-600 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                : "bg-white text-gray-700 hover:bg-gray-100"
             }`}
           >
             {topic}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={() => setMasteryFilter((current) => (current === "all" ? "weak" : "all"))}
+          aria-pressed={masteryFilter === "weak"}
+          className={`min-h-11 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+            masteryFilter === "weak"
+              ? "border-orange-400 bg-orange-100 text-orange-700"
+              : "border-gray-200 bg-white text-gray-500 hover:border-gray-400"
+          }`}
+        >
+          {masteryFilter === "weak" ? "★ Chưa thành thạo ✓" : "★ Chưa thành thạo"}
+        </button>
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-gray-500">Chưa có từ nào được lưu.</p>
+        <p className="text-[#b0b0d1]">Chưa có từ nào được lưu.</p>
       ) : (
         <ul className="space-y-3">
           {filtered.map((entry) => (
             <li
               key={entry.word}
-              className="flex items-start justify-between rounded-xl bg-white p-4 shadow-sm"
+              className="flex items-start gap-3 rounded-xl bg-white p-4 shadow-sm"
             >
-              <div>
-                <p className="font-bold text-gray-800">
-                  {entry.word}{" "}
-                  <span className="font-normal text-gray-500">- {entry.meaning}</span>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <p className="break-words font-bold text-gray-800 [overflow-wrap:anywhere]">
+                    {entry.word}{" "}
+                    <span className="font-normal text-gray-500">- {entry.meaning}</span>
+                  </p>
+                  <div className="flex shrink-0 gap-0.5" aria-label={`Mastery ${entry.mastery ?? 0} trên 5 sao`}>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <span key={star} className={star <= (entry.mastery ?? 0) ? "text-amber-400" : "text-gray-200"}>★</span>
+                    ))}
+                  </div>
+                </div>
+                <p className="mt-1 break-words text-sm italic text-gray-600 [overflow-wrap:anywhere]">
+                  {entry.example}
                 </p>
-                <p className="mt-1 text-sm italic text-gray-600">{entry.example}</p>
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="mt-1 break-words text-xs text-gray-600 [overflow-wrap:anywhere]">
                   {entry.topic} · {new Date(entry.learnedAt).toLocaleDateString("vi-VN")}
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => handleDelete(entry.word)}
-                className="ml-4 text-sm text-red-400 transition-colors hover:text-red-600"
+                aria-label={`Xóa ${entry.word}`}
+                className="inline-flex min-h-11 shrink-0 items-center rounded-lg px-3 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 hover:text-red-800"
               >
                 Xóa
               </button>

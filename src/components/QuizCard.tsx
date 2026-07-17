@@ -5,9 +5,10 @@ interface Props {
   options: string[];
   correctAnswer: string;
   onAnswer: (correct: boolean) => void;
+  disabled?: boolean;
 }
 
-export default function QuizCard({ question, options, correctAnswer, onAnswer }: Props) {
+export default function QuizCard({ question, options, correctAnswer, onAnswer, disabled = false }: Props) {
   return (
     <div className="rounded-2xl bg-white p-6 shadow">
       <p className="mb-2 text-center text-sm text-gray-500">Nghĩa của từ nào là:</p>
@@ -17,8 +18,9 @@ export default function QuizCard({ question, options, correctAnswer, onAnswer }:
           <button
             key={opt}
             type="button"
+            disabled={disabled}
             onClick={() => onAnswer(opt === correctAnswer)}
-            className="rounded-xl border border-gray-200 px-4 py-3 text-center font-medium text-[#2c1f4a] transition-colors hover:border-blue-400 hover:bg-blue-50"
+            className="rounded-xl border border-gray-200 px-4 py-3 text-center font-medium text-[#2c1f4a] transition-colors hover:border-blue-400 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {opt}
           </button>
