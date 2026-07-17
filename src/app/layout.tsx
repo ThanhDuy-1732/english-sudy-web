@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Caladea, Inter } from "next/font/google";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import { ProviderContextProvider } from "@/contexts/ProviderContext";
+import { ProviderBadge } from "@/components/ProviderBadge";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -74,6 +75,13 @@ export default function RootLayout({
                 >
                   Lịch sử
                 </a>
+                <a
+                  href="/settings"
+                  className="inline-flex min-h-11 items-center whitespace-nowrap px-2 text-sm font-medium text-[#b0b0d1] transition-colors hover:text-white"
+                >
+                  Cài đặt
+                </a>
+                <ProviderBadge />
               </div>
             </div>
           </nav>

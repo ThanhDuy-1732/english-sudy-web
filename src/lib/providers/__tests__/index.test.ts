@@ -65,7 +65,6 @@ test("getRegisteredProviders returns ProviderInfo without generateContent when G
   // Use jest module isolation to test with an env var set
   jest.resetModules();
   process.env.GEMINI_API_KEY = "test-key";
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { getRegisteredProviders: getProviders } = require("../index") as typeof import("../index");
   const providers = getProviders();
   expect(providers.length).toBeGreaterThan(0);
