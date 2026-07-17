@@ -44,6 +44,11 @@ export default function ReviewPage() {
               word={w.word}
               meaning={w.meaning}
               topic={w.topic}
+              initialExample={w.example}
+              initialSynonymData={{
+                synonyms: w.synonyms ?? [],
+                antonyms: w.antonyms ?? [],
+              }}
               isReviewMode={true}
               onReviewed={handleReviewed}
             />

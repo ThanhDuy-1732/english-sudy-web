@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { getCustomTopics, saveCustomTopic } from "@/lib/custom-topics";
+
 const TOPICS = ["Daily Communication", "TOEIC"];
 
 interface TopicSelectorProps {
@@ -8,21 +11,43 @@ interface TopicSelectorProps {
 }
 
 export default function TopicSelector({ value, onChange }: TopicSelectorProps) {
+  const [customTopics, setCustomTopics] = useState<string[]>([]);
+  const [inputValue, setInputValue] = useState("");
+
+  useEffect(() => setCustomTopics(getCustomTopics()), []);
+
+  function addTopic() {
+    const topic = inputValue.trim();
+    if (!topic) return;
+    saveCustomTopic(topic);
+    setCustomTopics(getCustomTopics());
+    onChange(topic);
+    setInputValue("");
+  }
+
   return (
-    <div className="flex flex-wrap gap-3">
-      {TOPICS.map((topic) => (
+    <div className="flex min-w-0 flex-1 flex-col gap-3">
+      <div className="flex flex-wrap gap-3">
+      {[...TOPICS, ...customTopics].map((topic) => (
         <button
+          type="button"
           key={topic}
           onClick={() => onChange(topic)}
-          className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
+          aria-pressed={value === topic}
+          className={`min-h-12 rounded-full px-5 text-sm font-semibold transition-colors ${
             value === topic
-              ? "bg-blue-600 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              ? "bg-[#7f56d9] text-white shadow-lg shadow-black/20"
+              : "bg-white/10 text-[#d9ecff] hover:bg-white/15"
           }`}
         >
           {topic}
         </button>
       ))}
+      </div>
+      <div className="flex min-w-0 gap-2">
+        <input value={inputValue} onChange={(event) => setInputValue(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") addTopic(); }} placeholder="Chủ đề khác... (nhấn Enter)" className="min-h-11 min-w-0 flex-1 rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm text-white placeholder:text-[#b0b0d1] focus:border-[#d9ecff] focus:outline-none" />
+        <button type="button" onClick={addTopic} disabled={!inputValue.trim()} className="min-h-11 rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-[#d9ecff] transition-colors hover:bg-white/15 disabled:opacity-50">+ Thêm</button>
+      </div>
     </div>
   );
 }

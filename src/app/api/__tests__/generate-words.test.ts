@@ -60,6 +60,7 @@ test("returns friendly 503 when Gemini fails", async () => {
 });
 
 test("returns 5xx with JSON error body when generateWords throws", async () => {
+  jest.spyOn(console, "error").mockImplementation(() => {});
   const { generateWords } = await import("@/lib/gemini");
   (generateWords as jest.Mock).mockRejectedValueOnce(new Error("Gemini API failure"));
   const req = new NextRequest("http://localhost/api/generate-words", {
@@ -68,7 +69,9 @@ test("returns 5xx with JSON error body when generateWords throws", async () => {
     headers: { "Content-Type": "application/json" },
   });
   const res = await POST(req);
-  expect(res.status).toBeGreaterThanOrEqual(500);
+  expect(res.status).toBe(503);
   const data = await res.json();
-  expect(data).toHaveProperty("error");
+  expect(data).toEqual({
+    error: "Không thể sinh từ mới lúc này. Vui lòng thử lại.",
+  });
 });
