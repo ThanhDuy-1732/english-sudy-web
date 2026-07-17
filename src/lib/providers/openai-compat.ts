@@ -2,7 +2,7 @@
 import OpenAI from "openai";
 import type { AIProvider } from "./types";
 
-interface OpenAICompatConfig {
+export interface OpenAICompatConfig {
   id: string;
   name: string;
   apiKey: string;
