@@ -61,12 +61,20 @@ test("callWithFallback throws when no providers configured", async () => {
   await expect(fn("hello")).rejects.toThrow("No AI providers configured");
 });
 
-test("getRegisteredProviders returns only safe fields", () => {
-  const providers = getRegisteredProviders();
+test("getRegisteredProviders returns ProviderInfo without generateContent when GEMINI_API_KEY is set", () => {
+  // Use jest module isolation to test with an env var set
+  jest.resetModules();
+  process.env.GEMINI_API_KEY = "test-key";
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { getRegisteredProviders: getProviders } = require("../index") as typeof import("../index");
+  const providers = getProviders();
+  expect(providers.length).toBeGreaterThan(0);
   providers.forEach((p) => {
     expect(p).toHaveProperty("id");
     expect(p).toHaveProperty("name");
     expect(p).toHaveProperty("model");
     expect(p).not.toHaveProperty("generateContent");
   });
+  delete process.env.GEMINI_API_KEY;
+  jest.resetModules();
 });
