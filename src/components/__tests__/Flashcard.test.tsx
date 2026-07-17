@@ -1,10 +1,16 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import Flashcard from "../Flashcard";
 
-global.fetch = jest.fn().mockResolvedValue({
-  ok: true,
-  json: async () => ({ sentence: "I greet my neighbors." }),
-});
+global.fetch = jest.fn().mockImplementation((input: string) =>
+  Promise.resolve({
+    ok: true,
+    headers: { get: () => null },
+    json: async () =>
+      input === "/api/generate-synonyms"
+        ? { synonyms: [], antonyms: [] }
+        : { sentence: "I greet my neighbors." },
+  }),
+);
 
 jest.mock("@/lib/storage", () => ({
   saveLearnedWord: jest.fn().mockReturnValue(true),
@@ -24,14 +30,31 @@ test("shows word on front face initially", () => {
 
 test("shows meaning and example after clicking", async () => {
   render(<Flashcard word="greet" meaning="chào hỏi" topic="Daily Communication" />);
-  fireEvent.click(screen.getByRole("button", { name: /greet/i }));
-  await waitFor(() => expect(screen.getByText("chào hỏi")).toBeInTheDocument());
-  expect(screen.getByText("I greet my neighbors.")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của greet" }));
+  await waitFor(() => expect(screen.getByText("I greet my neighbors.")).toBeInTheDocument());
+  expect(screen.getByText("chào hỏi")).toBeInTheDocument();
+});
+
+test("uses a saved example and synonyms without requesting the network", async () => {
+  render(
+    <Flashcard
+      word="greet"
+      meaning="chào hỏi"
+      topic="Daily Communication"
+      initialExample="I greet my neighbors."
+      initialSynonymData={{ synonyms: ["welcome", "hello"], antonyms: ["ignore"] }}
+    />,
+  );
+
+  fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của greet" }));
+
+  await waitFor(() => expect(screen.getByText("I greet my neighbors.")).toBeInTheDocument());
+  expect(global.fetch).not.toHaveBeenCalled();
 });
 
 test("calls saveLearnedWord when Đã học is clicked", async () => {
   render(<Flashcard word="greet" meaning="chào hỏi" topic="Daily Communication" />);
-  fireEvent.click(screen.getByRole("button", { name: /greet/i }));
+  fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của greet" }));
   await waitFor(() => screen.getByText("Đã học ✓"));
   fireEvent.click(screen.getByText("Đã học ✓"));
   expect(saveLearnedWord).toHaveBeenCalledWith(
@@ -54,12 +77,12 @@ test("clicking card while loading does NOT toggle back to front", async () => {
 
   render(<Flashcard word="greet" meaning="chào hỏi" topic="Daily Communication" />);
   // First click starts the fetch (loading begins)
-  fireEvent.click(screen.getByRole("button", { name: /greet/i }));
+  fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của greet" }));
   // Second click while loading should be a no-op (loading guard)
-  fireEvent.click(screen.getByRole("button", { name: /greet/i }));
+  fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của greet" }));
 
   // Resolve the fetch
-  resolveFetch({ ok: true, json: async () => ({ sentence: "I greet my neighbors." }) });
+  resolveFetch({ ok: true, headers: { get: () => null }, json: async () => ({ sentence: "I greet my neighbors." }) });
 
   // Card should flip to showing the meaning after fetch resolves
   await waitFor(() => expect(screen.getByText("chào hỏi")).toBeInTheDocument());
@@ -69,11 +92,24 @@ test("setSaved stays false when saveLearnedWord returns false (duplicate)", asyn
   (saveLearnedWord as jest.Mock).mockReturnValue(false);
 
   render(<Flashcard word="greet" meaning="chào hỏi" topic="Daily Communication" />);
-  fireEvent.click(screen.getByRole("button", { name: /greet/i }));
+  fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của greet" }));
   await waitFor(() => screen.getByText("Đã học ✓"));
   fireEvent.click(screen.getByText("Đã học ✓"));
 
   // Button label should NOT change to "Đã lưu ✓"
   expect(screen.getByText("Đã học ✓")).toBeInTheDocument();
   expect(screen.queryByText("Đã lưu ✓")).not.toBeInTheDocument();
+});
+
+test("keeps flip and save actions as separate accessible buttons", async () => {
+  render(<Flashcard word="greet" meaning="chào hỏi" topic="Daily Communication" />);
+
+  fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của greet" }));
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Đã học ✓" })).toBeInTheDocument(),
+  );
+
+  expect(screen.getByRole("button", { name: "Lật lại" })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Lật lại" }));
+  expect(screen.getByRole("button", { name: "Xem nghĩa của greet" })).toBeInTheDocument();
 });

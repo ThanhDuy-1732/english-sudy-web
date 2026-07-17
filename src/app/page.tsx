@@ -1,22 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FlashcardGrid from "@/components/FlashcardGrid";
 import TopicSelector from "@/components/TopicSelector";
 import QuizMode from "@/components/QuizMode";
+import ReadingMode from "@/components/ReadingMode";
+import { getDailyChallenge, getStreak, setDailyComplete } from "@/lib/daily-challenge";
+import { useApiFetch } from "@/lib/useApiFetch";
 
 interface Word {
   word: string;
   meaning: string;
 }
 
+interface ReadingData {
+  passage: string;
+  questions: { question: string; options: string[]; answer: string }[];
+}
+
+function parseReadingData(payload: unknown): ReadingData | null {
+  if (!payload || typeof payload !== "object") return null;
+  const candidate = payload as Partial<ReadingData>;
+  if (typeof candidate.passage !== "string" || !Array.isArray(candidate.questions)) return null;
+  const questions = candidate.questions.filter((question): question is ReadingData["questions"][number] => Boolean(question) && typeof question === "object" && typeof question.question === "string" && Array.isArray(question.options) && question.options.every((option) => typeof option === "string") && typeof question.answer === "string");
+  return questions.length > 0 ? { passage: candidate.passage, questions } : null;
+}
+
 export default function HomePage() {
+  const { fetchWithProvider } = useApiFetch();
   const [topic, setTopic] = useState("Daily Communication");
   const [words, setWords] = useState<Word[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [flippedCount, setFlippedCount] = useState(0);
   const [quizOpen, setQuizOpen] = useState(false);
+  const [readingData, setReadingData] = useState<ReadingData | null>(null);
+  const [readingLoading, setReadingLoading] = useState(false);
+  const [dailyCompleted, setDailyCompleted] = useState(false);
+  const [streak, setStreak] = useState(0);
+  const progress = words.length > 0 ? Math.round((flippedCount / words.length) * 100) : 0;
+
+  useEffect(() => {
+    const challenge = getDailyChallenge();
+    setDailyCompleted(Boolean(challenge?.completed));
+    setStreak(getStreak());
+  }, []);
 
   async function handleGenerate() {
     setLoading(true);
@@ -24,14 +52,10 @@ export default function HomePage() {
     setWords([]);
     setFlippedCount(0);
     setQuizOpen(false);
+    setReadingData(null);
 
     try {
-      const res = await fetch("/api/generate-words", {
-        method: "POST",
-        cache: "no-store",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic }),
-      });
+      const res = await fetchWithProvider("/api/generate-words", { topic });
 
       if (!res.ok) {
         throw new Error("Không thể sinh từ mới lúc này.");
@@ -52,6 +76,28 @@ export default function HomePage() {
     setError(null);
     setFlippedCount(0);
     setQuizOpen(false);
+    setReadingData(null);
+  }
+
+  async function handleReadingMode() {
+    if (words.length === 0 || readingLoading) return;
+    setReadingLoading(true);
+    try {
+      const response = await fetchWithProvider("/api/generate-reading", { words: words.map((word) => word.word) });
+      if (!response.ok) throw new Error();
+      const parsed = parseReadingData(await response.json());
+      if (!parsed) throw new Error();
+      setReadingData(parsed);
+    } catch {
+      setError("Không thể tạo bài đọc lúc này. Vui lòng thử lại.");
+    } finally { setReadingLoading(false); }
+  }
+
+  function completeDailyChallenge() {
+    if (words.length === 0 || flippedCount < words.length || dailyCompleted) return;
+    setDailyComplete(words.map((word) => word.word));
+    setDailyCompleted(true);
+    setStreak(getStreak());
   }
 
   return (
@@ -85,6 +131,10 @@ export default function HomePage() {
               {error}
             </p>
           )}
+          <div className="mt-6 flex flex-col gap-4 rounded-2xl border border-[#d9ecff]/20 bg-[#d9ecff]/10 p-4 text-[#d9ecff] sm:flex-row sm:items-center sm:justify-between">
+            <div><p className="text-sm font-semibold">Daily Challenge · 🔥 {streak} ngày liên tiếp</p><p className="mt-1 text-xs text-[#b0b0d1]">Sinh bộ từ hôm nay, luyện và đánh dấu hoàn thành để giữ streak.</p></div>
+            <button type="button" onClick={completeDailyChallenge} disabled={!words.length || flippedCount < words.length || dailyCompleted} className="min-h-11 shrink-0 rounded-xl bg-[#d9ecff] px-4 text-sm font-semibold text-[#2c1f4a] disabled:opacity-50">{dailyCompleted ? "Đã hoàn thành ✓" : words.length && flippedCount < words.length ? "Lật hết thẻ" : "Đánh dấu hoàn thành"}</button>
+          </div>
         </div>
 
         <aside className="relative z-10 rounded-[32px] border border-white/10 bg-[#3a2a61] p-5 shadow-2xl shadow-black/25">
@@ -100,9 +150,9 @@ export default function HomePage() {
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
               {[
-                ["10x", "Words"],
-                ["2", "Topics"],
-                ["30s", "Practice"],
+                [String(words.length), "Words ready"],
+                [topic ? "1" : "0", "Topic"],
+                [`${progress}%`, "Progress"],
               ].map(([value, label]) => (
                 <div key={label} className="rounded-2xl bg-white p-4 shadow-sm">
                   <p className="font-display text-3xl font-bold">{value}</p>
@@ -114,7 +164,7 @@ export default function HomePage() {
               <p className="text-sm text-[#b0b0d1]">Current category</p>
               <p className="mt-2 text-xl font-semibold">{topic}</p>
               <div className="mt-5 h-2 rounded-full bg-white/10">
-                <div className="h-2 w-2/3 rounded-full bg-[#d9ecff]" />
+                <div className="h-2 rounded-full bg-[#d9ecff] transition-[width]" style={{ width: `${progress}%` }} />
               </div>
             </div>
           </div>
@@ -173,7 +223,7 @@ export default function HomePage() {
                 onFlip={() => setFlippedCount((c) => c + 1)}
               />
               {flippedCount >= 3 && (
-                <div className="mt-8 text-center">
+                <div className="mt-8 flex flex-wrap justify-center gap-3 text-center">
                   <button
                     type="button"
                     onClick={() => setQuizOpen(true)}
@@ -181,6 +231,7 @@ export default function HomePage() {
                   >
                     Kiểm tra kiến thức
                   </button>
+                  <button type="button" onClick={handleReadingMode} disabled={readingLoading} className="rounded-xl bg-teal-500 px-8 py-3 font-medium text-white hover:bg-teal-600 disabled:opacity-50">{readingLoading ? "Đang tạo bài đọc..." : "Đọc hiểu"}</button>
                 </div>
               )}
               {quizOpen && (
@@ -191,6 +242,7 @@ export default function HomePage() {
               )}
             </>
           )}
+          {readingData && <ReadingMode passage={readingData.passage} questions={readingData.questions} highlightWords={words.map((word) => word.word)} onClose={() => setReadingData(null)} />}
         </div>
       </section>
     </main>

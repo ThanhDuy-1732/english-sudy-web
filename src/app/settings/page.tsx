@@ -53,7 +53,7 @@ export default function SettingsPage() {
               return (
                 <tr key={p.id} className="border-b border-white/5 last:border-0">
                   <td className="px-4 py-4 font-medium text-white">{p.name}</td>
-                  <td className="px-4 py-4 font-mono text-xs text-[#b0b0d1]">{p.model}</td>
+                  <td className="px-4 py-4 font-mono text-xs text-[#b0b0d1]">{active ? (availableProviders.find((ap) => ap.id === p.id)?.model ?? p.model) : p.model}</td>
                   <td className="px-4 py-4">
                     {active ? (
                       <span className="inline-flex items-center gap-1 text-green-400">
