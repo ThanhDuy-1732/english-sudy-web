@@ -45,6 +45,8 @@ pullFromKey("ThankZ") or pullFromKey("some-uuid")
 
 **Device A:** Never modified. Supabase rows under key A are read-only from Device B's perspective.
 
+**Error handling:** Unlike fire-and-forget push functions, `pullFromKey` is user-initiated and must surface errors. If the Supabase fetch fails (offline, network error), the function throws and the Settings UI shows an error message. No local data is modified on failure.
+
 ## Special Key: ThankZ
 
 `"ThankZ"` (case-insensitive) resolves via `KEY_ALIASES` to UUID `7468616e-6b7a-4000-8000-000000000000`. Pulling from ThankZ merges the vocabulary stored under that UUID into the current device — same flow as any other key.
