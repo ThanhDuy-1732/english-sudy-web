@@ -9,6 +9,7 @@ const config: Config = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
+  clearMocks: true,
 };
 
 export default createJestConfig(config);
