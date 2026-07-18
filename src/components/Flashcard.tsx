@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { saveLearnedWord, updateWordReview } from "@/lib/storage";
+import { saveLearnedWord, updateWordReview, getLearnedWords } from "@/lib/storage";
+import { pushWord } from "@/lib/sync";
 import { useApiFetch } from "@/lib/useApiFetch";
 import PronunciationButton from "./PronunciationButton";
 import WritingChallenge from "./WritingChallenge";
@@ -129,7 +130,18 @@ export default function Flashcard({
       synonyms: synonymData?.synonyms,
       antonyms: synonymData?.antonyms,
     });
-    if (didSave) setSaved(true);
+    if (didSave) {
+      setSaved(true);
+      void pushWord({
+        word,
+        meaning,
+        example,
+        topic,
+        learnedAt: new Date().toISOString(),
+        synonyms: synonymData?.synonyms,
+        antonyms: synonymData?.antonyms,
+      });
+    }
   }
 
   return (
@@ -216,6 +228,8 @@ export default function Flashcard({
                 onClick={(e) => {
                   e.stopPropagation();
                   updateWordReview(word, true);
+                  const updated = getLearnedWords().find((w) => w.word === word);
+                  if (updated) void pushWord(updated);
                   onReviewed?.();
                 }}
                 className="min-h-11 flex-1 rounded-lg bg-green-100 px-3 py-2 text-sm font-medium text-green-800 hover:bg-green-200"
@@ -228,6 +242,8 @@ export default function Flashcard({
                 onClick={(e) => {
                   e.stopPropagation();
                   updateWordReview(word, false);
+                  const updated = getLearnedWords().find((w) => w.word === word);
+                  if (updated) void pushWord(updated);
                   onReviewed?.();
                 }}
                 className="min-h-11 flex-1 rounded-lg bg-red-100 px-3 py-2 text-sm font-medium text-red-800 hover:bg-red-200"

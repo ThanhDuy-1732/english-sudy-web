@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { LearnedWord, saveLearnedWord } from "@/lib/storage";
+import { pushWord } from "@/lib/sync";
 import { useApiFetch } from "@/lib/useApiFetch";
 
 interface WordResult { word: string; meaning: string; example: string }
@@ -34,7 +35,10 @@ export default function ImportWords() {
     let count = 0;
     results.filter((item) => selected.has(item.word)).forEach((item) => {
       const entry: LearnedWord = { word: item.word, meaning: item.meaning, example: item.example, topic: "Import", learnedAt: new Date().toISOString(), nextReviewAt: new Date(Date.now() + 86400000).toISOString(), reviewInterval: 1, mastery: 0 };
-      if (saveLearnedWord(entry)) count += 1;
+      if (saveLearnedWord(entry)) {
+        count += 1;
+        void pushWord(entry);
+      }
     });
     setSavedCount(count);
   }
