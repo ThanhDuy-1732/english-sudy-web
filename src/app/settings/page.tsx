@@ -31,7 +31,7 @@ export default function SettingsPage() {
     navigator.clipboard.writeText(syncKey).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    });
+    }).catch(() => {});
   }
 
   async function handlePull() {
