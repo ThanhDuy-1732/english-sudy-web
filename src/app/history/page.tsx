@@ -6,6 +6,7 @@ import {
   getLearnedWords,
   type LearnedWord,
 } from "@/lib/storage";
+import { deleteWord } from "@/lib/sync";
 
 export default function HistoryPage() {
   const [words, setWords] = useState<LearnedWord[]>([]);
@@ -18,6 +19,7 @@ export default function HistoryPage() {
 
   function handleDelete(word: string) {
     deleteLearnedWord(word);
+    void deleteWord(word);
     const nextWords = words.filter((w) => w.word !== word);
     setWords(nextWords);
 
