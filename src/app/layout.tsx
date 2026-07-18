@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Caladea, Inter } from "next/font/google";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import { SyncInitializer } from "@/components/SyncInitializer";
 import { ProviderContextProvider } from "@/contexts/ProviderContext";
 import { ProviderBadge } from "@/components/ProviderBadge";
 import "./globals.css";
@@ -93,6 +94,7 @@ export default function RootLayout({
             </div>
           </footer>
           <ServiceWorkerRegistration />
+          <SyncInitializer />
         </ProviderContextProvider>
       </body>
     </html>
