@@ -14,13 +14,41 @@ global.fetch = jest.fn().mockImplementation((input: string) =>
 
 jest.mock("@/lib/storage", () => ({
   saveLearnedWord: jest.fn().mockReturnValue(true),
+  getLearnedWords: jest.fn().mockReturnValue([
+    {
+      word: "greet",
+      meaning: "chào hỏi",
+      example: "I greet my neighbors.",
+      topic: "Daily Communication",
+      learnedAt: new Date().toISOString(),
+      nextReviewAt: new Date(Date.now() + 86400000).toISOString(),
+      reviewInterval: 1,
+      mastery: 0,
+    },
+  ]),
 }));
 
-import { saveLearnedWord } from "@/lib/storage";
+jest.mock("@/lib/sync", () => ({
+  pushWord: jest.fn(),
+}));
+
+import { saveLearnedWord, getLearnedWords } from "@/lib/storage";
 
 beforeEach(() => {
   jest.clearAllMocks();
   (saveLearnedWord as jest.Mock).mockReturnValue(true);
+  (getLearnedWords as jest.Mock).mockReturnValue([
+    {
+      word: "greet",
+      meaning: "chào hỏi",
+      example: "I greet my neighbors.",
+      topic: "Daily Communication",
+      learnedAt: new Date().toISOString(),
+      nextReviewAt: new Date(Date.now() + 86400000).toISOString(),
+      reviewInterval: 1,
+      mastery: 0,
+    },
+  ]);
 });
 
 test("shows word on front face initially", () => {

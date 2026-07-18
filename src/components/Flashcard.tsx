@@ -132,15 +132,8 @@ export default function Flashcard({
     });
     if (didSave) {
       setSaved(true);
-      void pushWord({
-        word,
-        meaning,
-        example,
-        topic,
-        learnedAt: new Date().toISOString(),
-        synonyms: synonymData?.synonyms,
-        antonyms: synonymData?.antonyms,
-      });
+      const saved = getLearnedWords().find((w) => w.word === word);
+      if (saved) void pushWord(saved);
     }
   }
 
