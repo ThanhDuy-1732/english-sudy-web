@@ -133,7 +133,7 @@ export default function SettingsPage() {
           <div>
             <p className="mb-2 text-sm font-medium text-[#d9ecff]">Sync Key của thiết bị này</p>
             <div className="flex items-center gap-3">
-              <code className="flex-1 rounded-lg bg-white/5 px-3 py-2 font-mono text-sm text-[#b0b0d1] overflow-hidden text-ellipsis">
+              <code className="flex-1 rounded-lg bg-white/5 px-3 py-2 font-mono text-sm text-[#b0b0d1] overflow-hidden">
                 {syncKey ? `${syncKey.slice(0, 8)}••••••••••••••••••••••••••••` : "Đang tải..."}
               </code>
               <button
