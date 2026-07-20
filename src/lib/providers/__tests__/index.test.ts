@@ -1,5 +1,5 @@
 // src/lib/providers/__tests__/index.test.ts
-import { createCallWithFallback, getRegisteredProviders } from "../index";
+import { createCallWithFallback, getRegisteredProviders, getProviderById } from "../index";
 import type { AIProvider } from "../types";
 
 const makeProvider = (id: string, fn: jest.Mock): AIProvider => ({
@@ -76,4 +76,33 @@ test("getRegisteredProviders returns ProviderInfo without generateContent when G
   });
   delete process.env.GEMINI_API_KEY;
   jest.resetModules();
+});
+
+test("callWithFallback skips disabled providers", async () => {
+  const mockA = jest.fn<Promise<string>, [string]>().mockResolvedValue("result-a");
+  const mockB = jest.fn<Promise<string>, [string]>().mockResolvedValue("result-b");
+  const fn = createCallWithFallback([makeProvider("a", mockA), makeProvider("b", mockB)]);
+  const result = await fn("hello", undefined, ["a"]);
+  expect(result).toEqual({ text: "result-b", providerId: "b" });
+  expect(mockA).not.toHaveBeenCalled();
+});
+
+test("callWithFallback throws when all providers are disabled", async () => {
+  const mockA = jest.fn<Promise<string>, [string]>().mockResolvedValue("result-a");
+  const fn = createCallWithFallback([makeProvider("a", mockA)]);
+  await expect(fn("hello", undefined, ["a"])).rejects.toThrow("No AI providers configured");
+});
+
+test("callWithFallback preferred provider still respects disabledIds", async () => {
+  const mockA = jest.fn<Promise<string>, [string]>().mockResolvedValue("result-a");
+  const mockB = jest.fn<Promise<string>, [string]>().mockResolvedValue("result-b");
+  const fn = createCallWithFallback([makeProvider("a", mockA), makeProvider("b", mockB)]);
+  // prefer "a" but "a" is disabled → should use "b"
+  const result = await fn("hello", "a", ["a"]);
+  expect(result).toEqual({ text: "result-b", providerId: "b" });
+  expect(mockA).not.toHaveBeenCalled();
+});
+
+test("getProviderById returns undefined for unknown id", () => {
+  expect(getProviderById("nonexistent")).toBeUndefined();
 });
