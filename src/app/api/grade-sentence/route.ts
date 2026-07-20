@@ -3,7 +3,12 @@ import { callWithFallback } from "@/lib/providers";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
-  const body = (await request.json()) as { word?: string; sentence?: string; provider?: string };
+  const body = (await request.json()) as {
+    word?: string;
+    sentence?: string;
+    provider?: string;
+    disabledProviders?: string[];
+  };
 
   if (!body.word?.trim() || !body.sentence?.trim()) {
     return NextResponse.json({ error: "Missing word or sentence" }, { status: 400 });
@@ -12,7 +17,7 @@ export async function POST(request: NextRequest) {
   try {
     let resolvedProviderId = "";
     const generateFn = async (prompt: string) => {
-      const result = await callWithFallback(prompt, body.provider);
+      const result = await callWithFallback(prompt, body.provider, body.disabledProviders);
       resolvedProviderId = result.providerId;
       return result.text;
     };

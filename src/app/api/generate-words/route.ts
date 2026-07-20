@@ -5,7 +5,11 @@ import { NextRequest, NextResponse } from "next/server";
 const NO_STORE = { "Cache-Control": "no-store" };
 
 export async function POST(req: NextRequest) {
-  const { topic, provider } = (await req.json()) as { topic?: string; provider?: string };
+  const { topic, provider, disabledProviders } = (await req.json()) as {
+    topic?: string;
+    provider?: string;
+    disabledProviders?: string[];
+  };
 
   if (!topic) {
     return NextResponse.json({ error: "topic is required" }, { status: 400, headers: NO_STORE });
@@ -14,7 +18,7 @@ export async function POST(req: NextRequest) {
   try {
     let resolvedProviderId = "";
     const generateFn = async (prompt: string) => {
-      const result = await callWithFallback(prompt, provider);
+      const result = await callWithFallback(prompt, provider, disabledProviders);
       resolvedProviderId = result.providerId;
       return result.text;
     };

@@ -118,3 +118,34 @@ test("fetchWithProvider does not update provider when header matches current", a
   // Should still be gemini (unchanged)
   expect(localStorage.getItem("preferredProvider")).toBeNull();
 });
+
+test("fetchWithProvider includes disabledProviders in request body", async () => {
+  localStorage.setItem("disabledProviders", JSON.stringify(["groq"]));
+
+  const mockFetch = jest.fn().mockResolvedValue({
+    ok: true,
+    json: () => Promise.resolve({}),
+    headers: makeHeaders({}),
+  });
+
+  (global.fetch as jest.Mock)
+    .mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve(mockProviders),
+      headers: makeHeaders({}),
+    })
+    .mockImplementation(mockFetch);
+
+  const { result } = renderHook(() => useApiFetch(), { wrapper });
+
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+
+  await act(async () => {
+    await result.current.fetchWithProvider("/api/generate-words", { topic: "TOEIC" });
+  });
+
+  const calledBody = JSON.parse(mockFetch.mock.calls[0][1].body as string) as Record<string, unknown>;
+  expect(calledBody.disabledProviders).toEqual(["groq"]);
+});
