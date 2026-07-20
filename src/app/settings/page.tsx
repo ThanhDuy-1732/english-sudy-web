@@ -7,10 +7,10 @@ import { getSyncKey, getLastSyncedAt, pullFromKey } from "@/lib/sync";
 const ALL_PROVIDERS = [
   { id: "gemini",     name: "Gemini Flash", model: "gemini-flash-latest",                          envKey: "GEMINI_API_KEY" },
   { id: "groq",       name: "Groq",         model: "llama-3.3-70b-versatile",                      envKey: "GROQ_API_KEY" },
-  { id: "openrouter", name: "OpenRouter",   model: "meta-llama/llama-3.1-8b-instruct:free",        envKey: "OPENROUTER_API_KEY" },
+  { id: "openrouter", name: "OpenRouter",   model: "nvidia/nemotron-3-nano-30b-a3b:free",           envKey: "OPENROUTER_API_KEY" },
   { id: "mistral",    name: "Mistral",      model: "mistral-small-latest",                          envKey: "MISTRAL_API_KEY" },
   { id: "cohere",     name: "Cohere",       model: "command-r7b-12-2024",                           envKey: "COHERE_API_KEY" },
-  { id: "huggingface",name: "HuggingFace",  model: "mistralai/Mistral-7B-v0.1",                    envKey: "HUGGINGFACE_API_KEY" },
+  { id: "huggingface",name: "HuggingFace",  model: "meta-llama/Llama-3.2-1B-Instruct",             envKey: "HUGGINGFACE_API_KEY" },
   { id: "replicate",  name: "Replicate",    model: "meta/llama-4-scout-17b-16e-instruct",           envKey: "REPLICATE_API_KEY" },
 ];
 

@@ -73,7 +73,7 @@ function buildRegistry(): AIProvider[] {
         id: "openrouter",
         name: "OpenRouter",
         apiKey: process.env.OPENROUTER_API_KEY,
-        model: process.env.OPENROUTER_MODEL ?? "meta-llama/llama-3.1-8b-instruct:free",
+        model: process.env.OPENROUTER_MODEL ?? "nvidia/nemotron-3-nano-30b-a3b:free",
         baseURL: "https://openrouter.ai/api/v1",
       })
     );
@@ -109,8 +109,8 @@ function buildRegistry(): AIProvider[] {
         id: "huggingface",
         name: "HuggingFace",
         apiKey: process.env.HUGGINGFACE_API_KEY,
-        model: process.env.HUGGINGFACE_MODEL ?? "mistralai/Mistral-7B-v0.1",
-        baseURL: "https://api-inference.huggingface.co/v1",
+        model: process.env.HUGGINGFACE_MODEL ?? "meta-llama/Llama-3.2-1B-Instruct",
+        baseURL: "https://router.huggingface.co/featherless-ai/v1",
       })
     );
   }
