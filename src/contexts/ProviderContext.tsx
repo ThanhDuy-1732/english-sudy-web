@@ -42,8 +42,11 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
       .then((providers: ProviderInfo[]) => {
         setAvailableProviders(providers);
         const saved = localStorage.getItem("preferredProvider");
-        const valid = providers.find((p) => p.id === saved);
-        setCurrentProvider(valid ? saved! : (providers[0]?.id ?? ""));
+        const disabledRaw = localStorage.getItem("disabledProviders");
+        const disabled: string[] = disabledRaw ? (JSON.parse(disabledRaw) as string[]) : [];
+        const valid = providers.find((p) => p.id === saved && !disabled.includes(p.id));
+        const fallback = providers.find((p) => !disabled.includes(p.id));
+        setCurrentProvider(valid ? saved! : (fallback?.id ?? providers[0]?.id ?? ""));
       })
       .catch(() => {});
   }, []);
