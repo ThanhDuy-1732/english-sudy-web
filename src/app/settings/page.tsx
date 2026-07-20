@@ -5,13 +5,20 @@ import { useProvider } from "@/contexts/ProviderContext";
 import { getSyncKey, getLastSyncedAt, pullFromKey } from "@/lib/sync";
 
 const ALL_PROVIDERS = [
-  { id: "gemini", name: "Gemini Flash", model: "gemini-flash-latest", envKey: "GEMINI_API_KEY" },
-  { id: "groq", name: "Groq", model: "llama-3.3-70b-versatile", envKey: "GROQ_API_KEY" },
-  { id: "huggingface", name: "HuggingFace", model: "mistralai/Mistral-7B-v0.1", envKey: "HUGGINGFACE_API_KEY" },
+  { id: "gemini",     name: "Gemini Flash", model: "gemini-flash-latest",                          envKey: "GEMINI_API_KEY" },
+  { id: "groq",       name: "Groq",         model: "llama-3.3-70b-versatile",                      envKey: "GROQ_API_KEY" },
+  { id: "openrouter", name: "OpenRouter",   model: "meta-llama/llama-3.1-8b-instruct:free",        envKey: "OPENROUTER_API_KEY" },
+  { id: "mistral",    name: "Mistral",      model: "mistral-small-latest",                          envKey: "MISTRAL_API_KEY" },
+  { id: "cohere",     name: "Cohere",       model: "command-r7b-12-2024",                           envKey: "COHERE_API_KEY" },
+  { id: "huggingface",name: "HuggingFace",  model: "mistralai/Mistral-7B-v0.1",                    envKey: "HUGGINGFACE_API_KEY" },
+  { id: "replicate",  name: "Replicate",    model: "meta/llama-4-scout-17b-16e-instruct",           envKey: "REPLICATE_API_KEY" },
 ];
 
+type TestResult = "loading" | { ok: boolean; latency?: number; error?: string };
+
 export default function SettingsPage() {
-  const { currentProvider, availableProviders, setProvider } = useProvider();
+  const { currentProvider, availableProviders, setProvider, disabledProviders, toggleProvider } =
+    useProvider();
   const [syncKey, setSyncKey] = useState("");
   const [lastSynced, setLastSynced] = useState<string | null>(null);
   const [pullInput, setPullInput] = useState("");
@@ -19,6 +26,7 @@ export default function SettingsPage() {
   const [copied, setCopied] = useState(false);
   const [pullSuccess, setPullSuccess] = useState<string | null>(null);
   const [pullError, setPullError] = useState<string | null>(null);
+  const [testResults, setTestResults] = useState<Record<string, TestResult>>({});
 
   useEffect(() => {
     setSyncKey(getSyncKey());
@@ -26,6 +34,7 @@ export default function SettingsPage() {
   }, []);
 
   const isActive = (id: string) => availableProviders.some((p) => p.id === id);
+  const isDisabled = (id: string) => disabledProviders.includes(id);
 
   function handleCopy() {
     navigator.clipboard.writeText(syncKey).then(() => {
@@ -53,14 +62,44 @@ export default function SettingsPage() {
     }
   }
 
+  async function handleTest(id: string) {
+    setTestResults((prev) => ({ ...prev, [id]: "loading" }));
+    try {
+      const res = await fetch("/api/providers/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ providerId: id }),
+      });
+      const data = (await res.json()) as { ok: boolean; latency: number; error?: string };
+      setTestResults((prev) => ({ ...prev, [id]: data }));
+    } catch {
+      setTestResults((prev) => ({ ...prev, [id]: { ok: false, error: "Network error" } }));
+    }
+    setTimeout(() => {
+      setTestResults((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    }, 5000);
+  }
+
   function formatSynced(iso: string | null) {
     if (!iso) return "Chưa đồng bộ";
     const d = new Date(iso);
     return `Đã đồng bộ lúc ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
   }
 
+  function renderTestResult(id: string) {
+    const result = testResults[id];
+    if (!result) return null;
+    if (result === "loading") return <span className="text-xs text-[#b0b0d1]">Testing…</span>;
+    if (result.ok) return <span className="text-xs text-green-400">✅ {result.latency}ms</span>;
+    return <span className="text-xs text-red-400">❌ {result.error ?? "Error"}</span>;
+  }
+
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10 space-y-10">
+    <main className="mx-auto max-w-4xl px-4 py-10 space-y-10">
       <div>
         <h1 className="mb-2 font-display text-3xl font-bold text-[#d9ecff]">Cài đặt</h1>
         <p className="mb-8 text-sm text-[#b0b0d1]">
@@ -68,35 +107,79 @@ export default function SettingsPage() {
           <code className="rounded bg-white/10 px-1">.env.local</code>.
         </p>
 
-        <div className="overflow-hidden rounded-xl border border-white/10">
+        <div className="overflow-x-auto rounded-xl border border-white/10">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/10 bg-white/5 text-left">
                 <th className="px-4 py-3 font-semibold text-[#d9ecff]">Provider</th>
                 <th className="px-4 py-3 font-semibold text-[#d9ecff]">Model</th>
                 <th className="px-4 py-3 font-semibold text-[#d9ecff]">Trạng thái</th>
-                <th className="px-4 py-3 font-semibold text-[#d9ecff]">Hành động</th>
+                <th className="px-4 py-3 font-semibold text-[#d9ecff]">Bật/Tắt</th>
+                <th className="px-4 py-3 font-semibold text-[#d9ecff]">Test</th>
+                <th className="px-4 py-3 font-semibold text-[#d9ecff]">Ưu tiên</th>
               </tr>
             </thead>
             <tbody>
               {ALL_PROVIDERS.map((p) => {
                 const active = isActive(p.id);
+                const disabled = isDisabled(p.id);
                 const isCurrent = p.id === currentProvider;
+                const testResult = testResults[p.id];
+
                 return (
                   <tr key={p.id} className="border-b border-white/5 last:border-0">
                     <td className="px-4 py-4 font-medium text-white">{p.name}</td>
                     <td className="px-4 py-4 font-mono text-xs text-[#b0b0d1]">
-                      {active ? (availableProviders.find((ap) => ap.id === p.id)?.model ?? p.model) : p.model}
+                      {active
+                        ? (availableProviders.find((ap) => ap.id === p.id)?.model ?? p.model)
+                        : p.model}
                     </td>
                     <td className="px-4 py-4">
                       {active ? (
-                        <span className="inline-flex items-center gap-1 text-green-400">✅ Active</span>
+                        <span className="inline-flex items-center gap-1 text-green-400">
+                          ✅ Active
+                        </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-yellow-400">⚠️ Chưa cấu hình</span>
+                        <span className="text-xs text-[#b0b0d1]">
+                          <code className="rounded bg-white/5 px-1">{p.envKey}</code>
+                        </span>
                       )}
                     </td>
                     <td className="px-4 py-4">
-                      {active ? (
+                      <button
+                        onClick={() => active && toggleProvider(p.id)}
+                        disabled={!active}
+                        title={active ? (disabled ? "Bật provider này" : "Tắt provider này") : "Chưa cấu hình"}
+                        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus:outline-none ${
+                          !active
+                            ? "cursor-not-allowed opacity-30 bg-white/10"
+                            : disabled
+                            ? "bg-white/20"
+                            : "bg-green-600 hover:bg-green-500"
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition-transform ${
+                            !disabled ? "translate-x-5" : "translate-x-1"
+                          }`}
+                        />
+                      </button>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-2">
+                        {active && !testResult && (
+                          <button
+                            onClick={() => void handleTest(p.id)}
+                            className="rounded-lg bg-white/10 px-2 py-1 text-xs font-medium text-[#d9ecff] hover:bg-white/20"
+                          >
+                            Test
+                          </button>
+                        )}
+                        {renderTestResult(p.id)}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4">
+                      {active && !disabled ? (
                         isCurrent ? (
                           <span className="text-[#d9ecff]">✓ Đang dùng</span>
                         ) : (
@@ -108,9 +191,7 @@ export default function SettingsPage() {
                           </button>
                         )
                       ) : (
-                        <span className="text-xs text-[#b0b0d1]">
-                          Thêm <code className="rounded bg-white/5 px-1">{p.envKey}</code> vào .env.local
-                        </span>
+                        <span className="text-xs text-[#b0b0d1]">—</span>
                       )}
                     </td>
                   </tr>
@@ -121,7 +202,7 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Sync section */}
+      {/* Sync section — unchanged */}
       <div>
         <h2 className="mb-2 font-display text-xl font-bold text-[#d9ecff]">Đồng bộ dữ liệu</h2>
         <p className="mb-6 text-sm text-[#b0b0d1]">
@@ -129,7 +210,6 @@ export default function SettingsPage() {
         </p>
 
         <div className="space-y-6 rounded-xl border border-white/10 p-6">
-          {/* Home key display */}
           <div>
             <p className="mb-2 text-sm font-medium text-[#d9ecff]">Sync Key của thiết bị này</p>
             <div className="flex items-center gap-3">
@@ -146,7 +226,6 @@ export default function SettingsPage() {
             <p className="mt-1 text-xs text-[#b0b0d1]">{formatSynced(lastSynced)}</p>
           </div>
 
-          {/* Pull from another device */}
           <div>
             <p className="mb-2 text-sm font-medium text-[#d9ecff]">Lấy dữ liệu từ thiết bị khác</p>
             <p className="mb-3 text-xs text-[#b0b0d1]">
