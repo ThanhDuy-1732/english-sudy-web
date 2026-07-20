@@ -1,10 +1,10 @@
 process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
 process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "test-key";
 
-import { supabase } from "@/lib/supabase";
+import { createSupabase } from "@/lib/supabase";
 
 jest.mock("@/lib/supabase", () => ({
-  supabase: { from: jest.fn() },
+  createSupabase: jest.fn(),
 }));
 
 import {
@@ -14,7 +14,8 @@ import {
   pullFromKey,
 } from "../sync";
 
-const mockFrom = supabase.from as jest.Mock;
+const mockCreateSupabase = createSupabase as jest.Mock;
+const mockFrom = jest.fn();
 
 function makeFromImpl(words: unknown[] = [], topics: unknown[] = [], challenges: unknown[] = [], error: unknown = null) {
   return (table: string) => {
@@ -40,7 +41,9 @@ beforeEach(() => {
     writable: true,
     configurable: true,
   });
+  mockFrom.mockReset();
   mockFrom.mockImplementation(makeFromImpl());
+  mockCreateSupabase.mockReturnValue({ from: mockFrom });
 });
 
 // --- getSyncKey ---
@@ -82,6 +85,12 @@ test("initSync does nothing when offline", async () => {
 test("initSync sets lastSyncedAt after running", async () => {
   await initSync();
   expect(getLastSyncedAt()).not.toBeNull();
+});
+
+test("initSync creates Supabase client with home sync key", async () => {
+  const homeKey = getSyncKey();
+  await initSync();
+  expect(mockCreateSupabase).toHaveBeenCalledWith(homeKey);
 });
 
 // --- pullFromKey ---
@@ -163,7 +172,8 @@ test('pullFromKey resolves "ThankZ" alias to fixed UUID and keeps home key', asy
   await pullFromKey("ThankZ");
   expect(localStorage.getItem("syncKey")).toBe(homeKey);
   expect(localStorage.getItem("syncKey")).not.toBe("7468616e-6b7a-4000-8000-000000000000");
-  // Verify it fetched using the ThankZ UUID (not the literal string)
+  // Verify client was created with ThankZ UUID (this is what gets sent as x-sync-key header)
+  expect(mockCreateSupabase).toHaveBeenCalledWith("7468616e-6b7a-4000-8000-000000000000");
   expect(mockFrom).toHaveBeenCalledWith("learned_words");
   const selectCall = mockFrom.mock.results[0].value.select.mock.results[0].value;
   expect(selectCall.eq).toHaveBeenCalledWith("sync_key", "7468616e-6b7a-4000-8000-000000000000");
@@ -171,6 +181,7 @@ test('pullFromKey resolves "ThankZ" alias to fixed UUID and keeps home key', asy
 
 test('pullFromKey resolves "thankz" (lowercase) to the same fixed UUID', async () => {
   await pullFromKey("thankz");
+  expect(mockCreateSupabase).toHaveBeenCalledWith("7468616e-6b7a-4000-8000-000000000000");
   const selectCall = mockFrom.mock.results[0].value.select.mock.results[0].value;
   expect(selectCall.eq).toHaveBeenCalledWith("sync_key", "7468616e-6b7a-4000-8000-000000000000");
 });

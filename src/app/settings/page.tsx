@@ -11,7 +11,6 @@ const ALL_PROVIDERS = [
   { id: "mistral",    name: "Mistral",      model: "mistral-small-latest",                          envKey: "MISTRAL_API_KEY" },
   { id: "cohere",     name: "Cohere",       model: "command-r7b-12-2024",                           envKey: "COHERE_API_KEY" },
   { id: "huggingface",name: "HuggingFace",  model: "meta-llama/Llama-3.2-1B-Instruct",             envKey: "HUGGINGFACE_API_KEY" },
-  { id: "replicate",  name: "Replicate",    model: "meta/llama-4-scout-17b-16e-instruct",           envKey: "REPLICATE_API_KEY" },
 ];
 
 type TestResult = "loading" | { ok: boolean; latency?: number; error?: string };

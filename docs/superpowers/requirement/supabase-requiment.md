@@ -1,0 +1,4 @@
+- Tôi muốn luồng sync hoạt động như sau:
+- Đăng nhập thiết bị A (sync key A), thiết bị B (sync key B)
+- Thiết bị muốn đồng bộ từ thiết bị A thì nhập sync key A. Hệ thống sẽ merge dữ liệu từ supabase của key A vào key B rồi trả về lưu vào localStorage của thiết bị A. Dữ liệu trên thiết bị A không bị ảnh hưởng
+- Trường hợp nhập key = 'ThankZ', được chọn dữ liệu đồng bộ từ các thiết bị khác

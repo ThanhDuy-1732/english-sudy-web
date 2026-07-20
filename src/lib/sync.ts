@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { createSupabase } from "./supabase";
 import { type LearnedWord, getLearnedWords, saveLearnedWord } from "./storage";
 import { type DailyChallenge } from "./daily-challenge";
 import { getCustomTopics, saveCustomTopic } from "./custom-topics";
@@ -34,6 +34,7 @@ function setLastSyncedAt() {
 export async function pushWord(entry: LearnedWord): Promise<void> {
   if (typeof window === "undefined") return;
   const syncKey = getSyncKey();
+  const supabase = createSupabase(syncKey);
   try {
     await supabase.from("learned_words").upsert({
       sync_key: syncKey,
@@ -54,6 +55,7 @@ export async function pushWord(entry: LearnedWord): Promise<void> {
 export async function deleteWord(word: string): Promise<void> {
   if (typeof window === "undefined") return;
   const syncKey = getSyncKey();
+  const supabase = createSupabase(syncKey);
   try {
     await supabase.from("learned_words").delete().match({ sync_key: syncKey, word });
   } catch { /* fire-and-forget */ }
@@ -62,6 +64,7 @@ export async function deleteWord(word: string): Promise<void> {
 export async function pushTopic(topic: string): Promise<void> {
   if (typeof window === "undefined") return;
   const syncKey = getSyncKey();
+  const supabase = createSupabase(syncKey);
   try {
     await supabase.from("custom_topics").upsert({ sync_key: syncKey, topic });
   } catch { /* fire-and-forget */ }
@@ -70,6 +73,7 @@ export async function pushTopic(topic: string): Promise<void> {
 export async function pushChallenge(record: DailyChallenge): Promise<void> {
   if (typeof window === "undefined") return;
   const syncKey = getSyncKey();
+  const supabase = createSupabase(syncKey);
   try {
     await supabase.from("daily_challenges").upsert({
       sync_key: syncKey,
@@ -83,6 +87,7 @@ export async function pushChallenge(record: DailyChallenge): Promise<void> {
 export async function initSync(): Promise<void> {
   if (typeof window === "undefined" || !navigator.onLine) return;
   const syncKey = getSyncKey();
+  const supabase = createSupabase(syncKey);
 
   try {
     const localWords = getLearnedWords();
@@ -192,6 +197,7 @@ export async function pullFromKey(key: string): Promise<number> {
   if (typeof window === "undefined") return 0;
   const trimmed = key.trim();
   const resolved = KEY_ALIASES[trimmed.toLowerCase()] ?? trimmed;
+  const supabase = createSupabase(resolved);
 
   const [wordsResult, topicsResult, challengesResult] = await Promise.all([
     supabase.from("learned_words").select("*").eq("sync_key", resolved),

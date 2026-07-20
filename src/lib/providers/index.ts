@@ -1,6 +1,5 @@
 import { GeminiProvider } from "./gemini";
 import { OpenAICompatProvider } from "./openai-compat";
-import { ReplicateProvider } from "./replicate";
 import type { AIProvider, ProviderInfo } from "./types";
 
 function isRetryableError(error: unknown): boolean {
@@ -112,15 +111,6 @@ function buildRegistry(): AIProvider[] {
         model: process.env.HUGGINGFACE_MODEL ?? "meta-llama/Llama-3.2-1B-Instruct",
         baseURL: "https://router.huggingface.co/featherless-ai/v1",
       })
-    );
-  }
-
-  if (process.env.REPLICATE_API_KEY) {
-    providers.push(
-      new ReplicateProvider(
-        process.env.REPLICATE_API_KEY,
-        process.env.REPLICATE_MODEL ?? "meta/llama-4-scout-17b-16e-instruct"
-      )
     );
   }
 
