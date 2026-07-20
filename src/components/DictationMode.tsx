@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useVoiceSettings } from "@/lib/useVoiceSettings";
 
 function normalize(word: string) { return word.toLowerCase().replace(/[.,!?;:'"“”]/g, ""); }
 function highlightDiff(input: string, correct: string) {
@@ -17,12 +18,16 @@ export default function DictationMode({ sentence }: { sentence: string }) {
   const [input, setInput] = useState("");
   const [checked, setChecked] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const { settings } = useVoiceSettings();
 
   function speak() {
     if (typeof window === "undefined" || !window.speechSynthesis) return;
     window.speechSynthesis.cancel();
+    const voices = window.speechSynthesis.getVoices();
     const utterance = new SpeechSynthesisUtterance(sentence);
-    utterance.lang = "en-US"; utterance.rate = 0.75;
+    const voice = voices.find((item) => item.voiceURI === settings.voiceURI) ?? null;
+    if (voice) utterance.voice = voice;
+    utterance.lang = "en-US"; utterance.rate = settings.rate; utterance.pitch = settings.pitch; utterance.volume = settings.volume;
     utterance.onstart = () => setPlaying(true); utterance.onend = () => setPlaying(false); utterance.onerror = () => setPlaying(false);
     window.speechSynthesis.speak(utterance);
   }

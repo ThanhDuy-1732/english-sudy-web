@@ -32,6 +32,13 @@ jest.mock("@/lib/sync", () => ({
   pushWord: jest.fn(),
 }));
 
+jest.mock("@/lib/useVoiceSettings", () => ({
+  useVoiceSettings: () => ({
+    settings: { voiceURI: null, rate: 0.9, pitch: 1.0, volume: 1.0 },
+    update: jest.fn(),
+  }),
+}));
+
 import { saveLearnedWord, getLearnedWords } from "@/lib/storage";
 
 beforeEach(() => {

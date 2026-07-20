@@ -17,8 +17,25 @@ import {
 const mockCreateSupabase = createSupabase as jest.Mock;
 const mockFrom = jest.fn();
 
-function makeFromImpl(words: unknown[] = [], topics: unknown[] = [], challenges: unknown[] = [], error: unknown = null) {
+function makeFromImpl(
+  words: unknown[] = [],
+  topics: unknown[] = [],
+  challenges: unknown[] = [],
+  error: unknown = null,
+  userSettings: unknown = null,
+) {
   return (table: string) => {
+    if (table === "user_settings") {
+      return {
+        upsert: jest.fn().mockResolvedValue({ data: null, error }),
+        select: jest.fn(() => ({
+          eq: jest.fn(() => ({
+            single: jest.fn().mockResolvedValue({ data: userSettings, error }),
+          })),
+        })),
+      };
+    }
+
     const data = table === "learned_words" ? words
                : table === "custom_topics" ? topics
                : challenges;
@@ -189,4 +206,51 @@ test('pullFromKey resolves "thankz" (lowercase) to the same fixed UUID', async (
 test("pullFromKey throws when Supabase returns an error", async () => {
   mockFrom.mockImplementation(makeFromImpl([], [], [], { message: "network error" }));
   await expect(pullFromKey("aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee")).rejects.toBeTruthy();
+});
+
+// --- voice settings sync ---
+
+test("initSync pushes voiceSettings to user_settings table", async () => {
+  localStorage.setItem("voiceSettings", JSON.stringify({ voiceURI: null, rate: 1.2, pitch: 1.0, volume: 0.8 }));
+  const upsertMock = jest.fn().mockResolvedValue({ data: null, error: null });
+  mockFrom.mockImplementation((table: string) => {
+    if (table === "user_settings") {
+      return {
+        upsert: upsertMock,
+        select: jest.fn(() => ({
+          eq: jest.fn(() => ({
+            single: jest.fn().mockResolvedValue({ data: null, error: null }),
+          })),
+        })),
+      };
+    }
+
+    return {
+      upsert: jest.fn().mockResolvedValue({ data: null, error: null }),
+      select: jest.fn(() => ({
+        eq: jest.fn().mockResolvedValue({ data: [], error: null }),
+      })),
+    };
+  });
+  await initSync();
+  expect(upsertMock).toHaveBeenCalledWith(
+    expect.objectContaining({ voice_settings: expect.objectContaining({ rate: 1.2 }) })
+  );
+});
+
+test("initSync applies pulled voice_settings when voiceURI is null", async () => {
+  const remoteSettings = { voiceURI: null, rate: 1.5, pitch: 0.8, volume: 0.9 };
+  mockFrom.mockImplementation(makeFromImpl([], [], [], null, { voice_settings: remoteSettings }));
+  await initSync();
+  const saved = JSON.parse(localStorage.getItem("voiceSettings")!);
+  expect(saved.rate).toBe(1.5);
+  expect(saved.voiceURI).toBeNull();
+});
+
+test("pullFromKey applies voice_settings from remote key", async () => {
+  const remoteSettings = { voiceURI: null, rate: 1.3, pitch: 1.1, volume: 1.0 };
+  mockFrom.mockImplementation(makeFromImpl([], [], [], null, { voice_settings: remoteSettings }));
+  await pullFromKey("7468616e-6b7a-4000-8000-000000000000");
+  const saved = JSON.parse(localStorage.getItem("voiceSettings")!);
+  expect(saved.rate).toBe(1.3);
 });

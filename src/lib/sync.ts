@@ -2,6 +2,7 @@ import { createSupabase } from "./supabase";
 import { type LearnedWord, getLearnedWords, saveLearnedWord } from "./storage";
 import { type DailyChallenge } from "./daily-challenge";
 import { getCustomTopics, saveCustomTopic } from "./custom-topics";
+import { getVoiceSettings, saveVoiceSettings, type VoiceSettings } from "./voiceSettings";
 
 const SYNC_KEY_LS = "syncKey";
 const LAST_SYNCED_LS = "lastSyncedAt";
@@ -29,6 +30,16 @@ function setLastSyncedAt() {
   if (typeof window !== "undefined") {
     localStorage.setItem(LAST_SYNCED_LS, new Date().toISOString());
   }
+}
+
+function resolveVoiceSettings(remote: VoiceSettings): VoiceSettings {
+  if (typeof window === "undefined" || !window.speechSynthesis) {
+    return { ...remote, voiceURI: null };
+  }
+
+  const availableURIs = window.speechSynthesis.getVoices().map((voice) => voice.voiceURI);
+  const voiceURI = remote.voiceURI && availableURIs.includes(remote.voiceURI) ? remote.voiceURI : null;
+  return { ...remote, voiceURI };
 }
 
 export async function pushWord(entry: LearnedWord): Promise<void> {
@@ -189,6 +200,21 @@ export async function initSync(): Promise<void> {
       );
     }
 
+    await supabase.from("user_settings").upsert({
+      sync_key: syncKey,
+      voice_settings: getVoiceSettings(),
+    });
+
+    const { data: remoteUserSettings } = await supabase
+      .from("user_settings")
+      .select("voice_settings")
+      .eq("sync_key", syncKey)
+      .single();
+
+    if (remoteUserSettings?.voice_settings) {
+      saveVoiceSettings(resolveVoiceSettings(remoteUserSettings.voice_settings as VoiceSettings));
+    }
+
     setLastSyncedAt();
   } catch { /* fire-and-forget */ }
 }
@@ -256,6 +282,16 @@ export async function pullFromKey(key: string): Promise<number> {
         JSON.stringify([...localChallenges, ...newChallenges])
       );
     }
+  }
+
+  const settingsResult = await supabase
+    .from("user_settings")
+    .select("voice_settings")
+    .eq("sync_key", resolved)
+    .single();
+
+  if (!settingsResult.error && settingsResult.data?.voice_settings) {
+    saveVoiceSettings(resolveVoiceSettings(settingsResult.data.voice_settings as VoiceSettings));
   }
 
   return newWordsCount;

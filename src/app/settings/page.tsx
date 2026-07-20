@@ -1,23 +1,32 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import VoiceSettingsTab from "@/components/VoiceSettingsTab";
 import { useProvider } from "@/contexts/ProviderContext";
-import { getSyncKey, getLastSyncedAt, pullFromKey } from "@/lib/sync";
+import { getLastSyncedAt, getSyncKey, pullFromKey } from "@/lib/sync";
 
 const ALL_PROVIDERS = [
-  { id: "gemini",     name: "Gemini Flash", model: "gemini-flash-latest",                          envKey: "GEMINI_API_KEY" },
-  { id: "groq",       name: "Groq",         model: "llama-3.3-70b-versatile",                      envKey: "GROQ_API_KEY" },
-  { id: "openrouter", name: "OpenRouter",   model: "nvidia/nemotron-3-nano-30b-a3b:free",           envKey: "OPENROUTER_API_KEY" },
-  { id: "mistral",    name: "Mistral",      model: "mistral-small-latest",                          envKey: "MISTRAL_API_KEY" },
-  { id: "cohere",     name: "Cohere",       model: "command-r7b-12-2024",                           envKey: "COHERE_API_KEY" },
-  { id: "huggingface",name: "HuggingFace",  model: "meta-llama/Llama-3.2-1B-Instruct",             envKey: "HUGGINGFACE_API_KEY" },
+  { id: "gemini", name: "Gemini Flash", model: "gemini-flash-latest", envKey: "GEMINI_API_KEY" },
+  { id: "groq", name: "Groq", model: "llama-3.3-70b-versatile", envKey: "GROQ_API_KEY" },
+  { id: "openrouter", name: "OpenRouter", model: "nvidia/nemotron-3-nano-30b-a3b:free", envKey: "OPENROUTER_API_KEY" },
+  { id: "mistral", name: "Mistral", model: "mistral-small-latest", envKey: "MISTRAL_API_KEY" },
+  { id: "cohere", name: "Cohere", model: "command-r7b-12-2024", envKey: "COHERE_API_KEY" },
+  { id: "huggingface", name: "HuggingFace", model: "meta-llama/Llama-3.2-1B-Instruct", envKey: "HUGGINGFACE_API_KEY" },
 ];
 
 type TestResult = "loading" | { ok: boolean; latency?: number; error?: string };
+type Tab = "providers" | "voice" | "sync";
+
+const TAB_LABELS: Record<Tab, string> = {
+  providers: "AI Providers",
+  voice: "Voice",
+  sync: "Sync",
+};
 
 export default function SettingsPage() {
   const { currentProvider, availableProviders, setProvider, disabledProviders, toggleProvider } =
     useProvider();
+  const [activeTab, setActiveTab] = useState<Tab>("providers");
   const [syncKey, setSyncKey] = useState("");
   const [lastSynced, setLastSynced] = useState<string | null>(null);
   const [pullInput, setPullInput] = useState("");
@@ -32,14 +41,17 @@ export default function SettingsPage() {
     setLastSynced(getLastSyncedAt());
   }, []);
 
-  const isActive = (id: string) => availableProviders.some((p) => p.id === id);
+  const isActive = (id: string) => availableProviders.some((provider) => provider.id === id);
   const isDisabled = (id: string) => disabledProviders.includes(id);
 
   function handleCopy() {
-    navigator.clipboard.writeText(syncKey).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }).catch(() => {});
+    navigator.clipboard
+      .writeText(syncKey)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => {});
   }
 
   async function handlePull() {
@@ -85,8 +97,11 @@ export default function SettingsPage() {
 
   function formatSynced(iso: string | null) {
     if (!iso) return "Chưa đồng bộ";
-    const d = new Date(iso);
-    return `Đã đồng bộ lúc ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
+    const date = new Date(iso);
+    return `Đã đồng bộ lúc ${date.getHours().toString().padStart(2, "0")}:${date
+      .getMinutes()
+      .toString()
+      .padStart(2, "0")}`;
   }
 
   function renderTestResult(id: string) {
@@ -98,165 +113,205 @@ export default function SettingsPage() {
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10 space-y-10">
+    <main className="mx-auto max-w-4xl space-y-8 px-4 py-10">
       <div>
-        <h1 className="mb-2 font-display text-3xl font-bold text-[#d9ecff]">Cài đặt</h1>
-        <p className="mb-8 text-sm text-[#b0b0d1]">
-          Quản lý AI provider. Provider được kích hoạt khi có API key trong{" "}
-          <code className="rounded bg-white/10 px-1">.env.local</code>.
-        </p>
+        <h1 className="mb-6 font-display text-3xl font-bold text-[#d9ecff]">Cài đặt</h1>
 
-        <div className="overflow-x-auto rounded-xl border border-white/10">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/10 bg-white/5 text-left">
-                <th className="px-4 py-3 font-semibold text-[#d9ecff]">Provider</th>
-                <th className="px-4 py-3 font-semibold text-[#d9ecff]">Model</th>
-                <th className="px-4 py-3 font-semibold text-[#d9ecff]">Trạng thái</th>
-                <th className="px-4 py-3 font-semibold text-[#d9ecff]">Bật/Tắt</th>
-                <th className="px-4 py-3 font-semibold text-[#d9ecff]">Test</th>
-                <th className="px-4 py-3 font-semibold text-[#d9ecff]">Ưu tiên</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ALL_PROVIDERS.map((p) => {
-                const active = isActive(p.id);
-                const disabled = isDisabled(p.id);
-                const isCurrent = p.id === currentProvider;
-                const testResult = testResults[p.id];
+        <div className="mb-8 flex w-fit gap-1 rounded-xl border border-white/10 bg-white/5 p-1">
+          {(["providers", "voice", "sync"] as Tab[]).map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setActiveTab(tab)}
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                activeTab === tab
+                  ? "bg-white/15 text-[#d9ecff]"
+                  : "text-[#b0b0d1] hover:text-[#d9ecff]"
+              }`}
+            >
+              {TAB_LABELS[tab]}
+            </button>
+          ))}
+        </div>
+      </div>
 
-                return (
-                  <tr key={p.id} className="border-b border-white/5 last:border-0">
-                    <td className="px-4 py-4 font-medium text-white">{p.name}</td>
-                    <td className="px-4 py-4 font-mono text-xs text-[#b0b0d1]">
-                      {active
-                        ? (availableProviders.find((ap) => ap.id === p.id)?.model ?? p.model)
-                        : p.model}
-                    </td>
-                    <td className="px-4 py-4">
-                      {active ? (
-                        <span className="inline-flex items-center gap-1 text-green-400">
-                          ✅ Active
-                        </span>
-                      ) : (
-                        <span className="text-xs text-[#b0b0d1]">
-                          <code className="rounded bg-white/5 px-1">{p.envKey}</code>
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-4">
-                      <button
-                        onClick={() => active && toggleProvider(p.id)}
-                        disabled={!active}
-                        title={active ? (disabled ? "Bật provider này" : "Tắt provider này") : "Chưa cấu hình"}
-                        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus:outline-none ${
-                          !active
-                            ? "cursor-not-allowed opacity-30 bg-white/10"
-                            : disabled
-                            ? "bg-white/20"
-                            : "bg-green-600 hover:bg-green-500"
-                        }`}
-                      >
-                        <span
-                          className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition-transform ${
-                            !disabled ? "translate-x-5" : "translate-x-1"
-                          }`}
-                        />
-                      </button>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-2">
-                        {active && !testResult && (
-                          <button
-                            onClick={() => void handleTest(p.id)}
-                            className="rounded-lg bg-white/10 px-2 py-1 text-xs font-medium text-[#d9ecff] hover:bg-white/20"
-                          >
-                            Test
-                          </button>
-                        )}
-                        {renderTestResult(p.id)}
-                      </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      {active && !disabled ? (
-                        isCurrent ? (
-                          <span className="text-[#d9ecff]">✓ Đang dùng</span>
+      {activeTab === "providers" && (
+        <div>
+          <p className="mb-8 text-sm text-[#b0b0d1]">
+            Quản lý AI provider. Provider được kích hoạt khi có API key trong{" "}
+            <code className="rounded bg-white/10 px-1">.env.local</code>.
+          </p>
+
+          <div className="overflow-x-auto rounded-xl border border-white/10">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/10 bg-white/5 text-left">
+                  <th className="px-4 py-3 font-semibold text-[#d9ecff]">Provider</th>
+                  <th className="px-4 py-3 font-semibold text-[#d9ecff]">Model</th>
+                  <th className="px-4 py-3 font-semibold text-[#d9ecff]">Trạng thái</th>
+                  <th className="px-4 py-3 font-semibold text-[#d9ecff]">Bật/Tắt</th>
+                  <th className="px-4 py-3 font-semibold text-[#d9ecff]">Test</th>
+                  <th className="px-4 py-3 font-semibold text-[#d9ecff]">Ưu tiên</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ALL_PROVIDERS.map((provider) => {
+                  const active = isActive(provider.id);
+                  const disabled = isDisabled(provider.id);
+                  const isCurrent = provider.id === currentProvider;
+                  const testResult = testResults[provider.id];
+
+                  return (
+                    <tr key={provider.id} className="border-b border-white/5 last:border-0">
+                      <td className="px-4 py-4 font-medium text-white">{provider.name}</td>
+                      <td className="px-4 py-4 font-mono text-xs text-[#b0b0d1]">
+                        {active
+                          ? availableProviders.find((available) => available.id === provider.id)?.model ??
+                            provider.model
+                          : provider.model}
+                      </td>
+                      <td className="px-4 py-4">
+                        {active ? (
+                          <span className="inline-flex items-center gap-1 text-green-400">
+                            ✅ Active
+                          </span>
                         ) : (
-                          <button
-                            onClick={() => setProvider(p.id)}
-                            className="rounded-lg bg-white/10 px-3 py-1 text-xs font-medium text-[#d9ecff] hover:bg-white/20"
-                          >
-                            Dùng cái này
-                          </button>
-                        )
-                      ) : (
-                        <span className="text-xs text-[#b0b0d1]">—</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Sync section — unchanged */}
-      <div>
-        <h2 className="mb-2 font-display text-xl font-bold text-[#d9ecff]">Đồng bộ dữ liệu</h2>
-        <p className="mb-6 text-sm text-[#b0b0d1]">
-          Dùng sync key để backup và đồng bộ dữ liệu giữa các thiết bị. Không cần đăng nhập.
-        </p>
-
-        <div className="space-y-6 rounded-xl border border-white/10 p-6">
-          <div>
-            <p className="mb-2 text-sm font-medium text-[#d9ecff]">Sync Key của thiết bị này</p>
-            <div className="flex items-center gap-3">
-              <code className="flex-1 rounded-lg bg-white/5 px-3 py-2 font-mono text-sm text-[#b0b0d1] overflow-hidden">
-                {syncKey ? `${syncKey.slice(0, 8)}••••••••••••••••••••••••••••` : "Đang tải..."}
-              </code>
-              <button
-                onClick={handleCopy}
-                className="shrink-0 rounded-lg bg-white/10 px-3 py-2 text-sm font-medium text-[#d9ecff] hover:bg-white/20"
-              >
-                {copied ? "Đã copy!" : "Copy full key"}
-              </button>
-            </div>
-            <p className="mt-1 text-xs text-[#b0b0d1]">{formatSynced(lastSynced)}</p>
-          </div>
-
-          <div>
-            <p className="mb-2 text-sm font-medium text-[#d9ecff]">Lấy dữ liệu từ thiết bị khác</p>
-            <p className="mb-3 text-xs text-[#b0b0d1]">
-              Nhập sync key của thiết bị khác để thêm từ vựng của thiết bị đó vào đây.
-              Dữ liệu hiện tại trên thiết bị này sẽ không bị mất.
-            </p>
-            <div className="flex gap-3">
-              <input
-                type="text"
-                value={pullInput}
-                onChange={(e) => setPullInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") void handlePull(); }}
-                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx hoặc ThankZ"
-                className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm text-white placeholder-[#b0b0d1] focus:border-white/30 focus:outline-none"
-              />
-              <button
-                onClick={() => void handlePull()}
-                disabled={pulling || !pullInput.trim()}
-                className="shrink-0 rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-[#d9ecff] hover:bg-white/20 disabled:opacity-50"
-              >
-                {pulling ? "Đang lấy..." : "Pull data"}
-              </button>
-            </div>
-            {pullSuccess && (
-              <p className="mt-2 text-sm font-medium text-green-400">{pullSuccess}</p>
-            )}
-            {pullError && (
-              <p className="mt-2 text-sm font-medium text-red-400">{pullError}</p>
-            )}
+                          <span className="text-xs text-[#b0b0d1]">
+                            <code className="rounded bg-white/5 px-1">{provider.envKey}</code>
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-4">
+                        <button
+                          type="button"
+                          onClick={() => active && toggleProvider(provider.id)}
+                          disabled={!active}
+                          title={active ? (disabled ? "Bật provider này" : "Tắt provider này") : "Chưa cấu hình"}
+                          className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus:outline-none ${
+                            !active
+                              ? "cursor-not-allowed bg-white/10 opacity-30"
+                              : disabled
+                                ? "bg-white/20"
+                                : "bg-green-600 hover:bg-green-500"
+                          }`}
+                        >
+                          <span
+                            className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition-transform ${
+                              !disabled ? "translate-x-5" : "translate-x-1"
+                            }`}
+                          />
+                        </button>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          {active && !testResult && (
+                            <button
+                              type="button"
+                              onClick={() => void handleTest(provider.id)}
+                              className="rounded-lg bg-white/10 px-2 py-1 text-xs font-medium text-[#d9ecff] hover:bg-white/20"
+                            >
+                              Test
+                            </button>
+                          )}
+                          {renderTestResult(provider.id)}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        {active && !disabled ? (
+                          isCurrent ? (
+                            <span className="text-[#d9ecff]">✓ Đang dùng</span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setProvider(provider.id)}
+                              className="rounded-lg bg-white/10 px-3 py-1 text-xs font-medium text-[#d9ecff] hover:bg-white/20"
+                            >
+                              Dùng cái này
+                            </button>
+                          )
+                        ) : (
+                          <span className="text-xs text-[#b0b0d1]">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
-      </div>
+      )}
+
+      {activeTab === "voice" && (
+        <div>
+          <p className="mb-8 text-sm text-[#b0b0d1]">
+            Chọn giọng đọc và điều chỉnh thông số phát âm.
+          </p>
+          <div className="rounded-xl border border-white/10 p-6">
+            <VoiceSettingsTab />
+          </div>
+        </div>
+      )}
+
+      {activeTab === "sync" && (
+        <div>
+          <h2 className="mb-2 font-display text-xl font-bold text-[#d9ecff]">Đồng bộ dữ liệu</h2>
+          <p className="mb-6 text-sm text-[#b0b0d1]">
+            Dùng sync key để backup và đồng bộ dữ liệu giữa các thiết bị. Không cần đăng nhập.
+          </p>
+
+          <div className="space-y-6 rounded-xl border border-white/10 p-6">
+            <div>
+              <p className="mb-2 text-sm font-medium text-[#d9ecff]">Sync Key của thiết bị này</p>
+              <div className="flex items-center gap-3">
+                <code className="flex-1 overflow-hidden rounded-lg bg-white/5 px-3 py-2 font-mono text-sm text-[#b0b0d1]">
+                  {syncKey ? `${syncKey.slice(0, 8)}••••••••••••••••••••••••••••` : "Đang tải..."}
+                </code>
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="shrink-0 rounded-lg bg-white/10 px-3 py-2 text-sm font-medium text-[#d9ecff] hover:bg-white/20"
+                >
+                  {copied ? "Đã copy!" : "Copy full key"}
+                </button>
+              </div>
+              <p className="mt-1 text-xs text-[#b0b0d1]">{formatSynced(lastSynced)}</p>
+            </div>
+
+            <div>
+              <p className="mb-2 text-sm font-medium text-[#d9ecff]">Lấy dữ liệu từ thiết bị khác</p>
+              <p className="mb-3 text-xs text-[#b0b0d1]">
+                Nhập sync key của thiết bị khác để thêm từ vựng của thiết bị đó vào đây. Dữ liệu
+                hiện tại trên thiết bị này sẽ không bị mất.
+              </p>
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  value={pullInput}
+                  onChange={(event) => setPullInput(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") void handlePull();
+                  }}
+                  placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx hoặc ThankZ"
+                  className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm text-white placeholder-[#b0b0d1] focus:border-white/30 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => void handlePull()}
+                  disabled={pulling || !pullInput.trim()}
+                  className="shrink-0 rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-[#d9ecff] hover:bg-white/20 disabled:opacity-50"
+                >
+                  {pulling ? "Đang lấy..." : "Pull data"}
+                </button>
+              </div>
+              {pullSuccess && (
+                <p className="mt-2 text-sm font-medium text-green-400">{pullSuccess}</p>
+              )}
+              {pullError && <p className="mt-2 text-sm font-medium text-red-400">{pullError}</p>}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
