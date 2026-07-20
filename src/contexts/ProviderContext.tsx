@@ -12,17 +12,29 @@ interface ProviderContextValue {
   currentProvider: string;
   availableProviders: ProviderInfo[];
   setProvider: (id: string) => void;
+  disabledProviders: string[];
+  toggleProvider: (id: string) => void;
 }
 
 const ProviderContext = createContext<ProviderContextValue>({
   currentProvider: "",
   availableProviders: [],
   setProvider: () => {},
+  disabledProviders: [],
+  toggleProvider: () => {},
 });
 
 export function ProviderContextProvider({ children }: { children: React.ReactNode }) {
   const [availableProviders, setAvailableProviders] = useState<ProviderInfo[]>([]);
   const [currentProvider, setCurrentProvider] = useState("");
+  const [disabledProviders, setDisabledProviders] = useState<string[]>([]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("disabledProviders");
+      if (stored) setDisabledProviders(JSON.parse(stored) as string[]);
+    } catch {}
+  }, []);
 
   useEffect(() => {
     fetch("/api/providers")
@@ -41,8 +53,28 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
     localStorage.setItem("preferredProvider", id);
   };
 
+  const toggleProvider = (id: string) => {
+    const isDisabling = !disabledProviders.includes(id);
+    const next = isDisabling
+      ? [...disabledProviders, id]
+      : disabledProviders.filter((d) => d !== id);
+
+    setDisabledProviders(next);
+    localStorage.setItem("disabledProviders", JSON.stringify(next));
+
+    if (isDisabling && currentProvider === id) {
+      const firstAvailable = availableProviders.find((p) => !next.includes(p.id));
+      if (firstAvailable) {
+        setCurrentProvider(firstAvailable.id);
+        localStorage.setItem("preferredProvider", firstAvailable.id);
+      }
+    }
+  };
+
   return (
-    <ProviderContext.Provider value={{ currentProvider, availableProviders, setProvider }}>
+    <ProviderContext.Provider
+      value={{ currentProvider, availableProviders, setProvider, disabledProviders, toggleProvider }}
+    >
       {children}
     </ProviderContext.Provider>
   );

@@ -55,3 +55,73 @@ test("setProvider updates state and localStorage", async () => {
   expect(screen.getByTestId("current").textContent).toBe("groq");
   expect(localStorage.getItem("preferredProvider")).toBe("groq");
 });
+
+function ToggleConsumer() {
+  const { disabledProviders, toggleProvider, currentProvider } = useProvider();
+  return (
+    <div>
+      <span data-testid="disabled">{disabledProviders.join(",")}</span>
+      <span data-testid="current">{currentProvider}</span>
+      <button onClick={() => toggleProvider("groq")}>Toggle Groq</button>
+    </div>
+  );
+}
+
+test("disabledProviders starts empty", async () => {
+  render(
+    <ProviderContextProvider>
+      <ToggleConsumer />
+    </ProviderContextProvider>
+  );
+  await waitFor(() => expect(screen.getAllByTestId("current")[0].textContent).toBe("gemini"));
+  expect(screen.getByTestId("disabled").textContent).toBe("");
+});
+
+test("toggleProvider disables a provider and persists to localStorage", async () => {
+  render(
+    <ProviderContextProvider>
+      <ToggleConsumer />
+    </ProviderContextProvider>
+  );
+  await waitFor(() => expect(screen.getAllByTestId("current")[0].textContent).toBe("gemini"));
+  act(() => screen.getByText("Toggle Groq").click());
+  expect(screen.getByTestId("disabled").textContent).toBe("groq");
+  expect(JSON.parse(localStorage.getItem("disabledProviders")!)).toEqual(["groq"]);
+});
+
+test("toggleProvider re-enables a disabled provider", async () => {
+  localStorage.setItem("disabledProviders", JSON.stringify(["groq"]));
+  render(
+    <ProviderContextProvider>
+      <ToggleConsumer />
+    </ProviderContextProvider>
+  );
+  await waitFor(() => expect(screen.getAllByTestId("current")[0].textContent).toBe("gemini"));
+  await waitFor(() => expect(screen.getByTestId("disabled").textContent).toBe("groq"));
+  act(() => screen.getByText("Toggle Groq").click());
+  expect(screen.getByTestId("disabled").textContent).toBe("");
+});
+
+test("toggleProvider switches currentProvider when disabling the active one", async () => {
+  localStorage.setItem("preferredProvider", "groq");
+  render(
+    <ProviderContextProvider>
+      <ToggleConsumer />
+    </ProviderContextProvider>
+  );
+  await waitFor(() => expect(screen.getAllByTestId("current")[0].textContent).toBe("groq"));
+  act(() => screen.getByText("Toggle Groq").click());
+  // Should fall back to first available (gemini)
+  expect(screen.getAllByTestId("current")[0].textContent).toBe("gemini");
+  expect(localStorage.getItem("preferredProvider")).toBe("gemini");
+});
+
+test("restores disabledProviders from localStorage on mount", async () => {
+  localStorage.setItem("disabledProviders", JSON.stringify(["gemini", "groq"]));
+  render(
+    <ProviderContextProvider>
+      <ToggleConsumer />
+    </ProviderContextProvider>
+  );
+  await waitFor(() => expect(screen.getByTestId("disabled").textContent).toBe("gemini,groq"));
+});
