@@ -18,6 +18,7 @@ Next.js 14 App Router · TypeScript · Tailwind CSS · Jest (jsdom) · Supabase 
 | `/history` | `src/app/history/page.tsx` | Browse saved words, filter by topic/mastery |
 | `/review` | `src/app/review/page.tsx` | Spaced-repetition review of due words |
 | `/stats` | `src/app/stats/page.tsx` | Learning analytics — 4 stat tiles (words, active days, mastery, today's study minutes), words-per-day chart, study-time chart, topic distribution, streak calendar |
+| `/diary` | `src/app/diary/page.tsx` | Daily learning journal — interactive 26-week heatmap, click a day to see words learned and study time in a slide-in drawer |
 | `/import` | `src/app/import/page.tsx` | Bulk import words |
 | `/settings` | `src/app/settings/page.tsx` | 3 tabs: AI Providers · Voice · Sync |
 
@@ -222,9 +223,12 @@ Supabase client created per call via `createSupabase(syncKey)` in `src/lib/supab
 | `StreakCalendar` | 26-week calendar heatmap |
 | `VoiceSettingsTab` | Voice picker + sliders |
 | `SyncInitializer` | Runs `initSync()` on app mount |
+| `FirebaseInitializer` | Initializes Firebase analytics in the browser when config is available |
 | `ProviderBadge` | Shows current AI provider name |
 | `HeaderTimer` | Navbar timer: shows today's study time or countdown; click to pause/resume; ＋ button opens SetCountdownModal; TimeUpModal shown when countdown ends |
 | `charts/StudyTimeChart` | Bar chart — study minutes per day for last 30 days |
+| `DiaryCalendar` | Interactive 26-week heatmap calendar for /diary; purple color levels 0–3; click cell opens DayDrawer |
+| `DayDrawer` | Slide-in right drawer for /diary; shows daily word list (expandable) + study minutes + prev/next nav |
 
 ---
 
