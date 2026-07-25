@@ -85,5 +85,8 @@ export function getStudyTimePerDay(days = 30): DailyStudyTime[] {
 }
 
 export function getWordsForDate(date: string): LearnedWord[] {
-  return getLearnedWords().filter((w) => w.learnedAt.startsWith(date));
+  return getLearnedWords().filter((w) => {
+    const d = new Date(w.learnedAt);
+    return Number.isNaN(d.getTime()) ? false : formatDate(d) === date;
+  });
 }

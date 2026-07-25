@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { LearnedWord } from "@/lib/storage";
 
 interface DayDrawerProps {
@@ -37,6 +37,8 @@ function MasteryStars({ mastery = 0 }: { mastery?: number }) {
 
 export default function DayDrawer({ date, words, studyMinutes, isOpen, onClose, onNavigate }: DayDrawerProps) {
   const [expandedWords, setExpandedWords] = useState<Set<string>>(new Set());
+
+  useEffect(() => { setExpandedWords(new Set()); }, [date]);
 
   function toggleWord(word: string) {
     setExpandedWords((prev) => {
