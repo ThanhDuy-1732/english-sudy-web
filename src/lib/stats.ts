@@ -1,4 +1,4 @@
-import { getLearnedWords } from "./storage";
+import { getLearnedWords, type LearnedWord } from "./storage";
 
 export interface DailyWordCount {
   date: string;
@@ -58,4 +58,32 @@ function toLevel(count: number): 0 | 1 | 2 | 3 {
 export function getCalendarData(weeks = 26): CalendarDay[] {
   const safeWeeks = Number.isFinite(weeks) ? Math.max(0, Math.floor(weeks)) : 26;
   return getWordsPerDay(safeWeeks * 7).map((day) => ({ ...day, level: toLevel(day.count) }));
+}
+
+export interface DailyStudyTime {
+  date: string;
+  minutes: number;
+}
+
+export function getStudyTimePerDay(days = 30): DailyStudyTime[] {
+  const safeDays = Number.isFinite(days) ? Math.max(0, Math.floor(days)) : 30;
+  let data: Record<string, number> = {};
+
+  if (typeof window !== "undefined") {
+    try {
+      const parsed = JSON.parse(localStorage.getItem("studyTime") ?? "{}");
+      data = parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed as Record<string, number> : {};
+    } catch {
+      data = {};
+    }
+  }
+
+  return Array.from({ length: safeDays }, (_, index) => {
+    const date = formatDate(dateFromOffset(-(safeDays - 1 - index)));
+    return { date, minutes: Math.round((data[date] ?? 0) / 60) };
+  });
+}
+
+export function getWordsForDate(date: string): LearnedWord[] {
+  return getLearnedWords().filter((w) => w.learnedAt.startsWith(date));
 }
