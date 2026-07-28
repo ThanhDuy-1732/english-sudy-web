@@ -19,6 +19,7 @@ Next.js 14 App Router · TypeScript · Tailwind CSS · Jest (jsdom) · Supabase 
 | `/review` | `src/app/review/page.tsx` | Spaced-repetition review of due words |
 | `/stats` | `src/app/stats/page.tsx` | Learning analytics — 4 stat tiles (words, active days, mastery, today's study minutes), words-per-day chart, study-time chart, topic distribution, streak calendar |
 | `/diary` | `src/app/diary/page.tsx` | Daily learning journal — interactive 26-week heatmap, click a day to see words learned and study time in a slide-in drawer |
+| `/grammar` | `src/app/grammar/page.tsx` | Grammar study page — desktop sidebar/mobile selector, static grammar rules, AI examples/exercises, user-generated grammar topics |
 | `/import` | `src/app/import/page.tsx` | Bulk import words |
 | `/settings` | `src/app/settings/page.tsx` | 3 tabs: AI Providers · Voice · Sync |
 
@@ -35,6 +36,9 @@ Next.js 14 App Router · TypeScript · Tailwind CSS · Jest (jsdom) · Supabase 
 | `/api/generate-fillblank` | `{ word, provider?, disabledProviders? }` | `{ sentence }` (with blank) |
 | `/api/generate-reading` | `{ words, provider?, disabledProviders? }` | `{ passage, questions[] }` |
 | `/api/grade-sentence` | `{ word, sentence, provider?, disabledProviders? }` | grading result |
+| `/api/grammar-generate` | `{ request, provider?, disabledProviders? }` | `GrammarTopic` JSON for a user-requested grammar topic |
+| `/api/grammar-examples` | `{ topic, subRule, provider?, disabledProviders? }` | `{ examples: string[] }` |
+| `/api/grammar-exercise` | `{ topic, subRule, provider?, disabledProviders? }` | `{ type: "fill"|"mcq", question, options?, answer }` |
 | `/api/providers` | GET | `{ id, name, model }[]` of configured providers |
 | `/api/providers/test` | `{ providerId }` | `{ ok, latency, error? }` |
 
@@ -79,6 +83,27 @@ interface VoiceSettings {
 }
 ```
 
+### GrammarTopic (`src/lib/grammar-data.ts`)
+```ts
+interface SubRule {
+  id: string;
+  name: string;
+  formula: string;
+  explanation: string;
+  examples: string[];
+}
+
+interface GrammarTopic {
+  id: string;
+  name: string;
+  rules: SubRule[];
+  isUserGenerated?: boolean;
+  createdAt?: string;
+}
+```
+
+`STATIC_GRAMMAR_TOPICS` contains 8 built-in topics: Tenses, Modal Verbs, Conditionals, Passive Voice, Relative Clauses, Reported Speech, Articles, Prepositions.
+
 ---
 
 ## localStorage Keys
@@ -89,6 +114,7 @@ interface VoiceSettings {
 | `dailyChallenge` | `DailyChallenge[]` | Full history |
 | `customTopics` | `string[]` | User-added topics |
 | `studyTime` | `Record<string, number>` | Daily study seconds — `{ "YYYY-MM-DD": seconds }` |
+| `grammarTopics` | `GrammarTopic[]` | User-generated grammar topics |
 | `voiceSettings` | `VoiceSettings` | TTS settings |
 | `syncKey` | `string` (UUID) | Supabase identity (auto-generated) |
 | `lastSyncedAt` | ISO string | Timestamp of last Supabase sync |
@@ -147,6 +173,13 @@ In **review mode** (`isReviewMode=true`): shows "Nhớ tốt ✓ / Quên ✗" bu
 
 Built-in topics (`"Daily Communication"`, `"TOEIC"`) are hardcoded in `TopicSelector.tsx` and cannot be deleted.
 
+## Grammar Topics (`src/lib/grammar-storage.ts`)
+
+- Built-in topics live in `STATIC_GRAMMAR_TOPICS` (`src/lib/grammar-data.ts`)
+- `getUserGrammarTopics()` — reads `localStorage["grammarTopics"]`; returns `[]` on SSR or malformed JSON
+- `saveUserGrammarTopic(topic)` — appends or updates by `id`
+- `/grammar` combines static topics with user topics; AI-generated topics are saved locally and pushed to Supabase via `pushGrammarTopic`
+
 ---
 
 ## Stats (`src/lib/stats.ts`)
@@ -180,6 +213,7 @@ No authentication. Identity = `syncKey` (UUID in localStorage, auto-generated).
 - `learned_words` — mirrors `LearnedWord` shape
 - `daily_challenges` — mirrors `DailyChallenge`
 - `custom_topics` — `{ sync_key, topic }`
+- `grammar_topics` — `{ sync_key: uuid, id, name, rules: jsonb, created_at }`
 - `user_settings` — `{ sync_key, voice_settings: jsonb }`
 
 **Operations**:
@@ -187,8 +221,11 @@ No authentication. Identity = `syncKey` (UUID in localStorage, auto-generated).
 - `pushWord(entry)` — fire-and-forget upsert
 - `deleteWord(word)` — fire-and-forget delete
 - `pushTopic(topic)` — fire-and-forget upsert
+- `pushGrammarTopic(topic)` — fire-and-forget upsert to `grammar_topics`
 - `pushChallenge(record)` — fire-and-forget upsert
 - `pullFromKey(key)` — one-way pull from another device's sync key; returns count of new words added
+
+`initSync()` also upserts local user-generated grammar topics and pulls missing remote grammar topics into `localStorage["grammarTopics"]`.
 
 **Key alias**: `"thankz"` resolves to a hardcoded UUID (for easy sharing).
 
@@ -219,6 +256,9 @@ Supabase client created per call via `createSupabase(syncKey)` in `src/lib/supab
 | `WritingChallenge` | User writes a sentence; calls `/api/grade-sentence` |
 | `FillBlank` | Displays fill-in-the-blank; validates answer |
 | `DictationMode` | Plays TTS; user types what they hear |
+| `GrammarSidebar` | Topic list + add-topic form for desktop `/grammar` |
+| `GrammarContent` | Displays grammar rules, formulas, static/AI examples, and exercise buttons |
+| `GrammarExercise` | Inline fill-in-the-blank or MCQ answer checking |
 | `PronunciationButton` | Web Speech API TTS button |
 | `StreakCalendar` | 26-week calendar heatmap |
 | `VoiceSettingsTab` | Voice picker + sliders |

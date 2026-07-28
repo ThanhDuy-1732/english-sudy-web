@@ -2,6 +2,8 @@ import { createSupabase } from "./supabase";
 import { type LearnedWord, getLearnedWords, saveLearnedWord } from "./storage";
 import { type DailyChallenge } from "./daily-challenge";
 import { getCustomTopics, saveCustomTopic } from "./custom-topics";
+import { type GrammarTopic } from "./grammar-data";
+import { getUserGrammarTopics, saveUserGrammarTopic } from "./grammar-storage";
 import { getVoiceSettings, saveVoiceSettings, type VoiceSettings } from "./voiceSettings";
 
 const SYNC_KEY_LS = "syncKey";
@@ -78,6 +80,21 @@ export async function pushTopic(topic: string): Promise<void> {
   const supabase = createSupabase(syncKey);
   try {
     await supabase.from("custom_topics").upsert({ sync_key: syncKey, topic });
+  } catch { /* fire-and-forget */ }
+}
+
+export async function pushGrammarTopic(topic: GrammarTopic): Promise<void> {
+  if (typeof window === "undefined") return;
+  const syncKey = getSyncKey();
+  const supabase = createSupabase(syncKey);
+  try {
+    await supabase.from("grammar_topics").upsert({
+      sync_key: syncKey,
+      id: topic.id,
+      name: topic.name,
+      rules: topic.rules,
+      created_at: topic.createdAt ?? new Date().toISOString(),
+    });
   } catch { /* fire-and-forget */ }
 }
 
@@ -176,6 +193,39 @@ export async function initSync(): Promise<void> {
 
     if (remoteTopics) {
       remoteTopics.forEach((row) => saveCustomTopic(row.topic as string));
+    }
+
+    const localGrammarTopics = getUserGrammarTopics();
+    if (localGrammarTopics.length > 0) {
+      await supabase.from("grammar_topics").upsert(
+        localGrammarTopics.map((topic) => ({
+          sync_key: syncKey,
+          id: topic.id,
+          name: topic.name,
+          rules: topic.rules,
+          created_at: topic.createdAt ?? new Date().toISOString(),
+        }))
+      );
+    }
+
+    const { data: remoteGrammarTopics } = await supabase
+      .from("grammar_topics")
+      .select("*")
+      .eq("sync_key", syncKey);
+
+    if (remoteGrammarTopics) {
+      const localGrammarMap = new Map(localGrammarTopics.map((topic) => [topic.id, topic]));
+      for (const row of remoteGrammarTopics) {
+        if (!localGrammarMap.has(row.id as string)) {
+          saveUserGrammarTopic({
+            id: row.id as string,
+            name: row.name as string,
+            rules: row.rules as GrammarTopic["rules"],
+            isUserGenerated: true,
+            createdAt: row.created_at as string,
+          });
+        }
+      }
     }
 
     const { data: remoteChallenges } = await supabase
