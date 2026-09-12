@@ -17,10 +17,19 @@ export class OpenAICompatProvider implements AIProvider {
   private client: OpenAI;
 
   constructor(config: OpenAICompatConfig) {
+    const testFetch = process.env.NODE_ENV === "test" && typeof globalThis.fetch === "undefined"
+      ? (async () => { throw new Error("fetch is unavailable in test environment"); }) as typeof fetch
+      : undefined;
+
     this.id = config.id;
     this.name = config.name;
     this.model = config.model;
-    this.client = new OpenAI({ apiKey: config.apiKey, baseURL: config.baseURL });
+    this.client = new OpenAI({
+      apiKey: config.apiKey,
+      baseURL: config.baseURL,
+      dangerouslyAllowBrowser: process.env.NODE_ENV === "test",
+      fetch: testFetch,
+    });
   }
 
   async generateContent(prompt: string): Promise<string> {

@@ -113,7 +113,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <main className="mx-auto max-w-4xl space-y-8 px-4 py-10">
+    <main className="mx-auto w-full min-w-0 max-w-4xl space-y-8 px-4 py-10">
       <div>
         <h1 className="mb-6 font-display text-3xl font-bold text-[#d9ecff]">Cài đặt</h1>
 
@@ -142,8 +142,8 @@ export default function SettingsPage() {
             <code className="rounded bg-white/10 px-1">.env.local</code>.
           </p>
 
-          <div className="overflow-x-auto rounded-xl border border-white/10">
-            <table className="w-full text-sm">
+          <div className="max-w-full overflow-x-auto rounded-xl border border-white/10">
+            <table className="min-w-[36rem] w-full text-sm">
               <thead>
                 <tr className="border-b border-white/10 bg-white/5 text-left">
                   <th className="px-4 py-3 font-semibold text-[#d9ecff]">Provider</th>

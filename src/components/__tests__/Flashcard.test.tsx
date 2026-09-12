@@ -103,7 +103,7 @@ test("calls saveLearnedWord when Đã học is clicked", async () => {
 
 test("clicking card while loading does NOT toggle back to front", async () => {
   // Delay the fetch so we can click during loading
-  let resolveFetch!: (value: { ok: boolean; json: () => Promise<{ sentence: string }> }) => void;
+  let resolveFetch!: (value: { ok: boolean; headers: { get: (name: string) => string | null }; json: () => Promise<{ sentence: string }> }) => void;
   (global.fetch as jest.Mock).mockReturnValueOnce(
     new Promise((resolve) => {
       resolveFetch = resolve;

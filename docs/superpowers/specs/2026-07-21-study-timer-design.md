@@ -79,7 +79,7 @@ Triggered automatically when countdown reaches 0. Contains:
 
 Adds a 4th tile to the existing 3-tile row in `/stats`:  
 **"Hôm nay"** — shows today's study time in minutes (e.g. `32 phút`).  
-Reads directly from the `TimerContext` or from localStorage on page mount.
+Reads `todaySeconds` from `TimerContext` (always live, no extra localStorage read needed).
 
 ### New chart: `StudyTimeChart` (`src/components/charts/StudyTimeChart.tsx`)
 

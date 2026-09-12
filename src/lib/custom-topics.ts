@@ -15,3 +15,9 @@ export function saveCustomTopic(topic: string) {
   if (existing.some((item) => item.toLowerCase() === trimmed.toLowerCase())) return;
   localStorage.setItem(KEY, JSON.stringify([...existing, trimmed]));
 }
+
+export function deleteCustomTopic(topic: string) {
+  if (typeof window === "undefined") return;
+  const existing = getCustomTopics().filter((item) => item !== topic);
+  localStorage.setItem(KEY, JSON.stringify(existing));
+}
