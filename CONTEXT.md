@@ -22,6 +22,17 @@ Next.js 14 App Router · TypeScript · Tailwind CSS · Jest (jsdom) · Supabase 
 | `/grammar` | `src/app/grammar/page.tsx` | Grammar study page — desktop sidebar/mobile selector, static grammar rules, AI examples/exercises, user-generated grammar topics |
 | `/import` | `src/app/import/page.tsx` | Bulk import words |
 | `/settings` | `src/app/settings/page.tsx` | 3 tabs: AI Providers · Voice · Sync |
+| `/exam` | `src/app/exam/page.tsx` | Exam dashboard — chọn TOEIC/IELTS, level, drill/mock |
+| `/exam/drill/[part]` | `src/app/exam/drill/[part]/page.tsx` | Luyện 1 part (RC5/RC6/RC7/LC2/LC3/LC4/READ_P3/LISTEN_S1) |
+| `/exam/mock` | `src/app/exam/mock/page.tsx` | Full mock test rút gọn với countdown timer |
+| `/exam/mistakes` | `src/app/exam/mistakes/page.tsx` | Sổ lỗi — filter, resolve, drill lại |
+| `/speak` | `src/app/speak/page.tsx` | Chọn scenario giao tiếp hoặc IELTS Speaking part |
+| `/speak/roleplay/[id]` | `src/app/speak/roleplay/[id]/page.tsx` | Roleplay hội thoại đa lượt với AI |
+| `/speak/ielts/[part]` | `src/app/speak/ielts/[part]/page.tsx` | IELTS Speaking P1/P2/P3 — mic hoặc nhập text |
+| `/write` | `src/app/write/page.tsx` | Chọn dạng bài viết IELTS/TOEIC |
+| `/write/task/[id]` | `src/app/write/task/[id]/page.tsx` | Editor + timer + word count |
+| `/write/result/[id]` | `src/app/write/result/[id]/page.tsx` | Kết quả chấm — annotated essay + model answer |
+| `/today` | `src/app/today/page.tsx` | Kế hoạch học tự động dựa trên điểm yếu + SRS debt |
 
 ---
 
@@ -41,8 +52,16 @@ Next.js 14 App Router · TypeScript · Tailwind CSS · Jest (jsdom) · Supabase 
 | `/api/grammar-exercise` | `{ topic, subRule, provider?, disabledProviders? }` | `{ type: "fill"|"mcq", question, options?, answer }` |
 | `/api/providers` | GET | `{ id, name, model }[]` of configured providers |
 | `/api/providers/test` | `{ providerId }` | `{ ok, latency, error? }` |
+| `/api/exam/generate-item` | `{ kind, part, level, topic? }` | `ExamItem` (zod validated, 1 auto-repair) |
+| `/api/exam/grade-open` | `{ question, userAnswer, correctAnswer }` | `{ correct, feedback }` |
+| `/api/exam/explain` | `{ question, userAnswer, correctAnswer, explanation? }` | `{ explanation }` |
+| `/api/speech/transcribe` | FormData `audio` (webm) | `{ text, durationSec, segments[] }` via Groq Whisper |
+| `/api/speech/grade` | `{ task, transcript, durationSec }` | `SpeakingFeedback` (4 band scores) |
+| `/api/speak/roleplay` | `{ scenario, history, userText }` | `{ reply, correction, goalAchieved, suggestedReplies }` |
+| `/api/write/grade` | `{ kind, prompt, content, chartData? }` | `WritingFeedback` (4 bands + annotations + model answer) |
 
 All AI-calling routes pass `provider` + `disabledProviders` to `callWithFallback`. They set header `X-Provider-Used` in the response. Actual AI calls live in `src/lib/providers/`.
+`GRADING_PROVIDER` env var pins a specific provider for band scoring (stability). `GROQ_API_KEY` + `GROQ_WHISPER_MODEL` env vars for STT.
 
 ---
 
@@ -57,12 +76,16 @@ interface LearnedWord {
   topic: string;
   learnedAt: string;           // ISO
   nextReviewAt?: string;       // ISO, defaults to +1 day
-  reviewInterval?: number;     // days, starts 1, doubles up to 30 on "remembered"
-  mastery?: number;            // 0–5 stars
+  reviewInterval?: number;     // days (SM-2: interval field)
+  mastery?: number;            // 0–5 stars (derived from repetitions)
   synonyms?: string[];
   antonyms?: string[];
+  // SM-2 fields (added by migrateToSm2):
+  easiness?: number;           // EF, floor 1.3
+  repetitions?: number;        // SM-2 repetition count
 }
 ```
+SRS uses SM-2 algorithm (`src/lib/srs.ts`). Use `updateWordReviewSm2(word, quality: 0|3|4|5)` for new reviews. Old `updateWordReview(word, remembered)` still works for backward compat.
 
 ### DailyChallenge (`src/lib/daily-challenge.ts`)
 ```ts
@@ -120,6 +143,13 @@ interface GrammarTopic {
 | `lastSyncedAt` | ISO string | Timestamp of last Supabase sync |
 | `preferredProvider` | `string` | Provider id (e.g. `"gemini"`) |
 | `disabledProviders` | `string[]` | Opt-out provider ids |
+| `examBank` | `Record<string, ExamItem[]>` | Cache đề exam, key = `"TOEIC:RC5:3"`. Max 30/key |
+| `examAttempts` | `ExamAttempt[]` | 100 attempts gần nhất |
+| `mistakeLog` | `MistakeEntry[]` | Sổ lỗi |
+| `examSettings` | `ExamSettings` | Primary exam, target score, level, listening rate |
+| `dailyPlan` | `{ date, blocks }` | Kế hoạch `/today` — regenerate mỗi ngày |
+| `lastSpeakingAt` | ISO string | Để /today nhắc luyện nói sau 2 ngày |
+| `lastWritingAt` | ISO string | Để /today nhắc luyện viết sau 5 ngày |
 
 ---
 

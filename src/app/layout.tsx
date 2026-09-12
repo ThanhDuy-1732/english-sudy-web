@@ -93,6 +93,24 @@ export default function RootLayout({
                     Luyện thi
                   </a>
                   <a
+                    href="/speak"
+                    className="inline-flex min-h-11 items-center whitespace-nowrap px-2 text-sm font-medium text-[#b0b0d1] transition-colors hover:text-white"
+                  >
+                    Nói
+                  </a>
+                  <a
+                    href="/write"
+                    className="inline-flex min-h-11 items-center whitespace-nowrap px-2 text-sm font-medium text-[#b0b0d1] transition-colors hover:text-white"
+                  >
+                    Viết
+                  </a>
+                  <a
+                    href="/today"
+                    className="inline-flex min-h-11 items-center whitespace-nowrap px-2 text-sm font-medium text-[#b0b0d1] transition-colors hover:text-white"
+                  >
+                    Hôm nay
+                  </a>
+                  <a
                     href="/history"
                     className="inline-flex min-h-11 items-center whitespace-nowrap px-2 text-sm font-medium text-[#b0b0d1] transition-colors hover:text-white"
                   >
