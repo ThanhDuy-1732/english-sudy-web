@@ -1,6 +1,11 @@
 "use client";
 
 import type { ExamQuestion, ExamItem } from "@/lib/exam/types";
+import PassageReader from "./PassageReader";
+import ListeningPlayer from "./ListeningPlayer";
+
+const READING_PARTS = new Set(["RC6", "RC7", "READ_P1", "READ_P2", "READ_P3"]);
+const LISTENING_PARTS = new Set(["LC1", "LC2", "LC3", "LC4", "LISTEN_S1", "LISTEN_S2", "LISTEN_S3", "LISTEN_S4"]);
 
 interface Props {
   item: ExamItem;
@@ -23,6 +28,21 @@ export default function QuestionCard({
 }: Props) {
   const isCompletion = !question.options;
 
+  // Use PassageReader layout for reading parts with passages
+  if (READING_PARTS.has(item.part) && item.passage) {
+    return (
+      <PassageReader
+        item={item}
+        question={question}
+        questionNumber={questionNumber}
+        totalQuestions={totalQuestions}
+        userAnswer={userAnswer}
+        showResult={showResult}
+        onAnswer={onAnswer}
+      />
+    );
+  }
+
   return (
     <div className="question-card">
       <div className="question-header">
@@ -32,8 +52,13 @@ export default function QuestionCard({
         <span className="question-type">{formatType(question.type)}</span>
       </div>
 
-      {/* Passage context for reading items */}
-      {item.passage && (
+      {/* Listening player for LC parts */}
+      {LISTENING_PARTS.has(item.part) && item.script && (
+        <ListeningPlayer script={item.script} />
+      )}
+
+      {/* Passage context for non-reading items that have a passage */}
+      {!READING_PARTS.has(item.part) && item.passage && (
         <div className="passage-context">
           <p>{item.passage}</p>
         </div>
