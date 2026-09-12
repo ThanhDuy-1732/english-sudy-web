@@ -87,6 +87,12 @@ export default function RootLayout({
                     Ngữ pháp
                   </a>
                   <a
+                    href="/exam"
+                    className="inline-flex min-h-11 items-center whitespace-nowrap px-2 text-sm font-medium text-[#b0b0d1] transition-colors hover:text-white"
+                  >
+                    Luyện thi
+                  </a>
+                  <a
                     href="/history"
                     className="inline-flex min-h-11 items-center whitespace-nowrap px-2 text-sm font-medium text-[#b0b0d1] transition-colors hover:text-white"
                   >
