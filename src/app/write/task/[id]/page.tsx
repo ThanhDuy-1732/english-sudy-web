@@ -2,6 +2,18 @@
 
 import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 interface TaskConfig {
   kind: string;
@@ -117,6 +129,7 @@ export default function WritingTaskPage({ params }: { params: Promise<{ id: stri
       const feedback = await res.json();
       // Store feedback in sessionStorage for result page
       sessionStorage.setItem(`writing-result-${id}`, JSON.stringify({ feedback, content, config }));
+      localStorage.setItem("lastWritingAt", new Date().toISOString());
       router.push(`/write/result/${id}`);
     } catch {
       alert("Lỗi chấm bài, thử lại.");
@@ -139,13 +152,7 @@ export default function WritingTaskPage({ params }: { params: Promise<{ id: stri
       <div className="prompt-box">
         <p className="prompt-label">Task</p>
         <p className="prompt-text">{config.prompt}</p>
-        {config.chartData && (
-          <div className="chart-placeholder">
-            📊 [Biểu đồ: {String(config.chartData?.title ?? "")}]
-            <br />
-            <small>Dữ liệu được cung cấp trong prompt để AI chấm chính xác.</small>
-          </div>
-        )}
+        {config.chartData && <TaskChart data={config.chartData} />}
         <p className="task-meta">Tối thiểu {config.minWords} từ · {config.timeLimitMin} phút</p>
       </div>
 
@@ -189,7 +196,7 @@ export default function WritingTaskPage({ params }: { params: Promise<{ id: stri
         .prompt-box { background: #f8f9fa; border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem; border-left: 3px solid #0d6efd; }
         .prompt-label { font-size: 0.75rem; text-transform: uppercase; color: #6c757d; margin: 0 0 0.5rem; }
         .prompt-text { font-size: 0.9rem; line-height: 1.6; margin: 0 0 0.5rem; }
-        .chart-placeholder { font-size: 0.85rem; background: #e9ecef; padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 0.5rem; color: #495057; }
+        .chart-placeholder { font-size: 0.85rem; background: #e9ecef; padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 0.5rem; color: #495057; border-radius: 8px; }
         .task-meta { font-size: 0.8rem; color: #6c757d; margin: 0; }
         .start-btn { display: block; width: 100%; padding: 1rem; background: #0d6efd; color: white; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; }
         .start-btn:hover { background: #0b5ed7; }
@@ -203,6 +210,66 @@ export default function WritingTaskPage({ params }: { params: Promise<{ id: stri
         .submit-btn { padding: 0.6rem 1.5rem; background: #198754; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
         .submit-btn:disabled { background: #adb5bd; cursor: not-allowed; }
       `}</style>
+    </div>
+  );
+}
+
+const COLORS = ["#7f56d9", "#0d6efd", "#20c997", "#fd7e14"];
+
+function TaskChart({ data }: { data: Record<string, unknown> }) {
+  const type = data.type as string;
+  const title = data.title as string | undefined;
+
+  if (type === "bar") {
+    const cats = data.categories as string[];
+    const series = data.series as { name: string; data: number[] }[];
+    const chartData = cats.map((cat, i) => {
+      const row: Record<string, string | number> = { cat };
+      series.forEach((s) => { row[s.name] = s.data[i] ?? 0; });
+      return row;
+    });
+    return (
+      <div className="chart-placeholder">
+        {title && <p style={{ fontSize: "0.8rem", fontWeight: 600, marginBottom: "0.5rem" }}>{title}</p>}
+        <ResponsiveContainer width="100%" height={180}>
+          <BarChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 4 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#dee2e6" />
+            <XAxis dataKey="cat" tick={{ fontSize: 10 }} />
+            <YAxis tick={{ fontSize: 10 }} />
+            <Tooltip />
+            <Legend wrapperStyle={{ fontSize: 11 }} />
+            {series.map((s, i) => (
+              <Bar key={s.name} dataKey={s.name} fill={COLORS[i % COLORS.length]} radius={[3, 3, 0, 0]} />
+            ))}
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  }
+
+  // default: line chart
+  const xAxis = data.xAxis as (string | number)[];
+  const series = data.series as { name: string; data: number[] }[];
+  const chartData = xAxis.map((x, i) => {
+    const row: Record<string, string | number> = { x };
+    series.forEach((s) => { row[s.name] = s.data[i] ?? 0; });
+    return row;
+  });
+  return (
+    <div className="chart-placeholder">
+      {title && <p style={{ fontSize: "0.8rem", fontWeight: 600, marginBottom: "0.5rem" }}>{title}</p>}
+      <ResponsiveContainer width="100%" height={180}>
+        <LineChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 4 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#dee2e6" />
+          <XAxis dataKey="x" tick={{ fontSize: 10 }} />
+          <YAxis tick={{ fontSize: 10 }} unit="%" />
+          <Tooltip />
+          <Legend wrapperStyle={{ fontSize: 11 }} />
+          {series.map((s, i) => (
+            <Line key={s.name} type="monotone" dataKey={s.name} stroke={COLORS[i % COLORS.length]} dot={false} />
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
     </div>
   );
 }

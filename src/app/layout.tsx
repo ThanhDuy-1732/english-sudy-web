@@ -6,6 +6,7 @@ import { ProviderContextProvider } from "@/contexts/ProviderContext";
 import { TimerContextProvider } from "@/contexts/TimerContext";
 import { ProviderBadge } from "@/components/ProviderBadge";
 import HeaderTimer from "@/components/HeaderTimer";
+import { DueBadge } from "@/components/DueBadge";
 import { FirebaseInitializer } from "@/components/FirebaseInitializer";
 import "./globals.css";
 
@@ -73,6 +74,7 @@ export default function RootLayout({
                     className="inline-flex min-h-11 items-center whitespace-nowrap px-2 text-sm font-medium text-[#b0b0d1] transition-colors hover:text-white"
                   >
                     Ôn tập
+                    <DueBadge />
                   </a>
                   <a
                     href="/diary"

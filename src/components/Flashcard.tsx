@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { saveLearnedWord, updateWordReview, getLearnedWords } from "@/lib/storage";
+import { saveLearnedWord, updateWordReview, updateWordReviewSm2, getLearnedWords } from "@/lib/storage";
 import { pushWord } from "@/lib/sync";
 import { useApiFetch } from "@/lib/useApiFetch";
 import PronunciationButton from "./PronunciationButton";
@@ -214,35 +214,31 @@ export default function Flashcard({
             )}
           </div>
           {isReviewMode && (
-            <div className="flex w-full gap-2">
-              <button
-                type="button"
-                tabIndex={flipped ? 0 : -1}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  updateWordReview(word, true);
-                  const updated = getLearnedWords().find((w) => w.word === word);
-                  if (updated) void pushWord(updated);
-                  onReviewed?.();
-                }}
-                className="min-h-11 flex-1 rounded-lg bg-green-100 px-3 py-2 text-sm font-medium text-green-800 hover:bg-green-200"
-              >
-                Nhớ tốt ✓
-              </button>
-              <button
-                type="button"
-                tabIndex={flipped ? 0 : -1}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  updateWordReview(word, false);
-                  const updated = getLearnedWords().find((w) => w.word === word);
-                  if (updated) void pushWord(updated);
-                  onReviewed?.();
-                }}
-                className="min-h-11 flex-1 rounded-lg bg-red-100 px-3 py-2 text-sm font-medium text-red-800 hover:bg-red-200"
-              >
-                Quên ✗
-              </button>
+            <div className="flex w-full flex-wrap gap-2">
+              {(
+                [
+                  { label: "Quên", quality: 0, cls: "bg-red-100 text-red-800 hover:bg-red-200" },
+                  { label: "Khó", quality: 3, cls: "bg-orange-100 text-orange-800 hover:bg-orange-200" },
+                  { label: "Được", quality: 4, cls: "bg-blue-100 text-blue-800 hover:bg-blue-200" },
+                  { label: "Dễ", quality: 5, cls: "bg-green-100 text-green-800 hover:bg-green-200" },
+                ] as const
+              ).map(({ label, quality, cls }) => (
+                <button
+                  key={quality}
+                  type="button"
+                  tabIndex={flipped ? 0 : -1}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    updateWordReviewSm2(word, quality);
+                    const updated = getLearnedWords().find((w) => w.word === word);
+                    if (updated) void pushWord(updated);
+                    onReviewed?.();
+                  }}
+                  className={`min-h-11 flex-1 rounded-lg px-3 py-2 text-sm font-medium ${cls}`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
           )}
         </div>

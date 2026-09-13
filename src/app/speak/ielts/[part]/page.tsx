@@ -123,6 +123,7 @@ export default function IeltsSpeakingPage({ params }: { params: Promise<{ part: 
     });
     const fb: SpeakingFeedback = await gradeRes.json();
     setFeedback(fb);
+    localStorage.setItem("lastSpeakingAt", new Date().toISOString());
     setPhase("result");
   }
 

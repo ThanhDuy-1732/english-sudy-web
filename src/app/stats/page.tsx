@@ -16,6 +16,10 @@ import {
   type DailyWordCount,
 } from "@/lib/stats";
 import { getLearnedWords } from "@/lib/storage";
+import { getAttempts } from "@/lib/exam/exam-storage";
+import ExamAccuracyChart from "@/components/charts/ExamAccuracyChart";
+import WeaknessRadar from "@/components/charts/WeaknessRadar";
+import type { ExamAttempt } from "@/lib/exam/types";
 
 export default function StatsPage() {
   const { todaySeconds } = useTimer();
@@ -23,6 +27,7 @@ export default function StatsPage() {
   const [topicDistribution, setTopicDistribution] = useState<{ topic: string; count: number }[]>([]);
   const [calendarData, setCalendarData] = useState<CalendarDay[]>([]);
   const [studyTimePerDay, setStudyTimePerDay] = useState<DailyStudyTime[]>([]);
+  const [examAttempts, setExamAttempts] = useState<ExamAttempt[]>([]);
   const [totalWords, setTotalWords] = useState(0);
   const [activeDays, setActiveDays] = useState(0);
   const [averageMastery, setAverageMastery] = useState(0);
@@ -34,6 +39,7 @@ export default function StatsPage() {
     setTopicDistribution(getTopicDistribution());
     setCalendarData(getCalendarData(26));
     setStudyTimePerDay(getStudyTimePerDay(30));
+    setExamAttempts(getAttempts());
     setTotalWords(learned.length);
     setActiveDays(daily.filter((day) => day.count > 0).length);
     setAverageMastery(
@@ -103,6 +109,14 @@ export default function StatsPage() {
           <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-6">
             <StreakCalendar data={calendarData} />
           </section>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-6">
+              <ExamAccuracyChart attempts={examAttempts} />
+            </section>
+            <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-6">
+              <WeaknessRadar attempts={examAttempts} />
+            </section>
+          </div>
         </div>
       </div>
     </main>
