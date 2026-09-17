@@ -1,9 +1,10 @@
 "use client";
 
-import { use, useState, useRef } from "react";
+import { use, useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { Scenario, ConversationTurn } from "@/lib/speech/types";
 import { saveLearnedWord } from "@/lib/storage";
+import { startSession, finishSession, cancelSession } from "@/lib/sessions";
 
 const SCENARIOS: Record<string, Scenario> = {
   hotel: {
@@ -79,9 +80,30 @@ export default function RoleplayPage({ params }: { params: Promise<{ id: string 
   const [goalAchieved, setGoalAchieved] = useState(false);
   const [done, setDone] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const sessionIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (scenario && !sessionIdRef.current) {
+      sessionIdRef.current = startSession("speaking", { mode: "roleplay", scenarioId: id });
+    }
+    return () => {
+      if (sessionIdRef.current) {
+        cancelSession(sessionIdRef.current);
+        sessionIdRef.current = null;
+      }
+    };
+  }, [id, scenario]);
 
   if (!scenario) {
     return <div className="error">Scenario not found</div>;
+  }
+
+  function endSession() {
+    if (sessionIdRef.current) {
+      finishSession(sessionIdRef.current);
+      sessionIdRef.current = null;
+    }
+    setDone(true);
   }
 
   async function sendMessage() {
@@ -114,7 +136,7 @@ export default function RoleplayPage({ params }: { params: Promise<{ id: string 
 
       // Auto-done after maxTurns
       if (newTurns.length >= scenario.maxTurns * 2) {
-        setDone(true);
+        endSession();
       }
 
       setTimeout(() => {
@@ -238,7 +260,7 @@ export default function RoleplayPage({ params }: { params: Promise<{ id: string 
         <button onClick={sendMessage} disabled={loading || !input.trim()}>
           Gửi
         </button>
-        <button onClick={() => setDone(true)} className="end-btn">
+        <button onClick={endSession} className="end-btn">
           Kết thúc
         </button>
       </div>

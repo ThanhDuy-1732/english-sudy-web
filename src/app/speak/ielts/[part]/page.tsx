@@ -1,10 +1,11 @@
 "use client";
 
-import { use, useState, useRef, useCallback } from "react";
+import { use, useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createRecorder } from "@/lib/speech/recorder";
 import { saveLearnedWord } from "@/lib/storage";
 import type { SpeakingFeedback } from "@/lib/speech/types";
+import { startSession, finishSession, cancelSession } from "@/lib/sessions";
 
 const PART_CONFIG: Record<string, { title: string; prepSec: number; speakSec: number; prompt: string }> = {
   p1: {
@@ -42,6 +43,19 @@ export default function IeltsSpeakingPage({ params }: { params: Promise<{ part: 
 
   const recorderRef = useRef(createRecorder());
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const sessionIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!sessionIdRef.current) {
+      sessionIdRef.current = startSession("speaking", { mode: "ielts", part });
+    }
+    return () => {
+      if (sessionIdRef.current) {
+        cancelSession(sessionIdRef.current);
+        sessionIdRef.current = null;
+      }
+    };
+  }, [part]);
 
   function clearTimer() {
     if (timerRef.current) {
@@ -123,6 +137,10 @@ export default function IeltsSpeakingPage({ params }: { params: Promise<{ part: 
     });
     const fb: SpeakingFeedback = await gradeRes.json();
     setFeedback(fb);
+    if (sessionIdRef.current) {
+      finishSession(sessionIdRef.current);
+      sessionIdRef.current = null;
+    }
     localStorage.setItem("lastSpeakingAt", new Date().toISOString());
     setPhase("result");
   }
@@ -215,7 +233,11 @@ export default function IeltsSpeakingPage({ params }: { params: Promise<{ part: 
           </section>
         )}
 
-        <button onClick={() => { setPhase("ready"); setFeedback(null); }} className="retry-btn">
+        <button onClick={() => {
+          sessionIdRef.current = startSession("speaking", { mode: "ielts", part });
+          setPhase("ready");
+          setFeedback(null);
+        }} className="retry-btn">
           Thử lại
         </button>
 
