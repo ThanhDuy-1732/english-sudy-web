@@ -16,6 +16,7 @@ Next.js 14 App Router · TypeScript · Tailwind CSS · Jest (jsdom) · Supabase 
 |---|---|---|
 | `/` | `src/app/page.tsx` | Generate & study flashcards |
 | `/history` | `src/app/history/page.tsx` | Browse saved words, filter by topic/mastery |
+| `/activity` | `src/app/activity/page.tsx` | Completed learning sessions grouped by local date, with type, duration, and accuracy |
 | `/review` | `src/app/review/page.tsx` | Spaced-repetition review of due words; records a learning session and shows a quality-count summary after the last card |
 | `/stats` | `src/app/stats/page.tsx` | Learning analytics — 4 stat tiles (words, active days, mastery, today's study minutes), words-per-day chart, study-time chart, topic distribution, streak calendar |
 | `/diary` | `src/app/diary/page.tsx` | Daily learning journal — interactive 26-week heatmap, click a day to see words learned and study time in a slide-in drawer |
@@ -137,7 +138,7 @@ interface GrammarTopic {
 
 | Key | Type | Purpose |
 |---|---|---|
-| `learningSessions` | `LearningSession[]` | Recent activity sessions, newest-first, max 500 |
+| `learningSessions` | `LearningSession[]` | Recent activity sessions from review, exam, speaking, and writing; newest-first, max 500 |
 | `learnedWords` | `LearnedWord[]` | All saved words |
 | `dailyChallenge` | `DailyChallenge[]` | Full history |
 | `customTopics` | `string[]` | User-added topics |

@@ -83,6 +83,12 @@ export default function RootLayout({
                     Nhật ký
                   </a>
                   <a
+                    href="/activity"
+                    className="inline-flex min-h-11 items-center whitespace-nowrap px-2 text-sm font-medium text-[#b0b0d1] transition-colors hover:text-white"
+                  >
+                    Hoạt động
+                  </a>
+                  <a
                     href="/grammar"
                     className="inline-flex min-h-11 items-center whitespace-nowrap px-2 text-sm font-medium text-[#b0b0d1] transition-colors hover:text-white"
                   >
