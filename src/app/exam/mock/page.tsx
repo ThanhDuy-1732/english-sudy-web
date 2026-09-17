@@ -24,12 +24,17 @@ export default function MockPage() {
   const [done, setDone] = useState(false);
   const [attempt, setAttempt] = useState<ExamAttempt | null>(null);
   const sessionIdRef = useRef<string | null>(null);
+  const timedOutRef = useRef(false);
 
   useEffect(() => {
-    if (!sessionIdRef.current) sessionIdRef.current = startSession("exam", { mode: "mock" });
     return () => {
       if (sessionIdRef.current) {
-        cancelSession(sessionIdRef.current);
+        // If time ran out but user navigated away before onComplete fired, finish the session
+        if (timedOutRef.current) {
+          finishSession(sessionIdRef.current);
+        } else {
+          cancelSession(sessionIdRef.current);
+        }
         sessionIdRef.current = null;
       }
     };
@@ -52,7 +57,10 @@ export default function MockPage() {
         <p className="warning">
           ⚠️ Sau khi bắt đầu, timer không thể tạm dừng.
         </p>
-        <button onClick={() => setStarted(true)} className="start-btn">
+        <button onClick={() => {
+          sessionIdRef.current = startSession("exam", { mode: "mock" });
+          setStarted(true);
+        }} className="start-btn">
           Bắt đầu thi
         </button>
         <button onClick={() => router.push("/exam")} className="cancel-btn">
@@ -132,8 +140,8 @@ export default function MockPage() {
         <ExamTimer
           totalSeconds={timeLimit}
           onTimeUp={() => {
-            // Auto-submit when time is up
-            setDone(true);
+            timedOutRef.current = true;
+            setDone(true); // triggers forceComplete on ExamRunner → onComplete fires
           }}
         />
       </div>
@@ -142,6 +150,7 @@ export default function MockPage() {
         parts={parts}
         mode="mock"
         level={settings.level}
+        forceComplete={done}
         onComplete={(a) => {
           setAttempt(a);
           setDone(true);

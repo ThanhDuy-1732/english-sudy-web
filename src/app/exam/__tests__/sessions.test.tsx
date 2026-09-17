@@ -24,11 +24,14 @@ test("drill records results and keeps the finished session", () => {
   expect(getSessions()).toHaveLength(1);
 });
 
-test("mock cancels on early exit and records results after starting", () => {
+test("mock: no session before start; cancels on early exit after starting; records results on complete", () => {
+  // No session created until user clicks "Bắt đầu thi"
   const early = render(<MockPage />);
+  expect(getSessions()).toHaveLength(0);
+  fireEvent.click(screen.getByRole("button", { name: "Bắt đầu thi" }));
   expect(getSessions()[0]).toMatchObject({ type: "exam", metadata: { mode: "mock" } });
   early.unmount();
-  expect(getSessions()).toEqual([]);
+  expect(getSessions()).toHaveLength(0); // cancelled on unmount before completing
 
   const completed = render(<MockPage />);
   fireEvent.click(screen.getByRole("button", { name: "Bắt đầu thi" }));

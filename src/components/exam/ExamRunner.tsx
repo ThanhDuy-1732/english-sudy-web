@@ -8,7 +8,7 @@ import { useTimer } from "@/contexts/TimerContext";
 import QuestionCard from "./QuestionCard";
 
 type RunnerState = {
-  phase: "loading" | "ready" | "running" | "reviewing" | "done";
+  phase: "loading" | "ready" | "running" | "reviewing" | "done" | "error";
   items: ExamItem[];
   flatQuestions: { item: ExamItem; q: ExamQuestion }[];
   cursor: number;
@@ -26,7 +26,8 @@ type RunnerAction =
   | { type: "NEXT" }
   | { type: "FLAG"; questionId: string }
   | { type: "FINISH" }
-  | { type: "LOADING_ERROR" };
+  | { type: "LOADING_ERROR" }
+  | { type: "FORCE_COMPLETE" };
 
 function flatten(items: ExamItem[]): { item: ExamItem; q: ExamQuestion }[] {
   return items.flatMap((item) => item.questions.map((q) => ({ item, q })));
@@ -69,6 +70,10 @@ function reducer(state: RunnerState, action: RunnerAction): RunnerState {
     }
     case "FINISH":
       return { ...state, phase: "done" };
+    case "LOADING_ERROR":
+      return { ...state, phase: "error" };
+    case "FORCE_COMPLETE":
+      return { ...state, phase: "reviewing" };
     default:
       return state;
   }
@@ -82,6 +87,7 @@ interface Props {
   topic?: string;
   preloadedItems?: ExamItem[];
   onComplete?: (attempt: ExamAttempt) => void;
+  forceComplete?: boolean; // when true, finish with current answers (e.g. timer expired)
 }
 
 export default function ExamRunner({
@@ -92,6 +98,7 @@ export default function ExamRunner({
   topic,
   preloadedItems,
   onComplete,
+  forceComplete,
 }: Props) {
   const timer = useTimer();
   const savedRef = useRef(false);
@@ -128,14 +135,24 @@ export default function ExamRunner({
           addItemToBank(item);
         }
       }
-      if (!cancelled && fetched.length > 0) {
+      if (cancelled) return;
+      if (fetched.length > 0) {
         dispatch({ type: "LOAD_ITEMS", items: fetched });
+      } else {
+        dispatch({ type: "LOADING_ERROR" });
       }
     }
 
     loadItems();
     return () => { cancelled = true; };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Force completion when timer expires (mock mode)
+  useEffect(() => {
+    if (!forceComplete) return;
+    if (state.phase === "reviewing" || state.phase === "done" || state.phase === "error") return;
+    dispatch({ type: "FORCE_COMPLETE" });
+  }, [forceComplete]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Study timer integration — resume on mount, pause on unmount
   useEffect(() => {
@@ -228,6 +245,20 @@ export default function ExamRunner({
     );
   }
 
+  if (state.phase === "error") {
+    return (
+      <div className="runner-error">
+        <p>⚠️ Không thể tải câu hỏi. Kiểm tra kết nối và thử lại.</p>
+        <button onClick={() => window.location.reload()}>Thử lại</button>
+        <style jsx>{`
+          .runner-error { text-align: center; padding: 3rem; }
+          .runner-error p { color: #856404; margin-bottom: 1rem; }
+          .runner-error button { padding: 0.5rem 1.5rem; background: #0d6efd; color: white; border: none; border-radius: 8px; cursor: pointer; }
+        `}</style>
+      </div>
+    );
+  }
+
   if (state.phase === "ready") {
     return (
       <div className="runner-ready">
@@ -243,6 +274,11 @@ export default function ExamRunner({
         `}</style>
       </div>
     );
+  }
+
+  // In mock mode, MockPage shows its own result screen — skip ReviewSummary to avoid flicker
+  if (state.phase === "reviewing" && mode === "mock") {
+    return null;
   }
 
   if (state.phase === "reviewing") {

@@ -30,7 +30,11 @@ const FeedbackSchema = z.object({
 export async function POST(req: NextRequest) {
   const { task, transcript, durationSec } = await req.json();
 
-  const wordCount = transcript.trim().split(/\s+/).length;
+  if (!transcript || typeof transcript !== "string") {
+    return NextResponse.json({ error: "transcript is required" }, { status: 400 });
+  }
+
+  const wordCount = transcript.trim().split(/\s+/).filter(Boolean).length;
   const wpm = durationSec > 0 ? Math.round((wordCount / durationSec) * 60) : 0;
   const fillerCount = (transcript.match(/\b(um|uh|like|you know|kind of|sort of)\b/gi) ?? []).length;
 

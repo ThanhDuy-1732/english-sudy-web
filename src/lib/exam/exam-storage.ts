@@ -77,7 +77,7 @@ export function saveAttempt(attempt: ExamAttempt) {
 }
 
 export function getAttemptById(id: string): ExamAttempt | undefined {
-  return getAttempts().find((a) => a.id === a.id && a.id === id);
+  return getAttempts().find((a) => a.id === id);
 }
 
 // ─── Mistake Log ─────────────────────────────────────────────────────────────

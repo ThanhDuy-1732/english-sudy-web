@@ -31,7 +31,11 @@ const WritingFeedbackSchema = z.object({
 export async function POST(req: NextRequest) {
   const { kind, prompt: taskPrompt, content, chartData } = await req.json();
 
-  const wordCount = content.trim().split(/\s+/).length;
+  if (!content || typeof content !== "string") {
+    return NextResponse.json({ error: "content is required" }, { status: 400 });
+  }
+
+  const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
   const taskLabel = kind === "ielts_task1" ? "IELTS Writing Task 1" : "IELTS Writing Task 2";
 
   const prompt = `You are an IELTS examiner grading ${taskLabel}.
