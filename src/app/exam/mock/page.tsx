@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import ExamRunner from "@/components/exam/ExamRunner";
 import ExamTimer from "@/components/exam/ExamTimer";
 import { getExamSettings } from "@/lib/exam/exam-storage";
+import { startSession, finishSession, cancelSession } from "@/lib/sessions";
 import type { ExamAttempt, ExamPart, ExamKind } from "@/lib/exam/types";
 
 const TOEIC_MOCK_PARTS: ExamPart[] = ["LC2", "LC3", "LC4", "RC5", "RC6", "RC7"];
@@ -22,6 +23,17 @@ export default function MockPage() {
   const [started, setStarted] = useState(false);
   const [done, setDone] = useState(false);
   const [attempt, setAttempt] = useState<ExamAttempt | null>(null);
+  const sessionIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!sessionIdRef.current) sessionIdRef.current = startSession("exam", { mode: "mock" });
+    return () => {
+      if (sessionIdRef.current) {
+        cancelSession(sessionIdRef.current);
+        sessionIdRef.current = null;
+      }
+    };
+  }, []);
 
   const kind = settings.primaryExam;
   const parts = kind === "TOEIC" ? TOEIC_MOCK_PARTS : IELTS_MOCK_PARTS;
@@ -133,6 +145,13 @@ export default function MockPage() {
         onComplete={(a) => {
           setAttempt(a);
           setDone(true);
+          if (sessionIdRef.current) {
+            finishSession(sessionIdRef.current, {
+              totalItems: a.answers.length,
+              correctItems: a.answers.filter((answer) => answer.correct).length,
+            });
+            sessionIdRef.current = null;
+          }
         }}
       />
       <style jsx>{`

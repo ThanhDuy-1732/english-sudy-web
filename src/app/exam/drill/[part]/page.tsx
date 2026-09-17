@@ -1,9 +1,10 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import ExamRunner from "@/components/exam/ExamRunner";
 import { getExamSettings, getItemsFromBank } from "@/lib/exam/exam-storage";
+import { startSession, finishSession, cancelSession } from "@/lib/sessions";
 import type { ExamPart, ExamAttempt, ExamKind } from "@/lib/exam/types";
 
 const PART_LABELS: Record<string, string> = {
@@ -28,6 +29,17 @@ export default function DrillPage({ params }: { params: Promise<{ part: string }
   const settings = getExamSettings();
   const [done, setDone] = useState(false);
   const [attempt, setAttempt] = useState<ExamAttempt | null>(null);
+  const sessionIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!sessionIdRef.current) sessionIdRef.current = startSession("exam", { part });
+    return () => {
+      if (sessionIdRef.current) {
+        cancelSession(sessionIdRef.current);
+        sessionIdRef.current = null;
+      }
+    };
+  }, [part]);
 
   const kind: ExamKind = PART_KIND[part] ?? settings.primaryExam;
   const cachedItems = getItemsFromBank(kind, part as ExamPart, settings.level);
@@ -89,6 +101,13 @@ export default function DrillPage({ params }: { params: Promise<{ part: string }
         onComplete={(a) => {
           setAttempt(a);
           setDone(true);
+          if (sessionIdRef.current) {
+            finishSession(sessionIdRef.current, {
+              totalItems: a.answers.length,
+              correctItems: a.answers.filter((answer) => answer.correct).length,
+            });
+            sessionIdRef.current = null;
+          }
         }}
       />
       <style jsx>{`
