@@ -67,6 +67,10 @@ All AI-calling routes pass `provider` + `disabledProviders` to `callWithFallback
 
 ## Data Models
 
+### LearningSession (`src/lib/sessions.ts`)
+
+`LearningSession` records an activity (`vocabulary`, `review`, `grammar`, `exam`, `speaking`, or `writing`) with an ID, ISO start/end times, duration in seconds, optional item totals, and optional metadata. `startSession`, `updateSession`, `finishSession`, and `cancelSession` manage records; `getSessions`, `getSessionsForDate`, and `getRecentSessions` read them. Records are stored newest-first, capped at 500; date filtering uses the local calendar date. `finishSession` is idempotent.
+
 ### LearnedWord (`src/lib/storage.ts`)
 ```ts
 interface LearnedWord {
@@ -133,6 +137,7 @@ interface GrammarTopic {
 
 | Key | Type | Purpose |
 |---|---|---|
+| `learningSessions` | `LearningSession[]` | Recent activity sessions, newest-first, max 500 |
 | `learnedWords` | `LearnedWord[]` | All saved words |
 | `dailyChallenge` | `DailyChallenge[]` | Full history |
 | `customTopics` | `string[]` | User-added topics |
