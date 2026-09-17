@@ -16,7 +16,7 @@ Next.js 14 App Router · TypeScript · Tailwind CSS · Jest (jsdom) · Supabase 
 |---|---|---|
 | `/` | `src/app/page.tsx` | Generate & study flashcards |
 | `/history` | `src/app/history/page.tsx` | Browse saved words, filter by topic/mastery |
-| `/review` | `src/app/review/page.tsx` | Spaced-repetition review of due words |
+| `/review` | `src/app/review/page.tsx` | Spaced-repetition review of due words; records a learning session and shows a quality-count summary after the last card |
 | `/stats` | `src/app/stats/page.tsx` | Learning analytics — 4 stat tiles (words, active days, mastery, today's study minutes), words-per-day chart, study-time chart, topic distribution, streak calendar |
 | `/diary` | `src/app/diary/page.tsx` | Daily learning journal — interactive 26-week heatmap, click a day to see words learned and study time in a slide-in drawer |
 | `/grammar` | `src/app/grammar/page.tsx` | Grammar study page — desktop sidebar/mobile selector, static grammar rules, AI examples/exercises, user-generated grammar topics |
@@ -196,7 +196,7 @@ Model can be overridden via env: `GEMINI_MODEL`, `GROQ_MODEL`, etc.
 
 On first flip: fetches sentence + synonyms in parallel. Saved state is lazy (only after flip). Pronunciation button (`PronunciationButton`) floats on front face.
 
-In **review mode** (`isReviewMode=true`): shows "Nhớ tốt ✓ / Quên ✗" buttons instead of save. Updates `mastery` and `reviewInterval` via `updateWordReview`, then pushes to Supabase.
+In **review mode** (`isReviewMode=true`): shows 4 SM-2 quality buttons — Quên (0), Khó (3), Được (4), Dễ (5) — instead of save. Updates SM-2 fields via `updateWordReviewSm2(word, quality)`, pushes to Supabase, and passes the quality to `onReviewed` for session tracking. `/review` cancels unfinished sessions on exit; its summary reports counts, accuracy (Được + Dễ), duration, and remaining due words.
 
 ---
 

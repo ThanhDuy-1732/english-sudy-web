@@ -18,7 +18,7 @@ interface FlashcardProps {
   initialExample?: string;
   initialSynonymData?: { synonyms: string[]; antonyms: string[] };
   isReviewMode?: boolean;
-  onReviewed?: () => void;
+  onReviewed?: (quality: 0 | 3 | 4 | 5) => void;
   onFlip?: () => void;
 }
 
@@ -232,7 +232,7 @@ export default function Flashcard({
                     updateWordReviewSm2(word, quality);
                     const updated = getLearnedWords().find((w) => w.word === word);
                     if (updated) void pushWord(updated);
-                    onReviewed?.();
+                    onReviewed?.(quality);
                   }}
                   className={`min-h-11 flex-1 rounded-lg px-3 py-2 text-sm font-medium ${cls}`}
                 >
