@@ -1,7 +1,8 @@
 "use client";
 
-import { use, useState, useEffect } from "react";
+import { use, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { startSession, finishSession, cancelSession } from "@/lib/sessions";
 import {
   Bar,
   BarChart,
@@ -98,6 +99,17 @@ export default function WritingTaskPage({ params }: { params: Promise<{ id: stri
   const [timeLeft, setTimeLeft] = useState(config.timeLimitMin * 60);
   const [started, setStarted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const sessionIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!sessionIdRef.current) sessionIdRef.current = startSession("writing", { taskId: id });
+    return () => {
+      if (sessionIdRef.current) {
+        cancelSession(sessionIdRef.current);
+        sessionIdRef.current = null;
+      }
+    };
+  }, [id]);
 
   const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
   const meetsMin = wordCount >= config.minWords;
@@ -130,6 +142,10 @@ export default function WritingTaskPage({ params }: { params: Promise<{ id: stri
       // Store feedback in sessionStorage for result page
       sessionStorage.setItem(`writing-result-${id}`, JSON.stringify({ feedback, content, config }));
       localStorage.setItem("lastWritingAt", new Date().toISOString());
+      if (sessionIdRef.current) {
+        finishSession(sessionIdRef.current);
+        sessionIdRef.current = null;
+      }
       router.push(`/write/result/${id}`);
     } catch {
       alert("Lỗi chấm bài, thử lại.");

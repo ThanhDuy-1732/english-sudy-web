@@ -30,7 +30,7 @@ Next.js 14 App Router · TypeScript · Tailwind CSS · Jest (jsdom) · Supabase 
 | `/speak/roleplay/[id]` | `src/app/speak/roleplay/[id]/page.tsx` | Roleplay hội thoại đa lượt với AI; speaking session ends on user/end-of-turn completion |
 | `/speak/ielts/[part]` | `src/app/speak/ielts/[part]/page.tsx` | IELTS Speaking P1/P2/P3 — mic hoặc nhập text; speaking session ends when grading returns, retry starts a new session |
 | `/write` | `src/app/write/page.tsx` | Chọn dạng bài viết IELTS/TOEIC |
-| `/write/task/[id]` | `src/app/write/task/[id]/page.tsx` | Editor + timer + word count |
+| `/write/task/[id]` | `src/app/write/task/[id]/page.tsx` | Editor + timer + word count; writing session ends after grading result is saved, cancels on early exit |
 | `/write/result/[id]` | `src/app/write/result/[id]/page.tsx` | Kết quả chấm — annotated essay + model answer |
 | `/today` | `src/app/today/page.tsx` | Kế hoạch học tự động dựa trên điểm yếu + SRS debt |
 
