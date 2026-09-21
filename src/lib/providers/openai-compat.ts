@@ -1,6 +1,6 @@
 // src/lib/providers/openai-compat.ts
 import OpenAI from "openai";
-import type { AIProvider } from "./types";
+import type { AIProvider, GenerateOpts } from "./types";
 
 export interface OpenAICompatConfig {
   id: string;
@@ -32,10 +32,11 @@ export class OpenAICompatProvider implements AIProvider {
     });
   }
 
-  async generateContent(prompt: string): Promise<string> {
+  async generateContent(prompt: string, opts?: GenerateOpts): Promise<string> {
     const response = await this.client.chat.completions.create({
       model: this.model,
       messages: [{ role: "user", content: prompt }],
+      temperature: opts?.temperature ?? 0.7,
     });
     return response.choices[0]?.message?.content ?? "";
   }

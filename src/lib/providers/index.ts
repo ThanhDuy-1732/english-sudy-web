@@ -1,6 +1,6 @@
 import { GeminiProvider } from "./gemini";
 import { OpenAICompatProvider } from "./openai-compat";
-import type { AIProvider, ProviderInfo } from "./types";
+import type { AIProvider, GenerateOpts, ProviderInfo } from "./types";
 
 function isRetryableError(error: unknown): boolean {
   const status = (error as { status?: number }).status;
@@ -11,7 +11,8 @@ export function createCallWithFallback(providers: AIProvider[]) {
   return async function callWithFallback(
     prompt: string,
     preferredId?: string,
-    disabledIds?: string[]
+    disabledIds?: string[],
+    opts: GenerateOpts = {}
   ): Promise<{ text: string; providerId: string }> {
     const active = disabledIds?.length
       ? providers.filter((p) => !disabledIds.includes(p.id))
@@ -31,7 +32,7 @@ export function createCallWithFallback(providers: AIProvider[]) {
     let lastError: unknown;
     for (const provider of ordered) {
       try {
-        const text = await provider.generateContent(prompt);
+        const text = await provider.generateContent(prompt, opts);
         return { text, providerId: provider.id };
       } catch (error) {
         if (!isRetryableError(error)) throw error;

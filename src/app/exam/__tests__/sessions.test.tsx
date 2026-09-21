@@ -4,7 +4,10 @@ import MockPage from "../mock/page";
 import { getSessions } from "@/lib/sessions";
 
 jest.mock("react", () => ({ ...jest.requireActual("react"), use: () => ({ part: "RC5" }) }));
-jest.mock("next/navigation", () => ({ useRouter: () => ({ push: jest.fn() }) }));
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: jest.fn() }),
+  useSearchParams: () => ({ get: () => null }),
+}));
 jest.mock("@/components/exam/ExamTimer", () => () => null);
 jest.mock("@/components/exam/ExamRunner", () => function ExamRunnerStub({ onComplete }: {
   onComplete: (attempt: { answers: { correct: boolean }[] }) => void;

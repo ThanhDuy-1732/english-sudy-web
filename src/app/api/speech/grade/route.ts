@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callWithFallback } from "@/lib/providers";
 import { parseAiJson } from "@/lib/ai-json";
+import { buildSpeakingAnchorBlock } from "@/lib/grading/anchors";
 import { z } from "zod";
 
 const GRADING_PROVIDER = process.env.GRADING_PROVIDER;
+const GRADING_OPTS = { temperature: 0.2 } as const;
 
 const FeedbackSchema = z.object({
   bands: z.object({
@@ -38,7 +40,11 @@ export async function POST(req: NextRequest) {
   const wpm = durationSec > 0 ? Math.round((wordCount / durationSec) * 60) : 0;
   const fillerCount = (transcript.match(/\b(um|uh|like|you know|kind of|sort of)\b/gi) ?? []).length;
 
+  const anchorBlock = buildSpeakingAnchorBlock();
   const prompt = `You are an IELTS Speaking examiner. Score this response using the public band descriptors.
+
+Calibration examples (do not grade these, use them as reference points only):
+${anchorBlock}
 
 Task: ${task.prompt}
 Response length: ${durationSec}s, ${wordCount} words (${wpm} wpm)
@@ -64,13 +70,15 @@ Return ONLY JSON:
   "newVocabulary": ["..."]
 }`;
 
-  const { text, providerId } = await callWithFallback(prompt, GRADING_PROVIDER);
+  const { text, providerId } = await callWithFallback(prompt, GRADING_PROVIDER, undefined, GRADING_OPTS);
 
   const parsed = await parseAiJson(text, FeedbackSchema, {
     repair: (err) =>
       callWithFallback(
         `${prompt}\n\nOutput trước bị lỗi schema: ${err}\nTrả lại JSON hợp lệ.`,
-        providerId
+        providerId,
+        undefined,
+        GRADING_OPTS
       ).then((r) => r.text),
   });
 
@@ -80,5 +88,6 @@ Return ONLY JSON:
     durationSec,
     wordsPerMinute: wpm,
     fillerCount,
+    gradedBy: providerId,
   });
 }

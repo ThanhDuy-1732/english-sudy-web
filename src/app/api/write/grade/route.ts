@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callWithFallback } from "@/lib/providers";
 import { parseAiJson } from "@/lib/ai-json";
+import { buildWritingAnchorBlock } from "@/lib/grading/anchors";
 import { z } from "zod";
 
 const GRADING_PROVIDER = process.env.GRADING_PROVIDER;
+const GRADING_OPTS = { temperature: 0.2 } as const;
 
 const WritingFeedbackSchema = z.object({
   bands: z.object({
@@ -38,7 +40,11 @@ export async function POST(req: NextRequest) {
   const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
   const taskLabel = kind === "ielts_task1" ? "IELTS Writing Task 1" : "IELTS Writing Task 2";
 
+  const anchorBlock = buildWritingAnchorBlock();
   const prompt = `You are an IELTS examiner grading ${taskLabel}.
+
+Calibration examples (do not grade these, use them as reference points only):
+${anchorBlock}
 
 Task prompt: ${taskPrompt}
 ${chartData ? `Chart/graph data: ${JSON.stringify(chartData)}` : ""}
@@ -64,14 +70,16 @@ Return ONLY JSON:
   "nextFocus": "..."
 }`;
 
-  const { text, providerId } = await callWithFallback(prompt, GRADING_PROVIDER);
+  const { text, providerId } = await callWithFallback(prompt, GRADING_PROVIDER, undefined, GRADING_OPTS);
   const parsed = await parseAiJson(text, WritingFeedbackSchema, {
     repair: (err) =>
       callWithFallback(
         `${prompt}\n\nSchema error: ${err}\nReturn valid JSON only.`,
-        providerId
+        providerId,
+        undefined,
+        GRADING_OPTS
       ).then((r) => r.text),
   });
 
-  return NextResponse.json(parsed);
+  return NextResponse.json({ ...parsed, gradedBy: providerId });
 }
