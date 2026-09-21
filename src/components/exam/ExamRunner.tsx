@@ -3,6 +3,7 @@
 import { useReducer, useCallback, useEffect, useRef } from "react";
 import type { ExamItem, ExamQuestion, AnswerRecord, ExamAttempt, ExamPart, ExamKind } from "@/lib/exam/types";
 import { saveAttempt, addMistake, addItemToBank } from "@/lib/exam/exam-storage";
+import { pushExamItem } from "@/lib/sync";
 import { computeScore, isCompletionCorrect } from "@/lib/exam/scoring";
 import { useTimer } from "@/contexts/TimerContext";
 import QuestionCard from "./QuestionCard";
@@ -133,6 +134,7 @@ export default function ExamRunner({
         if (item.id) {
           fetched.push(item);
           addItemToBank(item);
+          pushExamItem(item);
         }
       }
       if (cancelled) return;

@@ -248,13 +248,18 @@ No authentication. Identity = `syncKey` (UUID in localStorage, auto-generated).
 
 **Tables**:
 - `learned_words` — mirrors `LearnedWord` shape; includes `easiness`, `repetitions`, `updated_at`
+- `exam_items` — shared bank (no `sync_key`); `{ id, exam_type, part, level, payload: jsonb, flagged }`
+- `exam_attempts` — per-user; `{ id, sync_key, exam_type, mode, parts, started_at, finished_at, answers, score, updated_at }`
+- `mistake_log` — per-user; `{ id, sync_key, payload: jsonb, resolved, updated_at }`
 - `daily_challenges` — mirrors `DailyChallenge`
 - `custom_topics` — `{ sync_key, topic }`
 - `grammar_topics` — `{ sync_key: uuid, id, name, rules: jsonb, created_at }`
 - `user_settings` — `{ sync_key, voice_settings: jsonb }`
 
 **Operations**:
-- `initSync()` — bidirectional sync on app load; **pull-before-push LWW merge** for words (`updatedAt` wins; tie → local; only diff pushed); `completed=true` wins for challenges. `src/lib/sync-merge.ts` provides `mergeLww<T>()` and `stamp()`.
+- `initSync()` — bidirectional sync on app load; **pull-before-push LWW merge** for words (`updatedAt` wins; tie → local; only diff pushed); `completed=true` wins for challenges; pulls `exam_attempts` and `mistake_log` into localStorage. `src/lib/sync-merge.ts` provides `mergeLww<T>()` and `stamp()`.
+- `pushExamItem(item)` / `pushAttempt(attempt)` / `pushMistake(mistake)` — fire-and-forget push to Supabase
+- `pullExamItems(kind, part, level, limit?)` — pull from shared `exam_items` bank (excludes flagged)
 - `pushWord(entry)` — fire-and-forget upsert
 - `deleteWord(word)` — fire-and-forget delete
 - `pushTopic(topic)` — fire-and-forget upsert

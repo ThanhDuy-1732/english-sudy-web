@@ -24,6 +24,17 @@ function makeFromImpl(
   error: unknown = null,
   userSettings: unknown = null,
 ) {
+  // Returns a chainable mock that resolves at the end
+  const chainEnd = (data: unknown) => Promise.resolve({ data: error ? null : data, error });
+  const chain = (data: unknown) => ({
+    eq: jest.fn().mockReturnThis(),
+    order: jest.fn().mockReturnThis(),
+    limit: jest.fn(() => chainEnd(data)),
+    single: jest.fn(() => chainEnd(data)),
+    // allow final .eq() to resolve too (for simple queries)
+    then: undefined as unknown,
+  });
+
   return (table: string) => {
     if (table === "user_settings") {
       return {
@@ -33,6 +44,14 @@ function makeFromImpl(
             single: jest.fn().mockResolvedValue({ data: userSettings, error }),
           })),
         })),
+      };
+    }
+
+    if (table === "exam_attempts" || table === "mistake_log") {
+      const c = chain([]);
+      return {
+        upsert: jest.fn(() => ({ catch: jest.fn() })),
+        select: jest.fn(() => c),
       };
     }
 

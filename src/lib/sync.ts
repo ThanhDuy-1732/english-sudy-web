@@ -6,6 +6,7 @@ import { getCustomTopics, saveCustomTopic } from "./custom-topics";
 import { type GrammarTopic } from "./grammar-data";
 import { getUserGrammarTopics, saveUserGrammarTopic } from "./grammar-storage";
 import { getVoiceSettings, saveVoiceSettings, type VoiceSettings } from "./voiceSettings";
+import type { ExamItem, ExamAttempt, MistakeEntry } from "./exam/types";
 
 const SYNC_KEY_LS = "syncKey";
 const LAST_SYNCED_LS = "lastSyncedAt";
@@ -138,6 +139,77 @@ export async function pushChallenge(record: DailyChallenge): Promise<void> {
   } catch { /* fire-and-forget */ }
 }
 
+export async function pushExamItem(item: ExamItem): Promise<void> {
+  if (typeof window === "undefined") return;
+  const supabase = createSupabase(getSyncKey());
+  try {
+    await supabase.from("exam_items").upsert({
+      id: item.id,
+      exam_type: item.kind,
+      part: item.part,
+      level: item.level,
+      payload: item,
+      flagged: false,
+    }, { onConflict: "id", ignoreDuplicates: true });
+  } catch { /* fire-and-forget */ }
+}
+
+export async function pushAttempt(attempt: ExamAttempt): Promise<void> {
+  if (typeof window === "undefined") return;
+  const syncKey = getSyncKey();
+  const supabase = createSupabase(syncKey);
+  try {
+    await supabase.from("exam_attempts").upsert({
+      id: attempt.id,
+      sync_key: syncKey,
+      exam_type: attempt.kind,
+      mode: attempt.mode,
+      parts: attempt.parts,
+      started_at: attempt.startedAt,
+      finished_at: attempt.finishedAt ?? null,
+      answers: attempt.answers,
+      score: attempt.score ?? null,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "id" });
+  } catch { /* fire-and-forget */ }
+}
+
+export async function pushMistake(mistake: MistakeEntry): Promise<void> {
+  if (typeof window === "undefined") return;
+  const syncKey = getSyncKey();
+  const supabase = createSupabase(syncKey);
+  try {
+    await supabase.from("mistake_log").upsert({
+      id: mistake.id,
+      sync_key: syncKey,
+      payload: mistake,
+      resolved: mistake.resolved,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "id" });
+  } catch { /* fire-and-forget */ }
+}
+
+export async function pullExamItems(
+  kind: string,
+  part: string,
+  level: number,
+  limit = 10,
+): Promise<ExamItem[]> {
+  if (typeof window === "undefined") return [];
+  const supabase = createSupabase(getSyncKey());
+  const { data, error } = await supabase
+    .from("exam_items")
+    .select("payload")
+    .eq("exam_type", kind)
+    .eq("part", part)
+    .eq("level", level)
+    .eq("flagged", false)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) return [];
+  return (data ?? []).map((r) => r.payload as ExamItem);
+}
+
 export async function initSync(): Promise<void> {
   if (typeof window === "undefined" || !navigator.onLine) return;
   const syncKey = getSyncKey();
@@ -263,6 +335,45 @@ export async function initSync(): Promise<void> {
 
     if (remoteUserSettings?.voice_settings) {
       saveVoiceSettings(resolveVoiceSettings(remoteUserSettings.voice_settings as VoiceSettings));
+    }
+
+    // Pull exam attempts (LWW merge by id + updated_at)
+    const { data: remoteAttempts } = await supabase
+      .from("exam_attempts")
+      .select("*")
+      .eq("sync_key", syncKey)
+      .order("started_at", { ascending: false })
+      .limit(100);
+
+    if (remoteAttempts && remoteAttempts.length > 0) {
+      const { getAttempts } = await import("./exam/exam-storage");
+      const local = getAttempts();
+      const remote = remoteAttempts.map((r) => ({
+        id: r.id as string,
+        kind: r.exam_type as ExamAttempt["kind"],
+        mode: r.mode as ExamAttempt["mode"],
+        parts: r.parts as ExamAttempt["parts"],
+        startedAt: r.started_at as string,
+        finishedAt: (r.finished_at as string | null) ?? undefined,
+        answers: r.answers as ExamAttempt["answers"],
+        score: (r.score as ExamAttempt["score"] | null) ?? undefined,
+      }));
+      const { merged } = mergeLww(local, remote, (a) => a.id);
+      localStorage.setItem("examAttempts", JSON.stringify(merged.slice(0, 100)));
+    }
+
+    // Pull mistake log
+    const { data: remoteMistakes } = await supabase
+      .from("mistake_log")
+      .select("payload")
+      .eq("sync_key", syncKey);
+
+    if (remoteMistakes && remoteMistakes.length > 0) {
+      const { getMistakes } = await import("./exam/exam-storage");
+      const local = getMistakes();
+      const remote = remoteMistakes.map((r) => r.payload as MistakeEntry);
+      const { merged } = mergeLww(local, remote, (m) => m.id);
+      localStorage.setItem("mistakeLog", JSON.stringify(merged));
     }
 
     setLastSyncedAt();

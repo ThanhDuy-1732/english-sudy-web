@@ -1,3 +1,8 @@
+jest.mock("@/lib/sync", () => ({
+  pushAttempt: jest.fn().mockResolvedValue(undefined),
+  pushMistake: jest.fn().mockResolvedValue(undefined),
+}));
+
 import {
   pruneBank,
   bankKey,

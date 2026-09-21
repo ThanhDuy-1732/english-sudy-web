@@ -6,6 +6,7 @@ import type {
   ExamKind,
   ExamPart,
 } from "./types";
+import { pushAttempt, pushMistake } from "@/lib/sync";
 
 // ─── Keys ───────────────────────────────────────────────────────────────────
 const BANK_KEY = "examBank";
@@ -74,6 +75,7 @@ export function getAttempts(): ExamAttempt[] {
 export function saveAttempt(attempt: ExamAttempt) {
   const attempts = [attempt, ...getAttempts()].slice(0, MAX_ATTEMPTS);
   lsSet(ATTEMPTS_KEY, attempts);
+  pushAttempt(attempt);
 }
 
 export function getAttemptById(id: string): ExamAttempt | undefined {
@@ -88,6 +90,7 @@ export function getMistakes(): MistakeEntry[] {
 export function addMistake(entry: MistakeEntry) {
   const mistakes = [entry, ...getMistakes()];
   lsSet(MISTAKES_KEY, mistakes);
+  pushMistake(entry);
 }
 
 export function resolveMistake(id: string) {
@@ -95,6 +98,8 @@ export function resolveMistake(id: string) {
     m.id === id ? { ...m, resolved: true, reviewedAt: new Date().toISOString() } : m
   );
   lsSet(MISTAKES_KEY, mistakes);
+  const updated = mistakes.find((m) => m.id === id);
+  if (updated) pushMistake(updated);
 }
 
 export function getUnresolvedMistakes(): MistakeEntry[] {
