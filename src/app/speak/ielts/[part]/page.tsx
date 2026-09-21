@@ -8,6 +8,7 @@ import type { SpeakingFeedback } from "@/lib/speech/types";
 import { startSession, finishSession, cancelSession } from "@/lib/sessions";
 import { saveSpeaking } from "@/lib/speech/speaking-storage";
 import type { SpeakingRecord } from "@/lib/speech/speaking-storage";
+import { saveAudio, loadAudio } from "@/lib/speech/audio-store";
 
 const PART_CONFIG: Record<string, { title: string; prepSec: number; speakSec: number; prompt: string }> = {
   p1: {
@@ -42,10 +43,29 @@ export default function IeltsSpeakingPage({ params }: { params: Promise<{ part: 
   const [feedback, setFeedback] = useState<SpeakingFeedback | null>(null);
   const [textMode, setTextMode] = useState(false);
   const [textInput, setTextInput] = useState("");
+  const [currentAudioId, setCurrentAudioId] = useState<string | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
   const recorderRef = useRef(createRecorder());
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sessionIdRef = useRef<string | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!currentAudioId) return;
+    loadAudio(currentAudioId).then((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      audioUrlRef.current = url;
+      setAudioUrl(url);
+    });
+    return () => {
+      if (audioUrlRef.current) {
+        URL.revokeObjectURL(audioUrlRef.current);
+        audioUrlRef.current = null;
+      }
+    };
+  }, [currentAudioId]);
 
   useEffect(() => {
     if (!sessionIdRef.current) {
@@ -113,6 +133,9 @@ export default function IeltsSpeakingPage({ params }: { params: Promise<{ part: 
     setPhase("processing");
     try {
       const blob = await recorderRef.current.stop();
+      const audioId = crypto.randomUUID();
+      void saveAudio(audioId, blob);
+      setCurrentAudioId(audioId);
       const formData = new FormData();
       formData.append("audio", blob, "speech.webm");
       const transcribeRes = await fetch("/api/speech/transcribe", {
@@ -120,14 +143,14 @@ export default function IeltsSpeakingPage({ params }: { params: Promise<{ part: 
         body: formData,
       });
       const { text, durationSec } = await transcribeRes.json();
-      await gradeTranscript(text, durationSec);
+      await gradeTranscript(text, durationSec, audioId);
     } catch {
       alert("Lỗi xử lý audio. Vui lòng thử lại.");
       setPhase("ready");
     }
   }
 
-  async function gradeTranscript(text: string, durationSec: number) {
+  async function gradeTranscript(text: string, durationSec: number, audioId?: string) {
     const gradeRes = await fetch("/api/speech/grade", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -146,6 +169,7 @@ export default function IeltsSpeakingPage({ params }: { params: Promise<{ part: 
       transcript: text,
       durationSec,
       feedback: fb,
+      audioId,
       createdAt: new Date().toISOString(),
     };
     saveSpeaking(record);
@@ -203,6 +227,13 @@ export default function IeltsSpeakingPage({ params }: { params: Promise<{ part: 
           <span>📝 {Math.round(feedback.wordsPerMinute)} wpm</span>
           <span>🔤 Filler words: {feedback.fillerCount}</span>
         </div>
+
+        {audioUrl && (
+          <div className="replay-section">
+            <p className="replay-label">Nghe lại</p>
+            <audio controls src={audioUrl} className="replay-audio" />
+          </div>
+        )}
 
         <section>
           <h2>✅ Điểm mạnh</h2>
@@ -276,6 +307,9 @@ export default function IeltsSpeakingPage({ params }: { params: Promise<{ part: 
           .vocab-chip { padding: 0.3rem 0.75rem; border: 1.5px solid #0d6efd; border-radius: 16px; background: white; cursor: pointer; font-size: 0.8rem; color: #0d6efd; }
           .vocab-chip:hover { background: #e8f0fe; }
           .vocab-hint { font-size: 0.75rem; color: #6c757d; margin-top: 0.35rem; }
+          .replay-section { margin: 0.75rem 0; }
+          .replay-label { font-size: 0.75rem; text-transform: uppercase; color: #6c757d; margin: 0 0 0.35rem; }
+          .replay-audio { width: 100%; border-radius: 8px; }
           .retry-btn { width: 100%; padding: 0.875rem; background: #0d6efd; color: white; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; margin-top: 1.5rem; }
         `}</style>
       </div>

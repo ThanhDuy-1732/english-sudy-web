@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import VoiceSettingsTab from "@/components/VoiceSettingsTab";
 import { useProvider } from "@/contexts/ProviderContext";
 import { getLastSyncedAt, getSyncKey, pullFromKey } from "@/lib/sync";
+import { clearAllAudio, getAudioCount } from "@/lib/speech/audio-store";
 
 const ALL_PROVIDERS = [
   { id: "gemini", name: "Gemini Flash", model: "gemini-flash-latest", envKey: "GEMINI_API_KEY" },
@@ -35,10 +36,12 @@ export default function SettingsPage() {
   const [pullSuccess, setPullSuccess] = useState<string | null>(null);
   const [pullError, setPullError] = useState<string | null>(null);
   const [testResults, setTestResults] = useState<Record<string, TestResult>>({});
+  const [audioCount, setAudioCount] = useState(0);
 
   useEffect(() => {
     setSyncKey(getSyncKey());
     setLastSynced(getLastSyncedAt());
+    getAudioCount().then(setAudioCount);
   }, []);
 
   const isActive = (id: string) => availableProviders.some((provider) => provider.id === id);
@@ -249,6 +252,22 @@ export default function SettingsPage() {
           </p>
           <div className="rounded-xl border border-white/10 p-6">
             <VoiceSettingsTab />
+          </div>
+          <div className="mt-6 rounded-xl border border-white/10 p-6">
+            <p className="mb-2 text-sm font-medium text-[#d9ecff]">Bản ghi âm</p>
+            <p className="mb-4 text-xs text-[#b0b0d1]">
+              Bản ghi âm được lưu cục bộ (tối đa 20). Không đồng bộ lên server.
+            </p>
+            <button
+              type="button"
+              onClick={async () => {
+                await clearAllAudio();
+                setAudioCount(0);
+              }}
+              className="text-sm text-red-400 underline hover:text-red-300"
+            >
+              Xoá bản ghi âm ({audioCount})
+            </button>
           </div>
         </div>
       )}
