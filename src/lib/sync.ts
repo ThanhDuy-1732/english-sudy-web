@@ -1,5 +1,6 @@
 import { createSupabase } from "./supabase";
 import { type LearnedWord, getLearnedWords, saveLearnedWord } from "./storage";
+import { mergeLww } from "./sync-merge";
 import { type DailyChallenge } from "./daily-challenge";
 import { getCustomTopics, saveCustomTopic } from "./custom-topics";
 import { type GrammarTopic } from "./grammar-data";
@@ -44,24 +45,49 @@ function resolveVoiceSettings(remote: VoiceSettings): VoiceSettings {
   return { ...remote, voiceURI };
 }
 
+function wordToRow(syncKey: string, w: LearnedWord) {
+  return {
+    sync_key: syncKey,
+    word: w.word,
+    meaning: w.meaning ?? null,
+    example: w.example ?? null,
+    topic: w.topic ?? null,
+    learned_at: w.learnedAt,
+    updated_at: w.updatedAt ?? w.learnedAt,
+    next_review_at: w.nextReviewAt ?? null,
+    review_interval: w.reviewInterval ?? 1,
+    mastery: w.mastery ?? 0,
+    easiness: w.easiness ?? 2.5,
+    repetitions: w.repetitions ?? 0,
+    synonyms: w.synonyms ?? null,
+    antonyms: w.antonyms ?? null,
+  };
+}
+
+function rowToWord(row: Record<string, unknown>): LearnedWord {
+  return {
+    word: row.word as string,
+    meaning: (row.meaning as string) ?? "",
+    example: (row.example as string) ?? "",
+    topic: (row.topic as string) ?? "",
+    learnedAt: row.learned_at as string,
+    updatedAt: (row.updated_at as string | null) ?? undefined,
+    nextReviewAt: (row.next_review_at as string | null) ?? undefined,
+    reviewInterval: (row.review_interval as number) ?? 1,
+    mastery: (row.mastery as number) ?? 0,
+    easiness: (row.easiness as number) ?? 2.5,
+    repetitions: (row.repetitions as number) ?? 0,
+    synonyms: (row.synonyms as string[] | null) ?? undefined,
+    antonyms: (row.antonyms as string[] | null) ?? undefined,
+  };
+}
+
 export async function pushWord(entry: LearnedWord): Promise<void> {
   if (typeof window === "undefined") return;
   const syncKey = getSyncKey();
   const supabase = createSupabase(syncKey);
   try {
-    await supabase.from("learned_words").upsert({
-      sync_key: syncKey,
-      word: entry.word,
-      meaning: entry.meaning ?? null,
-      example: entry.example ?? null,
-      topic: entry.topic ?? null,
-      learned_at: entry.learnedAt,
-      next_review_at: entry.nextReviewAt ?? null,
-      review_interval: entry.reviewInterval ?? 1,
-      mastery: entry.mastery ?? 0,
-      synonyms: entry.synonyms ?? null,
-      antonyms: entry.antonyms ?? null,
-    });
+    await supabase.from("learned_words").upsert(wordToRow(syncKey, entry));
   } catch { /* fire-and-forget */ }
 }
 
@@ -119,21 +145,22 @@ export async function initSync(): Promise<void> {
 
   try {
     const localWords = getLearnedWords();
-    if (localWords.length > 0) {
+
+    // Pull remote first, then merge LWW, then push only the diff
+    const { data: remoteWordRows } = await supabase
+      .from("learned_words")
+      .select("*")
+      .eq("sync_key", syncKey);
+
+    const remoteWords: LearnedWord[] = (remoteWordRows ?? []).map(
+      (r) => rowToWord(r as Record<string, unknown>)
+    );
+    const { merged, toPush } = mergeLww(localWords, remoteWords, (w) => w.word.toLowerCase());
+    localStorage.setItem("learnedWords", JSON.stringify(merged));
+
+    if (toPush.length > 0) {
       await supabase.from("learned_words").upsert(
-        localWords.map((w) => ({
-          sync_key: syncKey,
-          word: w.word,
-          meaning: w.meaning ?? null,
-          example: w.example ?? null,
-          topic: w.topic ?? null,
-          learned_at: w.learnedAt,
-          next_review_at: w.nextReviewAt ?? null,
-          review_interval: w.reviewInterval ?? 1,
-          mastery: w.mastery ?? 0,
-          synonyms: w.synonyms ?? null,
-          antonyms: w.antonyms ?? null,
-        }))
+        toPush.map((w) => wordToRow(syncKey, w))
       );
     }
 
@@ -157,33 +184,6 @@ export async function initSync(): Promise<void> {
           completed: c.completed,
         }))
       );
-    }
-
-    const { data: remoteWords } = await supabase
-      .from("learned_words")
-      .select("*")
-      .eq("sync_key", syncKey);
-
-    if (remoteWords && remoteWords.length > 0) {
-      const wordMap = new Map(localWords.map((w) => [w.word.toLowerCase(), w]));
-      for (const row of remoteWords) {
-        const existing = wordMap.get((row.word as string).toLowerCase());
-        if (!existing || new Date(row.learned_at as string) > new Date(existing.learnedAt)) {
-          wordMap.set((row.word as string).toLowerCase(), {
-            word: row.word as string,
-            meaning: (row.meaning as string) ?? "",
-            example: (row.example as string) ?? "",
-            topic: (row.topic as string) ?? "",
-            learnedAt: row.learned_at as string,
-            nextReviewAt: (row.next_review_at as string | null) ?? undefined,
-            reviewInterval: (row.review_interval as number) ?? 1,
-            mastery: (row.mastery as number) ?? 0,
-            synonyms: (row.synonyms as string[] | null) ?? undefined,
-            antonyms: (row.antonyms as string[] | null) ?? undefined,
-          });
-        }
-      }
-      localStorage.setItem("learnedWords", JSON.stringify(Array.from(wordMap.values())));
     }
 
     const { data: remoteTopics } = await supabase

@@ -4,6 +4,7 @@ export interface LearnedWord {
   example: string;
   topic: string;
   learnedAt: string;
+  updatedAt?: string;
   nextReviewAt?: string;
   reviewInterval?: number;
   mastery?: number;
@@ -12,6 +13,11 @@ export interface LearnedWord {
   // SM-2 fields (added by migrateToSm2 in srs.ts)
   easiness?: number;
   repetitions?: number;
+}
+
+/** Set updatedAt to now on a word object (use on every user-initiated mutation). */
+export function touch<T extends { updatedAt?: string }>(obj: T): T {
+  return { ...obj, updatedAt: new Date().toISOString() };
 }
 
 const KEY = "learnedWords";
@@ -34,12 +40,12 @@ export function saveLearnedWord(entry: LearnedWord): boolean {
   const words = getLearnedWords();
   if (words.some((w) => w.word.toLowerCase() === entry.word.toLowerCase())) return false;
 
-  const withDefaults: LearnedWord = {
+  const withDefaults: LearnedWord = touch({
     reviewInterval: 1,
     mastery: 0,
     nextReviewAt: new Date(Date.now() + 86400000).toISOString(),
     ...entry,
-  };
+  });
   localStorage.setItem(KEY, JSON.stringify([...words, withDefaults]));
   return true;
 }
@@ -57,7 +63,7 @@ export function updateWordReview(word: string, remembered: boolean): void {
       ? Math.min((w.mastery ?? 0) + 1, 5)
       : Math.max((w.mastery ?? 0) - 1, 0);
     const nextReviewAt = new Date(Date.now() + newInterval * 86400000).toISOString();
-    return { ...w, reviewInterval: newInterval, mastery: newMastery, nextReviewAt };
+    return touch({ ...w, reviewInterval: newInterval, mastery: newMastery, nextReviewAt });
   });
   localStorage.setItem(KEY, JSON.stringify(words));
 }
@@ -84,14 +90,14 @@ export function updateWordReviewSm2(
       },
       quality
     );
-    return {
+    return touch({
       ...migrated,
       easiness: next.easiness,
       repetitions: next.repetitions,
       reviewInterval: next.interval,
       nextReviewAt: next.nextReviewAt,
       mastery: repetitionsToMastery(next.repetitions),
-    };
+    });
   });
   localStorage.setItem(KEY, JSON.stringify(words));
 }

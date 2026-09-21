@@ -18,7 +18,7 @@ Next.js 14 App Router · TypeScript · Tailwind CSS · Jest (jsdom) · Supabase 
 | `/history` | `src/app/history/page.tsx` | Browse saved words, filter by topic/mastery |
 | `/activity` | `src/app/activity/page.tsx` | Completed learning sessions grouped by local date, with type, duration, and accuracy |
 | `/review` | `src/app/review/page.tsx` | Spaced-repetition review of due words; records a learning session and shows a quality-count summary after the last card |
-| `/stats` | `src/app/stats/page.tsx` | Learning analytics — 4 stat tiles (words, active days, mastery, today's study minutes), words-per-day chart, study-time chart, topic distribution, streak calendar |
+| `/stats` | `src/app/stats/page.tsx` | Learning analytics — 4 stat tiles (words, active days, mastery, today's study minutes), words-per-day chart, study-time chart, topic distribution, streak calendar, exam accuracy chart (weekly), weakness radar (by question type) |
 | `/diary` | `src/app/diary/page.tsx` | Daily learning journal — interactive 26-week heatmap, click a day to see words learned and study time in a slide-in drawer |
 | `/grammar` | `src/app/grammar/page.tsx` | Grammar study page — desktop sidebar/mobile selector, static grammar rules, AI examples/exercises, user-generated grammar topics |
 | `/import` | `src/app/import/page.tsx` | Bulk import words |
@@ -79,7 +79,8 @@ interface LearnedWord {
   meaning: string;
   example: string;
   topic: string;
-  learnedAt: string;           // ISO
+  learnedAt: string;           // ISO, set once on first save
+  updatedAt?: string;          // ISO, set on every user-initiated mutation (LWW key)
   nextReviewAt?: string;       // ISO, defaults to +1 day
   reviewInterval?: number;     // days (SM-2: interval field)
   mastery?: number;            // 0–5 stars (derived from repetitions)
@@ -246,14 +247,14 @@ interface DailyStudyTime { date: string; minutes: number; }
 No authentication. Identity = `syncKey` (UUID in localStorage, auto-generated).
 
 **Tables**:
-- `learned_words` — mirrors `LearnedWord` shape
+- `learned_words` — mirrors `LearnedWord` shape; includes `easiness`, `repetitions`, `updated_at`
 - `daily_challenges` — mirrors `DailyChallenge`
 - `custom_topics` — `{ sync_key, topic }`
 - `grammar_topics` — `{ sync_key: uuid, id, name, rules: jsonb, created_at }`
 - `user_settings` — `{ sync_key, voice_settings: jsonb }`
 
 **Operations**:
-- `initSync()` — bidirectional sync on app load; local→remote upsert, then remote→local merge (newer `learned_at` wins for words; `completed=true` wins for challenges)
+- `initSync()` — bidirectional sync on app load; **pull-before-push LWW merge** for words (`updatedAt` wins; tie → local; only diff pushed); `completed=true` wins for challenges. `src/lib/sync-merge.ts` provides `mergeLww<T>()` and `stamp()`.
 - `pushWord(entry)` — fire-and-forget upsert
 - `deleteWord(word)` — fire-and-forget delete
 - `pushTopic(topic)` — fire-and-forget upsert
@@ -303,6 +304,10 @@ Supabase client created per call via `createSupabase(syncKey)` in `src/lib/supab
 | `ProviderBadge` | Shows current AI provider name |
 | `HeaderTimer` | Navbar timer: shows today's study time or countdown; click to pause/resume; ＋ button opens SetCountdownModal; TimeUpModal shown when countdown ends |
 | `charts/StudyTimeChart` | Bar chart — study minutes per day for last 30 days |
+| `charts/ExamAccuracyChart` | Bar chart — weekly exam accuracy % for last 4 weeks |
+| `charts/WeaknessRadar` | Radar chart — exam accuracy % grouped by QuestionType |
+| `ExamRunner` | Stateful exam engine — phases: `loading → ready → running → reviewing → done` (+ `error`); accepts `forceComplete` prop to transition directly to reviewing on timer expiry (mock mode); dispatches `LOADING_ERROR` when all API fetches fail |
+| `DueBadge` | Client component — live SRS-due word count badge next to "Ôn tập" nav link, updates every 60 s |
 | `DiaryCalendar` | Interactive 26-week heatmap calendar for /diary; purple color levels 0–3; click cell opens DayDrawer |
 | `DayDrawer` | Slide-in right drawer for /diary; shows daily word list (expandable) + study minutes + prev/next nav |
 
