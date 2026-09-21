@@ -6,6 +6,8 @@ import { createRecorder } from "@/lib/speech/recorder";
 import { saveLearnedWord } from "@/lib/storage";
 import type { SpeakingFeedback } from "@/lib/speech/types";
 import { startSession, finishSession, cancelSession } from "@/lib/sessions";
+import { saveSpeaking } from "@/lib/speech/speaking-storage";
+import type { SpeakingRecord } from "@/lib/speech/speaking-storage";
 
 const PART_CONFIG: Record<string, { title: string; prepSec: number; speakSec: number; prompt: string }> = {
   p1: {
@@ -137,11 +139,20 @@ export default function IeltsSpeakingPage({ params }: { params: Promise<{ part: 
     });
     const fb: SpeakingFeedback = await gradeRes.json();
     setFeedback(fb);
+    const record: SpeakingRecord = {
+      id: crypto.randomUUID(),
+      mode: `ielts_${part}` as SpeakingRecord["mode"],
+      prompt: config.prompt,
+      transcript: text,
+      durationSec,
+      feedback: fb,
+      createdAt: new Date().toISOString(),
+    };
+    saveSpeaking(record);
     if (sessionIdRef.current) {
       finishSession(sessionIdRef.current);
       sessionIdRef.current = null;
     }
-    localStorage.setItem("lastSpeakingAt", new Date().toISOString());
     setPhase("result");
   }
 

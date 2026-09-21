@@ -19,6 +19,9 @@ import { getLearnedWords } from "@/lib/storage";
 import { getAttempts } from "@/lib/exam/exam-storage";
 import ExamAccuracyChart from "@/components/charts/ExamAccuracyChart";
 import WeaknessRadar from "@/components/charts/WeaknessRadar";
+import BandTimelineChart from "@/components/charts/BandTimelineChart";
+import SkillRadar from "@/components/charts/SkillRadar";
+import { weeklyBands, skillRadar, type WeeklyBand, type SkillRadarPoint } from "@/lib/stats-skills";
 import type { ExamAttempt } from "@/lib/exam/types";
 
 export default function StatsPage() {
@@ -28,6 +31,8 @@ export default function StatsPage() {
   const [calendarData, setCalendarData] = useState<CalendarDay[]>([]);
   const [studyTimePerDay, setStudyTimePerDay] = useState<DailyStudyTime[]>([]);
   const [examAttempts, setExamAttempts] = useState<ExamAttempt[]>([]);
+  const [bands, setBands] = useState<WeeklyBand[]>([]);
+  const [radarData, setRadarData] = useState<SkillRadarPoint[]>([]);
   const [totalWords, setTotalWords] = useState(0);
   const [activeDays, setActiveDays] = useState(0);
   const [averageMastery, setAverageMastery] = useState(0);
@@ -40,6 +45,8 @@ export default function StatsPage() {
     setCalendarData(getCalendarData(26));
     setStudyTimePerDay(getStudyTimePerDay(30));
     setExamAttempts(getAttempts());
+    setBands(weeklyBands(12));
+    setRadarData(skillRadar());
     setTotalWords(learned.length);
     setActiveDays(daily.filter((day) => day.count > 0).length);
     setAverageMastery(
@@ -109,6 +116,16 @@ export default function StatsPage() {
           <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-6">
             <StreakCalendar data={calendarData} />
           </section>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-6">
+              <h2 className="mb-3 font-semibold text-gray-700">Band theo tuần (12 tuần gần nhất)</h2>
+              <BandTimelineChart data={bands} />
+            </section>
+            <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-6">
+              <h2 className="mb-3 font-semibold text-gray-700">4 kỹ năng</h2>
+              <SkillRadar data={radarData} />
+            </section>
+          </div>
           <div className="grid gap-6 lg:grid-cols-2">
             <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-6">
               <ExamAccuracyChart attempts={examAttempts} />

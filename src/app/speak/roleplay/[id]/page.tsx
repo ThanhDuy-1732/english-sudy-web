@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Scenario, ConversationTurn } from "@/lib/speech/types";
 import { saveLearnedWord } from "@/lib/storage";
 import { startSession, finishSession, cancelSession } from "@/lib/sessions";
+import { saveSpeaking } from "@/lib/speech/speaking-storage";
 
 const SCENARIOS: Record<string, Scenario> = {
   hotel: {
@@ -103,6 +104,26 @@ export default function RoleplayPage({ params }: { params: Promise<{ id: string 
       finishSession(sessionIdRef.current);
       sessionIdRef.current = null;
     }
+    saveSpeaking({
+      id: crypto.randomUUID(),
+      mode: "roleplay",
+      prompt: scenario?.goal ?? id,
+      transcript: turns.map((t) => `${t.role}: ${t.text}`).join("\n"),
+      durationSec: turns.length * 30,
+      feedback: {
+        transcript: "",
+        durationSec: turns.length * 30,
+        wordsPerMinute: 0,
+        fillerCount: 0,
+        bands: { fluency: 0, lexical: 0, grammar: 0, pronunciation: null },
+        overall: 0,
+        strengths: [],
+        improvements: [],
+        upgradedVersion: "",
+        newVocabulary: [],
+      },
+      createdAt: new Date().toISOString(),
+    });
     setDone(true);
   }
 

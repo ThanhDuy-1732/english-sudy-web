@@ -3,6 +3,8 @@
 import { use, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { startSession, finishSession, cancelSession } from "@/lib/sessions";
+import { saveWriting } from "@/lib/write/writing-storage";
+import type { WritingKind } from "@/lib/write/writing-storage";
 import {
   Bar,
   BarChart,
@@ -141,7 +143,16 @@ export default function WritingTaskPage({ params }: { params: Promise<{ id: stri
       const feedback = await res.json();
       // Store feedback in sessionStorage for result page
       sessionStorage.setItem(`writing-result-${id}`, JSON.stringify({ feedback, content, config }));
-      localStorage.setItem("lastWritingAt", new Date().toISOString());
+      saveWriting({
+        id: crypto.randomUUID(),
+        kind: config.kind as WritingKind,
+        prompt: config.prompt,
+        chartData: config.chartData,
+        content,
+        wordCount: feedback.wordCount ?? content.trim().split(/\s+/).length,
+        feedback,
+        createdAt: new Date().toISOString(),
+      });
       if (sessionIdRef.current) {
         finishSession(sessionIdRef.current);
         sessionIdRef.current = null;
