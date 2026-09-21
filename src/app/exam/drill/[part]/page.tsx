@@ -1,9 +1,9 @@
 "use client";
 
 import { use, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import ExamRunner from "@/components/exam/ExamRunner";
-import { getExamSettings, getItemsFromBank } from "@/lib/exam/exam-storage";
+import { getExamSettings, getExamBank, bankKey } from "@/lib/exam/exam-storage";
 import { startSession, finishSession, cancelSession } from "@/lib/sessions";
 import type { ExamPart, ExamAttempt, ExamKind } from "@/lib/exam/types";
 
@@ -26,6 +26,7 @@ const PART_KIND: Record<string, ExamKind> = {
 export default function DrillPage({ params }: { params: Promise<{ part: string }> }) {
   const { part } = use(params);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const settings = getExamSettings();
   const [done, setDone] = useState(false);
   const [attempt, setAttempt] = useState<ExamAttempt | null>(null);
@@ -42,7 +43,12 @@ export default function DrillPage({ params }: { params: Promise<{ part: string }
   }, [part]);
 
   const kind: ExamKind = PART_KIND[part] ?? settings.primaryExam;
-  const cachedItems = getItemsFromBank(kind, part as ExamPart, settings.level);
+  const grammarSlug = searchParams.get("grammarSlug");
+  const topic = searchParams.get("topic") ?? undefined;
+  const effectiveBankKey = grammarSlug
+    ? `${kind}:${part}:${settings.level}:grammar=${grammarSlug}`
+    : bankKey(kind, part as ExamPart, settings.level);
+  const cachedItems = getExamBank()[effectiveBankKey] ?? [];
 
   if (done && attempt) {
     return (
@@ -97,6 +103,7 @@ export default function DrillPage({ params }: { params: Promise<{ part: string }
         parts={[part as ExamPart]}
         mode="drill"
         level={settings.level}
+        topic={topic}
         preloadedItems={cachedItems.length > 0 ? [cachedItems[Math.floor(Math.random() * cachedItems.length)]] : undefined}
         onComplete={(a) => {
           setAttempt(a);

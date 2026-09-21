@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { type GrammarTopic, type SubRule } from "@/lib/grammar-data";
 import GrammarExercise, { type Exercise } from "./GrammarExercise";
 
@@ -118,6 +119,12 @@ export default function GrammarContent({ topic }: { topic: GrammarTopic }) {
             >
               {loadingExercise.has(rule.id) ? "Đang tạo..." : "Luyện tập"}
             </button>
+            <Link
+              href={`/exam/drill/RC5?topic=${encodeURIComponent(rule.name)}&grammarSlug=${encodeURIComponent(rule.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''))}`}
+              className="flex items-center min-h-9 rounded px-3 py-1.5 text-xs font-medium text-purple-400 underline hover:text-purple-300"
+            >
+              Luyện TOEIC Part 5
+            </Link>
           </div>
 
           {errors[`examples-${rule.id}`] && (
