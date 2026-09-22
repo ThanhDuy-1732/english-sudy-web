@@ -9,6 +9,7 @@ interface Props {
   onSelect: (id: string) => void;
   onAddTopic: (request: string) => void;
   isAdding: boolean;
+  topicAccuracy?: Record<string, number>;
 }
 
 export default function GrammarSidebar({
@@ -17,6 +18,7 @@ export default function GrammarSidebar({
   onSelect,
   onAddTopic,
   isAdding,
+  topicAccuracy = {},
 }: Props) {
   const [input, setInput] = useState("");
 
@@ -34,19 +36,32 @@ export default function GrammarSidebar({
         Chủ đề ngữ pháp
       </p>
       {topics.map((topic) => (
-        <button
-          key={topic.id}
-          type="button"
-          onClick={() => onSelect(topic.id)}
-          className={`flex min-h-11 min-w-0 items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
-            selectedId === topic.id
-              ? "bg-purple-600/40 font-medium text-white"
-              : "text-[#b0b0d1] hover:bg-white/10 hover:text-white"
-          }`}
-        >
-          <span className="min-w-0 truncate">{topic.name}</span>
-          <span className="ml-2 flex-none text-xs text-white/40">{topic.rules.length}</span>
-        </button>
+        <div key={topic.id}>
+          <button
+            type="button"
+            onClick={() => onSelect(topic.id)}
+            className={`flex min-h-11 min-w-0 w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
+              selectedId === topic.id
+                ? "bg-purple-600/40 font-medium text-white"
+                : "text-[#b0b0d1] hover:bg-white/10 hover:text-white"
+            }`}
+          >
+            <span className="min-w-0 flex-1 truncate">{topic.name}</span>
+            {topicAccuracy[topic.id] !== undefined ? (
+              <span className="ml-2 flex-none text-xs text-white/60">{topicAccuracy[topic.id]}%</span>
+            ) : (
+              <span className="ml-2 flex-none text-xs text-white/40">{topic.rules.length}</span>
+            )}
+          </button>
+          {topicAccuracy[topic.id] !== undefined && (
+            <div className="mx-3 mb-1 h-1 rounded bg-white/10">
+              <div
+                className="h-1 rounded bg-blue-400/70"
+                style={{ width: `${topicAccuracy[topic.id]}%` }}
+              />
+            </div>
+          )}
+        </div>
       ))}
 
       <div className="mt-4 border-t border-white/10 pt-4">

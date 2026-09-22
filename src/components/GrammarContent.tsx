@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import { type GrammarTopic, type SubRule } from "@/lib/grammar-data";
 import GrammarExercise, { type Exercise } from "./GrammarExercise";
+import { isBookmarked, toggleBookmark } from "@/lib/grammar-bookmarks";
 
 export default function GrammarContent({ topic }: { topic: GrammarTopic }) {
   const [aiExamples, setAiExamples] = useState<Record<string, string[]>>({});
@@ -11,6 +12,18 @@ export default function GrammarContent({ topic }: { topic: GrammarTopic }) {
   const [loadingExamples, setLoadingExamples] = useState<Set<string>>(new Set());
   const [loadingExercise, setLoadingExercise] = useState<Set<string>>(new Set());
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [bookmarks, setBookmarks] = useState<Set<string>>(
+    () => new Set(topic.rules.filter((r) => isBookmarked(topic.id, r.id)).map((r) => r.id))
+  );
+
+  const handleToggleBookmark = useCallback((ruleId: string) => {
+    const now = toggleBookmark(topic.id, ruleId);
+    setBookmarks((prev) => {
+      const next = new Set(prev);
+      if (now) next.add(ruleId); else next.delete(ruleId);
+      return next;
+    });
+  }, [topic.id]);
 
   async function fetchExamples(rule: SubRule) {
     if (loadingExamples.has(rule.id)) return;
@@ -125,6 +138,18 @@ export default function GrammarContent({ topic }: { topic: GrammarTopic }) {
             >
               Luyện TOEIC Part 5
             </Link>
+            <button
+              type="button"
+              onClick={() => handleToggleBookmark(rule.id)}
+              title={bookmarks.has(rule.id) ? "Bỏ lưu" : "Lưu sub-rule"}
+              className={`min-h-9 rounded px-3 py-1.5 text-xs font-medium transition-colors ${
+                bookmarks.has(rule.id)
+                  ? "bg-yellow-500/20 text-yellow-300 hover:bg-yellow-500/30"
+                  : "bg-white/10 text-white/40 hover:text-yellow-300 hover:bg-white/20"
+              }`}
+            >
+              {bookmarks.has(rule.id) ? "★ Đã lưu" : "☆ Lưu"}
+            </button>
           </div>
 
           {errors[`examples-${rule.id}`] && (

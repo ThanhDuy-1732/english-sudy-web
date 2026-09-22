@@ -1,4 +1,4 @@
-import { type GrammarTopic } from "./grammar-data";
+import { type GrammarTopic, STATIC_GRAMMAR_TOPICS } from "./grammar-data";
 
 const STORAGE_KEY = "grammarTopics";
 
@@ -10,6 +10,10 @@ export function getUserGrammarTopics(): GrammarTopic[] {
   } catch {
     return [];
   }
+}
+
+export function getAllGrammarTopics(): GrammarTopic[] {
+  return [...STATIC_GRAMMAR_TOPICS, ...getUserGrammarTopics()];
 }
 
 export function saveUserGrammarTopic(topic: GrammarTopic): void {

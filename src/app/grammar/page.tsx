@@ -1,20 +1,34 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import GrammarContent from "@/components/GrammarContent";
 import GrammarSidebar from "@/components/GrammarSidebar";
 import { STATIC_GRAMMAR_TOPICS, type GrammarTopic } from "@/lib/grammar-data";
 import { getUserGrammarTopics, saveUserGrammarTopic } from "@/lib/grammar-storage";
 import { pushGrammarTopic } from "@/lib/sync";
+import { getTopicProgress } from "@/lib/grammar-progress";
+import { isBookmarked, toggleBookmark } from "@/lib/grammar-bookmarks";
 
 export default function GrammarPage() {
   const [userTopics, setUserTopics] = useState<GrammarTopic[]>([]);
   const [selectedId, setSelectedId] = useState(STATIC_GRAMMAR_TOPICS[0].id);
   const [isAdding, setIsAdding] = useState(false);
   const [error, setError] = useState("");
+  const [topicAccuracy, setTopicAccuracy] = useState<Record<string, number>>({});
 
   useEffect(() => {
     setUserTopics(getUserGrammarTopics());
+    // Compute per-topic accuracy from grammar progress
+    const allTopics = [...STATIC_GRAMMAR_TOPICS, ...getUserGrammarTopics()];
+    const acc: Record<string, number> = {};
+    for (const t of allTopics) {
+      const prog = getTopicProgress(t.id);
+      if (prog.length > 0) {
+        acc[t.id] = Math.round(prog.reduce((s, p) => s + p.accuracy, 0) / prog.length);
+      }
+    }
+    setTopicAccuracy(acc);
   }, []);
 
   const allTopics = [...STATIC_GRAMMAR_TOPICS, ...userTopics];
@@ -49,6 +63,12 @@ export default function GrammarPage() {
 
   return (
     <main className="mx-auto min-w-0 max-w-6xl px-4 py-6 sm:px-6">
+      <div className="mb-4 flex items-center justify-between">
+        <span />
+        <Link href="/grammar/quiz" className="text-sm px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-500">
+          Quiz Ngữ pháp
+        </Link>
+      </div>
       <div className="mb-4 md:hidden">
         <select
           value={selectedId}
@@ -77,6 +97,7 @@ export default function GrammarPage() {
             onSelect={setSelectedId}
             onAddTopic={(request) => void handleAddTopic(request)}
             isAdding={isAdding}
+            topicAccuracy={topicAccuracy}
           />
         </div>
 
