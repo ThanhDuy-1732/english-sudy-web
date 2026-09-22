@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { generatePlan, type PlanBlock } from "@/lib/plan/generate-plan";
 import { getWordsForReview } from "@/lib/storage";
-import { getMistakes, getAttempts, getExamSettings } from "@/lib/exam/exam-storage";
+import { getAttempts, getExamSettings } from "@/lib/exam/exam-storage";
+import { getMistakes as getUnifiedMistakes } from "@/lib/mistakes";
+import { getCachedMastery } from "@/lib/mastery";
 
 const BUDGET_OPTIONS = [15, 30, 60] as const;
 
@@ -57,7 +59,6 @@ export default function TodayPage() {
 
   function buildPlan() {
     const dueWords = getWordsForReview().length;
-    const mistakes = getMistakes();
     const attempts = getAttempts();
     const settings = getExamSettings();
 
@@ -67,7 +68,8 @@ export default function TodayPage() {
 
     const blocks = generatePlan({
       dueWords,
-      mistakes,
+      unifiedMistakes: getUnifiedMistakes(),
+      skillMastery: getCachedMastery(),
       attempts,
       lastSpeakingAt,
       lastWritingAt,

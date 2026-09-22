@@ -1,6 +1,7 @@
 import { generatePlan, weakestType } from "../generate-plan";
-import type { ExamAttempt, MistakeEntry } from "@/lib/exam/types";
+import type { ExamAttempt } from "@/lib/exam/types";
 import type { ExamSettings } from "@/lib/exam/types";
+import type { UnifiedMistake } from "@/lib/mistakes";
 
 const settings: ExamSettings = {
   primaryExam: "TOEIC",
@@ -62,14 +63,16 @@ describe("weakestType", () => {
 
 describe("generatePlan", () => {
   const base = {
-    mistakes: [] as MistakeEntry[],
+    dueWords: 0,
+    unifiedMistakes: [] as UnifiedMistake[],
+    skillMastery: [],
     attempts: [] as ExamAttempt[],
     settings,
     availableMin: 60,
   };
 
   it("always puts SRS first when there are due words", () => {
-    const plan = generatePlan({ ...base, dueWords: 10 });
+    const plan = generatePlan({ ...base, dueWords: 10, unifiedMistakes: [], skillMastery: [] });
     expect(plan[0].kind).toBe("srs_review");
   });
 
@@ -97,7 +100,7 @@ describe("generatePlan", () => {
       dueWords: 20,
       lastSpeakingAt: new Date(Date.now() - 5 * 86400000).toISOString(),
       lastWritingAt: new Date(Date.now() - 10 * 86400000).toISOString(),
-      mistakes: Array(15).fill({ resolved: false }) as MistakeEntry[],
+      unifiedMistakes: Array(15).fill({ status: "new" }) as UnifiedMistake[],
       availableMin: 120,
     });
     expect(plan.length).toBeLessThanOrEqual(6);

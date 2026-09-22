@@ -1,5 +1,6 @@
-import type { MistakeEntry, ExamAttempt, QuestionType } from "@/lib/exam/types";
-import type { ExamSettings } from "@/lib/exam/types";
+import type { ExamAttempt, QuestionType, ExamSettings } from "@/lib/exam/types";
+import type { UnifiedMistake } from "@/lib/mistakes";
+import type { SkillMastery } from "@/lib/mastery";
 
 export interface PlanBlock {
   id: string;
@@ -80,15 +81,18 @@ const TYPE_TO_PART: Partial<Record<QuestionType, string>> = {
   form_completion: "LISTEN_S1",
 };
 
-export function generatePlan(ctx: {
+export interface PlanContext {
   dueWords: number;
-  mistakes: MistakeEntry[];
+  unifiedMistakes: UnifiedMistake[];
+  skillMastery: SkillMastery[];
   attempts: ExamAttempt[];
   lastSpeakingAt?: string;
   lastWritingAt?: string;
   settings: ExamSettings;
   availableMin: number;
-}): PlanBlock[] {
+}
+
+export function generatePlan(ctx: PlanContext): PlanBlock[] {
   const blocks: PlanBlock[] = [];
   const now = Date.now();
 
@@ -120,16 +124,36 @@ export function generatePlan(ctx: {
     });
   }
 
-  // 3. Mistake log > 10 unresolved
-  const unresolved = ctx.mistakes.filter((m) => !m.resolved);
-  if (unresolved.length >= 10) {
+  // 3. Unified mistakes >= 5 unresolved
+  const unresolved = ctx.unifiedMistakes.filter((m) => m.status !== "resolved");
+  if (unresolved.length >= 5) {
     blocks.push({
       id: "mistakes",
       kind: "mistakes",
-      title: "Xem lại sổ lỗi",
-      reason: `${unresolved.length} câu sai chưa giải quyết`,
+      title: "Xem lại lỗi sai",
+      reason: `${unresolved.length} lỗi chưa giải quyết`,
       estimatedMin: 10,
-      href: "/exam/mistakes",
+      href: "/mistakes",
+      done: false,
+    });
+  }
+
+  // 3b. Grammar block when mastery < 60
+  const weakGrammar = ctx.skillMastery.find(
+    (s) => s.skill === "grammar" && s.overallMastery < 60
+  );
+  if (weakGrammar) {
+    const weakCat = weakGrammar.categories
+      .filter((c) => c.confidence > 0.3)
+      .sort((a, b) => a.mastery - b.mastery)[0];
+    blocks.push({
+      id: "grammar-weak",
+      kind: "grammar",
+      title: weakCat ? `Ngữ pháp — ${weakCat.category}` : "Luyện ngữ pháp",
+      reason: `Mastery ${weakGrammar.overallMastery}%${weakCat ? ` — yếu nhất: ${weakCat.category}` : ""}`,
+      estimatedMin: 10,
+      href: "/grammar",
+      payload: weakCat ? { focusCategory: weakCat.category } : undefined,
       done: false,
     });
   }
