@@ -355,6 +355,7 @@ export async function initSync(): Promise<void> {
         parts: r.parts as ExamAttempt["parts"],
         startedAt: r.started_at as string,
         finishedAt: (r.finished_at as string | null) ?? undefined,
+        updatedAt: (r.updated_at as string | null) ?? undefined,
         answers: r.answers as ExamAttempt["answers"],
         score: (r.score as ExamAttempt["score"] | null) ?? undefined,
       }));
@@ -362,16 +363,19 @@ export async function initSync(): Promise<void> {
       localStorage.setItem("examAttempts", JSON.stringify(merged.slice(0, 100)));
     }
 
-    // Pull mistake log
+    // Pull mistake log — include updated_at so LWW stamp() sees actual write order
     const { data: remoteMistakes } = await supabase
       .from("mistake_log")
-      .select("payload")
+      .select("payload, updated_at")
       .eq("sync_key", syncKey);
 
     if (remoteMistakes && remoteMistakes.length > 0) {
       const { getMistakes } = await import("./exam/exam-storage");
       const local = getMistakes();
-      const remote = remoteMistakes.map((r) => r.payload as MistakeEntry);
+      const remote = remoteMistakes.map((r) => ({
+        ...(r.payload as MistakeEntry),
+        updatedAt: (r.updated_at as string) ?? (r.payload as MistakeEntry).updatedAt,
+      }));
       const { merged } = mergeLww(local, remote, (m) => m.id);
       localStorage.setItem("mistakeLog", JSON.stringify(merged));
     }

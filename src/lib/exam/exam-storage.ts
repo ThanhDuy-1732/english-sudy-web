@@ -38,13 +38,16 @@ export function bankKey(kind: ExamKind, part: ExamPart, level: number) {
   return `${kind}:${part}:${level}`;
 }
 
-export function pruneBank(bank: Record<string, ExamItem[]>) {
+export function pruneBank(bank: Record<string, ExamItem[]>): Record<string, ExamItem[]> {
+  const pinnedIds = new Set(getUnresolvedMistakes().map((m) => m.itemId));
+  const result: Record<string, ExamItem[]> = {};
   for (const key of Object.keys(bank)) {
-    bank[key] = bank[key]
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-      .slice(0, BANK_MAX_ITEMS_PER_KEY);
+    const sorted = bank[key].slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    const pinned = sorted.filter((item) => pinnedIds.has(item.id));
+    const unpinned = sorted.filter((item) => !pinnedIds.has(item.id));
+    result[key] = [...pinned, ...unpinned].slice(0, BANK_MAX_ITEMS_PER_KEY);
   }
-  return bank;
+  return result;
 }
 
 export function getExamBank(): Record<string, ExamItem[]> {
@@ -73,9 +76,10 @@ export function getAttempts(): ExamAttempt[] {
 }
 
 export function saveAttempt(attempt: ExamAttempt) {
-  const attempts = [attempt, ...getAttempts()].slice(0, MAX_ATTEMPTS);
+  const stamped = { ...attempt, updatedAt: new Date().toISOString() };
+  const attempts = [stamped, ...getAttempts()].slice(0, MAX_ATTEMPTS);
   lsSet(ATTEMPTS_KEY, attempts);
-  pushAttempt(attempt);
+  pushAttempt(stamped);
 }
 
 export function getAttemptById(id: string): ExamAttempt | undefined {
@@ -88,14 +92,17 @@ export function getMistakes(): MistakeEntry[] {
 }
 
 export function addMistake(entry: MistakeEntry) {
-  const mistakes = [entry, ...getMistakes()];
+  const now = new Date().toISOString();
+  const stamped = { ...entry, updatedAt: entry.updatedAt ?? now };
+  const mistakes = [stamped, ...getMistakes()];
   lsSet(MISTAKES_KEY, mistakes);
-  pushMistake(entry);
+  pushMistake(stamped);
 }
 
 export function resolveMistake(id: string) {
+  const now = new Date().toISOString();
   const mistakes = getMistakes().map((m) =>
-    m.id === id ? { ...m, resolved: true, reviewedAt: new Date().toISOString() } : m
+    m.id === id ? { ...m, resolved: true, reviewedAt: now, updatedAt: now } : m
   );
   lsSet(MISTAKES_KEY, mistakes);
   const updated = mistakes.find((m) => m.id === id);

@@ -68,6 +68,7 @@ export interface ExamAttempt {
   parts: ExamPart[];
   startedAt: string;
   finishedAt?: string;
+  updatedAt?: string;  // set by saveAttempt; used by LWW stamp()
   answers: AnswerRecord[];
   score?: ScoreResult;
 }
@@ -102,6 +103,7 @@ export interface MistakeEntry {
   correctAnswer: string;
   explanation: string;
   createdAt: string;
+  updatedAt: string;   // required for LWW stamp(); set by addMistake/resolveMistake
   reviewedAt?: string;
   resolved: boolean;
 }

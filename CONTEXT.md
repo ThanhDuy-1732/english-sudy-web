@@ -112,6 +112,43 @@ interface VoiceSettings {
 }
 ```
 
+### SpeakingRecord (`src/lib/speech/speaking-storage.ts`)
+```ts
+interface SpeakingRecord {
+  id: string;
+  mode: "ielts_p1" | "ielts_p2" | "ielts_p3" | "roleplay" | "shadowing";
+  prompt: string;
+  transcript: string;
+  durationSec: number;
+  feedback: SpeakingFeedback;  // { fluency, vocab, grammar, pronunciation, overall } — all 0–9 bands
+  audioId?: string;             // idb-keyval key for IndexedDB audio blob replay
+  createdAt: string;
+  updatedAt?: string;
+}
+```
+
+### WritingRecord (`src/lib/write/writing-storage.ts`)
+```ts
+interface WritingRecord {
+  id: string;
+  kind: "ielts_task1" | "ielts_task2" | "toeic_email";
+  prompt: string;
+  chartData?: unknown;
+  content: string;
+  wordCount: number;
+  feedback: {
+    bands: { task: number; coherence: number; lexical: number; grammar: number };
+    overall: number;
+    wordCount: number;
+    annotations: { excerpt: string; issue: string; category: string; suggestion: string }[];
+    modelAnswer: string;
+    nextFocus: string;
+  };
+  createdAt: string;
+  updatedAt?: string;
+}
+```
+
 ### GrammarTopic (`src/lib/grammar-data.ts`)
 ```ts
 interface SubRule {
@@ -157,6 +194,8 @@ interface GrammarTopic {
 | `dailyPlan` | `{ date, blocks }` | Kế hoạch `/today` — regenerate mỗi ngày |
 | `lastSpeakingAt` | ISO string | Để /today nhắc luyện nói sau 2 ngày |
 | `lastWritingAt` | ISO string | Để /today nhắc luyện viết sau 5 ngày |
+| `speakingSessions` | `SpeakingRecord[]` | IELTS speaking session history; newest-first, max 200 |
+| `writingSubmissions` | `WritingRecord[]` | IELTS/TOEIC writing submission history; newest-first, max 100 |
 
 ---
 
@@ -251,6 +290,8 @@ No authentication. Identity = `syncKey` (UUID in localStorage, auto-generated).
 - `exam_items` — shared bank (no `sync_key`); `{ id, exam_type, part, level, payload: jsonb, flagged }`
 - `exam_attempts` — per-user; `{ id, sync_key, exam_type, mode, parts, started_at, finished_at, answers, score, updated_at }`
 - `mistake_log` — per-user; `{ id, sync_key, payload: jsonb, resolved, updated_at }`
+- `speaking_sessions` — per-user; `{ id, sync_key, payload: jsonb, created_at, updated_at }`
+- `writing_submissions` — per-user; `{ id, sync_key, payload: jsonb, created_at, updated_at }`
 - `daily_challenges` — mirrors `DailyChallenge`
 - `custom_topics` — `{ sync_key, topic }`
 - `grammar_topics` — `{ sync_key: uuid, id, name, rules: jsonb, created_at }`
@@ -311,6 +352,8 @@ Supabase client created per call via `createSupabase(syncKey)` in `src/lib/supab
 | `charts/StudyTimeChart` | Bar chart — study minutes per day for last 30 days |
 | `charts/ExamAccuracyChart` | Bar chart — weekly exam accuracy % for last 4 weeks |
 | `charts/WeaknessRadar` | Radar chart — exam accuracy % grouped by QuestionType |
+| `charts/BandTimelineChart` | Line chart — weekly speaking/writing/listening/reading band scores (last 12 weeks) |
+| `charts/SkillRadar` | Radar chart — L/R/S/W skill accuracy % from recent sessions |
 | `ExamRunner` | Stateful exam engine — phases: `loading → ready → running → reviewing → done` (+ `error`); accepts `forceComplete` prop to transition directly to reviewing on timer expiry (mock mode); dispatches `LOADING_ERROR` when all API fetches fail |
 | `DueBadge` | Client component — live SRS-due word count badge next to "Ôn tập" nav link, updates every 60 s |
 | `DiaryCalendar` | Interactive 26-week heatmap calendar for /diary; purple color levels 0–3; click cell opens DayDrawer |

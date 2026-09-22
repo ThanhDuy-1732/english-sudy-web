@@ -214,6 +214,7 @@ export default function ExamRunner({
           correctAnswer: q.answer,
           explanation: q.explanation,
           createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
           resolved: false,
         });
       });

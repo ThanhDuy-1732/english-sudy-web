@@ -51,12 +51,19 @@ export function weeklyBands(weeks = 12): WeeklyBand[] {
     ensure(isoWeek(w.createdAt)).w.push(w.feedback.overall);
   }
   for (const a of getAttempts()) {
-    if (!a.finishedAt || a.finishedAt < cutoff || !a.score?.ielts) continue;
+    if (!a.finishedAt || a.finishedAt < cutoff || !a.score) continue;
     const wk = isoWeek(a.finishedAt);
     const isLC = a.parts.some((p: string) => LC_PARTS.has(p));
     const isRC = a.parts.some((p: string) => RC_PARTS.has(p));
-    if (a.score.ielts.listening != null && isLC) ensure(wk).l.push(a.score.ielts.listening);
-    if (a.score.ielts.reading != null && isRC) ensure(wk).r.push(a.score.ielts.reading);
+    if (a.score.ielts) {
+      if (a.score.ielts.listening != null && isLC) ensure(wk).l.push(a.score.ielts.listening);
+      if (a.score.ielts.reading != null && isRC) ensure(wk).r.push(a.score.ielts.reading);
+    }
+    if (a.score.toeic) {
+      // Normalize TOEIC 5-495 to 0-9 band scale for the timeline
+      if (a.score.toeic.listening && isLC) ensure(wk).l.push(a.score.toeic.listening / 495 * 9);
+      if (a.score.toeic.reading && isRC) ensure(wk).r.push(a.score.toeic.reading / 495 * 9);
+    }
   }
 
   return Array.from(map.entries())

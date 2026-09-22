@@ -21,6 +21,7 @@ function interpolate(anchors: [number, number][], x: number): number {
 }
 
 export function toeicScaled(raw: number, total: number, section: "LC" | "RC"): number {
+  if (total === 0) return 5;
   const per100 = (raw / total) * 100;
   return interpolate(section === "LC" ? TOEIC_LC_ANCHORS : TOEIC_RC_ANCHORS, per100);
 }

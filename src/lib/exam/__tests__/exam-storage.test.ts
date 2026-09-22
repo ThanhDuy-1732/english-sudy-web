@@ -102,6 +102,7 @@ describe("mistakes", () => {
       correctAnswer: "B",
       explanation: "because B",
       createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       resolved: false,
     };
     addMistake(m);
