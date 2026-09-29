@@ -5,6 +5,7 @@ import VoiceSettingsTab from "@/components/VoiceSettingsTab";
 import { useProvider } from "@/contexts/ProviderContext";
 import { getLastSyncedAt, getSyncKey, pullFromKey } from "@/lib/sync";
 import { SyncStatusBadge } from "@/components/SyncStatusBadge";
+import { getProfile, saveProfile, type LearningProfile, type LearningGoal } from "@/lib/profile";
 import { clearAllAudio, getAudioCount } from "@/lib/speech/audio-store";
 
 const ALL_PROVIDERS = [
@@ -17,12 +18,13 @@ const ALL_PROVIDERS = [
 ];
 
 type TestResult = "loading" | { ok: boolean; latency?: number; error?: string };
-type Tab = "providers" | "voice" | "sync";
+type Tab = "providers" | "voice" | "sync" | "profile";
 
 const TAB_LABELS: Record<Tab, string> = {
   providers: "AI Providers",
   voice: "Voice",
   sync: "Sync",
+  profile: "Hồ sơ",
 };
 
 export default function SettingsPage() {
@@ -122,7 +124,7 @@ export default function SettingsPage() {
         <h1 className="mb-6 font-display text-3xl font-bold text-[#d9ecff]">Cài đặt</h1>
 
         <div className="mb-8 flex w-fit gap-1 rounded-xl border border-white/10 bg-white/5 p-1">
-          {(["providers", "voice", "sync"] as Tab[]).map((tab) => (
+          {(["providers", "voice", "sync", "profile"] as Tab[]).map((tab) => (
             <button
               key={tab}
               type="button"
@@ -335,6 +337,127 @@ export default function SettingsPage() {
           </div>
         </div>
       )}
+
+      {activeTab === "profile" && (
+        <div className="space-y-8">
+          <ProfileSettings />
+          <div>
+            <h3 className="mb-3 font-semibold text-[#d9ecff]">Giao diện</h3>
+            <ThemeToggle />
+          </div>
+        </div>
+      )}
     </main>
+  );
+}
+
+function ProfileSettings() {
+  const [profile, setProfile] = useState<LearningProfile>(() => {
+    if (typeof window === "undefined") return {
+      goal: "mixed", currentLevel: 2, dailyStudyMinutes: 30, shortcutsEnabled: true,
+    };
+    return getProfile();
+  });
+
+  function update(partial: Partial<LearningProfile>) {
+    const updated = { ...profile, ...partial };
+    setProfile(updated);
+    saveProfile(updated);
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <p className="mb-2 text-sm font-medium text-[#d9ecff]">Mục tiêu học</p>
+        <div className="flex flex-wrap gap-2">
+          {([["communication","Giao tiếp"],["toeic","TOEIC"],["ielts","IELTS"],
+            ["vocabulary","Từ vựng"],["mixed","Tổng hợp"]] as [LearningGoal, string][]).map(([v,l]) => (
+            <button key={v} onClick={() => update({ goal: v })}
+              className={`px-3 py-2 rounded-lg text-sm ${profile.goal === v ? "bg-[#7f56d9] text-white" : "bg-white/10 text-[#b0b0d1] hover:bg-white/20"}`}>
+              {l}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <p className="mb-2 text-sm font-medium text-[#d9ecff]">Trình độ hiện tại</p>
+        <div className="flex flex-wrap gap-2">
+          {([1,2,3,4,5] as const).map((n) => (
+            <button key={n} onClick={() => update({ currentLevel: n })}
+              className={`px-3 py-2 rounded-lg text-sm ${profile.currentLevel === n ? "bg-[#7f56d9] text-white" : "bg-white/10 text-[#b0b0d1] hover:bg-white/20"}`}>
+              {["Sơ cấp","Tiền trung","Trung cấp","Trung cao","Nâng cao"][n-1]}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <p className="mb-2 text-sm font-medium text-[#d9ecff]">Thời gian học mỗi ngày</p>
+        <div className="flex flex-wrap gap-2">
+          {[15, 30, 45, 60, 90].map((m) => (
+            <button key={m} onClick={() => update({ dailyStudyMinutes: m })}
+              className={`px-3 py-2 rounded-lg text-sm ${profile.dailyStudyMinutes === m ? "bg-[#7f56d9] text-white" : "bg-white/10 text-[#b0b0d1] hover:bg-white/20"}`}>
+              {m} phút
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {profile.goal === "toeic" && (
+        <div>
+          <label className="text-sm font-medium text-[#d9ecff]">Mục tiêu TOEIC</label>
+          <input type="number" min={10} max={990} step={5}
+            value={profile.targetToeicScore ?? ""}
+            onChange={(e) => update({ targetToeicScore: Number(e.target.value) })}
+            className="mt-1 w-full max-w-xs rounded-lg bg-white/10 px-3 py-2 text-sm text-[#d9ecff] border border-white/20" />
+        </div>
+      )}
+
+      {profile.goal === "ielts" && (
+        <div>
+          <label className="text-sm font-medium text-[#d9ecff]">Mục tiêu IELTS</label>
+          <input type="number" min={1} max={9} step={0.5}
+            value={profile.targetIeltsScore ?? ""}
+            onChange={(e) => update({ targetIeltsScore: Number(e.target.value) })}
+            className="mt-1 w-full max-w-xs rounded-lg bg-white/10 px-3 py-2 text-sm text-[#d9ecff] border border-white/20" />
+        </div>
+      )}
+
+      <div className="flex items-center justify-between max-w-xs">
+        <p className="text-sm text-[#d9ecff]">Phím tắt bàn phím</p>
+        <button
+          onClick={() => update({ shortcutsEnabled: !profile.shortcutsEnabled })}
+          className={`relative w-12 h-6 rounded-full transition-colors ${profile.shortcutsEnabled ? "bg-[#7f56d9]" : "bg-white/20"}`}
+        >
+          <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${profile.shortcutsEnabled ? "translate-x-6" : ""}`} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ThemeToggle() {
+  const [theme, setTheme] = useState<"system" | "light" | "dark">(() => {
+    if (typeof window === "undefined") return "system";
+    return (localStorage.getItem("theme") as "system" | "light" | "dark") ?? "system";
+  });
+
+  function applyTheme(t: "system" | "light" | "dark") {
+    setTheme(t);
+    localStorage.setItem("theme", t);
+    if (t === "system") document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.setAttribute("data-theme", t);
+  }
+
+  return (
+    <div className="flex gap-2">
+      {(["system", "light", "dark"] as const).map((t) => (
+        <button key={t} onClick={() => applyTheme(t)}
+          className={`px-3 py-2 rounded-lg text-sm ${theme === t ? "bg-[#7f56d9] text-white" : "bg-white/10 text-[#b0b0d1] hover:bg-white/20"}`}>
+          {t === "system" ? "Hệ thống" : t === "light" ? "Sáng" : "Tối"}
+        </button>
+      ))}
+    </div>
   );
 }

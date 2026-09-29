@@ -49,7 +49,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi">
+    <html lang="vi" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `(function(){var t=localStorage.getItem('theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);})();` }} />
+      </head>
       <body
         className={`${inter.variable} ${caladea.variable} grid min-h-screen min-h-svh min-w-0 grid-rows-[auto_1fr_auto] bg-[#2c1f4a] font-sans text-white`}
       >

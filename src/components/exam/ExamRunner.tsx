@@ -6,6 +6,7 @@ import { saveAttempt, addMistake, addItemToBank } from "@/lib/exam/exam-storage"
 import { pushExamItem } from "@/lib/sync";
 import { computeScore, isCompletionCorrect } from "@/lib/exam/scoring";
 import { recordTagResult } from "@/lib/exam/exam-tags";
+import { getProfile } from "@/lib/profile";
 import { useTimer } from "@/contexts/TimerContext";
 import QuestionCard from "./QuestionCard";
 import ReportQuestionModal from "./ReportQuestionModal";
@@ -175,6 +176,30 @@ export default function ExamRunner({
   const handleNext = useCallback(() => {
     dispatch({ type: "NEXT" });
   }, []);
+
+  // Keyboard shortcuts: 1–4 select MCQ option, Enter advances
+  useEffect(() => {
+    if (state.phase !== "running") return;
+    if (!getProfile().shortcutsEnabled) return;
+
+    function handleKey(e: KeyboardEvent) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const c = state.flatQuestions[state.cursor];
+      if (!c) return;
+      if (["1","2","3","4"].includes(e.key)) {
+        const idx = Number(e.key) - 1;
+        const opt = c.q.options?.[idx];
+        if (opt) handleAnswer(opt);
+      }
+      if (e.key === "Enter") {
+        const answered = state.answers[c.q.id] !== undefined && state.answers[c.q.id] !== "";
+        if (answered) handleNext();
+      }
+    }
+
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [state.phase, state.cursor, state.answers, state.flatQuestions, handleAnswer, handleNext]);
 
   // Build and save attempt when done
   useEffect(() => {
