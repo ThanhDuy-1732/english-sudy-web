@@ -17,6 +17,9 @@ import {
 } from "@/lib/stats";
 import { getLearnedWords } from "@/lib/storage";
 import { getAttempts } from "@/lib/exam/exam-storage";
+import { getSessions } from "@/lib/sessions";
+import { computeWeeklyReport } from "@/lib/weekly-report";
+import { computeStreak } from "@/lib/streak";
 import ExamAccuracyChart from "@/components/charts/ExamAccuracyChart";
 import WeaknessRadar from "@/components/charts/WeaknessRadar";
 import BandTimelineChart from "@/components/charts/BandTimelineChart";
@@ -26,6 +29,7 @@ import type { ExamAttempt } from "@/lib/exam/types";
 
 export default function StatsPage() {
   const { todaySeconds } = useTimer();
+  const [activeTab, setActiveTab] = useState<"overview" | "weekly">("overview");
   const [wordsPerDay, setWordsPerDay] = useState<DailyWordCount[]>([]);
   const [topicDistribution, setTopicDistribution] = useState<{ topic: string; count: number }[]>([]);
   const [calendarData, setCalendarData] = useState<CalendarDay[]>([]);
@@ -36,6 +40,8 @@ export default function StatsPage() {
   const [totalWords, setTotalWords] = useState(0);
   const [activeDays, setActiveDays] = useState(0);
   const [averageMastery, setAverageMastery] = useState(0);
+  const [weeklyReport, setWeeklyReport] = useState(() => computeWeeklyReport([], []));
+  const [streakInfo, setStreakInfo] = useState(() => computeStreak([]));
 
   useEffect(() => {
     const daily = getWordsPerDay(30);
@@ -44,9 +50,13 @@ export default function StatsPage() {
     setTopicDistribution(getTopicDistribution());
     setCalendarData(getCalendarData(26));
     setStudyTimePerDay(getStudyTimePerDay(30));
-    setExamAttempts(getAttempts());
+    const attempts = getAttempts();
+    const allSessions = getSessions();
+    setExamAttempts(attempts);
     setBands(weeklyBands(12));
     setRadarData(skillRadar());
+    setWeeklyReport(computeWeeklyReport(allSessions, attempts));
+    setStreakInfo(computeStreak(allSessions));
     setTotalWords(learned.length);
     setActiveDays(daily.filter((day) => day.count > 0).length);
     setAverageMastery(
@@ -67,7 +77,60 @@ export default function StatsPage() {
           <p className="mt-2 text-sm text-[#6b6384]">Theo dõi nhịp học, chủ đề và tiến bộ mastery của bạn.</p>
         </div>
 
-        <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div className="flex gap-2 mb-6">
+          {([["overview", "Tổng quan"], ["weekly", "Tuần này"]] as const).map(([v, l]) => (
+            <button key={v} onClick={() => setActiveTab(v)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium ${activeTab === v ? "bg-[#7f56d9] text-white" : "bg-white text-[#6b6384] shadow-sm"}`}>
+              {l}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === "weekly" && (
+          <div className="space-y-4 mb-6">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+              <div className="rounded-2xl bg-white p-5 shadow-sm">
+                <p className="font-display text-3xl font-bold">{streakInfo.currentStreak}</p>
+                <p className="mt-1 text-sm text-[#6b6384]">Streak hiện tại (ngày)</p>
+              </div>
+              <div className="rounded-2xl bg-white p-5 shadow-sm">
+                <p className="font-display text-3xl font-bold">{streakInfo.activeDaysThisWeek}/7</p>
+                <p className="mt-1 text-sm text-[#6b6384]">Ngày học tuần này</p>
+              </div>
+              <div className="rounded-2xl bg-white p-5 shadow-sm">
+                <p className="font-display text-3xl font-bold">{weeklyReport.studyMinutes} phút</p>
+                <p className="mt-1 text-sm text-[#6b6384]">Tổng thời gian tuần</p>
+              </div>
+              <div className="rounded-2xl bg-white p-5 shadow-sm">
+                <p className="font-display text-3xl font-bold">{weeklyReport.sessions}</p>
+                <p className="mt-1 text-sm text-[#6b6384]">Phiên học tuần này</p>
+              </div>
+              <div className="rounded-2xl bg-white p-5 shadow-sm">
+                <p className="font-display text-3xl font-bold">{weeklyReport.wordsLearned}</p>
+                <p className="mt-1 text-sm text-[#6b6384]">Từ mới tuần này</p>
+              </div>
+              <div className="rounded-2xl bg-white p-5 shadow-sm">
+                <p className="font-display text-3xl font-bold">
+                  {weeklyReport.examAccuracy !== null ? `${weeklyReport.examAccuracy}%` : "—"}
+                </p>
+                <p className="mt-1 text-sm text-[#6b6384]">Độ chính xác exam</p>
+              </div>
+            </div>
+            {weeklyReport.srsAccuracy !== null && (
+              <div className="rounded-2xl bg-white p-5 shadow-sm">
+                <p className="text-sm text-[#6b6384] mb-1">SRS accuracy tuần này</p>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#7f56d9] rounded-full" style={{ width: `${weeklyReport.srsAccuracy}%` }} />
+                  </div>
+                  <span className="text-sm font-semibold">{weeklyReport.srsAccuracy}%</span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === "overview" && (<><div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
           <div className="rounded-2xl bg-white p-5 shadow-sm">
             <p className="font-display text-3xl font-bold">{totalWords}</p>
             <p className="mt-1 text-sm text-[#6b6384]">Từ đã học</p>
@@ -135,6 +198,7 @@ export default function StatsPage() {
             </section>
           </div>
         </div>
+        </>)}
       </div>
     </main>
   );
