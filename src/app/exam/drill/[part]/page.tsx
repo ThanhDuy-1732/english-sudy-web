@@ -4,6 +4,7 @@ import { use, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import ExamRunner from "@/components/exam/ExamRunner";
 import { getExamSettings, getExamBank, bankKey } from "@/lib/exam/exam-storage";
+import { getTagAccuracies } from "@/lib/exam/exam-tags";
 import { startSession, finishSession, cancelSession } from "@/lib/sessions";
 import type { ExamPart, ExamAttempt, ExamKind } from "@/lib/exam/types";
 
@@ -30,6 +31,7 @@ export default function DrillPage({ params }: { params: Promise<{ part: string }
   const settings = getExamSettings();
   const [done, setDone] = useState(false);
   const [attempt, setAttempt] = useState<ExamAttempt | null>(null);
+  const [sessionTags, setSessionTags] = useState<string[]>([]);
   const sessionIdRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -51,6 +53,12 @@ export default function DrillPage({ params }: { params: Promise<{ part: string }
   const cachedItems = getExamBank()[effectiveBankKey] ?? [];
 
   if (done && attempt) {
+    const tagStats = sessionTags.length > 0
+      ? getTagAccuracies()
+          .filter((t) => sessionTags.includes(t.tag))
+          .sort((a, b) => a.accuracy - b.accuracy)
+      : [];
+
     return (
       <div className="done-container">
         <h1>✅ Drill hoàn thành</h1>
@@ -68,6 +76,26 @@ export default function DrillPage({ params }: { params: Promise<{ part: string }
               : `Listening ${attempt.score.ielts.listening}`}
           </p>
         )}
+        {tagStats.length > 0 && (
+          <div className="tag-stats">
+            <p className="tag-stats-title">Phân tích theo chủ đề</p>
+            {tagStats.map((t) => (
+              <div key={t.tag} className="tag-row">
+                <span className="tag-name">{t.tag}</span>
+                <div className="tag-bar-bg">
+                  <div
+                    className="tag-bar-fill"
+                    style={{
+                      width: `${t.accuracy}%`,
+                      background: t.accuracy < 60 ? "#dc3545" : t.accuracy < 80 ? "#fd7e14" : "#198754",
+                    }}
+                  />
+                </div>
+                <span className="tag-pct">{t.accuracy}%</span>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="done-actions">
           <button onClick={() => router.push(`/exam/drill/${part}`)}>
             Luyện thêm
@@ -82,6 +110,13 @@ export default function DrillPage({ params }: { params: Promise<{ part: string }
         <style jsx>{`
           .done-container { max-width: 480px; margin: 3rem auto; text-align: center; padding: 2rem; }
           h1 { font-size: 1.5rem; margin-bottom: 1rem; }
+          .tag-stats { text-align: left; margin: 1.5rem 0; padding: 1rem; border: 1px solid #dee2e6; border-radius: 8px; }
+          .tag-stats-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6c757d; margin-bottom: 0.75rem; }
+          .tag-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+          .tag-name { font-size: 0.8rem; min-width: 120px; flex-shrink: 0; }
+          .tag-bar-bg { flex: 1; height: 6px; background: #e9ecef; border-radius: 3px; overflow: hidden; }
+          .tag-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+          .tag-pct { font-size: 0.75rem; color: #6c757d; min-width: 32px; text-align: right; }
           .done-actions { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 2rem; }
           .done-actions button { padding: 0.75rem 1.5rem; border-radius: 8px; border: 1.5px solid #dee2e6; background: white; cursor: pointer; font-size: 0.95rem; }
           .done-actions button:first-child { background: #0d6efd; color: white; border-color: #0d6efd; }
@@ -105,8 +140,9 @@ export default function DrillPage({ params }: { params: Promise<{ part: string }
         level={settings.level}
         topic={topic}
         preloadedItems={cachedItems.length > 0 ? [cachedItems[Math.floor(Math.random() * cachedItems.length)]] : undefined}
-        onComplete={(a) => {
+        onComplete={(a, tags) => {
           setAttempt(a);
+          setSessionTags(tags ?? []);
           setDone(true);
           if (sessionIdRef.current) {
             finishSession(sessionIdRef.current, {

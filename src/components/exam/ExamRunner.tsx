@@ -1,12 +1,14 @@
 "use client";
 
-import { useReducer, useCallback, useEffect, useRef } from "react";
+import { useReducer, useCallback, useEffect, useRef, useState } from "react";
 import type { ExamItem, ExamQuestion, AnswerRecord, ExamAttempt, ExamPart, ExamKind } from "@/lib/exam/types";
 import { saveAttempt, addMistake, addItemToBank } from "@/lib/exam/exam-storage";
 import { pushExamItem } from "@/lib/sync";
 import { computeScore, isCompletionCorrect } from "@/lib/exam/scoring";
+import { recordTagResult } from "@/lib/exam/exam-tags";
 import { useTimer } from "@/contexts/TimerContext";
 import QuestionCard from "./QuestionCard";
+import ReportQuestionModal from "./ReportQuestionModal";
 
 type RunnerState = {
   phase: "loading" | "ready" | "running" | "reviewing" | "done" | "error";
@@ -87,7 +89,7 @@ interface Props {
   level: 1 | 2 | 3 | 4 | 5;
   topic?: string;
   preloadedItems?: ExamItem[];
-  onComplete?: (attempt: ExamAttempt) => void;
+  onComplete?: (attempt: ExamAttempt, sessionTags?: string[]) => void;
   forceComplete?: boolean; // when true, finish with current answers (e.g. timer expired)
 }
 
@@ -103,6 +105,7 @@ export default function ExamRunner({
 }: Props) {
   const timer = useTimer();
   const savedRef = useRef(false);
+  const [reporting, setReporting] = useState<{ questionId: string; itemId: string } | null>(null);
 
   const [state, dispatch] = useReducer(reducer, {
     phase: preloadedItems ? "ready" : "loading",
@@ -196,13 +199,16 @@ export default function ExamRunner({
       };
     });
 
-    // Save mistakes
-    answerRecords
-      .filter((r) => !r.correct)
-      .forEach((r) => {
-        const { item, q } = state.flatQuestions.find(
-          (f) => f.q.id === r.questionId
-        )!;
+    const sessionTagsSet = new Set<string>();
+
+    // Save mistakes + record tag results
+    answerRecords.forEach((r) => {
+      const { item, q } = state.flatQuestions.find((f) => f.q.id === r.questionId)!;
+      q.tags?.forEach((tag) => {
+        sessionTagsSet.add(tag);
+        recordTagResult(tag, r.correct);
+      });
+      if (!r.correct) {
         addMistake({
           id: crypto.randomUUID(),
           questionId: q.id,
@@ -217,7 +223,8 @@ export default function ExamRunner({
           updatedAt: new Date().toISOString(),
           resolved: false,
         });
-      });
+      }
+    });
 
     const attempt: ExamAttempt = {
       id: state.attemptId,
@@ -231,7 +238,7 @@ export default function ExamRunner({
     };
 
     saveAttempt(attempt);
-    onComplete?.(attempt);
+    onComplete?.(attempt, sessionTagsSet.size > 0 ? Array.from(sessionTagsSet) : undefined);
   }, [state.phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (state.phase === "loading") {
@@ -323,12 +330,20 @@ export default function ExamRunner({
         onAnswer={handleAnswer}
       />
       <div className="runner-controls">
-        <button
-          onClick={() => dispatch({ type: "FLAG", questionId: current.q.id })}
-          className={`flag-btn ${state.flags.has(current.q.id) ? "flagged" : ""}`}
-        >
-          {state.flags.has(current.q.id) ? "🚩 Đã đánh dấu" : "🚩 Đánh dấu"}
-        </button>
+        <div className="controls-left">
+          <button
+            onClick={() => dispatch({ type: "FLAG", questionId: current.q.id })}
+            className={`flag-btn ${state.flags.has(current.q.id) ? "flagged" : ""}`}
+          >
+            {state.flags.has(current.q.id) ? "🚩 Đã đánh dấu" : "🚩 Đánh dấu"}
+          </button>
+          <button
+            onClick={() => setReporting({ questionId: current.q.id, itemId: current.item.id })}
+            className="report-btn"
+          >
+            ⚑ Báo cáo
+          </button>
+        </div>
         <button
           onClick={handleNext}
           disabled={!answered}
@@ -337,13 +352,23 @@ export default function ExamRunner({
           {state.cursor + 1 >= state.flatQuestions.length ? "Xem kết quả" : "Tiếp →"}
         </button>
       </div>
+      {reporting && (
+        <ReportQuestionModal
+          questionId={reporting.questionId}
+          itemId={reporting.itemId}
+          onClose={() => setReporting(null)}
+        />
+      )}
       <style jsx>{`
         .runner-controls { display: flex; justify-content: space-between; align-items: center; max-width: 720px; margin: 1rem auto; padding: 0 1.5rem; }
+        .controls-left { display: flex; gap: 0.5rem; }
         .next-btn { padding: 0.6rem 1.5rem; background: #0d6efd; color: white; border: none; border-radius: 6px; font-size: 0.95rem; cursor: pointer; }
         .next-btn:disabled { background: #adb5bd; cursor: not-allowed; }
         .next-btn:hover:not(:disabled) { background: #0b5ed7; }
         .flag-btn { padding: 0.5rem 1rem; background: transparent; border: 1.5px solid #dee2e6; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
         .flag-btn.flagged { border-color: #ffc107; background: #fff3cd; }
+        .report-btn { padding: 0.5rem 1rem; background: transparent; border: 1.5px solid #dee2e6; border-radius: 6px; font-size: 0.85rem; cursor: pointer; color: #6c757d; }
+        .report-btn:hover { border-color: #adb5bd; color: #495057; }
       `}</style>
     </div>
   );

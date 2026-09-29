@@ -7,6 +7,13 @@ import type {
   ExamPart,
 } from "./types";
 import { pushAttempt, pushMistake } from "@/lib/sync";
+import { addMistake as addUnifiedMistake } from "@/lib/mistakes";
+import type { MistakeSkill } from "@/lib/mistakes";
+
+function partToSkill(part: string): MistakeSkill {
+  if (part.startsWith("LC") || part.startsWith("LISTEN")) return "listening";
+  return "reading";
+}
 
 // ─── Keys ───────────────────────────────────────────────────────────────────
 const BANK_KEY = "examBank";
@@ -97,6 +104,19 @@ export function addMistake(entry: MistakeEntry) {
   const mistakes = [stamped, ...getMistakes()];
   lsSet(MISTAKES_KEY, mistakes);
   pushMistake(stamped);
+  // dual-write to unified mistake log for cross-skill tracking
+  try {
+    addUnifiedMistake({
+      skill: partToSkill(entry.part),
+      category: entry.type,
+      source: `exam:${entry.part}:${entry.questionId}`,
+      userAnswer: entry.userAnswer,
+      correctAnswer: entry.correctAnswer,
+      explanation: entry.explanation,
+    });
+  } catch {
+    // non-critical, don't disrupt exam flow
+  }
 }
 
 export function resolveMistake(id: string) {

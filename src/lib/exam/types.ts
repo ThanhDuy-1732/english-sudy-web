@@ -45,6 +45,7 @@ export interface ExamQuestion {
   explanation: string;
   keyVocabulary?: string[];
   timeLimitSec?: number;
+  tags?: string[];
 }
 
 export interface ExamItem {
