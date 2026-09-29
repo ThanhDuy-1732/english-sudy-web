@@ -8,6 +8,7 @@ import { ProviderBadge } from "@/components/ProviderBadge";
 import HeaderTimer from "@/components/HeaderTimer";
 import { DueBadge } from "@/components/DueBadge";
 import { FirebaseInitializer } from "@/components/FirebaseInitializer";
+import { SyncInit } from "@/components/SyncInit";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -147,6 +148,7 @@ export default function RootLayout({
             <FirebaseInitializer />
             <ServiceWorkerRegistration />
             <SyncInitializer />
+            <SyncInit />
           </TimerContextProvider>
         </ProviderContextProvider>
       </body>

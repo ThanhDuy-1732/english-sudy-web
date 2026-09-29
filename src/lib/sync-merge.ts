@@ -1,4 +1,35 @@
 /**
+ * Per-entity conflict strategies:
+ *
+ * learnedWords        → LWW (last-write-wins by updatedAt)
+ * learningSessions    → append (never overwrite, client id is unique)
+ * examAttempts        → append
+ * mistakeLog          → LWW by updatedAt
+ * unifiedMistakes     → LWW by updatedAt
+ * grammarAttempts     → append
+ * speakingSessions    → append (audio stays local-only)
+ * writingSubmissions  → LWW by updatedAt; versions array merges by version number
+ * dailyChallenges     → completed wins (once completed, stays completed)
+ * grammarTopics       → LWW by updatedAt
+ * voiceSettings       → LWW by updatedAt
+ * Audio (IndexedDB)   → local-only, never synced
+ * Deletes             → tombstone: set deletedAt, filter out on read
+ */
+export const CONFLICT_STRATEGIES = {
+  learnedWords: "lww",
+  learningSessions: "append",
+  examAttempts: "append",
+  mistakeLog: "lww",
+  unifiedMistakes: "lww",
+  grammarAttempts: "append",
+  speakingSessions: "append",
+  writingSubmissions: "lww",
+  dailyChallenges: "completed-wins",
+  grammarTopics: "lww",
+  voiceSettings: "lww",
+} as const;
+
+/**
  * stamp() — extracts the best comparable timestamp from an object.
  * Falls back: updatedAt → learnedAt → createdAt → ''
  */

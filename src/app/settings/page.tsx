@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import VoiceSettingsTab from "@/components/VoiceSettingsTab";
 import { useProvider } from "@/contexts/ProviderContext";
 import { getLastSyncedAt, getSyncKey, pullFromKey } from "@/lib/sync";
+import { SyncStatusBadge } from "@/components/SyncStatusBadge";
 import { clearAllAudio, getAudioCount } from "@/lib/speech/audio-store";
 
 const ALL_PROVIDERS = [
@@ -274,7 +275,10 @@ export default function SettingsPage() {
 
       {activeTab === "sync" && (
         <div>
-          <h2 className="mb-2 font-display text-xl font-bold text-[#d9ecff]">Đồng bộ dữ liệu</h2>
+          <div className="mb-2 flex items-center gap-3">
+            <h2 className="font-display text-xl font-bold text-[#d9ecff]">Đồng bộ dữ liệu</h2>
+            <SyncStatusBadge />
+          </div>
           <p className="mb-6 text-sm text-[#b0b0d1]">
             Dùng sync key để backup và đồng bộ dữ liệu giữa các thiết bị. Không cần đăng nhập.
           </p>

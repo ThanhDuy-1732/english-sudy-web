@@ -7,6 +7,7 @@ import { type GrammarTopic } from "./grammar-data";
 import { getUserGrammarTopics, saveUserGrammarTopic } from "./grammar-storage";
 import { getVoiceSettings, saveVoiceSettings, type VoiceSettings } from "./voiceSettings";
 import type { ExamItem, ExamAttempt, MistakeEntry } from "./exam/types";
+import { registerProcessor, type QueueEntry } from "./sync-queue";
 
 const SYNC_KEY_LS = "syncKey";
 const LAST_SYNCED_LS = "lastSyncedAt";
@@ -382,6 +383,54 @@ export async function initSync(): Promise<void> {
 
     setLastSyncedAt();
   } catch { /* fire-and-forget */ }
+}
+
+export function registerSyncProcessors(): void {
+  const syncKey = getSyncKey();
+  const supabase = createSupabase(syncKey);
+
+  registerProcessor("learnedWords", async (entry: QueueEntry) => {
+    const word = entry.payload as LearnedWord;
+    await supabase.from("learned_words").upsert(wordToRow(syncKey, word), { onConflict: "id" });
+  });
+
+  registerProcessor("examAttempts", async (entry: QueueEntry) => {
+    const attempt = entry.payload as ExamAttempt;
+    await supabase.from("exam_attempts").upsert({
+      id: attempt.id, sync_key: syncKey, exam_type: attempt.kind, mode: attempt.mode,
+      parts: attempt.parts, started_at: attempt.startedAt, finished_at: attempt.finishedAt ?? null,
+      answers: attempt.answers, score: attempt.score ?? null, updated_at: new Date().toISOString(),
+    }, { onConflict: "id" });
+  });
+
+  registerProcessor("mistakeLog", async (entry: QueueEntry) => {
+    const mistake = entry.payload as MistakeEntry;
+    await supabase.from("mistake_log").upsert({
+      id: mistake.id, sync_key: syncKey, payload: mistake,
+      resolved: mistake.resolved, updated_at: new Date().toISOString(),
+    }, { onConflict: "id" });
+  });
+
+  registerProcessor("dailyChallenges", async (entry: QueueEntry) => {
+    const record = entry.payload as DailyChallenge;
+    await supabase.from("daily_challenges").upsert({
+      sync_key: syncKey, date: record.date, words: record.words, completed: record.completed,
+    });
+  });
+
+  registerProcessor("grammarTopics", async (entry: QueueEntry) => {
+    const topic = entry.payload as GrammarTopic;
+    await supabase.from("grammar_topics").upsert({
+      sync_key: syncKey, id: topic.id, name: topic.name,
+      rules: topic.rules, created_at: topic.createdAt ?? new Date().toISOString(),
+    });
+  });
+
+  registerProcessor("voiceSettings", async (entry: QueueEntry) => {
+    await supabase.from("user_settings").upsert({
+      sync_key: syncKey, voice_settings: entry.payload,
+    });
+  });
 }
 
 export async function pullFromKey(key: string): Promise<number> {
