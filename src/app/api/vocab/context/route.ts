@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { callWithFallback } from "@/lib/providers";
+import { callTask } from "@/lib/ai-tasks";
 
 const FORMAT_PROMPTS: Record<string, string> = {
   mini_story: "a short story (3-4 sentences)",
@@ -23,6 +23,6 @@ export async function POST(req: Request) {
 Mark each target word with **bold** formatting.
 Return only the text, no explanation.`;
 
-  const { text } = await callWithFallback(prompt);
+  const { text } = await callTask({ task: "vocab-context", prompt });
   return NextResponse.json({ text });
 }

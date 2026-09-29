@@ -1,5 +1,5 @@
 import { generateWords } from "@/lib/gemini";
-import { callWithFallback } from "@/lib/providers";
+import { callTask } from "@/lib/ai-tasks";
 import { NextRequest, NextResponse } from "next/server";
 
 const NO_STORE = { "Cache-Control": "no-store" };
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   try {
     let resolvedProviderId = "";
     const generateFn = async (prompt: string) => {
-      const result = await callWithFallback(prompt, provider, disabledProviders);
+      const result = await callTask({ task: "word-generation", prompt, provider, disabledProviders });
       resolvedProviderId = result.providerId;
       return result.text;
     };

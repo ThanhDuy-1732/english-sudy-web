@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callWithFallback } from "@/lib/providers";
+import { callTask } from "@/lib/ai-tasks";
 import { parseAiJson } from "@/lib/ai-json";
 import { buildSpeakingAnchorBlock } from "@/lib/grading/anchors";
 import { z } from "zod";
@@ -70,7 +71,7 @@ Return ONLY JSON:
   "newVocabulary": ["..."]
 }`;
 
-  const { text, providerId } = await callWithFallback(prompt, GRADING_PROVIDER, undefined, GRADING_OPTS);
+  const { text, providerId } = await callTask({ task: "speaking-grade", prompt, temperature: GRADING_OPTS.temperature });
 
   const parsed = await parseAiJson(text, FeedbackSchema, {
     repair: (err) =>
