@@ -12,6 +12,14 @@ export interface WritingFeedbackShape {
   nextFocus: string;
 }
 
+export interface WritingDraft {
+  version: number;
+  content: string;
+  wordCount: number;
+  feedback: WritingFeedbackShape;
+  createdAt: string;
+}
+
 export interface WritingRecord {
   id: string;
   kind: WritingKind;
@@ -20,6 +28,7 @@ export interface WritingRecord {
   content: string;
   wordCount: number;
   feedback: WritingFeedbackShape;
+  versions?: WritingDraft[];
   createdAt: string;
   updatedAt?: string;
 }
@@ -43,6 +52,25 @@ export function saveWriting(r: WritingRecord): void {
   localStorage.setItem(KEY, JSON.stringify(all.slice(0, MAX)));
   localStorage.setItem("lastWritingAt", r.createdAt);
   void pushWriting(updated);
+}
+
+export function addWritingVersion(id: string, draft: Omit<WritingDraft, "version">): void {
+  if (typeof window === "undefined") return;
+  const all = getWriting();
+  const record = all.find((r) => r.id === id);
+  if (!record) return;
+  const versions = record.versions ?? [];
+  const updated: WritingRecord = {
+    ...record,
+    content: draft.content,
+    wordCount: draft.wordCount,
+    feedback: draft.feedback,
+    updatedAt: new Date().toISOString(),
+    versions: [...versions, { ...draft, version: versions.length + 1 }],
+  };
+  const rest = all.filter((r) => r.id !== id);
+  rest.unshift(updated);
+  localStorage.setItem(KEY, JSON.stringify(rest.slice(0, MAX)));
 }
 
 export async function pushWriting(r: WritingRecord): Promise<void> {

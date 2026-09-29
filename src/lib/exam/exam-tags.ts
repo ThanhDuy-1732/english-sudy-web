@@ -64,8 +64,9 @@ export function selectAdaptiveItems<T extends { tags?: string[] }>(
   const tagMap = new Map(getTagAccuracies().map((t) => [t.tag, t.accuracy]));
 
   function score(item: T): number {
-    if (!item.tags?.length) return 50;
-    const accs = item.tags.map((t) => tagMap.get(t) ?? 50);
+    // No tag data → treat as normal (not weak, not strong)
+    if (!item.tags?.length) return 70;
+    const accs = item.tags.map((t) => tagMap.get(t) ?? 70);
     return accs.reduce((s, a) => s + a, 0) / accs.length;
   }
 

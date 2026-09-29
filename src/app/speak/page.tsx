@@ -50,6 +50,26 @@ export default function SpeakPage() {
         </div>
       </section>
 
+      <section>
+        <h2>Công cụ</h2>
+        <div className="tools-list">
+          <Link href="/speak/shadowing" className="tool-card">
+            <span className="emoji">🎯</span>
+            <div>
+              <p className="title">Shadowing</p>
+              <p className="desc">Nghe và lặp lại câu mẫu để luyện phát âm</p>
+            </div>
+          </Link>
+          <Link href="/speak/history" className="tool-card">
+            <span className="emoji">📋</span>
+            <div>
+              <p className="title">Lịch sử</p>
+              <p className="desc">Xem lại các bài nói và điểm số</p>
+            </div>
+          </Link>
+        </div>
+      </section>
+
       <style jsx>{`
         .speak-page { max-width: 640px; margin: 0 auto; padding: 1.5rem; }
         h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; }
@@ -66,6 +86,12 @@ export default function SpeakPage() {
         .ielts-card .emoji { font-size: 1.5rem; }
         .ielts-card .title { font-weight: 600; margin-bottom: 0.2rem; font-size: 0.95rem; }
         .ielts-card .desc { font-size: 0.8rem; color: #6c757d; }
+        .tools-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        .tool-card { display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; text-decoration: none; color: inherit; transition: border-color 0.15s; }
+        .tool-card:hover { border-color: #0d6efd; background: #e8f0fe; }
+        .tool-card .emoji { font-size: 1.5rem; }
+        .tool-card .title { font-weight: 600; margin-bottom: 0.2rem; font-size: 0.95rem; }
+        .tool-card .desc { font-size: 0.8rem; color: #6c757d; }
         @media (max-width: 480px) { .scenarios-grid { grid-template-columns: 1fr; } }
       `}</style>
     </div>

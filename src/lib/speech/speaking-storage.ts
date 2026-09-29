@@ -10,6 +10,7 @@ export interface SpeakingRecord {
   durationSec: number;
   feedback: SpeakingFeedback;
   audioId?: string;
+  retryOfId?: string;
   createdAt: string;
   updatedAt?: string;
 }
