@@ -6,7 +6,7 @@ import { generatePlan, type PlanBlock } from "@/lib/plan/generate-plan";
 import { getWordsForReview } from "@/lib/storage";
 import { getAttempts, getExamSettings } from "@/lib/exam/exam-storage";
 import { getMistakes as getUnifiedMistakes } from "@/lib/mistakes";
-import { getCachedMastery } from "@/lib/mastery";
+import { recomputeMastery } from "@/lib/mastery-all";
 
 const BUDGET_OPTIONS = [15, 30, 60] as const;
 
@@ -69,7 +69,7 @@ export default function TodayPage() {
     const blocks = generatePlan({
       dueWords,
       unifiedMistakes: getUnifiedMistakes(),
-      skillMastery: getCachedMastery(),
+      skillMastery: recomputeMastery(),
       attempts,
       lastSpeakingAt,
       lastWritingAt,

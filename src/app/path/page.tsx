@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { getProfile } from "@/lib/profile";
-import { getCachedMastery } from "@/lib/mastery";
+import { recomputeMastery } from "@/lib/mastery-all";
 import { getTopCategories } from "@/lib/mistakes";
 
 interface PathItem {
@@ -15,7 +15,7 @@ interface PathItem {
 
 function buildPath(): PathItem[] {
   const profile = getProfile();
-  const mastery = getCachedMastery();
+  const mastery = recomputeMastery();
   const topMistakes = getTopCategories(undefined, 3);
 
   const items: PathItem[] = [];
