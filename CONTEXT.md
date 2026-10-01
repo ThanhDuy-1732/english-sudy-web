@@ -26,18 +26,30 @@ Next.js 14 App Router · TypeScript · Tailwind CSS · Jest (jsdom) · Supabase 
 | `/exam` | `src/app/exam/page.tsx` | Exam dashboard — chọn TOEIC/IELTS, level, drill/mock |
 | `/exam/drill/[part]` | `src/app/exam/drill/[part]/page.tsx` | Luyện 1 part (RC5/RC6/RC7/LC2/LC3/LC4/READ_P3/LISTEN_S1); records an exam session with part metadata and result totals |
 | `/exam/mock` | `src/app/exam/mock/page.tsx` | Full mock test rút gọn với countdown timer; records an exam session with mock metadata and result totals |
-| `/exam/mistakes` | `src/app/exam/mistakes/page.tsx` | Sổ lỗi — filter, resolve, drill lại |
+| `/exam/mistakes` | `src/app/exam/mistakes/page.tsx` | Sổ lỗi exam: `getExamMistakes()` (unified, `source` `exam:*`), filter, resolve dùng chung với `/mistakes`, badge "sai N lần", drill lại; chạy `runMistakeMigration()` khi tải |
 | `/speak` | `src/app/speak/page.tsx` | Chọn scenario giao tiếp hoặc IELTS Speaking part |
 | `/speak/roleplay/[id]` | `src/app/speak/roleplay/[id]/page.tsx` | Roleplay hội thoại đa lượt với AI; speaking session ends on user/end-of-turn completion |
 | `/speak/ielts/[part]` | `src/app/speak/ielts/[part]/page.tsx` | IELTS Speaking P1/P2/P3 — mic hoặc nhập text; speaking session ends when grading returns, retry starts a new session |
 | `/write` | `src/app/write/page.tsx` | Chọn dạng bài viết IELTS/TOEIC |
-| `/write/task/[id]` | `src/app/write/task/[id]/page.tsx` | Editor + timer + word count; writing session ends after grading result is saved, cancels on early exit |
-| `/write/result/[id]` | `src/app/write/result/[id]/page.tsx` | Kết quả chấm — annotated essay + model answer |
-| `/today` | `src/app/today/page.tsx` | Kế hoạch học tự động dựa trên điểm yếu + SRS debt |
+| `/write/task/[id]` | `src/app/write/task/[id]/page.tsx` | Editor + wall-clock timer + word count + per-task local draft recovery; validates HTTP/feedback before saving; opens result by persisted record UUID; writing session ends after grading result is saved, cancels on early exit |
+| `/write/result/[id]` | `src/app/write/result/[id]/page.tsx` | Kết quả chấm — annotated essay + model answer; reads saved record by UUID (survives PWA restart), with sessionStorage fallback for legacy task-ID URLs |
+| `/today` | `src/app/today/page.tsx` | Kế hoạch học tự động từ `generatePlan` (SRS debt, điểm yếu exam, lỗi chưa xử lý, grammar mastery, nhắc speaking/writing) |
+| `/path` | `src/app/path/page.tsx` | Lộ trình: learning profile + mastery 6 kỹ năng (`recomputeMastery()`) + top nhóm lỗi; link tới quiz/mistakes |
+| `/mistakes` | `src/app/mistakes/page.tsx` | Sổ lỗi hợp nhất (`unifiedMistakes`) — lọc theo skill/status, đổi status, resolve |
+| `/library` | `src/app/library/page.tsx` | Tìm kiếm xuyên từ vựng / lỗi / speaking / writing |
+| `/vocab/quiz` | `src/app/vocab/quiz/page.tsx` | Quiz điền từ trên từ đã học (`/api/generate-fillblank`); ghi session |
+| `/vocab/context` | `src/app/vocab/context/page.tsx` | Luyện từ trong ngữ cảnh (story/dialogue/email/workplace) qua `/api/vocab/context` |
+| `/grammar/quiz` | `src/app/grammar/quiz/page.tsx` | Quiz ngữ pháp nhiều câu; ghi `grammarAttempts`, lỗi → `unifiedMistakes`, session; ưu tiên sub-rule yếu/bookmark |
+| `/speak/shadowing` | `src/app/speak/shadowing/page.tsx` | Nghe–nhắc lại: ghi âm → Whisper → lưu `SpeakingRecord` (mode `shadowing`) |
+| `/speak/history` | `src/app/speak/history/page.tsx` | Lịch sử speaking + nghe lại audio (IndexedDB) |
+| `/write/history` | `src/app/write/history/page.tsx` | Lịch sử bài viết; mở rewrite |
+| `/write/rewrite/[id]` | `src/app/write/rewrite/[id]/page.tsx` | Viết lại đoạn sai; chấm qua `/api/exam/grade-open`; lỗi → `unifiedMistakes` |
+
+**Navbar** (`AppNavigation.tsx`, mounted in `layout.tsx`): compact native `<details>` menu below `lg`, full links on desktop. Links include `/`, `/review`, `/today`, `/grammar`, `/exam`, `/speak`, `/write`, `/history`, `/diary`, `/activity`, `/path`, `/library`, `/mistakes`, `/stats`, `/vocab/context`, `/import`, `/settings`. Settings remains reachable on phones; menu entries have ≥44px touch targets. Layout uses `viewport-fit=cover` and safe-area padding; mobile form fields use ≥16px text.
 
 ---
 
-## API Routes (all POST)
+## API Routes (POST, trừ `/api/providers` và `/api/admin/metrics` là GET)
 
 | Route | Body | Response |
 |---|---|---|
@@ -56,12 +68,14 @@ Next.js 14 App Router · TypeScript · Tailwind CSS · Jest (jsdom) · Supabase 
 | `/api/exam/generate-item` | `{ kind, part, level, topic? }` | `ExamItem` (zod validated, 1 auto-repair) |
 | `/api/exam/grade-open` | `{ question, userAnswer, correctAnswer }` | `{ correct, feedback }` |
 | `/api/exam/explain` | `{ question, userAnswer, correctAnswer, explanation? }` | `{ explanation }` |
-| `/api/speech/transcribe` | FormData `audio` (webm) | `{ text, durationSec, segments[] }` via Groq Whisper |
+| `/api/speech/transcribe` | FormData `audio` (WebM/MP4/M4A/Ogg; nonempty, max 25 MiB) | `{ text, durationSec, segments[] }` via Groq Whisper |
 | `/api/speech/grade` | `{ task, transcript, durationSec }` | `SpeakingFeedback` (4 band scores) |
 | `/api/speak/roleplay` | `{ scenario, history, userText }` | `{ reply, correction, goalAchieved, suggestedReplies }` |
 | `/api/write/grade` | `{ kind, prompt, content, chartData? }` | `WritingFeedback` (4 bands + annotations + model answer) |
+| `/api/vocab/context` | `{ words: string[], format?: "mini_story"\|"dialogue"\|"email"\|"workplace" }` | `{ text }` (từ mục tiêu in **đậm**); 400 nếu `words` rỗng |
+| `/api/admin/metrics` | GET, header `x-admin-secret` = `ADMIN_SECRET` | Metrics AI tổng hợp theo task; 503 nếu chưa set `ADMIN_SECRET`, 401 nếu sai |
 
-All AI-calling routes pass `provider` + `disabledProviders` to `callWithFallback`. They set header `X-Provider-Used` in the response. Actual AI calls live in `src/lib/providers/`.
+Routes gọi AI dùng `callWithFallback` (qua `provider` + `disabledProviders`) hoặc `callTask` (task router, xem mục AI Provider System) — **chỉ 4 route dùng `callTask`**: `generate-words`, `speech/grade`, `write/grade`, `vocab/context`. Các route còn lại gọi `callWithFallback` trực tiếp (không có metrics). Chúng set header `X-Provider-Used`. Lời gọi AI thật nằm ở `src/lib/providers/`.
 `GRADING_PROVIDER` env var pins a specific provider for band scoring (stability). `GROQ_API_KEY` + `GROQ_WHISPER_MODEL` env vars for STT.
 
 ---
@@ -170,6 +184,52 @@ interface GrammarTopic {
 
 `STATIC_GRAMMAR_TOPICS` contains 8 built-in topics: Tenses, Modal Verbs, Conditionals, Passive Voice, Relative Clauses, Reported Speech, Articles, Prepositions.
 
+### UnifiedMistake (`src/lib/mistakes.ts`)
+```ts
+type MistakeSkill = "vocabulary"|"grammar"|"reading"|"listening"|"speaking"|"writing";
+type MistakeStatus = "new" | "reviewing" | "resolved";
+interface UnifiedMistake {
+  id: string; skill: MistakeSkill; category: string; source: string;
+  userAnswer: string; correctAnswer: string; explanation: string;
+  occurrenceCount: number; status: MistakeStatus;
+  createdAt: string; updatedAt: string; reviewedAt?: string;   // updatedAt = LWW key
+  exam?: { itemId; questionId; part: ExamPart; type: QuestionType; prompt };   // chỉ lỗi từ exam engine
+}
+type ExamMistake = UnifiedMistake & { exam: NonNullable<UnifiedMistake["exam"]> };
+```
+Local key `unifiedMistakes`, max 1000. `addMistake(input)` **dedupes** theo `source + category` trong các lỗi chưa `resolved`: gặp lại thì tăng `occurrenceCount`, không tạo bản ghi mới. Mọi mutation (`addMistake`, `resolveMistake`, `setMistakeStatus`) gọi `pushUnifiedMistake` (fire-and-forget, lỗi → offline queue). `saveMistakes(items)` ghi đè local, **không push** (dùng sau sync merge). Truy vấn: `getMistakes`, `getMistakesBySkill`, `getMistakesByStatus`, `getTopCategories(skill?, limit)`, `getExamMistakes()` / `getUnresolvedExamMistakes()` (lỗi có `exam`), `examPartToSkill(part)`.
+
+**Một sổ lỗi duy nhất**: `unifiedMistakes` là source of truth. `exam-storage.addMistake(entry)` (`@deprecated`, adapter cho `ExamRunner`) chỉ gọi `mistakes.addMistake` kèm `exam`, không còn ghi `mistakeLog`/`pushMistake`; resolve dùng `mistakes.resolveMistake` ở mọi UI. `pruneBank` pin theo `getUnresolvedExamMistakes()`. Dedupe theo `source = exam:<part>:<questionId>` + `category = type`: sai lặp lại tăng `occurrenceCount`; resolve rồi sai lại tạo bản ghi mới. Nguồn khác ghi thẳng unified: `/grammar/quiz`, `/write/rewrite/[id]`.
+
+**Migration `mistakeLog` → unified** (`src/lib/mistake-migration.ts`): `migrateLegacyMistakes(legacy, unified)` thuần/deterministic (nhóm theo câu+type+resolved, id = id legacy mới nhất, không cộng đôi lỗi mà dual-write cũ đã đếm, propagate resolve nếu unified không mới hơn). `runMistakeMigration(remote?)` chạy đúng một lần, cờ riêng cho local (`mistakeLogMigrated`) và remote (`mistakeLogRemoteMigrated`), backup `mistakeLogBackup`, không xoá `mistakeLog`; gọi từ `SyncInit`, `initSync` (remote) và hai trang `/exam`, `/exam/mistakes`. `needsRemoteMistakeMigration()` cho `initSync`.
+
+### LearningProfile (`src/lib/profile.ts`)
+```ts
+interface LearningProfile {
+  goal: "communication"|"toeic"|"ielts"|"vocabulary"|"mixed";   // default "mixed"
+  currentLevel: 1|2|3|4|5;          // default 2
+  dailyStudyMinutes: number;        // default 30
+  targetToeicScore?: number; targetIeltsScore?: number; targetDate?: string;
+  shortcutsEnabled: boolean;        // default true; tắt phím tắt ExamRunner
+}
+```
+`getProfile()` (merge defaults, SSR-safe), `saveProfile`, `updateProfile(partial)`. Local key `learningProfile`. Không sync lên Supabase.
+
+### Grammar progress & bookmarks
+- `grammar-progress.ts`: `GrammarAttempt {id, topicId, subRuleId, correct, at}` (key `grammarAttempts`, max 2000); `recordGrammarAttempt`, `getGrammarProgress(topicId, subRuleId)`, `getTopicProgress`, `getWeakSubRules(threshold=70)`. `GrammarProgress.mastery` = accuracy 0–100. Sau attempt cập nhật mastery `grammar` trong cache.
+- `grammar-bookmarks.ts`: key `grammarBookmarks`; `getBookmarks`, `isBookmarked`, `toggleBookmark(topicId, subRuleId)`.
+
+### Exam tags (`src/lib/exam/exam-tags.ts`)
+Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTagAccuracies`, `getWeakTags(threshold=60)` (cần ≥3 mẫu). `selectAdaptiveItems(items, …)` trộn đề 70% tag yếu / 20% thường / 10% mạnh cho drill.
+
+### Streak, weekly report, mastery timeline
+- `streak.ts`: `computeStreak(sessions, refDate?)` → `{currentStreak, longestStreak, activeDaysThisWeek}` (ngày local, dựa trên `learningSessions`).
+- `weekly-report.ts`: `computeWeeklyReport(sessions, attempts)` → `{studyMinutes, sessions, wordsLearned, srsAccuracy|null, examAccuracy|null}` (tuần bắt đầu thứ Hai).
+- `mastery-timeline.ts`: key `masteryTimeline` — `{date, skill, mastery 0–100}[]`, 1 snapshot/kỹ năng/ngày. `recordMasterySnapshot`, `getMasteryTimeline(skill)`, `getSkillTrend(skill)` → up/down/stable.
+
+### Daily plan (`src/lib/plan/generate-plan.ts`)
+`generatePlan(ctx: PlanContext): PlanBlock[]` — thuần (không đọc localStorage; caller truyền `dueWords`, `unifiedMistakes`, `skillMastery`, `attempts`, `lastSpeakingAt`, `lastWritingAt`, `settings`, `availableMin`). Thứ tự ưu tiên: (1) SRS nếu có từ đến hạn → (2) kiểu câu exam yếu nhất, 14 ngày, ≥10 mẫu → (3) ≥5 lỗi chưa resolved → (3b) grammar nếu mastery < 60 → (4) speaking nếu >2 ngày → (5) writing nếu >5 ngày → (6) từ mới nếu còn ngân sách phút. `PlanBlock.kind`: `srs_review | new_words | exam_drill | speaking | writing | grammar | mistakes`.
+
 ---
 
 ## localStorage Keys
@@ -189,13 +249,27 @@ interface GrammarTopic {
 | `disabledProviders` | `string[]` | Opt-out provider ids |
 | `examBank` | `Record<string, ExamItem[]>` | Cache đề exam, key = `"TOEIC:RC5:3"`. Max 30/key |
 | `examAttempts` | `ExamAttempt[]` | 100 attempts gần nhất |
-| `mistakeLog` | `MistakeEntry[]` | Sổ lỗi |
+| `mistakeLog` | `MistakeEntry[]` | **Legacy**: chỉ đọc để migration một lần, không còn ghi |
+| `mistakeLogBackup` | string | Bản sao nguyên văn `mistakeLog` trước migration |
+| `mistakeLogMigrated` · `mistakeLogRemoteMigrated` | `"1"` | Cờ migration local / remote (`mistake_log`) đã chạy |
 | `examSettings` | `ExamSettings` | Primary exam, target score, level, listening rate |
 | `dailyPlan` | `{ date, blocks }` | Kế hoạch `/today` — regenerate mỗi ngày |
 | `lastSpeakingAt` | ISO string | Để /today nhắc luyện nói sau 2 ngày |
 | `lastWritingAt` | ISO string | Để /today nhắc luyện viết sau 5 ngày |
 | `speakingSessions` | `SpeakingRecord[]` | IELTS speaking session history; newest-first, max 200 |
+| `writingTaskDraft:<taskId>` | `{content: string, deadline: number}` | Local unfinished writing task; saved synchronously on edits/start, restored on mount, cleared only after successful grading and local result save |
 | `writingSubmissions` | `WritingRecord[]` | IELTS/TOEIC writing submission history; newest-first, max 100 |
+| `unifiedMistakes` | `UnifiedMistake[]` | Sổ lỗi hợp nhất 6 kỹ năng, max 1000 |
+| `learningProfile` | `LearningProfile` | Goal, level, phút/ngày, mục tiêu điểm, bật/tắt phím tắt |
+| `skillMasteryCache` | `SkillMastery[]` | Cache mastery 6 kỹ năng; `recomputeMastery()` ghi lại mỗi lần gọi |
+| `masteryTimeline` | `MasterySnapshot[]` | Snapshot mastery theo ngày/kỹ năng |
+| `grammarAttempts` | `GrammarAttempt[]` | Lịch sử làm bài grammar, max 2000 |
+| `grammarBookmarks` | `GrammarBookmark[]` | Sub-rule đã bookmark |
+| `examTagAccuracies` | `{tag, correct, total}[]` | Accuracy theo tag cho drill thích ứng |
+| `reportedQuestions` | `{questionId, itemId, reason, note, reportedAt}[]` | Câu hỏi exam người dùng báo lỗi; max 200, chỉ local |
+| `syncQueue` | `QueueEntry[]` | Hàng đợi offline retry (xem Supabase Sync) |
+| `syncFailedQueue` | `QueueEntry[]` | Mục vượt `MAX_RETRIES = 5` |
+| `theme` | `"system"\|"light"\|"dark"` | Cài đặt trong Settings; script inline ở `layout.tsx` đặt `data-theme` trên `<html>` để tránh nháy |
 
 ---
 
@@ -209,9 +283,14 @@ interface GrammarTopic {
 
 **Registry** (`src/lib/providers/index.ts`):
 - Built from env vars at module load time
-- `callWithFallback(prompt, preferredId?, disabledIds?)` — tries preferred first, falls back on 429/503
+- `callWithFallback(prompt, preferredId?, disabledIds?, opts?: GenerateOpts)` — tries preferred first, falls back on 429/503. `GenerateOpts = { temperature? }`
 - `getRegisteredProviders()` — returns all configured providers
 - Active providers: whichever env keys are set in `.env.local`
+
+**Task router** (`src/lib/ai-tasks.ts`): `callTask({ task, prompt, provider?, disabledProviders?, temperature? })` → `{ text, providerId }`. Bọc `callWithFallback`, chọn provider theo `TASK_PROVIDER_MAP` (bảng tĩnh; chỉ `speaking-grade` và `writing-grade` ghim theo `GRADING_PROVIDER`) và ghi metric mỗi lần gọi. `AITaskName`: `word-generation`, `sentence-generation`, `grammar-generation`, `grammar-explanation`, `exam-generation`, `exam-explanation`, `speaking-roleplay`, `speaking-grade`, `writing-grade`, `writing-feedback`, `vocab-context`. Mới 4 route dùng (xem API Routes).
+- `ai-prompts.ts` — `PROMPTS: Partial<Record<AITaskName, PromptDefinition>>`, `getPrompt(task)`; chưa phủ hết task.
+- `ai-metrics.ts` — `recordMetric`, `getMetrics`, `getAggregatedMetrics`, `clearMetrics`; **in-memory theo server instance**, mất khi cold start. Đọc qua `GET /api/admin/metrics`.
+- `ai-json.ts` — `stripFences`, `parseAiJson(schema, …)` (Zod validate; dùng cho exam item).
 
 **Supported providers** (env key → default model):
 - `GEMINI_API_KEY` → `gemini-flash-latest`
@@ -265,19 +344,31 @@ Built-in topics (`"Daily Communication"`, `"TOEIC"`) are hardcoded in `TopicSele
 - `getCalendarData(weeks)` → `CalendarDay[]` — heatmap levels 0–3
 - `getStudyTimePerDay(days)` → `DailyStudyTime[]` — reads `localStorage["studyTime"]`, converts seconds → rounded minutes, fills missing days with 0
 
+- `getWordsForDate(date)` — từ học trong ngày local `date`
+
 ```ts
 interface DailyStudyTime { date: string; minutes: number; }
 ```
+
+`src/lib/stats-skills.ts`: `weeklyBands(weeks = 12)` → band L/R/S/W theo tuần (TOEIC chuẩn hoá về 0–9); `skillRadar()` → accuracy 4 kỹ năng từ session gần nhất. Xem thêm streak / weekly report / mastery timeline ở mục Data Models.
+
+---
+
+## Skill Mastery (`src/lib/mastery.ts`, `src/lib/mastery-all.ts`)
+
+`mastery.ts` holds the pure scoring functions (`computeSkillMastery`, decay-weighted accuracy) and the `skillMasteryCache` localStorage read/write (`getCachedMastery`/`saveMasteryCache`). It only knows about attempts `{ correct, at }[]` per category — it has no knowledge of where those attempts come from.
+
+`grammar-progress.ts` computes and caches the `grammar` skill itself (called after quiz attempts).
+
+`mastery-all.ts`'s `recomputeMastery()` computes the other five skills (`vocabulary`, `reading`, `listening`, `speaking`, `writing`) from their live source data each time it's called — `exam-storage.ts` attempts split by TOEIC/IELTS part into reading vs listening, `speaking-storage.ts`/`writing-storage.ts` records (feedback ≥ 6/9 = correct), and `learnedWords` (`mastery` star ≥ 3 = correct) — merges in the cached `grammar` entry, and persists the merged cache. `/today` and `/path` call `recomputeMastery()` rather than reading the cache directly, so a skill only appears once it has data.
 
 ---
 
 ## Spaced Repetition (`src/lib/storage.ts`)
 
 - `getWordsForReview()` — returns words where `nextReviewAt <= now`
-- `updateWordReview(word, remembered)`:
-  - remembered=true: `interval = min(interval*2, 30)`, `mastery = min(mastery+1, 5)`
-  - remembered=false: `interval = 1`, `mastery = max(mastery-1, 0)`
-  - `nextReviewAt = now + interval * 86400000`
+- `updateWordReviewSm2(word, quality: 0|3|4|5)` — **đường chính**, dùng SM-2 trong `src/lib/srs.ts` (EF ≥ 1.3; quality < 3 → interval 1; `nextReviewAt = now + interval * 86400000`), cập nhật `updatedAt`, push Supabase.
+- `updateWordReview(word, remembered)` — **legacy**, giữ để tương thích: remembered → `interval = min(interval*2, 30)`, `mastery+1`; quên → `interval = 1`, `mastery-1`.
 
 ---
 
@@ -289,26 +380,35 @@ No authentication. Identity = `syncKey` (UUID in localStorage, auto-generated).
 - `learned_words` — mirrors `LearnedWord` shape; includes `easiness`, `repetitions`, `updated_at`
 - `exam_items` — shared bank (no `sync_key`); `{ id, exam_type, part, level, payload: jsonb, flagged }`
 - `exam_attempts` — per-user; `{ id, sync_key, exam_type, mode, parts, started_at, finished_at, answers, score, updated_at }`
-- `mistake_log` — per-user; `{ id, sync_key, payload: jsonb, resolved, updated_at }`
+- `mistake_log` — per-user; `{ id, sync_key, payload: jsonb, resolved, updated_at }`. **Legacy**: không còn được ghi; `initSync` chỉ pull một lần để migrate sang `unified_mistakes`
 - `speaking_sessions` — per-user; `{ id, sync_key, payload: jsonb, created_at, updated_at }`
 - `writing_submissions` — per-user; `{ id, sync_key, payload: jsonb, created_at, updated_at }`
 - `daily_challenges` — mirrors `DailyChallenge`
 - `custom_topics` — `{ sync_key, topic }`
 - `grammar_topics` — `{ sync_key: uuid, id, name, rules: jsonb, created_at }`
 - `user_settings` — `{ sync_key, voice_settings: jsonb }`
+- `unified_mistakes` — per-user; `{ sync_key: uuid, id, payload: jsonb, updated_at }`, PK `(sync_key, id)`, RLS by `x-sync-key` header (see `supabase/migrations/20260930120000_unified_mistakes.sql`)
+
+All per-user tables (`learned_words`, `custom_topics`, `daily_challenges`, `grammar_topics`, `exam_attempts`, `mistake_log`, `speaking_sessions`, `writing_submissions`, `unified_mistakes`) have RLS enabled with the `sync_key_rls` policy (`sync_key::text = x-sync-key header`). `exam_items` is an intentionally shared, non-per-user content bank and has no RLS. `exam_attempts`/`mistake_log`/`speaking_sessions`/`writing_submissions` got RLS in `supabase/migrations/20260930130000_rls_gap_fix.sql` (they predated the RLS convention). Migration files dùng timestamp `YYYYMMDDHHMMSS` (bản đầu `001`–`005` giữ tên cũ). Supabase local (CLI + Docker) dùng cổng tuỳ chỉnh 543xx trong `supabase/config.toml`.
 
 **Operations**:
-- `initSync()` — bidirectional sync on app load; **pull-before-push LWW merge** for words (`updatedAt` wins; tie → local; only diff pushed); `completed=true` wins for challenges; pulls `exam_attempts` and `mistake_log` into localStorage. `src/lib/sync-merge.ts` provides `mergeLww<T>()` and `stamp()`.
-- `pushExamItem(item)` / `pushAttempt(attempt)` / `pushMistake(mistake)` — fire-and-forget push to Supabase
+- `initSync()` — bidirectional sync on app load; **pull-before-push LWW merge** for words, `exam_attempts`, and `unified_mistakes` (`updatedAt` wins; tie → local; only diff pushed); `completed=true` wins for challenges. `src/lib/sync-merge.ts` provides `mergeLww<T>()` and `stamp()`.
+- `pushExamItem(item)` / `pushAttempt(attempt)` / `pushUnifiedMistake(mistake)` — push to Supabase; on failure, `enqueue()`s into the offline retry queue (`src/lib/sync-queue.ts`) instead of silently dropping
 - `pullExamItems(kind, part, level, limit?)` — pull from shared `exam_items` bank (excludes flagged)
-- `pushWord(entry)` — fire-and-forget upsert
-- `deleteWord(word)` — fire-and-forget delete
-- `pushTopic(topic)` — fire-and-forget upsert
-- `pushGrammarTopic(topic)` — fire-and-forget upsert to `grammar_topics`
-- `pushChallenge(record)` — fire-and-forget upsert
+- `pushWord(entry)` — upsert, enqueues on failure
+- `deleteWord(word)` — delete, enqueues (op: "delete") on failure
+- `pushTopic(topic)` — upsert to `custom_topics`, enqueues on failure
+- `pushGrammarTopic(topic)` — upsert to `grammar_topics`, enqueues on failure
+- `pushChallenge(record)` — upsert, enqueues on failure
 - `pullFromKey(key)` — one-way pull from another device's sync key; returns count of new words added
 
 `initSync()` also upserts local user-generated grammar topics and pulls missing remote grammar topics into `localStorage["grammarTopics"]`.
+
+**Offline queue** (`src/lib/sync-queue.ts`): `enqueue()`/`drainQueue()`/`registerProcessor()` back the retry path above; `SyncInit` component (`src/components/SyncInit.tsx`, mounted in `layout.tsx` cạnh `SyncInitializer`) calls `registerSyncProcessors()` and `initSyncQueueManager()` (drain on reconnect). Mục đang gửi vẫn nằm trong localStorage cho đến khi processor thành công. Mỗi lượt drain chỉ thử một lần cho mỗi mục; dừng ở lỗi đầu để giữ thứ tự. Lỗi tăng `retryCount`, đặt `nextRetryAt` (15s exponential backoff, cap 5 minutes); đạt `MAX_RETRIES = 5` thì chuyển sang `syncFailedQueue` và giữ dữ liệu đến khi người dùng bấm **Thử đồng bộ lại** trên `SyncStatusBadge`. Mục thiếu processor được giữ lại. Manager drain khi online, app visible và mỗi 15s. Processor `mistakeLog` được giữ chỉ để drain các mục cũ còn trong queue (không còn mục mới). `QueueEntity` gồm 13 loại (learnedWords, learningSessions, examAttempts, mistakeLog, unifiedMistakes, grammarAttempts, speakingSessions, writingSubmissions, dailyChallenges, grammarTopics, voiceSettings, customTopics, examItems). `getSyncStatus()` → `offline` (navigator offline) › `syncing` (drain active) › `failed` (có mục failed) › `pending` (queue không rỗng) › `synced`; `SyncStatusBadge` hiển thị trạng thái này.
+
+**Error handling**: `sync-request.ts` checks Supabase resolved `{error}` responses as well as rejected requests. All `sync.ts` writes/processors use it; `initSync` does not set `lastSyncedAt` on error and marks initialization errors for the sync badge. Pending writes/deletions are drained before an initial pull; successful drain reruns `initSync`, preventing pending deletions from being restored by remote data. Speaking/writing pushes now enqueue failures too, with corresponding retry processors; rewriting a saved writing version also pushes the updated record.
+
+**LWW chưa phủ**: speaking/writing/grammar topics/settings vẫn upsert kiểu cũ (không `mergeLww`).
 
 **Key alias**: `"thankz"` resolves to a hardcoded UUID (for easy sharing).
 
@@ -324,7 +424,7 @@ Supabase client created per call via `createSupabase(syncKey)` in `src/lib/supab
 2. **`src/lib/gemini.ts`** is a legacy thin wrapper still used by some tests; new routes use `src/lib/providers/`.
 3. **No auth / no user accounts.** All data keyed by `syncKey` (UUID).
 4. **Firebase is hosting only.** No Firebase Firestore/Auth/Functions used. Config in `firebase.json` and `.firebaserc`.
-5. **PWA**: offline support via `public/sw.js`. Manifest at `src/app/manifest.ts`.
+5. **PWA**: production-only service worker `public/sw.js`, manifest `src/app/manifest.ts`. Core offline assets are mandatory; all static learning pages and built-in dynamic tasks are best-effort precached, so an optional route outage does not prevent installation. Navigations are network-first (5s timeout), JS/CSS/icons cache-first. HTML is cached by pathname + search; RSC/Flight responses are never mixed with HTML, and successful Next Link/RSC requests warm the separate full-document cache. Next 14 falls back to document navigation if Flight fails offline. Visited pages cache their JS/CSS too. Asset downloads are deduplicated; retain the previous cache for older tabs. AI/API requests are not cached; offline supports saved vocab review, static grammar, cached exam questions, local history and writing drafts. See `docs/pwa.md`.
 
 ---
 
@@ -354,10 +454,17 @@ Supabase client created per call via `createSupabase(syncKey)` in `src/lib/supab
 | `charts/WeaknessRadar` | Radar chart — exam accuracy % grouped by QuestionType |
 | `charts/BandTimelineChart` | Line chart — weekly speaking/writing/listening/reading band scores (last 12 weeks) |
 | `charts/SkillRadar` | Radar chart — L/R/S/W skill accuracy % from recent sessions |
-| `ExamRunner` | Stateful exam engine — phases: `loading → ready → running → reviewing → done` (+ `error`); accepts `forceComplete` prop to transition directly to reviewing on timer expiry (mock mode); dispatches `LOADING_ERROR` when all API fetches fail |
+| `ExamRunner` | Stateful exam engine — phases: `loading → ready → running → reviewing → done` (+ `error`); falls back to the local bank when offline/API fails (without a topic filter), or displays an error rather than leaving a loading spinner; accepts `forceComplete` prop to transition directly to reviewing on timer expiry (mock mode); dispatches `LOADING_ERROR` when all API fetches fail |
 | `DueBadge` | Client component — live SRS-due word count badge next to "Ôn tập" nav link, updates every 60 s |
 | `DiaryCalendar` | Interactive 26-week heatmap calendar for /diary; purple color levels 0–3; click cell opens DayDrawer |
 | `DayDrawer` | Slide-in right drawer for /diary; shows daily word list (expandable) + study minutes + prev/next nav |
+| `SyncInit` | Đăng ký processors của offline queue và drain khi online lại (khác `SyncInitializer` chạy `initSync()`) |
+| `SyncStatusBadge` | Chỉ báo trạng thái sync (`synced/syncing/pending/offline/failed`) trong Settings; manual retry button for failed queue |
+| `AppNavigation` | Compact mobile menu and desktop links, shared timer and due badges; includes Settings on all viewports |
+| `ServiceWorkerRegistration` | Production worker registration; installs through `beforeinstallprompt` when available, native installation instructions otherwise; standalone detection and optional persistent storage request; offline notice; waiting-worker update button posts `SKIP_WAITING`, reloads only after user action |
+| `exam/AnswerSheet` · `ExamTimer` · `ListeningPlayer` · `PassageReader` · `QuestionCard` | Thành phần của exam engine (grid câu hỏi, countdown, phát TTS, đoạn đọc, thẻ câu hỏi) |
+| `exam/ReportQuestionModal` | Báo câu hỏi lỗi (lý do + ghi chú) → chỉ lưu local vào `reportedQuestions` (max 200); **không** set `flagged` ở `exam_items` và không sync |
+| `ImportWords` · `QuizCard` | Bulk import từ; thẻ quiz dùng chung |
 
 ---
 
@@ -374,7 +481,7 @@ Supabase client created per call via `createSupabase(syncKey)` in `src/lib/supab
 
 ### `TimerContext` (`src/contexts/TimerContext.tsx`)
 
-`TimerContextProvider` wraps inside `ProviderContextProvider` in `layout.tsx`. A single `setInterval` drives all timer state. Exposes via `useTimer()`:
+`TimerContextProvider` wraps inside `ProviderContextProvider` in `layout.tsx`. A single `setInterval` refreshes timer state from wall-clock timestamps. Countdown uses an absolute deadline, catches up on visibility/pageshow, and manual pause freezes its remaining time. Study time counts only while running and visible. Exposes via `useTimer()`:
 
 ```ts
 todaySeconds: number          // total seconds studied today (increments while isRunning)
@@ -391,7 +498,7 @@ stopCountdown()               // cancels countdown without triggering time-up mo
 clearTimeUp()                 // dismisses time-up state, clears countdownTarget
 ```
 
-Persistence: writes `todaySeconds` to `localStorage["studyTime"][YYYY-MM-DD]` with 5 s debounce. Reads on mount to restore today's value.
+Persistence: writes `todaySeconds` to `localStorage["studyTime"][YYYY-MM-DD]` with 5 s debounce, flushes on hidden/pagehide/unmount. Reads on mount to restore today's value. `src/lib/useCountdown.ts` is shared by ExamTimer, writing tasks and IELTS speaking prep/recording; it derives remaining seconds from a deadline and checks visibility/pageshow after suspension. Recording chooses a supported MediaRecorder MIME type, preserves it in Blob/file upload through transcription, releases microphone tracks on failure/unmount, and handles late permission results after disposal.
 
 ---
 

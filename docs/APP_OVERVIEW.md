@@ -1,366 +1,193 @@
-# English Study App — Tài liệu kỹ thuật
+# English Study App — Tổng quan sản phẩm & hiện trạng
 
-> Tài liệu này mô tả kiến trúc, luồng dữ liệu, và kế hoạch phát triển của ứng dụng.
-> Dùng làm context cho các phiên làm việc với AI.
+> Tài liệu tường thuật: ứng dụng làm gì, hoạt động ra sao, đang ở đâu, thiếu gì.
+> **Chi tiết kỹ thuật** (data model, localStorage key, bảng Supabase, route body/response, component map) nằm trong [`CONTEXT.md`](../CONTEXT.md) — không lặp lại ở đây để tránh lệch.
+> Mục đích: dùng làm đầu vào cho phân tích định hướng phát triển.
 >
-> Cập nhật lần cuối: 2026-09-12
+> Cập nhật lần cuối: 2026-10-01 · Nhánh `phase-6-exam-engine` · Batch 1–8 đã code xong · 342 tests / 64 suites pass
 
 ---
 
-## 1. Mục đích ứng dụng
+## 1. Ứng dụng là gì
 
-Ứng dụng học tiếng Anh cá nhân chạy trên web (PWA), hỗ trợ:
+PWA học tiếng Anh cá nhân (1 người dùng, nhiều thiết bị), nhắm tới giao tiếp + TOEIC + IELTS. Không có tài khoản — danh tính là `syncKey` (UUID). Không có backend riêng: mọi lời gọi AI đi qua Next.js API routes server-side.
 
-- **Học từ vựng** theo chủ đề với AI tạo câu ví dụ, bài tập, và kiểm tra
-- **Ôn tập spaced-repetition (SRS)** — từ được lên lịch ôn theo khoảng tăng dần
-- **Học ngữ pháp** với 8 chủ đề tĩnh + chủ đề do AI tạo theo yêu cầu
-- **Theo dõi tiến trình** — thống kê số từ, thời gian học, mastery, streak
-- **Nhật ký học tập** — xem lại từng ngày học gì, học bao lâu
-- **Sync đa thiết bị** qua Supabase (không cần đăng nhập)
+Năng lực hiện có:
 
-Không có backend riêng — mọi AI call đều qua Next.js API routes server-side để giữ API key an toàn.
-
----
-
-## 2. Tech Stack
-
-| Layer | Công nghệ |
+| Mảng | Có gì |
 |---|---|
-| Framework | Next.js 14 App Router, TypeScript |
-| Styling | Tailwind CSS |
-| AI | Google Gemini, Groq, OpenRouter, Mistral, Cohere, HuggingFace (fallback chain) |
-| Storage | `localStorage` (primary) + Supabase (sync) |
-| Hosting | Firebase Hosting |
-| Testing | Jest + @testing-library/react |
-| PWA | Service Worker tại `public/sw.js` |
+| Từ vựng | Sinh từ theo chủ đề, flashcard 4 chế độ (study/write/fill/dictation), bulk import, quiz điền từ, luyện từ trong ngữ cảnh |
+| SRS | SM-2 thật, 4 mức đánh giá, badge số từ đến hạn trên navbar, tóm tắt phiên ôn |
+| Ngữ pháp | 8 chủ đề tĩnh + chủ đề AI sinh, ví dụ/bài tập AI, quiz, bookmark, theo dõi tiến độ từng sub-rule, link sang drill TOEIC Part 5 |
+| Luyện thi | TOEIC/IELTS drill từng part + mock có timer, sổ lỗi, drill thích ứng theo tag yếu, nút báo câu hỏi lỗi (chỉ lưu local), phím tắt |
+| Speaking | IELTS P1/P2/P3 (mic → Whisper → chấm band), roleplay đa lượt, shadowing, lịch sử + nghe lại audio |
+| Writing | IELTS Task 1/2, TOEIC email, chấm 4 tiêu chí + model answer, lịch sử, viết lại (rewrite) |
+| Thích ứng | Sổ lỗi hợp nhất, Skill Mastery Engine, kế hoạch hôm nay (`/today`), lộ trình (`/path`), learning profile |
+| Thống kê | Streak, mastery timeline, báo cáo tuần, band timeline, radar kỹ năng, heatmap, accuracy theo question type |
+| Hạ tầng | Sync LWW qua Supabase, hàng đợi offline có retry, task router + metrics + prompt registry cho AI, dark mode |
 
 ---
 
-## 3. Kiến trúc tổng quan
+## 2. Tech stack
+
+Next.js 14 App Router · TypeScript · Tailwind · Jest + Testing Library · `localStorage` (nguồn chính) + IndexedDB (audio) + Supabase (sync, không auth) · Firebase **chỉ hosting** · PWA (`public/sw.js`) · AI: Gemini, Groq (+ Whisper STT), OpenRouter, Mistral, Cohere, HuggingFace với fallback chain.
+
+---
+
+## 3. Kiến trúc
 
 ```
 Browser
-├── Client Components (React)         ← UI, đọc localStorage
-├── Context Providers
-│   ├── ProviderContext                ← quản lý AI provider đang dùng
-│   └── TimerContext                  ← đồng hồ học tập toàn app
-└── API Routes (server-side only)
-    └── src/app/api/*/route.ts        ← gọi AI, không bao giờ export sang client
+├── Client pages/components   ← đọc/ghi localStorage, IndexedDB
+├── Context: ProviderContext (provider AI đang chọn), TimerContext (đồng hồ học toàn app)
+├── SyncInit / SyncInitializer ← initSync() + drain hàng đợi offline khi online lại
+└── fetch → API routes (server-side only)
+              └── callTask(task, prompt) → callWithFallback → provider
+                    ├── ai-prompts  (prompt registry theo task)
+                    ├── ai-metrics  (ghi latency/lỗi, in-memory)
+                    └── ai-json     (parse + Zod validate, 1 lần auto-repair)
 ```
 
-**Nguyên tắc cứng:** `src/lib/providers/` chỉ được import trong API routes. Client không bao giờ chứa API key.
+Ràng buộc cứng: API key chỉ ở server; `src/lib/providers/` không bao giờ được import từ client component.
+
+### Vòng lặp thích ứng (trục chính của sản phẩm)
+
+```
+Làm bài (vocab / grammar / exam / speaking / writing)
+   → ghi LearningSession          (sessions)
+   → ghi lỗi vào UnifiedMistake   (mistakes: dedupe, occurrenceCount, status new/reviewing/resolved)
+   → recomputeMastery()           (mastery-all: 6 kỹ năng, decay-weighted accuracy, nửa đời 14 ngày)
+   → generatePlan()               (plan: ưu tiên SRS → điểm yếu exam → lỗi chưa xử lý → grammar → speaking → writing → từ mới)
+   → /today, /path hiển thị
+```
+
+Tính toán mastery/plan là **deterministic, không gọi AI**; AI chỉ dùng để sinh nội dung và chấm bài.
 
 ---
 
-## 4. Các trang
+## 4. Các trang (30 trang)
 
-### `/` — Flashcard (trang chính)
-
-Luồng chính của app:
-1. Người dùng chọn chủ đề (preset hoặc tự thêm)
-2. Nhấn **Tạo từ** → POST `/api/generate-words` → trả `{ word, meaning }[]`
-3. Hiển thị `FlashcardGrid` — mỗi card có mặt trước (từ) / mặt sau (nghĩa + bài tập)
-4. Lật card lần đầu → fetch song song: `/api/generate-sentence` + `/api/generate-synonyms`
-5. Nhấn **Lưu** → ghi vào `localStorage["learnedWords"]` + push Supabase
-
-**4 chế độ học trên card (tabs):**
-- `study` — nghĩa + ví dụ + đồng nghĩa/trái nghĩa
-- `write` — người dùng tự viết câu, AI chấm điểm (`/api/grade-sentence`)
-- `fill` — điền vào chỗ trống
-- `dictation` — nghe và gõ lại
-
-### `/review` — Ôn tập SRS
-
-- Lấy từ `getWordsForReview()` — lọc `nextReviewAt <= now`
-- Hiển thị flashcard ở `isReviewMode=true`
-- Nhấn "Nhớ tốt ✓" / "Quên ✗" → `updateWordReview()` → cập nhật `mastery` và `reviewInterval`, push Supabase
-
-**Thuật toán SRS đơn giản:**
-- Nhớ: `interval = min(interval × 2, 30)`, `mastery++`
-- Quên: `interval = 1`, `mastery--`
-- `nextReviewAt = now + interval × 86400000`
-
-### `/history` — Lịch sử từ
-
-Browse toàn bộ `learnedWords`, lọc theo topic và mastery (0–5 sao). Có thể xóa từng từ.
-
-### `/stats` — Thống kê
-
-4 tile tóm tắt: tổng từ, ngày học trong 30 ngày, mastery trung bình, phút học hôm nay (live từ TimerContext).
-
-Charts:
-- `WordsPerDayChart` — số từ mỗi ngày (30 ngày)
-- `StudyTimeChart` — phút học mỗi ngày (30 ngày, đọc từ `localStorage["studyTime"]`)
-- `TopicDistributionChart` — phân bố theo chủ đề
-- `StreakCalendar` — heatmap 26 tuần
-
-### `/diary` — Nhật ký
-
-Heatmap 26 tuần (DiaryCalendar). Click vào một ô → slide-in DayDrawer hiển thị:
-- Danh sách từ học ngày đó (expandable)
-- Tổng phút học ngày đó
-- Điều hướng prev/next
-
-Dữ liệu study minutes lấy từ `localStorage["studyTime"]`, words từ `getWordsForDate(date)` (filter theo `learnedAt`).
-
-### `/grammar` — Ngữ pháp
-
-Desktop: sidebar trái chọn topic + form thêm topic mới / Mobile: dropdown.
-
-8 chủ đề tĩnh (`STATIC_GRAMMAR_TOPICS`): Tenses, Modal Verbs, Conditionals, Passive Voice, Relative Clauses, Reported Speech, Articles, Prepositions.
-
-Người dùng có thể yêu cầu tạo chủ đề mới → POST `/api/grammar-generate` → trả `GrammarTopic` JSON → lưu `localStorage["grammarTopics"]` + push Supabase.
-
-Trong mỗi sub-rule:
-- Nút **Ví dụ AI** → POST `/api/grammar-examples`
-- Nút **Bài tập** → POST `/api/grammar-exercise` → `GrammarExercise` inline (fill hoặc MCQ)
-
-### `/settings` — Cài đặt
-
-3 tab:
-- **AI Providers** — xem danh sách provider, test latency, bật/tắt từng provider
-- **Voice** — chọn giọng TTS, rate, pitch, volume
-- **Sync** — nhập sync key để pull data từ thiết bị khác
-
----
-
-## 5. Hệ thống AI Provider
-
-**File:** `src/lib/providers/`
-
-```
-callWithFallback(prompt, preferredId?, disabledIds?)
-  → thử preferred provider trước
-  → nếu 429/503 → thử provider tiếp theo
-  → trả chuỗi text hoặc throw
-```
-
-Provider được kích hoạt dựa vào env key có trong `.env.local`:
-
-| Env key | Provider | Model mặc định |
-|---|---|---|
-| `GEMINI_API_KEY` | Google Gemini | `gemini-flash-latest` |
-| `GROQ_API_KEY` | Groq | `llama-3.3-70b-versatile` |
-| `OPENROUTER_API_KEY` | OpenRouter | `nvidia/nemotron-3-nano-30b-a3b:free` |
-| `MISTRAL_API_KEY` | Mistral | `mistral-small-latest` |
-| `COHERE_API_KEY` | Cohere | `command-r7b-12-2024` |
-| `HUGGINGFACE_API_KEY` | HuggingFace | `meta-llama/Llama-3.2-1B-Instruct` |
-
-Model có thể override qua `GEMINI_MODEL`, `GROQ_MODEL`, v.v.
-
-**Luồng client:**
-`useApiFetch` hook → đọc `ProviderContext` → POST với `{ provider, disabledProviders }` → API route set header `X-Provider-Used` → hook cập nhật context nếu provider thực tế dùng khác preferred.
-
----
-
-## 6. Data Models
-
-### LearnedWord (`src/lib/storage.ts`)
-
-```ts
-interface LearnedWord {
-  word: string           // required
-  meaning: string        // required
-  example: string        // required
-  topic: string          // required
-  learnedAt: string      // ISO — thời điểm lưu
-  nextReviewAt?: string  // ISO — lịch ôn tiếp theo (SRS)
-  reviewInterval?: number // ngày, bắt đầu 1, tăng gấp đôi, max 30
-  mastery?: number       // 0–5 sao
-  synonyms?: string[]
-  antonyms?: string[]
-}
-```
-
-### GrammarTopic (`src/lib/grammar-data.ts`)
-
-```ts
-interface SubRule {
-  id: string; name: string; formula: string
-  explanation: string; examples: string[]
-}
-interface GrammarTopic {
-  id: string; name: string; rules: SubRule[]
-  isUserGenerated?: boolean; createdAt?: string
-}
-```
-
----
-
-## 7. localStorage Keys
-
-| Key | Type | Ghi chú |
-|---|---|---|
-| `learnedWords` | `LearnedWord[]` | Toàn bộ từ đã lưu |
-| `studyTime` | `Record<YYYY-MM-DD, seconds>` | Thời gian học theo ngày |
-| `grammarTopics` | `GrammarTopic[]` | Chủ đề ngữ pháp do người dùng tạo |
-| `customTopics` | `string[]` | Chủ đề từ vựng tuỳ chỉnh |
-| `syncKey` | UUID | Danh tính Supabase |
-| `lastSyncedAt` | ISO string | Lần sync gần nhất |
-| `preferredProvider` | string | Provider đang chọn |
-| `disabledProviders` | `string[]` | Provider đã tắt |
-| `voiceSettings` | `VoiceSettings` | TTS: voiceURI, rate, pitch, volume |
-| `dailyChallenge` | `DailyChallenge[]` | Lịch sử daily challenge |
-
----
-
-## 8. Sync Supabase
-
-**Không có xác thực.** Danh tính = `syncKey` (UUID trong localStorage, tự sinh lần đầu).
-
-| Bảng | Nội dung |
+### Học & ôn
+| Route | Hành vi |
 |---|---|
-| `learned_words` | Mirror của `LearnedWord` |
-| `daily_challenges` | Mirror của `DailyChallenge` |
-| `custom_topics` | `{ sync_key, topic }` |
-| `grammar_topics` | `{ sync_key, id, name, rules: jsonb, created_at }` |
-| `user_settings` | `{ sync_key, voice_settings: jsonb }` |
+| `/` | Chọn chủ đề → sinh từ → flashcard (lật lần đầu fetch câu ví dụ + đồng/trái nghĩa song song) → Lưu |
+| `/review` | SRS: từ `nextReviewAt <= now`, 4 nút Quên/Khó/Được/Dễ, tóm tắt phiên |
+| `/history` | Duyệt từ đã lưu, lọc topic/mastery, xoá |
+| `/import` | Nhập từ hàng loạt |
+| `/vocab/quiz` | Quiz điền từ trên từ đã học (dùng `/api/generate-fillblank`), ghi session |
+| `/vocab/context` | Luyện từ trong ngữ cảnh (`/api/vocab/context`) |
+| `/grammar` | Sidebar topic, quy tắc, ví dụ AI, bài tập AI, bookmark, chỉ báo tiến độ sub-rule, link drill RC5 |
+| `/grammar/quiz` | Quiz nhiều câu; ghi attempt, lỗi vào sổ lỗi, ưu tiên sub-rule yếu/bookmark |
 
-**`initSync()`** chạy khi app mount (`SyncInitializer`):
-1. Local → Remote: upsert toàn bộ words, topics, grammar topics, voice settings
-2. Remote → Local: merge (từ mới hơn theo `learnedAt` thắng; `completed=true` thắng cho challenge)
+### Luyện thi
+| Route | Hành vi |
+|---|---|
+| `/exam` | Dashboard: TOEIC/IELTS, level, drill/mock |
+| `/exam/drill/[part]` | RC5/RC6/RC7/LC2/LC3/LC4/READ_P3/LISTEN_S1; chọn đề thích ứng theo tag yếu; giải thích AI; phím 1–4 + Enter (tắt được trong profile); nút báo câu hỏi lỗi |
+| `/exam/mock` | Mock rút gọn + countdown + AnswerSheet |
+| `/exam/mistakes` | Sổ lỗi exam, là view lọc `source = exam:*` trên `unifiedMistakes` (dùng chung trạng thái resolve với `/mistakes`) |
 
-**Fire-and-forget**: `pushWord`, `deleteWord`, `pushTopic`, `pushGrammarTopic`, `pushChallenge` — không await, không retry.
+### Speaking / Writing
+| Route | Hành vi |
+|---|---|
+| `/speak` | Chọn roleplay / IELTS part / shadowing |
+| `/speak/roleplay/[id]` | Hội thoại đa lượt, gợi ý trả lời, sửa lỗi |
+| `/speak/ielts/[part]` | Ghi âm → IndexedDB (LRU 20) → Whisper → chấm band; hoặc nhập text |
+| `/speak/shadowing` | Nghe–nhắc lại, ghi âm, STT, lưu `SpeakingRecord` |
+| `/speak/history` | Lịch sử + nghe lại audio |
+| `/write` · `/write/task/[id]` · `/write/result/[id]` | Chọn đề → editor + timer → kết quả chấm (annotation + model answer) |
+| `/write/history` · `/write/rewrite/[id]` | Lịch sử bài viết; viết lại đoạn sai, chấm qua `/api/exam/grade-open`, lỗi vào sổ lỗi |
 
-**Key alias**: `"thankz"` → UUID cứng (dùng để share nhanh).
+### Thích ứng & theo dõi
+| Route | Hành vi |
+|---|---|
+| `/today` | Kế hoạch ngày từ `generatePlan` (SRS debt, điểm yếu exam 14 ngày ≥10 mẫu, ≥5 lỗi chưa xử lý, mastery grammar < 60, nhắc speaking >2 ngày / writing >5 ngày, từ mới theo ngân sách phút) |
+| `/path` | Lộ trình: theo profile (goal, level, mục tiêu điểm), mastery từng kỹ năng, nhóm lỗi hàng đầu, link sang quiz/mistakes |
+| `/mistakes` | Sổ lỗi **hợp nhất** 6 kỹ năng; lọc, đổi status, resolve |
+| `/library` | Tìm kiếm xuyên từ vựng / lỗi / speaking / writing |
+| `/stats` | Tile tổng quan, streak, mastery timeline, báo cáo tuần, words/day, study time, topic, exam accuracy, weakness radar, band timeline, skill radar, heatmap |
+| `/diary` | Heatmap 26 tuần + drawer theo ngày |
+| `/activity` | Các `LearningSession` theo ngày |
+| `/settings` | Tab AI Providers (test latency, bật/tắt) · Voice (+ xoá audio) · Sync (nhập key, `SyncStatusBadge`) · theme sáng/tối |
 
----
-
-## 9. TimerContext (`src/contexts/TimerContext.tsx`)
-
-Đồng hồ học tập toàn app, chạy dưới dạng Context Provider trong `layout.tsx`.
-
-```
-isRunning = true  →  setInterval 1s  →  todaySeconds++
-                                      →  schedulePersist (debounce 5s)
-                                      →  countdownRemaining--
-```
-
-Khi đủ thời gian đếm ngược → `showTimeUp = true` → `HeaderTimer` hiển thị modal.
-
-**Midnight reset** (đã fix): interval tự phát hiện khi `getTodayKey()` thay đổi → flush giá trị cũ vào ngày cũ → reset `todaySeconds = 0` cho ngày mới.
-
-Persistence: `localStorage["studyTime"]["YYYY-MM-DD"]` = giây học trong ngày.
-
----
-
-## 10. Các vấn đề đã biết
-
-| Mức độ | Vấn đề | Trạng thái |
-|---|---|---|
-| ✅ Fixed | UTC/Local mismatch trong `getWordsForDate` | `3395af0` |
-| ✅ Fixed | `expandedWords` rò rỉ khi navigate prev/next | `3395af0` |
-| ✅ Fixed | TimerContext không reset khi qua nửa đêm | Unstaged |
-| ⚠️ Edge case | Navigate > 182 ngày trong DayDrawer hiện 0 phút | Ít người bị |
-
----
-
-## 11. Kế hoạch phát triển
-
-Thứ tự ưu tiên dựa theo trạng thái code hiện tại và giá trị sử dụng hàng ngày.
-
-### P0 — Hoàn thiện timer feature (đang dở)
-
-File đang unstaged: `TimerContext.tsx`, `HeaderTimer.tsx`, `StudyTimeChart.tsx`, `FirebaseInitializer.tsx`.
-
-Cần làm:
-- [ ] Commit toàn bộ timer feature sau khi verify `HeaderTimer` hoạt động đúng
-- [ ] `StudyTimeChart` sync live: chart bar "hôm nay" hiện đang lag 5s so với tile (minor, có thể bỏ qua)
-- [ ] `FirebaseInitializer` — xác nhận analytics event đang bắn đúng
-
-### P1 — Nâng cấp SRS
-
-Thuật toán hiện tại rất thô (`interval × 2`, max 30). Cải tiến:
-- [ ] Thêm **FSRS-4** hoặc **SM-2** thực sự — dựa vào `easiness factor` thay vì nhân đôi cứng
-- [ ] Hiển thị **due count** trên navbar (badge số từ cần ôn hôm nay)
-- [ ] **Session review**: kết thúc 1 phiên ôn → hiển thị summary (số từ đúng/sai, mastery thay đổi)
-
-### P2 — Grammar page
-
-Vừa ship, còn thiếu:
-- [ ] **Progress tracking per topic** — lưu sub-rule nào đã xem, đã làm bài tập
-- [ ] **Quiz mode** cho grammar — tạo 5–10 câu liên tiếp từ 1 topic
-- [ ] **Bookmark sub-rule** để ôn lại sau
-
-### P3 — Stats & Insights
-
-- [ ] **Streak counting** thực sự (hiện `StreakCalendar` chỉ heatmap, không đếm streak liên tiếp)
-- [ ] **Điểm mastery timeline** — chart mastery trung bình theo tuần
-- [ ] **Nhắc nhở học** — notification (Web Push) khi streak sắp gãy
-
-### P4 — Sync & offline
-
-- [ ] **Conflict resolution rõ ràng hơn** — hiện "từ mới hơn thắng", đôi khi không đúng
-- [ ] **Offline queue** — action thực hiện offline được queue và sync khi có mạng (hiện tại fire-and-forget không retry)
-- [ ] **Import từ Anki** — hỗ trợ parse `.apkg` hoặc `.txt` format phổ biến
-
-### P5 — UX nhỏ
-
-- [ ] **Search trong History** — hiện chỉ lọc topic/mastery, chưa có full-text search
-- [ ] **Dark mode** — app hiện chỉ có light theme
-- [ ] **Keyboard shortcuts** — space để lật card, Enter để lưu
+### Khả năng khám phá (đã kiểm tra bằng grep `href`)
+Navbar chỉ link tới: `/`, `/review`, `/diary`, `/activity`, `/grammar`, `/exam`, `/speak`, `/write`, `/today`, `/history`, `/settings`.
+**Chưa có link nào trong UI** tới `/path`, `/library`, `/stats`, `/vocab/context`, `/import` — chỉ vào được bằng gõ URL. `/mistakes` chỉ được link từ `/path` và `/library` (nên cũng gián tiếp bị ẩn).
 
 ---
 
-## 12. Cấu trúc file quan trọng
+## 5. Hệ thống AI
 
-```
-src/
-├── app/
-│   ├── page.tsx                    ← trang flashcard chính
-│   ├── review/page.tsx
-│   ├── history/page.tsx
-│   ├── stats/page.tsx
-│   ├── diary/page.tsx
-│   ├── grammar/page.tsx
-│   ├── settings/page.tsx
-│   └── api/
-│       ├── generate-words/route.ts
-│       ├── generate-sentence/route.ts
-│       ├── grammar-generate/route.ts
-│       └── ...                     ← tất cả AI calls ở đây
-├── components/
-│   ├── Flashcard.tsx               ← card học chính, 4 mode
-│   ├── HeaderTimer.tsx             ← timer trên navbar
-│   ├── DiaryCalendar.tsx           ← heatmap 26 tuần
-│   ├── DayDrawer.tsx               ← slide-in drawer ngày
-│   ├── GrammarSidebar.tsx
-│   ├── GrammarContent.tsx
-│   └── charts/
-│       ├── WordsPerDayChart.tsx
-│       ├── StudyTimeChart.tsx
-│       └── TopicDistributionChart.tsx
-├── contexts/
-│   ├── ProviderContext.tsx          ← AI provider state
-│   └── TimerContext.tsx            ← đồng hồ học tập
-└── lib/
-    ├── storage.ts                  ← LearnedWord CRUD
-    ├── stats.ts                    ← analytics functions
-    ├── sync.ts                     ← Supabase operations
-    ├── grammar-data.ts             ← static grammar topics
-    ├── grammar-storage.ts          ← user grammar topics CRUD
-    ├── custom-topics.ts            ← custom topic CRUD
-    └── providers/
-        ├── index.ts                ← callWithFallback, registry
-        ├── gemini.ts
-        └── openai-compat.ts        ← Groq, OpenRouter, Mistral, v.v.
-```
+- **Provider fallback**: `callWithFallback(prompt, preferred?, disabled?, opts?)` — thử provider ưu tiên, 429/503 thì chuyển tiếp. Provider nào có env key mới được đăng ký.
+- **Task router** (`ai-tasks.ts`, `callTask`): mới 4 route dùng (`generate-words`, `speech/grade`, `write/grade`, `vocab/context`); các route khác còn gọi thẳng `callWithFallback`. 11 task (`word-generation`, `sentence-generation`, `grammar-generation`, `grammar-explanation`, `exam-generation`, `exam-explanation`, `speaking-roleplay`, `speaking-grade`, `writing-grade`, `writing-feedback`, `vocab-context`). Map task→provider hiện là bảng tĩnh; chỉ `speaking-grade` và `writing-grade` ghim theo `GRADING_PROVIDER` (kèm `temperature: 0.2` + few-shot anchors để band ổn định).
+- **Prompt registry** (`ai-prompts.ts`): mới định nghĩa cho một phần task (`Partial<Record<…>>`).
+- **Metrics** (`ai-metrics.ts`): lưu **trong bộ nhớ từng server instance**, mất khi cold start. Xem qua `GET /api/admin/metrics` (header `x-admin-secret` = `ADMIN_SECRET`; chưa set env → 503).
+- **Client**: `useApiFetch` gửi `{provider, disabledProviders}`, đọc `X-Provider-Used` để đồng bộ context.
 
 ---
 
-## 13. Chạy & phát triển
+## 6. Dữ liệu & sync (tóm tắt — chi tiết ở CONTEXT.md)
+
+- **Nguồn chính là localStorage**; mỗi thực thể có giới hạn kích thước (sessions 500, attempts 100, mistakes 1000, speaking 200, writing 100, bank 30/key).
+- **Sync Supabase** theo `syncKey`, RLS bằng header `x-sync-key`. 11 bảng (words, challenges, topics, grammar topics, settings, exam_items dùng chung, exam_attempts, mistake_log, speaking, writing, unified_mistakes).
+- **LWW** (`updatedAt` thắng, hòa → local, chỉ push phần khác) hiện áp cho: words, exam_attempts, unified_mistakes (`mistake_log` là legacy, chỉ pull một lần để migrate). `completed=true` thắng với challenges.
+- **Offline queue**: push lỗi → `enqueue`; `drainQueue` khi online lại; `getSyncStatus()` ∈ synced/syncing/pending/offline/failed.
+- **Migration**: 9+ file trong `supabase/migrations/` đã đổi sang timestamp `YYYYMMDDHHMMSS`; stack Supabase local đã chạy được (cổng tuỳ chỉnh 543xx do trùng dự án khác).
+
+---
+
+## 7. Hiện trạng & nợ kỹ thuật (trung thực)
+
+**Trạng thái repo**: nhánh `phase-6-exam-engine` (~108 commit), còn nhiều thay đổi chưa commit (migration đổi tên, `mastery-all.ts`, unified mistakes sync, scripts, docs kế hoạch). Chưa merge vào `main`.
+
+| Mức | Vấn đề |
+|---|---|
+| ⚠️ | **Migrate route sang `callTask` mới được 4/21**: chỉ `generate-words`, `speech/grade`, `write/grade`, `vocab/context` đi qua task router (có metrics). Các route AI còn lại vẫn gọi `callWithFallback` trực tiếp nên không có metrics/task routing. |
+| ⚠️ | **Trang mồ côi** (mục 4): `/path`, `/library`, `/stats`, `/vocab/context`, `/import` không có điểm vào UI. |
+| ⚠️ | **"Báo câu hỏi lỗi" chưa có tác dụng ngược**: chỉ lưu `reportedQuestions` local; không đánh dấu `flagged` trên `exam_items` dùng chung nên đề xấu vẫn được pull về. |
+| ⚠️ | LWW chưa áp cho speaking/writing/grammar topics/settings (các bảng này vẫn upsert kiểu cũ). |
+| ⚠️ | Bảo mật sync: `syncKey` hoạt động như bearer secret; alias `"thankz"` → UUID cố định trong code. Không có đăng nhập. |
+| ⚠️ | Metrics AI mất khi cold start; task→provider map tĩnh; prompt registry chưa phủ hết task. |
+| ⚠️ | Phím tắt mới có ở `ExamRunner`; flashcard (space/Enter) chưa có. |
+| ⚠️ | Điều hướng > 182 ngày trong DayDrawer hiện 0 phút (ít gặp). |
+| ℹ️ | `src/lib/gemini.ts` là wrapper legacy chỉ còn test dùng; `updateWordReview` (kiểu cũ) còn giữ để tương thích. |
+
+---
+
+## 8. Lộ trình — đã làm / chưa làm
+
+### Đã hoàn thành
+- **Batch 1 — Adaptive core**: Learning Session, UnifiedMistake, Skill Mastery Engine, Today Planner v2, `/mistakes`
+- **Batch 2 — Grammar**: progress, bookmark, quiz, chỉ báo tiến độ
+- **Batch 3 — Exam intelligence**: drill thích ứng, tag accuracy, báo cáo câu hỏi, phân tích theo category
+- **Batch 4 — Speaking/Writing loop**: history, rewrite, shadowing
+- **Batch 5 — Vocabulary & insights**: streak, mastery timeline, quiz từ, luyện ngữ cảnh, báo cáo tuần
+- **Batch 6 — Reliability**: hàng đợi offline, drain khi reconnect, `SyncStatusBadge`
+- **Batch 7 — Personalization/UX**: learning profile, `/path`, tìm kiếm `/library`, phím tắt exam, dark mode
+- **Batch 8 — AI infra** (một phần: 4/21 route đã migrate sang `callTask`): task router, metrics, prompt registry; gate `/api/admin/metrics` bằng `ADMIN_SECRET`
+- Trước đó: SM-2, LWW (words/exam), Phase 6 exam engine, Phase 7 speaking/writing, audio replay, grading calibration.
+
+### Chưa làm / ứng viên tiếp theo
+- Nhắc học (Web Push) khi streak sắp gãy
+- Import Anki (`.apkg` / `.txt`)
+- Phím tắt cho flashcard
+- LWW cho các thực thể còn lại
+- Đưa các trang mồ côi vào navigation
+- Persist metrics AI; map task→provider theo settings
+- Mở rộng prompt registry cho mọi task
+- Xác thực thật (thay `syncKey`) nếu có nhu cầu chia sẻ/đa người dùng
+- Làm cho "báo câu hỏi lỗi" thực sự flag đề
+- Dọn nợ: merge nhánh, commit thay đổi dang dở
+
+---
+
+## 9. Chạy & phát triển
 
 ```bash
-npm run dev      # dev server tại http://localhost:3000
-npm test         # chạy toàn bộ Jest tests (180 tests)
-npm run build    # production build
-npm run lint     # ESLint check
-```
-
-Firebase deploy (sau khi build):
-```bash
+npm run dev      # http://localhost:3000
+npm test         # 342 tests, 64 suites (đã chạy 2026-10-01: all pass)
 npm run build
-firebase deploy
+npm run lint
 ```
 
-API keys đặt trong `.env.local` (không commit). Chỉ cần set key của provider muốn dùng — provider nào thiếu key sẽ không được đăng ký.
+Env: ít nhất một `*_API_KEY` của provider; `GROQ_API_KEY` (+ `GROQ_WHISPER_MODEL`) cho STT; tuỳ chọn `GRADING_PROVIDER`, `ADMIN_SECRET`; `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` cho sync (có thể trỏ Supabase local). Deploy: `npm run build && firebase deploy`.
