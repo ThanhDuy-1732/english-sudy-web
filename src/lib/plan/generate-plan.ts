@@ -112,7 +112,7 @@ export function generatePlan(ctx: PlanContext): PlanBlock[] {
   // 2. Weakest exam type (min 10 samples in 14 days)
   const weak = weakestType(ctx.attempts, { days: 14, minSamples: 10 });
   if (weak) {
-    const part = TYPE_TO_PART[weak.type] ?? ctx.settings.primaryExam === "TOEIC" ? "RC5" : "READ_P3";
+    const part = TYPE_TO_PART[weak.type] ?? (ctx.settings.primaryExam === "TOEIC" ? "RC5" : "READ_P3");
     blocks.push({
       id: "exam-weak",
       kind: "exam_drill",

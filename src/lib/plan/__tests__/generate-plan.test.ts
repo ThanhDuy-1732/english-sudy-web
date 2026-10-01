@@ -71,6 +71,15 @@ describe("generatePlan", () => {
     availableMin: 60,
   };
 
+  it("links the exam drill to the weakest type's part", () => {
+    const answers = Array(10).fill(null).map((_, i) => ({
+      itemId: "i1", questionId: `q${i}`, type: "conversation", part: "LC3",
+      userAnswer: "A", correct: i < 3, timeSpentSec: 30,
+    }));
+    const plan = generatePlan({ ...base, attempts: [makeAttempt({ answers })] as ExamAttempt[] });
+    expect(plan.find((b) => b.kind === "exam_drill")?.href).toBe("/exam/drill/LC3");
+  });
+
   it("always puts SRS first when there are due words", () => {
     const plan = generatePlan({ ...base, dueWords: 10, unifiedMistakes: [], skillMastery: [] });
     expect(plan[0].kind).toBe("srs_review");
