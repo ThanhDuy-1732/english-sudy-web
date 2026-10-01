@@ -18,7 +18,7 @@ export class GeminiProvider implements AIProvider {
   async generateContent(prompt: string, opts?: GenerateOpts): Promise<string> {
     const req = {
       contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: { temperature: opts?.temperature ?? 0.7 },
+      ...(opts?.temperature !== undefined && { generationConfig: { temperature: opts.temperature } }),
     };
     try {
       const result = await this.client.generateContent(req);

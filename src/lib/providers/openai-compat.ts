@@ -36,7 +36,7 @@ export class OpenAICompatProvider implements AIProvider {
     const response = await this.client.chat.completions.create({
       model: this.model,
       messages: [{ role: "user", content: prompt }],
-      temperature: opts?.temperature ?? 0.7,
+      ...(opts?.temperature !== undefined && { temperature: opts.temperature }),
     });
     return response.choices[0]?.message?.content ?? "";
   }

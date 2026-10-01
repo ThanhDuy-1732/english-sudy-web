@@ -24,7 +24,6 @@ test("generateContent returns message content", async () => {
   expect(mockCreate).toHaveBeenCalledWith({
     model: "llama-3.3-70b-versatile",
     messages: [{ role: "user", content: "test prompt" }],
-    temperature: 0.7,
   });
 });
 
