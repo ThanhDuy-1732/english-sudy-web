@@ -1,4 +1,4 @@
-import { enqueue, dequeue, peekQueue, markFailed, getQueueLength } from "../sync-queue";
+import { enqueue, dequeue, peekQueue, markFailed, getQueueLength, drainQueue, registerProcessor } from "../sync-queue";
 
 beforeEach(() => { localStorage.clear(); });
 
@@ -39,4 +39,24 @@ test("markFailed moves to failedQueue after max retries", () => {
     if (i < 4) entry = dequeue()!;
   }
   expect(getQueueLength()).toBe(0);
+});
+
+test("keeps an in-flight entry persisted and retries a failure only once per drain", async () => {
+  const processor = jest.fn(async () => {
+    expect(getQueueLength()).toBe(1);
+    throw new Error("temporary outage");
+  });
+  registerProcessor("learnedWords", processor);
+  enqueue({ entity: "learnedWords", entityId: "a", op: "upsert", payload: {} });
+  await drainQueue();
+  await drainQueue();
+  expect(processor).toHaveBeenCalledTimes(1);
+  expect(peekQueue()[0].retryCount).toBe(1);
+  expect(localStorage.getItem("syncFailedQueue")).toBeNull();
+});
+
+test("does not drop entries without a registered processor", async () => {
+  enqueue({ entity: "learningSessions", entityId: "a", op: "upsert", payload: {} });
+  await drainQueue();
+  expect(getQueueLength()).toBe(1);
 });

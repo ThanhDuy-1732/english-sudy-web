@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { getSyncStatus, type SyncStatus } from "@/lib/sync-queue";
+import { getSyncStatus, retryFailedQueue, type SyncStatus } from "@/lib/sync-queue";
+import { initSync } from "@/lib/sync";
 
 const STATUS_CONFIG: Record<SyncStatus, { label: string; color: string }> = {
   synced:  { label: "Đã đồng bộ", color: "text-green-500" },
@@ -31,6 +32,11 @@ export function SyncStatusBadge() {
     <span className={`text-xs ${cfg.color} flex items-center gap-1`}>
       <span className="w-1.5 h-1.5 rounded-full bg-current inline-block" />
       {cfg.label}
+      {status === "failed" && (
+        <button type="button" className="min-h-11 px-2 underline" onClick={async () => { await retryFailedQueue(); await initSync(); setStatus(getSyncStatus()); }}>
+          Thử đồng bộ lại
+        </button>
+      )}
     </span>
   );
 }

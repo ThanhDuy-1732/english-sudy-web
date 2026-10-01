@@ -1,6 +1,6 @@
 jest.mock("@/lib/sync", () => ({
   pushAttempt: jest.fn().mockResolvedValue(undefined),
-  pushMistake: jest.fn().mockResolvedValue(undefined),
+  pushUnifiedMistake: jest.fn().mockResolvedValue(undefined),
 }));
 
 import {
@@ -11,12 +11,11 @@ import {
   getItemsFromBank,
   getAttempts,
   saveAttempt,
-  getMistakes,
   addMistake,
-  resolveMistake,
   getExamSettings,
   saveExamSettings,
 } from "../exam-storage";
+import { getMistakes, getUnresolvedExamMistakes, resolveMistake } from "@/lib/mistakes";
 import type { ExamItem, ExamAttempt, MistakeEntry } from "../types";
 
 // Mock localStorage
@@ -89,26 +88,57 @@ describe("attempts", () => {
   });
 });
 
-describe("mistakes", () => {
-  it("adds and resolves mistakes", () => {
-    const m: MistakeEntry = {
-      id: "m1",
-      questionId: "q1",
-      itemId: "i1",
-      type: "incomplete_sentence",
-      part: "RC5",
-      prompt: "test?",
-      userAnswer: "A",
-      correctAnswer: "B",
-      explanation: "because B",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      resolved: false,
-    };
-    addMistake(m);
-    expect(getMistakes()[0].resolved).toBe(false);
-    resolveMistake("m1");
-    expect(getMistakes()[0].resolved).toBe(true);
+describe("mistakes adapter", () => {
+  const entry = (o: Partial<MistakeEntry> = {}): MistakeEntry => ({
+    id: "m1",
+    questionId: "q1",
+    itemId: "i1",
+    type: "incomplete_sentence",
+    part: "RC5",
+    prompt: "test?",
+    userAnswer: "A",
+    correctAnswer: "B",
+    explanation: "because B",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    resolved: false,
+    ...o,
+  });
+
+  it("writes only to unifiedMistakes, with exam meta", () => {
+    addMistake(entry());
+    expect(store["mistakeLog"]).toBeUndefined();
+    const [m] = getMistakes();
+    expect(m).toMatchObject({
+      skill: "reading",
+      category: "incomplete_sentence",
+      source: "exam:RC5:q1",
+      exam: { itemId: "i1", questionId: "q1", part: "RC5", prompt: "test?" },
+    });
+  });
+
+  it("maps listening parts to the listening skill", () => {
+    addMistake(entry({ part: "LC2", type: "question_response", questionId: "q9" }));
+    expect(getMistakes()[0].skill).toBe("listening");
+  });
+
+  it("repeated wrong answers increment occurrenceCount; resolve is visible everywhere", () => {
+    addMistake(entry({ id: "a" }));
+    addMistake(entry({ id: "b" }));
+    expect(getMistakes()).toHaveLength(1);
+    expect(getMistakes()[0].occurrenceCount).toBe(2);
+    resolveMistake(getMistakes()[0].id);
+    expect(getUnresolvedExamMistakes()).toHaveLength(0);
+  });
+
+  it("pruneBank keeps items pinned by unresolved exam mistakes even when old", () => {
+    const items = Array.from({ length: 35 }, (_, i) =>
+      makeItem({ id: `id-${i}`, createdAt: new Date(1000 + i).toISOString() })
+    );
+    addMistake(entry({ itemId: "id-0" }));
+    const pruned = pruneBank({ "TOEIC:RC5:3": items });
+    expect(pruned["TOEIC:RC5:3"]).toHaveLength(30);
+    expect(pruned["TOEIC:RC5:3"].map((i) => i.id)).toContain("id-0");
   });
 });
 

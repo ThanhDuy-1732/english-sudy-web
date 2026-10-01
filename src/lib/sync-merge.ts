@@ -4,7 +4,7 @@
  * learnedWords        → LWW (last-write-wins by updatedAt)
  * learningSessions    → append (never overwrite, client id is unique)
  * examAttempts        → append
- * mistakeLog          → LWW by updatedAt
+ * mistakeLog          → legacy; migrated once into unifiedMistakes (see mistake-migration.ts)
  * unifiedMistakes     → LWW by updatedAt
  * grammarAttempts     → append
  * speakingSessions    → append (audio stays local-only)
@@ -14,20 +14,11 @@
  * voiceSettings       → LWW by updatedAt
  * Audio (IndexedDB)   → local-only, never synced
  * Deletes             → tombstone: set deletedAt, filter out on read
+ *
+ * Only learnedWords, examAttempts, and unifiedMistakes currently route through
+ * mergeLww() below; dailyChallenges/grammarTopics/voiceSettings apply their
+ * strategy inline in sync.ts's initSync().
  */
-export const CONFLICT_STRATEGIES = {
-  learnedWords: "lww",
-  learningSessions: "append",
-  examAttempts: "append",
-  mistakeLog: "lww",
-  unifiedMistakes: "lww",
-  grammarAttempts: "append",
-  speakingSessions: "append",
-  writingSubmissions: "lww",
-  dailyChallenges: "completed-wins",
-  grammarTopics: "lww",
-  voiceSettings: "lww",
-} as const;
 
 /**
  * stamp() — extracts the best comparable timestamp from an object.

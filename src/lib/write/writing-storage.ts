@@ -1,4 +1,6 @@
+import { syncRequest } from "@/lib/sync-request";
 import { createSupabase } from "@/lib/supabase";
+import { enqueue } from "@/lib/sync-queue";
 import { getSyncKey } from "@/lib/sync";
 
 export type WritingKind = "ielts_task1" | "ielts_task2" | "toeic_email";
@@ -71,14 +73,15 @@ export function addWritingVersion(id: string, draft: Omit<WritingDraft, "version
   const rest = all.filter((r) => r.id !== id);
   rest.unshift(updated);
   localStorage.setItem(KEY, JSON.stringify(rest.slice(0, MAX)));
+  void pushWriting(updated);
 }
 
-export async function pushWriting(r: WritingRecord): Promise<void> {
+export async function pushWriting(r: WritingRecord, queueOnFailure = true): Promise<void> {
   if (typeof window === "undefined") return;
   const syncKey = getSyncKey();
   const supabase = createSupabase(syncKey);
   try {
-    await supabase.from("writing_submissions").upsert({
+    await syncRequest(supabase.from("writing_submissions").upsert({
       id: r.id,
       sync_key: syncKey,
       kind: r.kind,
@@ -86,6 +89,9 @@ export async function pushWriting(r: WritingRecord): Promise<void> {
       overall: r.feedback.overall,
       created_at: r.createdAt,
       updated_at: r.updatedAt ?? r.createdAt,
-    }, { onConflict: "id" });
-  } catch { /* fire-and-forget */ }
+    }, { onConflict: "id" }));
+  } catch (error) {
+    if (!queueOnFailure) throw error;
+    enqueue({ entity: "writingSubmissions", entityId: r.id, op: "upsert", payload: r });
+  }
 }

@@ -2,13 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  getMistakes,
-  resolveMistake,
-  getExamSettings,
-} from "@/lib/exam/exam-storage";
+import { getExamMistakes, resolveMistake, type ExamMistake } from "@/lib/mistakes";
+import { runMistakeMigration } from "@/lib/mistake-migration";
 import { saveLearnedWord } from "@/lib/storage";
-import type { MistakeEntry, QuestionType } from "@/lib/exam/types";
+import type { QuestionType } from "@/lib/exam/types";
 
 const TYPE_LABELS: Partial<Record<QuestionType, string>> = {
   incomplete_sentence: "Part 5",
@@ -25,23 +22,25 @@ const TYPE_LABELS: Partial<Record<QuestionType, string>> = {
 
 export default function MistakesPage() {
   const router = useRouter();
-  const [mistakes, setMistakes] = useState(getMistakes);
+  const [mistakes, setMistakes] = useState<ExamMistake[]>(() => {
+    runMistakeMigration();
+    return getExamMistakes();
+  });
   const [filter, setFilter] = useState<"all" | "unresolved">("unresolved");
 
-  const settings = getExamSettings();
-  const shown = filter === "all" ? mistakes : mistakes.filter((m) => !m.resolved);
+  const shown = filter === "all" ? mistakes : mistakes.filter((m) => m.status !== "resolved");
 
   function handleResolve(id: string) {
     resolveMistake(id);
-    setMistakes(getMistakes());
+    setMistakes(getExamMistakes());
   }
 
-  function handleAddToSRS(mistake: MistakeEntry, word: string) {
+  function handleAddToSRS(mistake: ExamMistake, word: string) {
     saveLearnedWord({
       word,
       meaning: "",
-      example: mistake.prompt,
-      topic: `exam:${mistake.part}`,
+      example: mistake.exam.prompt,
+      topic: `exam:${mistake.exam.part}`,
       learnedAt: new Date().toISOString(),
       mastery: 0,
       nextReviewAt: new Date(Date.now() + 86400000).toISOString(),
@@ -58,7 +57,7 @@ export default function MistakesPage() {
         </button>
         <h1>Sổ lỗi</h1>
         <span className="count">
-          {mistakes.filter((m) => !m.resolved).length} chưa giải quyết
+          {mistakes.filter((m) => m.status !== "resolved").length} chưa giải quyết
         </span>
       </div>
 
@@ -81,16 +80,19 @@ export default function MistakesPage() {
       ) : (
         <div className="mistakes-list">
           {shown.map((m) => (
-            <div key={m.id} className={`mistake-card ${m.resolved ? "resolved" : ""}`}>
+            <div key={m.id} className={`mistake-card ${m.status === "resolved" ? "resolved" : ""}`}>
               <div className="mistake-meta">
-                <span className="part-tag">{TYPE_LABELS[m.type] ?? m.type}</span>
+                <span className="part-tag">{TYPE_LABELS[m.exam.type] ?? m.exam.type}</span>
                 <span className="date">
                   {new Date(m.createdAt).toLocaleDateString("vi-VN")}
                 </span>
-                {m.resolved && <span className="resolved-tag">✓ Đã xử lý</span>}
+                {m.occurrenceCount > 1 && (
+                  <span className="date">{`sai ${m.occurrenceCount} lần`}</span>
+                )}
+                {m.status === "resolved" && <span className="resolved-tag">✓ Đã xử lý</span>}
               </div>
 
-              <p className="mistake-prompt">{m.prompt}</p>
+              <p className="mistake-prompt">{m.exam.prompt}</p>
 
               <div className="answer-row">
                 <span className="wrong-answer">✗ {m.userAnswer || "(không trả lời)"}</span>
@@ -101,12 +103,12 @@ export default function MistakesPage() {
 
               <div className="mistake-actions">
                 <button
-                  onClick={() => router.push(`/exam/drill/${m.part}`)}
+                  onClick={() => router.push(`/exam/drill/${m.exam.part}`)}
                   className="drill-btn"
                 >
                   Luyện thêm
                 </button>
-                {!m.resolved && (
+                {m.status !== "resolved" && (
                   <button onClick={() => handleResolve(m.id)} className="resolve-btn">
                     ✓ Đánh dấu xử lý
                   </button>

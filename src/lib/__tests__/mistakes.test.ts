@@ -1,3 +1,5 @@
+jest.mock("../sync", () => ({ pushUnifiedMistake: jest.fn().mockResolvedValue(undefined) }));
+
 import {
   getMistakes,
   addMistake,
@@ -6,6 +8,9 @@ import {
   getMistakesBySkill,
   getMistakesByStatus,
   getTopCategories,
+  getExamMistakes,
+  getUnresolvedExamMistakes,
+  examPartToSkill,
 } from "../mistakes";
 
 beforeEach(() => {
@@ -94,4 +99,48 @@ test("getTopCategories without skill arg returns all skills", () => {
   addMistake({ ...base, skill: "vocabulary", source: "vocab:w1", category: "spelling" });
   const top = getTopCategories();
   expect(top).toHaveLength(2);
+});
+
+const exam = {
+  itemId: "i1",
+  questionId: "q1",
+  part: "RC5" as const,
+  type: "incomplete_sentence" as const,
+  prompt: "Which?",
+};
+
+test("addMistake stores exam meta and getExamMistakes returns only exam entries", () => {
+  addMistake({ ...base, source: "exam:RC5:q1", exam });
+  addMistake({ ...base, source: "grammar:t1" });
+  expect(getMistakes()).toHaveLength(2);
+  expect(getExamMistakes()).toHaveLength(1);
+  expect(getExamMistakes()[0].exam.prompt).toBe("Which?");
+});
+
+test("dedupe keeps the latest exam meta and increments occurrenceCount", () => {
+  addMistake({ ...base, source: "exam:RC5:q1", exam });
+  const m2 = addMistake({
+    ...base,
+    source: "exam:RC5:q1",
+    exam: { ...exam, itemId: "i2" },
+  });
+  expect(getExamMistakes()).toHaveLength(1);
+  expect(m2.occurrenceCount).toBe(2);
+  expect(getExamMistakes()[0].exam.itemId).toBe("i2");
+});
+
+test("getUnresolvedExamMistakes excludes resolved; a new wrong answer after resolve creates a new entry", () => {
+  const m = addMistake({ ...base, source: "exam:RC5:q1", exam });
+  resolveMistake(m.id);
+  expect(getUnresolvedExamMistakes()).toHaveLength(0);
+  addMistake({ ...base, source: "exam:RC5:q1", exam });
+  expect(getExamMistakes()).toHaveLength(2);
+  expect(getUnresolvedExamMistakes()).toHaveLength(1);
+});
+
+test("examPartToSkill maps listening parts and defaults to reading", () => {
+  expect(examPartToSkill("LC2")).toBe("listening");
+  expect(examPartToSkill("LISTEN_S1")).toBe("listening");
+  expect(examPartToSkill("RC5")).toBe("reading");
+  expect(examPartToSkill("READ_P3")).toBe("reading");
 });

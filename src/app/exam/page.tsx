@@ -2,12 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import {
-  getExamSettings,
-  saveExamSettings,
-  getAttempts,
-  getUnresolvedMistakes,
-} from "@/lib/exam/exam-storage";
+import { getExamSettings, saveExamSettings, getAttempts } from "@/lib/exam/exam-storage";
+import { getUnresolvedExamMistakes } from "@/lib/mistakes";
+import { runMistakeMigration } from "@/lib/mistake-migration";
 import type { ExamKind } from "@/lib/exam/types";
 
 const TOEIC_PARTS = [
@@ -27,7 +24,10 @@ const IELTS_PARTS = [
 export default function ExamPage() {
   const [settings, setSettings] = useState(getExamSettings);
   const attempts = getAttempts();
-  const unresolvedCount = getUnresolvedMistakes().length;
+  const [unresolvedCount] = useState(() => {
+    runMistakeMigration();
+    return getUnresolvedExamMistakes().length;
+  });
 
   function updateKind(kind: ExamKind) {
     const updated = { ...settings, primaryExam: kind };

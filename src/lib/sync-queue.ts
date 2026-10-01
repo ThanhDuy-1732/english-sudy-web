@@ -6,7 +6,7 @@ export type QueueOpType = "upsert" | "delete";
 export type QueueEntity =
   | "learnedWords" | "learningSessions" | "examAttempts" | "mistakeLog"
   | "unifiedMistakes" | "grammarAttempts" | "speakingSessions" | "writingSubmissions"
-  | "dailyChallenges" | "grammarTopics" | "voiceSettings";
+  | "dailyChallenges" | "grammarTopics" | "voiceSettings" | "customTopics" | "examItems";
 
 export interface QueueEntry {
   id: string;
@@ -17,6 +17,7 @@ export interface QueueEntry {
   retryCount: number;
   createdAt: string;
   lastAttemptAt?: string;
+  nextRetryAt?: string;
 }
 
 function ls<T>(key: string): T[] {
@@ -65,14 +66,25 @@ export function getQueueLength(): number {
 }
 
 export function markFailed(entry: QueueEntry): void {
-  const updated = { ...entry, retryCount: entry.retryCount + 1, lastAttemptAt: new Date().toISOString() };
+  const updated = {
+    ...entry, retryCount: entry.retryCount + 1, lastAttemptAt: new Date().toISOString(),
+    nextRetryAt: new Date(Date.now() + Math.min(300_000, 15_000 * 2 ** entry.retryCount)).toISOString(),
+  };
+  const queue = peekQueue().filter((item) => item.id !== entry.id);
   if (updated.retryCount >= MAX_RETRIES) {
     const failed = ls<QueueEntry>(FAILED_KEY);
-    save(FAILED_KEY, [...failed, updated].slice(-100));
+    save(FAILED_KEY, [...failed, updated]);
+    save(QUEUE_KEY, queue);
   } else {
-    const queue = ls<QueueEntry>(QUEUE_KEY);
-    save(QUEUE_KEY, [...queue, updated]);
+    save(QUEUE_KEY, [updated, ...queue]);
   }
+}
+
+export async function retryFailedQueue(): Promise<void> {
+  const failed = ls<QueueEntry>(FAILED_KEY);
+  save(QUEUE_KEY, [...failed.map((entry) => ({ ...entry, retryCount: 0, nextRetryAt: undefined })), ...peekQueue()]);
+  save(FAILED_KEY, []);
+  await drainQueue();
 }
 
 export function clearQueue(): void {
@@ -80,13 +92,19 @@ export function clearQueue(): void {
 }
 
 export type SyncStatus = "synced" | "syncing" | "pending" | "offline" | "failed";
+let initializationFailed = false;
+
+export function setSyncInitializationFailed(failed: boolean): void {
+  initializationFailed = failed;
+}
 
 export function getSyncStatus(): SyncStatus {
   if (typeof window === "undefined") return "synced";
   if (!navigator.onLine) return "offline";
+  if (draining) return "syncing";
   const qLen = getQueueLength();
   const fLen = ls<QueueEntry>(FAILED_KEY).length;
-  if (fLen > 0) return "failed";
+  if (fLen > 0 || initializationFailed) return "failed";
   if (qLen > 0) return "pending";
   return "synced";
 }
@@ -107,27 +125,40 @@ export async function drainQueue(): Promise<void> {
   if (draining || typeof window === "undefined" || !navigator.onLine) return;
   draining = true;
   try {
-    let entry = dequeue();
-    while (entry) {
+    for (const entry of peekQueue()) {
+      if (!navigator.onLine || (entry.nextRetryAt && Date.parse(entry.nextRetryAt) > Date.now())) break;
       const processor = processors.get(entry.entity);
-      if (processor) {
-        try {
-          await processor(entry);
-        } catch {
-          markFailed(entry);
-        }
+      if (!processor) break;
+      try {
+        await processor(entry);
+      } catch {
+        markFailed(entry);
+        break;
       }
-      entry = dequeue();
+      // A closed tab must leave in-flight work available for the next launch.
+      save(QUEUE_KEY, peekQueue().filter((item) => item.id !== entry.id));
     }
   } finally {
     draining = false;
   }
 }
 
-export function initSyncQueueManager(): () => void {
+export function initSyncQueueManager(onDrained?: () => Promise<void>): () => void {
   if (typeof window === "undefined") return () => {};
-  const handler = () => { void drainQueue(); };
+  const handler = () => {
+    const hadWork = getQueueLength() > 0;
+    void drainQueue().then(() => {
+      if (hadWork && getQueueLength() === 0) void onDrained?.();
+    });
+  };
+  const visible = () => { if (document.visibilityState === "visible") handler(); };
   window.addEventListener("online", handler);
-  if (navigator.onLine) void drainQueue();
-  return () => window.removeEventListener("online", handler);
+  document.addEventListener("visibilitychange", visible);
+  const interval = setInterval(handler, 15_000);
+  if (navigator.onLine) handler();
+  return () => {
+    window.removeEventListener("online", handler);
+    document.removeEventListener("visibilitychange", visible);
+    clearInterval(interval);
+  };
 }

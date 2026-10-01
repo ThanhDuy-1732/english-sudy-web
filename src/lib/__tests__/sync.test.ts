@@ -12,7 +12,10 @@ import {
   getLastSyncedAt,
   initSync,
   pullFromKey,
+  pushWord,
+  registerSyncProcessors,
 } from "../sync";
+import { drainQueue, peekQueue, enqueue, getSyncStatus } from "../sync-queue";
 
 const mockCreateSupabase = createSupabase as jest.Mock;
 const mockFrom = jest.fn();
@@ -30,7 +33,7 @@ function makeFromImpl(
     eq: jest.fn().mockReturnThis(),
     order: jest.fn().mockReturnThis(),
     limit: jest.fn(() => chainEnd(data)),
-    single: jest.fn(() => chainEnd(data)),
+    maybeSingle: jest.fn(() => chainEnd(data)),
     // allow final .eq() to resolve too (for simple queries)
     then: undefined as unknown,
   });
@@ -41,7 +44,7 @@ function makeFromImpl(
         upsert: jest.fn().mockResolvedValue({ data: null, error }),
         select: jest.fn(() => ({
           eq: jest.fn(() => ({
-            single: jest.fn().mockResolvedValue({ data: userSettings, error }),
+            maybeSingle: jest.fn().mockResolvedValue({ data: userSettings, error }),
           })),
         })),
       };
@@ -116,6 +119,31 @@ test("initSync does nothing when offline", async () => {
   });
   await expect(initSync()).resolves.toBeUndefined();
   expect(getLastSyncedAt()).toBeNull();
+});
+
+test("Supabase error responses stay queued until a retry succeeds", async () => {
+  mockFrom.mockImplementation(makeFromImpl([], [], [], { message: "server unavailable" }));
+  const word = { word: "hello", meaning: "xin chào", example: "Hello!", topic: "test", learnedAt: new Date().toISOString() };
+  await pushWord(word);
+  expect(peekQueue()).toHaveLength(1);
+  registerSyncProcessors();
+  await drainQueue();
+  expect(peekQueue()).toHaveLength(1);
+  expect(peekQueue()[0].retryCount).toBe(1);
+});
+
+test("failed initial sync never claims success", async () => {
+  mockFrom.mockImplementation(makeFromImpl([], [], [], { message: "server unavailable" }));
+  await initSync();
+  expect(getLastSyncedAt()).toBeNull();
+  expect(getSyncStatus()).toBe("failed");
+});
+
+test("initial sync does not resurrect a word whose offline deletion is pending", async () => {
+  enqueue({ entity: "learnedWords", entityId: "deleted", op: "delete", payload: { word: "deleted" } });
+  await initSync();
+  expect(mockFrom).not.toHaveBeenCalled();
+  expect(peekQueue()).toHaveLength(1);
 });
 
 test("initSync sets lastSyncedAt after running", async () => {
@@ -238,7 +266,7 @@ test("initSync pushes voiceSettings to user_settings table", async () => {
         upsert: upsertMock,
         select: jest.fn(() => ({
           eq: jest.fn(() => ({
-            single: jest.fn().mockResolvedValue({ data: null, error: null }),
+            maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null }),
           })),
         })),
       };
@@ -272,4 +300,48 @@ test("pullFromKey applies voice_settings from remote key", async () => {
   await pullFromKey("7468616e-6b7a-4000-8000-000000000000");
   const saved = JSON.parse(localStorage.getItem("voiceSettings")!);
   expect(saved.rate).toBe(1.3);
+});
+
+// --- mistake_log → unifiedMistakes migration ---
+
+function fromWithMistakeLog(result: { data: unknown; error: unknown }) {
+  const base = makeFromImpl();
+  return (table: string) =>
+    table === "mistake_log"
+      ? {
+          upsert: jest.fn().mockResolvedValue({ data: null, error: null }),
+          select: jest.fn(() => ({ eq: jest.fn().mockResolvedValue(result) })),
+        }
+      : base(table);
+}
+
+const remoteLegacy = {
+  id: "r1", questionId: "q5", itemId: "i5", type: "incomplete_sentence", part: "RC5",
+  prompt: "Remote prompt", userAnswer: "A", correctAnswer: "B", explanation: "e",
+  createdAt: "2026-09-01T00:00:00.000Z", updatedAt: "2026-09-01T00:00:00.000Z", resolved: false,
+};
+
+test("initSync migrates remote mistake_log into unifiedMistakes once", async () => {
+  mockFrom.mockImplementation(
+    fromWithMistakeLog({ data: [{ payload: remoteLegacy, updated_at: remoteLegacy.updatedAt }], error: null })
+  );
+  await initSync();
+  const stored = JSON.parse(localStorage.getItem("unifiedMistakes") ?? "[]");
+  expect(stored.map((m: { source: string }) => m.source)).toContain("exam:RC5:q5");
+  expect(localStorage.getItem("mistakeLogRemoteMigrated")).toBe("1");
+});
+
+test("initSync does not set the remote migration flag when the mistake_log fetch fails", async () => {
+  mockFrom.mockImplementation(fromWithMistakeLog({ data: null, error: { message: "boom" } }));
+  await initSync();
+  expect(localStorage.getItem("mistakeLogRemoteMigrated")).toBeNull();
+  expect(getLastSyncedAt()).not.toBeNull();
+});
+
+test("initSync no longer writes mistakeLog to localStorage", async () => {
+  mockFrom.mockImplementation(
+    fromWithMistakeLog({ data: [{ payload: remoteLegacy, updated_at: remoteLegacy.updatedAt }], error: null })
+  );
+  await initSync();
+  expect(localStorage.getItem("mistakeLog")).toBeNull();
 });

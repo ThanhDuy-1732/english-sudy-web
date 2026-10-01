@@ -6,19 +6,16 @@ import type {
   ExamKind,
   ExamPart,
 } from "./types";
-import { pushAttempt, pushMistake } from "@/lib/sync";
-import { addMistake as addUnifiedMistake } from "@/lib/mistakes";
-import type { MistakeSkill } from "@/lib/mistakes";
-
-function partToSkill(part: string): MistakeSkill {
-  if (part.startsWith("LC") || part.startsWith("LISTEN")) return "listening";
-  return "reading";
-}
+import { pushAttempt } from "@/lib/sync";
+import {
+  addMistake as addUnifiedMistake,
+  examPartToSkill,
+  getUnresolvedExamMistakes,
+} from "@/lib/mistakes";
 
 // ─── Keys ───────────────────────────────────────────────────────────────────
 const BANK_KEY = "examBank";
 const ATTEMPTS_KEY = "examAttempts";
-const MISTAKES_KEY = "mistakeLog";
 const SETTINGS_KEY = "examSettings";
 
 const BANK_MAX_ITEMS_PER_KEY = 30;
@@ -46,7 +43,7 @@ export function bankKey(kind: ExamKind, part: ExamPart, level: number) {
 }
 
 export function pruneBank(bank: Record<string, ExamItem[]>): Record<string, ExamItem[]> {
-  const pinnedIds = new Set(getUnresolvedMistakes().map((m) => m.itemId));
+  const pinnedIds = new Set(getUnresolvedExamMistakes().map((m) => m.exam.itemId));
   const result: Record<string, ExamItem[]> = {};
   for (const key of Object.keys(bank)) {
     const sorted = bank[key].slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
@@ -93,44 +90,31 @@ export function getAttemptById(id: string): ExamAttempt | undefined {
   return getAttempts().find((a) => a.id === id);
 }
 
-// ─── Mistake Log ─────────────────────────────────────────────────────────────
-export function getMistakes(): MistakeEntry[] {
-  return ls<MistakeEntry[]>(MISTAKES_KEY, []);
-}
-
+// ─── Mistakes ────────────────────────────────────────────────────────────────
+/**
+ * @deprecated Compatibility adapter for ExamRunner. Writes only to unifiedMistakes;
+ * new code should call `addMistake` from "@/lib/mistakes" directly.
+ */
 export function addMistake(entry: MistakeEntry) {
-  const now = new Date().toISOString();
-  const stamped = { ...entry, updatedAt: entry.updatedAt ?? now };
-  const mistakes = [stamped, ...getMistakes()];
-  lsSet(MISTAKES_KEY, mistakes);
-  pushMistake(stamped);
-  // dual-write to unified mistake log for cross-skill tracking
   try {
     addUnifiedMistake({
-      skill: partToSkill(entry.part),
+      skill: examPartToSkill(entry.part),
       category: entry.type,
       source: `exam:${entry.part}:${entry.questionId}`,
       userAnswer: entry.userAnswer,
       correctAnswer: entry.correctAnswer,
       explanation: entry.explanation,
+      exam: {
+        itemId: entry.itemId,
+        questionId: entry.questionId,
+        part: entry.part,
+        type: entry.type,
+        prompt: entry.prompt,
+      },
     });
   } catch {
-    // non-critical, don't disrupt exam flow
+    // don't disrupt the exam flow on storage failure
   }
-}
-
-export function resolveMistake(id: string) {
-  const now = new Date().toISOString();
-  const mistakes = getMistakes().map((m) =>
-    m.id === id ? { ...m, resolved: true, reviewedAt: now, updatedAt: now } : m
-  );
-  lsSet(MISTAKES_KEY, mistakes);
-  const updated = mistakes.find((m) => m.id === id);
-  if (updated) pushMistake(updated);
-}
-
-export function getUnresolvedMistakes(): MistakeEntry[] {
-  return getMistakes().filter((m) => !m.resolved);
 }
 
 // ─── Settings ────────────────────────────────────────────────────────────────

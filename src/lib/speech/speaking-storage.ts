@@ -1,5 +1,7 @@
+import { syncRequest } from "@/lib/sync-request";
 import type { SpeakingFeedback } from "./types";
 import { createSupabase } from "@/lib/supabase";
+import { enqueue } from "@/lib/sync-queue";
 import { getSyncKey } from "@/lib/sync";
 
 export interface SpeakingRecord {
@@ -36,12 +38,12 @@ export function saveSpeaking(r: SpeakingRecord): void {
   void pushSpeaking(updated);
 }
 
-export async function pushSpeaking(r: SpeakingRecord): Promise<void> {
+export async function pushSpeaking(r: SpeakingRecord, queueOnFailure = true): Promise<void> {
   if (typeof window === "undefined") return;
   const syncKey = getSyncKey();
   const supabase = createSupabase(syncKey);
   try {
-    await supabase.from("speaking_sessions").upsert({
+    await syncRequest(supabase.from("speaking_sessions").upsert({
       id: r.id,
       sync_key: syncKey,
       mode: r.mode,
@@ -49,6 +51,9 @@ export async function pushSpeaking(r: SpeakingRecord): Promise<void> {
       overall: r.feedback.overall,
       created_at: r.createdAt,
       updated_at: r.updatedAt ?? r.createdAt,
-    }, { onConflict: "id" });
-  } catch { /* fire-and-forget */ }
+    }, { onConflict: "id" }));
+  } catch (error) {
+    if (!queueOnFailure) throw error;
+    enqueue({ entity: "speakingSessions", entityId: r.id, op: "upsert", payload: r });
+  }
 }
