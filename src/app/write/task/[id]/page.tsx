@@ -1,10 +1,11 @@
 "use client";
 
-import { use, useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { startSession, finishSession, cancelSession } from "@/lib/sessions";
 import { saveWriting } from "@/lib/write/writing-storage";
 import type { WritingKind } from "@/lib/write/writing-storage";
+import { useCountdown } from "@/lib/useCountdown";
 import {
   Bar,
   BarChart,
@@ -92,16 +93,42 @@ const TASK_CONFIGS: Record<string, TaskConfig> = {
   },
 };
 
-export default function WritingTaskPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function WritingTaskPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const router = useRouter();
   const config = TASK_CONFIGS[id] ?? TASK_CONFIGS["task2-opinion"];
 
   const [content, setContent] = useState("");
-  const [timeLeft, setTimeLeft] = useState(config.timeLimitMin * 60);
+  const [deadline, setDeadline] = useState<number | null>(null);
   const [started, setStarted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [draftReady, setDraftReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const draftKey = `writingTaskDraft:${id}`;
+  const timeLeft = useCountdown(config.timeLimitMin * 60, started, undefined, deadline);
   const sessionIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const draft = JSON.parse(localStorage.getItem(draftKey) ?? "null");
+      if (draft && typeof draft.content === "string" && typeof draft.deadline === "number" && Number.isFinite(draft.deadline)) {
+        setContent(draft.content);
+        setDeadline(draft.deadline);
+        setStarted(true);
+      }
+    } catch {
+      setError("Không thể khôi phục bản nháp trên thiết bị này.");
+    }
+    setDraftReady(true);
+  }, [draftKey]);
+
+  function saveDraft(nextContent: string, nextDeadline: number) {
+    try {
+      localStorage.setItem(draftKey, JSON.stringify({ content: nextContent, deadline: nextDeadline }));
+    } catch {
+      setError("Không thể lưu bản nháp. Hãy sao chép bài viết trước khi rời trang.");
+    }
+  }
 
   useEffect(() => {
     if (!sessionIdRef.current) sessionIdRef.current = startSession("writing", { taskId: id });
@@ -113,22 +140,23 @@ export default function WritingTaskPage({ params }: { params: Promise<{ id: stri
     };
   }, [id]);
 
+  function restart() {
+    try { localStorage.removeItem(draftKey); } catch { /* storage unavailable */ }
+    setContent("");
+    setDeadline(null);
+    setStarted(false);
+    setError(null);
+  }
+
   const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
   const meetsMin = wordCount >= config.minWords;
-
-  useEffect(() => {
-    if (!started) return;
-    const id = setInterval(() => {
-      setTimeLeft((v) => Math.max(0, v - 1));
-    }, 1000);
-    return () => clearInterval(id);
-  }, [started]);
 
   const mins = Math.floor(timeLeft / 60);
   const secs = timeLeft % 60;
 
   async function handleSubmit() {
     setSubmitting(true);
+    setError(null);
     try {
       const res = await fetch("/api/write/grade", {
         method: "POST",
@@ -140,11 +168,14 @@ export default function WritingTaskPage({ params }: { params: Promise<{ id: stri
           chartData: config.chartData,
         }),
       });
+      if (!res.ok) throw new Error("grading failed");
       const feedback = await res.json();
-      // Store feedback in sessionStorage for result page
-      sessionStorage.setItem(`writing-result-${id}`, JSON.stringify({ feedback, content, config }));
+      if (!feedback.bands || !Array.isArray(feedback.annotations) || typeof feedback.overall !== "number") {
+        throw new Error("invalid feedback");
+      }
+      const recordId = crypto.randomUUID();
       saveWriting({
-        id: crypto.randomUUID(),
+        id: recordId,
         kind: config.kind as WritingKind,
         prompt: config.prompt,
         chartData: config.chartData,
@@ -153,19 +184,21 @@ export default function WritingTaskPage({ params }: { params: Promise<{ id: stri
         feedback,
         createdAt: new Date().toISOString(),
       });
+      localStorage.removeItem(draftKey);
       if (sessionIdRef.current) {
         finishSession(sessionIdRef.current);
         sessionIdRef.current = null;
       }
-      router.push(`/write/result/${id}`);
+      router.push(`/write/result/${recordId}`);
     } catch {
-      alert("Lỗi chấm bài, thử lại.");
+      setError("Không thể chấm bài. Bản nháp vẫn được giữ để bạn thử lại khi có mạng.");
       setSubmitting(false);
     }
   }
 
   return (
     <div className="writing-task">
+      {error && <p role="alert" className="mb-4 rounded-lg bg-red-950 p-3 text-red-100">{error}</p>}
       <div className="task-header">
         <button onClick={() => router.push("/write")} className="back-btn">← Write</button>
         <h1>{config.title}</h1>
@@ -184,15 +217,30 @@ export default function WritingTaskPage({ params }: { params: Promise<{ id: stri
       </div>
 
       {!started ? (
-        <button onClick={() => setStarted(true)} className="start-btn">
+        <button disabled={!draftReady} onClick={() => {
+          const end = Date.now() + config.timeLimitMin * 60_000;
+          setDeadline(end);
+          saveDraft(content, end);
+          setStarted(true);
+        }} className="start-btn">
           ▶ Bắt đầu viết (timer sẽ chạy)
         </button>
       ) : (
         <>
           <div className="editor-area">
+            {timeLeft === 0 && (
+              <p role="status" className="time-up">
+                ⏰ Đã hết giờ. Bạn vẫn có thể nộp bài này, hoặc{" "}
+                <button type="button" onClick={restart} className="restart-btn">Làm lại từ đầu</button>
+              </p>
+            )}
             <textarea
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e) => {
+                setContent(e.target.value);
+                if (deadline !== null) saveDraft(e.target.value, deadline);
+              }}
+              aria-label="Bài viết"
               placeholder="Bắt đầu viết bài của bạn ở đây…"
               rows={16}
               autoFocus
@@ -227,8 +275,10 @@ export default function WritingTaskPage({ params }: { params: Promise<{ id: stri
         .task-meta { font-size: 0.8rem; color: #6c757d; margin: 0; }
         .start-btn { display: block; width: 100%; padding: 1rem; background: #0d6efd; color: white; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; }
         .start-btn:hover { background: #0b5ed7; }
+        .time-up { margin: 0; padding: 0.6rem 0.75rem; border-radius: 8px; background: #fff5f5; color: #b02a37; font-size: 0.875rem; }
+        .restart-btn { background: none; border: none; padding: 0; color: #0d6efd; text-decoration: underline; cursor: pointer; font-size: inherit; }
         .editor-area { display: flex; flex-direction: column; gap: 0.75rem; }
-        textarea { width: 100%; padding: 0.875rem; border: 1.5px solid #dee2e6; border-radius: 10px; font-size: 0.9rem; line-height: 1.6; resize: vertical; box-sizing: border-box; font-family: inherit; }
+        textarea { width: 100%; padding: 0.875rem; border: 1.5px solid #dee2e6; border-radius: 10px; font-size: 1rem; line-height: 1.6; resize: vertical; box-sizing: border-box; font-family: inherit; color: #111827; background: white; }
         textarea:focus { border-color: #0d6efd; outline: none; }
         .word-count-row { display: flex; align-items: center; justify-content: space-between; }
         .word-count { font-size: 0.875rem; font-weight: 600; }

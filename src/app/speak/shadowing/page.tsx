@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { createRecorder } from "@/lib/speech/recorder";
+import { createRecorder, audioFilename } from "@/lib/speech/recorder";
 import { saveSpeaking } from "@/lib/speech/speaking-storage";
-import { startSession, finishSession } from "@/lib/sessions";
+import { startSession, finishSession, cancelSession } from "@/lib/sessions";
 
 const SHADOW_SENTENCES = [
   "The meeting has been postponed until next Thursday.",
@@ -33,8 +33,20 @@ export default function ShadowingPage() {
   const [matchPct, setMatchPct] = useState(0);
   const recorderRef = useRef(createRecorder());
   const sessionIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    const recorder = recorderRef.current;
+    return () => {
+      recorder.dispose();
+      if (sessionIdRef.current) cancelSession(sessionIdRef.current);
+    };
+  }, []);
 
   const sentence = SHADOW_SENTENCES[sentenceIdx % SHADOW_SENTENCES.length];
+
+  function discardSession() {
+    if (sessionIdRef.current) cancelSession(sessionIdRef.current);
+    sessionIdRef.current = null;
+  }
 
   function handleSpeak() {
     if (typeof window === "undefined" || !window.speechSynthesis) return;
@@ -45,12 +57,15 @@ export default function ShadowingPage() {
   }
 
   async function handleStartRecording() {
+    setPhase("processing");
     try {
       await recorderRef.current.start();
       setPhase("recording");
+      discardSession();
       sessionIdRef.current = startSession("speaking", { mode: "shadowing" });
     } catch {
       alert("Không thể truy cập microphone.");
+      setPhase("ready");
     }
   }
 
@@ -59,8 +74,9 @@ export default function ShadowingPage() {
     try {
       const blob = await recorderRef.current.stop();
       const form = new FormData();
-      form.append("audio", blob, "shadowing.webm");
+      form.append("audio", blob, audioFilename(blob, "shadowing"));
       const res = await fetch("/api/speech/transcribe", { method: "POST", body: form });
+      if (!res.ok) throw new Error("transcription failed");
       const result = await res.json() as { text?: string };
       const text = result.text ?? "";
       setTranscript(text);
@@ -99,6 +115,7 @@ export default function ShadowingPage() {
 
       setPhase("result");
     } catch {
+      discardSession();
       setPhase("ready");
       alert("Lỗi xử lý audio. Vui lòng thử lại.");
     }

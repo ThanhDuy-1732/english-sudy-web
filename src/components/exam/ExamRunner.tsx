@@ -2,7 +2,7 @@
 
 import { useReducer, useCallback, useEffect, useRef, useState } from "react";
 import type { ExamItem, ExamQuestion, AnswerRecord, ExamAttempt, ExamPart, ExamKind } from "@/lib/exam/types";
-import { saveAttempt, addMistake, addItemToBank } from "@/lib/exam/exam-storage";
+import { saveAttempt, addMistake, addItemToBank, getItemsFromBank } from "@/lib/exam/exam-storage";
 import { pushExamItem } from "@/lib/sync";
 import { computeScore, isCompletionCorrect } from "@/lib/exam/scoring";
 import { recordTagResult } from "@/lib/exam/exam-tags";
@@ -128,17 +128,24 @@ export default function ExamRunner({
     async function loadItems() {
       const fetched: ExamItem[] = [];
       for (const part of parts) {
-        const res = await fetch("/api/exam/generate-item", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ kind, part, level, topic }),
-        });
-        if (!res.ok) continue;
-        const item = await res.json();
-        if (item.id) {
+        if (cancelled) return;
+        try {
+          if (!navigator.onLine) throw new Error("offline");
+          const res = await fetch("/api/exam/generate-item", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ kind, part, level, topic }),
+          });
+          if (!res.ok) throw new Error("generation failed");
+          const item = await res.json();
+          if (!item.id || !Array.isArray(item.questions)) throw new Error("invalid item");
           fetched.push(item);
           addItemToBank(item);
-          pushExamItem(item);
+          void pushExamItem(item);
+        } catch {
+          // Only reuse the general bank when no specific topic was requested.
+          const cached = !topic ? getItemsFromBank(kind, part, level)[0] : undefined;
+          if (cached) fetched.push(cached);
         }
       }
       if (cancelled) return;

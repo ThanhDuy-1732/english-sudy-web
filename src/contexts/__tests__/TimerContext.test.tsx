@@ -107,3 +107,17 @@ test("persists todaySeconds to localStorage after 5 seconds", () => {
   const data = JSON.parse(localStorage.getItem("studyTime") ?? "{}") as Record<string, number>;
   expect(data["2026-07-21"]).toBeGreaterThanOrEqual(5);
 });
+
+test("countdown catches up after suspension but hidden time is not study time", () => {
+  wrap(<Consumer />);
+  act(() => { screen.getByText("start5").click(); });
+  act(() => { jest.advanceTimersByTime(2000); });
+  Object.defineProperty(document, "visibilityState", { configurable: true, value: "hidden" });
+  act(() => { document.dispatchEvent(new Event("visibilitychange")); });
+  expect(JSON.parse(localStorage.getItem("studyTime")!)["2026-07-21"]).toBe(2);
+  jest.setSystemTime(new Date("2026-07-21T12:01:00.000Z"));
+  Object.defineProperty(document, "visibilityState", { configurable: true, value: "visible" });
+  act(() => { document.dispatchEvent(new Event("visibilitychange")); });
+  expect(screen.getByTestId("time-up")).toHaveTextContent("true");
+  expect(screen.getByTestId("today")).toHaveTextContent("2");
+});

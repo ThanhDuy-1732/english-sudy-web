@@ -1,8 +1,9 @@
 "use client";
 
-import { use, useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { createRecorder } from "@/lib/speech/recorder";
+import { createRecorder, audioFilename } from "@/lib/speech/recorder";
+import { useCountdown } from "@/lib/useCountdown";
 import { saveLearnedWord } from "@/lib/storage";
 import type { SpeakingFeedback } from "@/lib/speech/types";
 import { startSession, finishSession, cancelSession } from "@/lib/sessions";
@@ -31,15 +32,13 @@ const PART_CONFIG: Record<string, { title: string; prepSec: number; speakSec: nu
   },
 };
 
-export default function IeltsSpeakingPage({ params }: { params: Promise<{ part: string }> }) {
-  const { part } = use(params);
+export default function IeltsSpeakingPage({ params }: { params: { part: string } }) {
+  const { part } = params;
   const router = useRouter();
   const config = PART_CONFIG[part] ?? PART_CONFIG.p1;
 
   type Phase = "ready" | "prep" | "recording" | "processing" | "result";
   const [phase, setPhase] = useState<Phase>("ready");
-  const [prepLeft, setPrepLeft] = useState(config.prepSec);
-  const [recLeft, setRecLeft] = useState(config.speakSec);
   const [feedback, setFeedback] = useState<SpeakingFeedback | null>(null);
   const [textMode, setTextMode] = useState(false);
   const [textInput, setTextInput] = useState("");
@@ -47,7 +46,9 @@ export default function IeltsSpeakingPage({ params }: { params: Promise<{ part: 
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
   const recorderRef = useRef(createRecorder());
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const prepLeft = useCountdown(config.prepSec, phase === "prep", () => { void startRecording(); });
+  const recLeft = useCountdown(config.speakSec, phase === "recording", () => { void stopRecording(); });
+  const processingRef = useRef(false);
   const sessionIdRef = useRef<string | null>(null);
   const audioUrlRef = useRef<string | null>(null);
 
@@ -68,10 +69,12 @@ export default function IeltsSpeakingPage({ params }: { params: Promise<{ part: 
   }, [currentAudioId]);
 
   useEffect(() => {
+    const recorder = recorderRef.current;
     if (!sessionIdRef.current) {
       sessionIdRef.current = startSession("speaking", { mode: "ielts", part });
     }
     return () => {
+      recorder.dispose();
       if (sessionIdRef.current) {
         cancelSession(sessionIdRef.current);
         sessionIdRef.current = null;
@@ -79,35 +82,16 @@ export default function IeltsSpeakingPage({ params }: { params: Promise<{ part: 
     };
   }, [part]);
 
-  function clearTimer() {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-  }
-
   async function startPrep() {
     if (config.prepSec === 0) {
       startRecording();
       return;
     }
     setPhase("prep");
-    setPrepLeft(config.prepSec);
-    timerRef.current = setInterval(() => {
-      setPrepLeft((v) => {
-        if (v <= 1) {
-          clearTimer();
-          startRecording();
-          return 0;
-        }
-        return v - 1;
-      });
-    }, 1000);
   }
 
   async function startRecording() {
-    setPhase("recording");
-    setRecLeft(config.speakSec);
+    setPhase("processing");
     try {
       await recorderRef.current.start();
     } catch {
@@ -116,37 +100,32 @@ export default function IeltsSpeakingPage({ params }: { params: Promise<{ part: 
       setPhase("ready");
       return;
     }
-    timerRef.current = setInterval(() => {
-      setRecLeft((v) => {
-        if (v <= 1) {
-          clearTimer();
-          stopRecording();
-          return 0;
-        }
-        return v - 1;
-      });
-    }, 1000);
+    setPhase("recording");
   }
 
   async function stopRecording() {
-    clearTimer();
+    if (processingRef.current) return;
+    processingRef.current = true;
     setPhase("processing");
     try {
       const blob = await recorderRef.current.stop();
       const audioId = crypto.randomUUID();
-      void saveAudio(audioId, blob);
+      await saveAudio(audioId, blob);
       setCurrentAudioId(audioId);
       const formData = new FormData();
-      formData.append("audio", blob, "speech.webm");
+      formData.append("audio", blob, audioFilename(blob));
       const transcribeRes = await fetch("/api/speech/transcribe", {
         method: "POST",
         body: formData,
       });
+      if (!transcribeRes.ok) throw new Error("transcription failed");
       const { text, durationSec } = await transcribeRes.json();
       await gradeTranscript(text, durationSec, audioId);
     } catch {
       alert("Lỗi xử lý audio. Vui lòng thử lại.");
       setPhase("ready");
+    } finally {
+      processingRef.current = false;
     }
   }
 
@@ -160,6 +139,7 @@ export default function IeltsSpeakingPage({ params }: { params: Promise<{ part: 
         durationSec,
       }),
     });
+    if (!gradeRes.ok) throw new Error("grading failed");
     const fb: SpeakingFeedback = await gradeRes.json();
     setFeedback(fb);
     const record: SpeakingRecord = {
@@ -185,7 +165,12 @@ export default function IeltsSpeakingPage({ params }: { params: Promise<{ part: 
     setPhase("processing");
     const wordCount = textInput.trim().split(/\s+/).length;
     const durationSec = Math.round(wordCount / 2.5); // ~150 wpm estimate
-    await gradeTranscript(textInput.trim(), durationSec);
+    try {
+      await gradeTranscript(textInput.trim(), durationSec);
+    } catch {
+      alert("Không thể chấm bài. Kiểm tra kết nối và thử lại.");
+      setPhase("ready");
+    }
   }
 
   function handleAddVocab(word: string) {

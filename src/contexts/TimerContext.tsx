@@ -57,10 +57,10 @@ function readTodaySeconds(): number {
   return typeof seconds === "number" && Number.isFinite(seconds) ? seconds : 0;
 }
 
-function writeTodaySeconds(seconds: number): void {
+function writeTodaySeconds(seconds: number, day = getTodayKey()): void {
   if (typeof window === "undefined") return;
   const data = readStudyTime();
-  data[getTodayKey()] = seconds;
+  data[day] = seconds;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
@@ -78,6 +78,8 @@ export function TimerContextProvider({ children }: { children: React.ReactNode }
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingSecondsRef = useRef(0);
   const dayKeyRef = useRef("");
+  const deadlineRef = useRef<number | null>(null);
+  const remainingRef = useRef<number | null>(null);
 
   useEffect(() => {
     dayKeyRef.current = getTodayKey();
@@ -91,7 +93,7 @@ export function TimerContextProvider({ children }: { children: React.ReactNode }
     pendingSecondsRef.current = seconds;
     if (debounceRef.current) return;
     debounceRef.current = setTimeout(() => {
-      writeTodaySeconds(pendingSecondsRef.current);
+      writeTodaySeconds(pendingSecondsRef.current, dayKeyRef.current);
       debounceRef.current = null;
     }, 5000);
   }, []);
@@ -99,12 +101,20 @@ export function TimerContextProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
+      writeTodaySeconds(pendingSecondsRef.current, dayKeyRef.current);
     };
   }, []);
 
   useEffect(() => {
-    if (!isRunning) return undefined;
-    const id = setInterval(() => {
+    let previous = Date.now();
+    let visible = document.visibilityState !== "hidden";
+    if (isRunning && remainingRef.current !== null) {
+      deadlineRef.current = Date.now() + remainingRef.current * 1000;
+    }
+    function update() {
+      const now = Date.now();
+      const elapsed = Math.max(0, Math.floor((now - previous) / 1000));
+      previous += elapsed * 1000;
       const currentDay = getTodayKey();
       if (currentDay !== dayKeyRef.current) {
         // Day rolled over: flush pending value to the OLD date key, then reset.
@@ -117,26 +127,47 @@ export function TimerContextProvider({ children }: { children: React.ReactNode }
         pendingSecondsRef.current = 0;
         setTodaySeconds(0);
       }
-      const next = todaySecondsRef.current + 1;
-      todaySecondsRef.current = next;
-      setTodaySeconds(next);
-      schedulePersist(next);
-      setCountdownRemaining((previous) => {
-        if (previous === null) return null;
-        if (previous <= 1) {
+      if (isRunning && visible && elapsed > 0) {
+        const next = todaySecondsRef.current + elapsed;
+        todaySecondsRef.current = next;
+        setTodaySeconds(next);
+        schedulePersist(next);
+      }
+      if (isRunning && deadlineRef.current !== null) {
+        const next = Math.max(0, Math.ceil((deadlineRef.current - now) / 1000));
+        remainingRef.current = next || null;
+        setCountdownRemaining(next || null);
+        if (next === 0) {
           setShowTimeUp(true);
-          return null;
+          deadlineRef.current = null;
         }
-        return previous - 1;
-      });
-    }, 1000);
-    return () => clearInterval(id);
+      }
+    }
+    function onVisibility() {
+      update();
+      visible = document.visibilityState !== "hidden";
+      previous = Date.now();
+      if (!visible) writeTodaySeconds(pendingSecondsRef.current, dayKeyRef.current);
+    }
+    const id = setInterval(update, 1000);
+    document.addEventListener("visibilitychange", onVisibility);
+    const persist = () => { update(); writeTodaySeconds(pendingSecondsRef.current, dayKeyRef.current); };
+    window.addEventListener("pagehide", persist);
+    window.addEventListener("pageshow", onVisibility);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pagehide", persist);
+      window.removeEventListener("pageshow", onVisibility);
+    };
   }, [isRunning, schedulePersist]);
 
   const pause = useCallback(() => setIsRunning(false), []);
   const resume = useCallback(() => setIsRunning(true), []);
 
   const startCountdown = useCallback((seconds: number) => {
+    deadlineRef.current = Date.now() + seconds * 1000;
+    remainingRef.current = seconds;
     setCountdownTarget(seconds);
     setCountdownRemaining(seconds);
     setShowTimeUp(false);
@@ -144,6 +175,8 @@ export function TimerContextProvider({ children }: { children: React.ReactNode }
   }, []);
 
   const stopCountdown = useCallback(() => {
+    deadlineRef.current = null;
+    remainingRef.current = null;
     setCountdownTarget(null);
     setCountdownRemaining(null);
   }, []);

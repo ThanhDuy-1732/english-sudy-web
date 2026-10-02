@@ -1,8 +1,9 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { saveLearnedWord } from "@/lib/storage";
+import { getWriting } from "@/lib/write/writing-storage";
 
 interface WritingFeedback {
   bands: { task: number; coherence: number; lexical: number; grammar: number };
@@ -26,8 +27,14 @@ const CATEGORY_COLORS: Record<string, string> = {
   style: "#6c757d",
 };
 
-export default function WritingResultPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+const KIND_TITLES: Record<string, string> = {
+  ielts_task1: "IELTS Task 1",
+  ielts_task2: "IELTS Task 2",
+  toeic_email: "TOEIC Writing – Business Email",
+};
+
+export default function WritingResultPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const router = useRouter();
   const [data, setData] = useState<{
     feedback: WritingFeedback;
@@ -36,10 +43,15 @@ export default function WritingResultPage({ params }: { params: Promise<{ id: st
   } | null>(null);
 
   useEffect(() => {
-    const stored = sessionStorage.getItem(`writing-result-${id}`);
-    if (stored) {
-      setData(JSON.parse(stored));
+    const record = getWriting().find((item) => item.id === id);
+    if (record) {
+      setData({ feedback: record.feedback, content: record.content, config: { title: KIND_TITLES[record.kind] ?? record.kind, prompt: record.prompt } });
+      return;
     }
+    try {
+      const stored = sessionStorage.getItem(`writing-result-${id}`);
+      if (stored) setData(JSON.parse(stored));
+    } catch { /* Ignore invalid legacy result data. */ }
   }, [id]);
 
   if (!data) {

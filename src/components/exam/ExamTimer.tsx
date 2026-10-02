@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useCountdown } from "@/lib/useCountdown";
 
 interface Props {
   totalSeconds: number;
@@ -12,25 +12,7 @@ interface Props {
  * Deliberately separate from TimerContext (which tracks total study time).
  */
 export default function ExamTimer({ totalSeconds, onTimeUp }: Props) {
-  const [remaining, setRemaining] = useState(totalSeconds);
-  const firedRef = useRef(false);
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      setRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(id);
-          if (!firedRef.current) {
-            firedRef.current = true;
-            onTimeUp?.();
-          }
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(id);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const remaining = useCountdown(totalSeconds, true, onTimeUp);
 
   const mins = Math.floor(remaining / 60);
   const secs = remaining % 60;

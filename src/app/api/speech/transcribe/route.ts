@@ -1,14 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
+import { audioFilename } from "@/lib/speech/recorder";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-export async function POST(req: NextRequest) {
-  const form = await req.formData();
-  const audio = form.get("audio") as File | null;
+const MAX_AUDIO_BYTES = 25 * 1024 * 1024;
+const MULTIPART_OVERHEAD_BYTES = 64 * 1024;
 
-  if (!audio) {
+export async function POST(req: NextRequest) {
+  // Reject before buffering a huge body; the size check below still covers a missing/understated header.
+  const declared = Number(req.headers.get("content-length"));
+  if (Number.isFinite(declared) && declared > MAX_AUDIO_BYTES + MULTIPART_OVERHEAD_BYTES) {
+    return NextResponse.json({ error: "Audio file is too large" }, { status: 413 });
+  }
+  const form = await req.formData().catch(() => null);
+  const audio = form?.get("audio");
+
+  if (!(audio instanceof File) || audio.size === 0) {
     return NextResponse.json({ error: "No audio file" }, { status: 400 });
+  }
+  const mimeType = audio.type.split(";")[0];
+  if (!["audio/webm", "audio/mp4", "audio/x-m4a", "audio/ogg"].includes(mimeType)) {
+    return NextResponse.json({ error: "Unsupported audio format" }, { status: 415 });
+  }
+  if (audio.size > MAX_AUDIO_BYTES) {
+    return NextResponse.json({ error: "Audio file is too large" }, { status: 413 });
   }
 
   const groqKey = process.env.GROQ_API_KEY;
@@ -19,7 +35,7 @@ export async function POST(req: NextRequest) {
   const model = process.env.GROQ_WHISPER_MODEL ?? "whisper-large-v3-turbo";
 
   const upstream = new FormData();
-  upstream.append("file", audio, "speech.webm");
+  upstream.append("file", audio, audioFilename(audio));
   upstream.append("model", model);
   upstream.append("response_format", "verbose_json");
   upstream.append("language", "en");

@@ -123,7 +123,7 @@ export default function SettingsPage() {
       <div>
         <h1 className="mb-6 font-display text-3xl font-bold text-[#d9ecff]">Cài đặt</h1>
 
-        <div className="mb-8 flex w-fit gap-1 rounded-xl border border-white/10 bg-white/5 p-1">
+        <div className="mb-8 flex w-fit max-w-full flex-wrap gap-1 rounded-xl border border-white/10 bg-white/5 p-1">
           {(["providers", "voice", "sync", "profile"] as Tab[]).map((tab) => (
             <button
               key={tab}
@@ -309,7 +309,7 @@ export default function SettingsPage() {
                 Nhập sync key của thiết bị khác để thêm từ vựng của thiết bị đó vào đây. Dữ liệu
                 hiện tại trên thiết bị này sẽ không bị mất.
               </p>
-              <div className="flex gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <input
                   type="text"
                   value={pullInput}
@@ -318,7 +318,7 @@ export default function SettingsPage() {
                     if (event.key === "Enter") void handlePull();
                   }}
                   placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx hoặc ThankZ"
-                  className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm text-white placeholder-[#b0b0d1] focus:border-white/30 focus:outline-none"
+                  className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm text-white placeholder-[#b0b0d1] focus:border-white/30 focus:outline-none"
                 />
                 <button
                   type="button"

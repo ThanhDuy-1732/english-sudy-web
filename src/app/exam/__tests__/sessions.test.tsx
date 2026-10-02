@@ -3,7 +3,6 @@ import DrillPage from "../drill/[part]/page";
 import MockPage from "../mock/page";
 import { getSessions } from "@/lib/sessions";
 
-jest.mock("react", () => ({ ...jest.requireActual("react"), use: () => ({ part: "RC5" }) }));
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: jest.fn() }),
   useSearchParams: () => ({ get: () => null }),
@@ -18,7 +17,7 @@ jest.mock("@/components/exam/ExamRunner", () => function ExamRunnerStub({ onComp
 beforeEach(() => localStorage.clear());
 
 test("drill records results and keeps the finished session", () => {
-  const { unmount } = render(<DrillPage params={Promise.resolve({ part: "RC5" })} />);
+  const { unmount } = render(<DrillPage params={{ part: "RC5" }} />);
   expect(getSessions()[0]).toMatchObject({ type: "exam", metadata: { part: "RC5" } });
   fireEvent.click(screen.getByRole("button", { name: "Complete exam" }));
   expect(getSessions()[0]).toMatchObject({ totalItems: 2, correctItems: 1 });
