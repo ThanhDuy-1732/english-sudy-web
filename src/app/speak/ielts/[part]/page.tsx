@@ -275,18 +275,18 @@ export default function IeltsSpeakingPage({ params }: { params: { part: string }
           h1 { font-size: 1.1rem; font-weight: 700; margin: 0; }
           h2 { font-size: 0.9rem; font-weight: 600; text-transform: uppercase; color: #6c757d; margin: 1.25rem 0 0.5rem; }
           .score-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 1rem; }
-          .score-box { text-align: center; padding: 0.75rem; background: #f8f9fa; border-radius: 10px; }
+          .score-box { color: #212529; text-align: center; padding: 0.75rem; background: #f8f9fa; border-radius: 10px; }
           .score-box.overall { background: #d1e7dd; }
           .score-label { font-size: 0.75rem; color: #6c757d; margin: 0; }
           .score-val { font-size: 1.5rem; font-weight: 700; margin: 0.25rem 0 0; }
           .stats-row { display: flex; gap: 1rem; font-size: 0.8rem; color: #6c757d; margin-bottom: 0.5rem; flex-wrap: wrap; }
           ul { padding-left: 1.25rem; }
           li { margin-bottom: 0.35rem; font-size: 0.9rem; }
-          .improvement { background: #f8f9fa; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem; }
+          .improvement { color: #212529; background: #f8f9fa; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem; }
           .issue { font-weight: 600; font-size: 0.875rem; margin: 0 0 0.35rem; }
           .wrong { color: #dc3545; font-size: 0.85rem; margin: 0; }
           .better { color: #198754; font-size: 0.85rem; margin: 0.25rem 0 0; }
-          .transcript { font-size: 0.875rem; line-height: 1.6; background: #f8f9fa; padding: 0.75rem; border-radius: 8px; }
+          .transcript { color: #212529; font-size: 0.875rem; line-height: 1.6; background: #f8f9fa; padding: 0.75rem; border-radius: 8px; }
           .upgraded { font-size: 0.875rem; line-height: 1.6; background: #e8f0fe; padding: 0.75rem; border-radius: 8px; border-left: 3px solid #0d6efd; }
           .vocab-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
           .vocab-chip { padding: 0.3rem 0.75rem; border: 1.5px solid #0d6efd; border-radius: 16px; background: white; cursor: pointer; font-size: 0.8rem; color: #0d6efd; }
@@ -361,8 +361,8 @@ export default function IeltsSpeakingPage({ params }: { params: { part: string }
         .speak-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; }
         .back-btn { background: none; border: none; cursor: pointer; color: #6c757d; }
         h1 { flex: 1; font-size: 1.1rem; font-weight: 700; margin: 0; }
-        .mode-btn { padding: 0.35rem 0.75rem; border: 1.5px solid #dee2e6; border-radius: 16px; background: white; cursor: pointer; font-size: 0.8rem; }
-        .task-card { background: #f8f9fa; border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem; border-left: 3px solid #0d6efd; }
+        .mode-btn { color: #212529; padding: 0.35rem 0.75rem; border: 1.5px solid #dee2e6; border-radius: 16px; background: white; cursor: pointer; font-size: 0.8rem; }
+        .task-card { color: #212529; background: #f8f9fa; border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem; border-left: 3px solid #0d6efd; }
         .task-label { font-size: 0.75rem; text-transform: uppercase; color: #6c757d; margin: 0 0 0.5rem; }
         .task-prompt { font-size: 0.95rem; line-height: 1.6; margin: 0; }
         .mic-section, .text-section { text-align: center; }

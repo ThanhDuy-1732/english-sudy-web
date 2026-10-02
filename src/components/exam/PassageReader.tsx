@@ -104,6 +104,7 @@ export default function PassageReader({
           align-items: start;
         }
         .passage-pane {
+          color: #212529;
           position: sticky;
           top: 80px;
           max-height: calc(100vh - 120px);
@@ -126,7 +127,7 @@ export default function PassageReader({
         .q-type { font-style: italic; }
         .question-prompt { font-size: 0.95rem; font-weight: 500; line-height: 1.6; margin-bottom: 1rem; }
         .options-list { display: flex; flex-direction: column; gap: 0.5rem; }
-        .option-btn { text-align: left; padding: 0.65rem 0.9rem; border: 1.5px solid #dee2e6; border-radius: 6px; background: white; cursor: pointer; font-size: 0.9rem; }
+        .option-btn { color: #212529; text-align: left; padding: 0.65rem 0.9rem; border: 1.5px solid #dee2e6; border-radius: 6px; background: white; cursor: pointer; font-size: 0.9rem; }
         .option-btn:hover:not(:disabled) { border-color: #0d6efd; background: #e8f0fe; }
         .option-btn.selected { border-color: #0d6efd; background: #e8f0fe; }
         .option-btn.correct { border-color: #198754; background: #d1e7dd; }

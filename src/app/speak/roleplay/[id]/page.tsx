@@ -215,12 +215,12 @@ export default function RoleplayPage({ params }: { params: { id: string } }) {
           .goal-status { font-size: 1.1rem; font-weight: 600; }
           .goal { color: #6c757d; font-size: 0.9rem; margin-bottom: 1rem; }
           .corrections { display: flex; flex-direction: column; gap: 0.75rem; }
-          .correction-item { padding: 0.75rem; background: #f8f9fa; border-radius: 8px; }
+          .correction-item { color: #212529; padding: 0.75rem; background: #f8f9fa; border-radius: 8px; }
           .wrong { color: #dc3545; margin: 0; }
           .right { color: #198754; margin: 0.25rem 0 0; }
           .note { color: #6c757d; font-size: 0.8rem; margin: 0.25rem 0 0; }
           .report-actions { display: flex; gap: 0.75rem; margin-top: 2rem; flex-wrap: wrap; }
-          .report-actions button { padding: 0.6rem 1.25rem; border-radius: 8px; border: 1.5px solid #dee2e6; background: white; cursor: pointer; }
+          .report-actions button { color: #212529; padding: 0.6rem 1.25rem; border-radius: 8px; border: 1.5px solid #dee2e6; background: white; cursor: pointer; }
           .report-actions button:first-child { background: #0d6efd; color: white; border-color: #0d6efd; }
         `}</style>
       </div>

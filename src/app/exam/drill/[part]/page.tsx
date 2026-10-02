@@ -118,7 +118,7 @@ export default function DrillPage({ params }: { params: { part: string } }) {
           .tag-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
           .tag-pct { font-size: 0.75rem; color: #6c757d; min-width: 32px; text-align: right; }
           .done-actions { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 2rem; }
-          .done-actions button { padding: 0.75rem 1.5rem; border-radius: 8px; border: 1.5px solid #dee2e6; background: white; cursor: pointer; font-size: 0.95rem; }
+          .done-actions button { color: #212529; padding: 0.75rem 1.5rem; border-radius: 8px; border: 1.5px solid #dee2e6; background: white; cursor: pointer; font-size: 0.95rem; }
           .done-actions button:first-child { background: #0d6efd; color: white; border-color: #0d6efd; }
         `}</style>
       </div>

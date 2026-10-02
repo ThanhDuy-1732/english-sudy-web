@@ -121,12 +121,12 @@ export default function MockPage() {
           .mock-result { max-width: 480px; margin: 3rem auto; text-align: center; padding: 2rem; }
           h1 { font-size: 1.5rem; margin-bottom: 1rem; }
           .raw-score { font-size: 1.1rem; margin-bottom: 1rem; }
-          .score-box { background: #f8f9fa; border-radius: 10px; padding: 1rem; margin-bottom: 1rem; }
+          .score-box { color: #212529; background: #f8f9fa; border-radius: 10px; padding: 1rem; margin-bottom: 1rem; }
           .score-box p { margin: 0.35rem 0; }
           .total { font-size: 1.25rem; font-weight: 700; margin-top: 0.5rem !important; }
           .disclaimer { font-size: 0.75rem; color: #6c757d; }
           .result-actions { display: flex; gap: 0.75rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap; }
-          .result-actions button { padding: 0.6rem 1.25rem; border-radius: 8px; border: 1.5px solid #dee2e6; background: white; cursor: pointer; }
+          .result-actions button { color: #212529; padding: 0.6rem 1.25rem; border-radius: 8px; border: 1.5px solid #dee2e6; background: white; cursor: pointer; }
           .result-actions button:first-child { background: #0d6efd; color: white; border-color: #0d6efd; }
         `}</style>
       </div>
@@ -164,7 +164,7 @@ export default function MockPage() {
         }}
       />
       <style jsx>{`
-        .mock-header { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.5rem; border-bottom: 1px solid #dee2e6; position: sticky; top: 0; background: white; z-index: 10; }
+        .mock-header { color: #212529; display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.5rem; border-bottom: 1px solid #dee2e6; position: sticky; top: 0; background: white; z-index: 10; }
         .mock-label { font-weight: 700; font-size: 0.95rem; }
       `}</style>
     </div>

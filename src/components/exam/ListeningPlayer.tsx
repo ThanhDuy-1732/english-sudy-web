@@ -126,9 +126,9 @@ export default function ListeningPlayer({ script, onPlaybackComplete }: Props) {
           padding: 0;
           margin-bottom: 0.5rem;
         }
-        .transcript { background: #f8f9fa; border-radius: 8px; padding: 0.75rem 1rem; margin-top: 0.5rem; }
+        .transcript { color: #212529; background: #f8f9fa; border-radius: 8px; padding: 0.75rem 1rem; margin-top: 0.5rem; }
         .transcript-line { margin: 0 0 0.4rem; font-size: 0.875rem; line-height: 1.5; transition: background 0.2s; border-radius: 4px; padding: 0.1rem 0.3rem; }
-        .transcript-line.active { background: #fff3cd; font-weight: 500; }
+        .transcript-line.active { color: #212529; background: #fff3cd; font-weight: 500; }
         .speaker { font-weight: 700; color: #495057; margin-right: 0.3rem; }
         @media (prefers-color-scheme: dark) {
           .transcript { background: #1e2a35; }

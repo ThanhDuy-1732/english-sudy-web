@@ -132,6 +132,7 @@ export default function QuestionCard({
           margin-bottom: 0.75rem;
         }
         .passage-context {
+          color: #212529;
           background: #f8f9fa;
           border-left: 3px solid #6c757d;
           padding: 0.75rem 1rem;
@@ -154,6 +155,7 @@ export default function QuestionCard({
           gap: 0.5rem;
         }
         .option-btn {
+          color: #212529;
           text-align: left;
           padding: 0.75rem 1rem;
           border: 1.5px solid #dee2e6;

@@ -126,14 +126,14 @@ export default function MistakesPage() {
         h1 { font-size: 1.25rem; font-weight: 700; margin: 0; flex: 1; }
         .count { font-size: 0.85rem; color: #6c757d; }
         .filter-row { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
-        .filter-row button { padding: 0.4rem 1rem; border: 1.5px solid #dee2e6; border-radius: 16px; background: white; cursor: pointer; font-size: 0.85rem; }
+        .filter-row button { color: #212529; padding: 0.4rem 1rem; border: 1.5px solid #dee2e6; border-radius: 16px; background: white; cursor: pointer; font-size: 0.85rem; }
         .filter-row button.active { background: #0d6efd; color: white; border-color: #0d6efd; }
         .empty { text-align: center; padding: 3rem; color: #6c757d; }
         .mistakes-list { display: flex; flex-direction: column; gap: 1rem; }
         .mistake-card { padding: 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; }
         .mistake-card.resolved { opacity: 0.65; border-style: dashed; }
         .mistake-meta { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; font-size: 0.8rem; }
-        .part-tag { background: #e9ecef; border-radius: 10px; padding: 0.15rem 0.5rem; font-weight: 600; }
+        .part-tag { color: #212529; background: #e9ecef; border-radius: 10px; padding: 0.15rem 0.5rem; font-weight: 600; }
         .date { color: #6c757d; }
         .resolved-tag { color: #198754; font-weight: 600; }
         .mistake-prompt { font-size: 0.9rem; font-weight: 500; margin-bottom: 0.5rem; }

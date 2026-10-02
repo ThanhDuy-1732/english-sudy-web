@@ -178,7 +178,7 @@ export default function TodayPage() {
         .setup { text-align: center; padding: 2rem; }
         .setup-label { font-size: 1rem; margin-bottom: 1rem; }
         .budget-selector { display: flex; justify-content: center; gap: 0.75rem; margin-bottom: 1.5rem; }
-        .budget-selector button { padding: 0.6rem 1.5rem; border: 2px solid #dee2e6; border-radius: 20px; background: white; cursor: pointer; font-size: 0.95rem; }
+        .budget-selector button { color: #212529; padding: 0.6rem 1.5rem; border: 2px solid #dee2e6; border-radius: 20px; background: white; cursor: pointer; font-size: 0.95rem; }
         .budget-selector button.active { border-color: #0d6efd; background: #0d6efd; color: white; font-weight: 700; }
         .generate-btn { padding: 0.875rem 2rem; background: #0d6efd; color: white; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; }
         .generate-btn:hover { background: #0b5ed7; }
@@ -186,7 +186,7 @@ export default function TodayPage() {
         .progress-bar { height: 100%; background: #198754; border-radius: 3px; transition: width 0.4s; }
         .progress-text { font-size: 0.8rem; color: #6c757d; margin-bottom: 1.25rem; }
         .plan-blocks { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
-        .plan-block { display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 2px solid var(--accent, #dee2e6); border-radius: 12px; background: white; transition: opacity 0.2s; }
+        .plan-block { color: #212529; display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 2px solid var(--accent, #dee2e6); border-radius: 12px; background: white; transition: opacity 0.2s; }
         .plan-block.done { opacity: 0.5; }
         .block-icon { font-size: 1.5rem; flex-shrink: 0; }
         .block-content { flex: 1; }
@@ -195,7 +195,7 @@ export default function TodayPage() {
         .block-time { font-size: 0.75rem; color: #adb5bd; margin: 0; }
         .block-actions { display: flex; gap: 0.4rem; align-items: center; flex-shrink: 0; }
         .go-btn { padding: 0.45rem 0.9rem; background: var(--accent, #0d6efd); color: white; border-radius: 8px; text-decoration: none; font-size: 0.85rem; white-space: nowrap; }
-        .done-btn { width: 32px; height: 32px; border: 1.5px solid #dee2e6; border-radius: 50%; background: white; cursor: pointer; font-size: 0.85rem; }
+        .done-btn { color: #212529; width: 32px; height: 32px; border: 1.5px solid #dee2e6; border-radius: 50%; background: white; cursor: pointer; font-size: 0.85rem; }
         .done-btn:hover { background: #d1e7dd; border-color: #198754; }
         .done-label { font-size: 0.85rem; color: #198754; font-weight: 600; }
         .regenerate-btn { width: 100%; padding: 0.6rem; background: transparent; border: 1.5px solid #dee2e6; border-radius: 8px; cursor: pointer; font-size: 0.875rem; color: #6c757d; }

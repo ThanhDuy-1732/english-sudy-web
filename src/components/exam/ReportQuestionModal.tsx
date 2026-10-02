@@ -87,12 +87,14 @@ export default function ReportQuestionModal({ questionId, itemId, onClose }: Pro
           display: flex; align-items: center; justify-content: center; z-index: 50;
         }
         .report-modal {
+          color: #212529;
           background: white; border-radius: 12px; padding: 1.5rem;
           width: min(400px, 90vw); box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
         h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; }
         .report-reasons { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
         .reason-btn {
+          color: #212529;
           padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.8rem;
           border: 1.5px solid #dee2e6; background: white; cursor: pointer;
         }
@@ -103,6 +105,7 @@ export default function ReportQuestionModal({ questionId, itemId, onClose }: Pro
         }
         .report-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
         .report-cancel-btn {
+          color: #212529;
           padding: 0.5rem 1rem; border-radius: 6px; border: 1.5px solid #dee2e6;
           background: white; cursor: pointer; font-size: 0.875rem;
         }
@@ -112,6 +115,7 @@ export default function ReportQuestionModal({ questionId, itemId, onClose }: Pro
         }
         .report-thanks { text-align: center; padding: 1rem 0; font-size: 1rem; }
         .report-close-btn {
+          color: #212529;
           display: block; width: 100%; padding: 0.6rem; margin-top: 0.5rem;
           border-radius: 6px; border: 1.5px solid #dee2e6; background: white;
           cursor: pointer; font-size: 0.875rem;

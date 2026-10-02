@@ -156,21 +156,21 @@ export default function WritingResultPage({ params }: { params: { id: string } }
         h1 { font-size: 1.1rem; font-weight: 700; margin: 0; }
         h2 { font-size: 0.9rem; text-transform: uppercase; color: #6c757d; margin: 1.5rem 0 0.5rem; }
         .score-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem; margin-bottom: 0.5rem; }
-        .score-box { text-align: center; padding: 0.75rem; background: #f8f9fa; border-radius: 10px; }
+        .score-box { color: #212529; text-align: center; padding: 0.75rem; background: #f8f9fa; border-radius: 10px; }
         .score-box.overall { background: #d1e7dd; }
         .score-label { font-size: 0.7rem; color: #6c757d; margin: 0; text-transform: uppercase; }
         .score-val { font-size: 1.5rem; font-weight: 700; margin: 0.2rem 0 0; }
         .word-count { font-size: 0.8rem; color: #6c757d; margin-bottom: 0.75rem; }
-        .next-focus { background: #fff3cd; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.875rem; margin-bottom: 0.5rem; }
-        .annotated-text { font-size: 0.9rem; line-height: 1.7; background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 0.75rem; white-space: pre-wrap; }
+        .next-focus { color: #212529; background: #fff3cd; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.875rem; margin-bottom: 0.5rem; }
+        .annotated-text { color: #212529; font-size: 0.9rem; line-height: 1.7; background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 0.75rem; white-space: pre-wrap; }
         .annotation-list { display: flex; flex-direction: column; gap: 0.5rem; }
-        .ann-item { padding: 0.6rem 0.75rem; border-left: 3px solid; background: #f8f9fa; border-radius: 0 6px 6px 0; font-size: 0.85rem; }
+        .ann-item { color: #212529; padding: 0.6rem 0.75rem; border-left: 3px solid; background: #f8f9fa; border-radius: 0 6px 6px 0; font-size: 0.85rem; }
         .ann-excerpt { font-style: italic; color: #495057; margin: 0 0 0.2rem; }
         .ann-issue { font-weight: 600; margin: 0 0 0.15rem; }
         .ann-suggestion { color: #198754; margin: 0; }
         .model-answer { font-size: 0.9rem; line-height: 1.7; background: #e8f0fe; padding: 1rem; border-radius: 8px; border-left: 3px solid #0d6efd; white-space: pre-wrap; }
         .result-actions { display: flex; gap: 0.75rem; margin-top: 2rem; flex-wrap: wrap; }
-        .result-actions button { padding: 0.6rem 1.25rem; border-radius: 8px; border: 1.5px solid #dee2e6; background: white; cursor: pointer; font-size: 0.9rem; }
+        .result-actions button { color: #212529; padding: 0.6rem 1.25rem; border-radius: 8px; border: 1.5px solid #dee2e6; background: white; cursor: pointer; font-size: 0.9rem; }
         .result-actions button:first-child { background: #0d6efd; color: white; border-color: #0d6efd; }
         .not-found { padding: 2rem; text-align: center; }
         .not-found button { background: none; border: none; color: #0d6efd; cursor: pointer; text-decoration: underline; }
