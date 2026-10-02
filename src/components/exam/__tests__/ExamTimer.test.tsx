@@ -15,3 +15,18 @@ test("expires once after returning from a suspended app", () => {
   view.unmount();
   jest.useRealTimers();
 });
+
+test("does not count down until enabled", () => {
+  jest.useFakeTimers();
+  jest.setSystemTime(0);
+  const onTimeUp = jest.fn();
+  const view = render(<ExamTimer totalSeconds={60} onTimeUp={onTimeUp} enabled={false} />);
+  act(() => { jest.advanceTimersByTime(120_000); });
+  expect(screen.getByText(/01:00/)).toBeInTheDocument();
+  expect(onTimeUp).not.toHaveBeenCalled();
+  view.rerender(<ExamTimer totalSeconds={60} onTimeUp={onTimeUp} enabled />);
+  act(() => { jest.advanceTimersByTime(10_000); });
+  expect(screen.getByText(/00:50/)).toBeInTheDocument();
+  view.unmount();
+  jest.useRealTimers();
+});

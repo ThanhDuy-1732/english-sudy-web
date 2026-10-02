@@ -1,3 +1,4 @@
+import { localDateKey } from "./date";
 export interface MasterySnapshot {
   date: string;   // YYYY-MM-DD
   skill: string;
@@ -16,7 +17,7 @@ function ls(): MasterySnapshot[] {
 }
 
 function today(): string {
-  return new Date().toISOString().slice(0, 10);
+  return localDateKey();
 }
 
 export function recordMasterySnapshot(skill: string, mastery: number): void {

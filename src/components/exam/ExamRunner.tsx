@@ -91,6 +91,7 @@ interface Props {
   topic?: string;
   preloadedItems?: ExamItem[];
   onComplete?: (attempt: ExamAttempt, sessionTags?: string[]) => void;
+  onRunning?: () => void; // fires once when the user starts answering
   forceComplete?: boolean; // when true, finish with current answers (e.g. timer expired)
 }
 
@@ -102,6 +103,7 @@ export default function ExamRunner({
   topic,
   preloadedItems,
   onComplete,
+  onRunning,
   forceComplete,
 }: Props) {
   const timer = useTimer();
@@ -119,6 +121,12 @@ export default function ExamRunner({
     perQuestionStart: Date.now(),
     attemptId: crypto.randomUUID(),
   });
+
+  const onRunningRef = useRef(onRunning);
+  onRunningRef.current = onRunning;
+  useEffect(() => {
+    if (state.phase === "running") onRunningRef.current?.();
+  }, [state.phase]);
 
   // Load items from API if not preloaded
   useEffect(() => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { localDateKey } from "@/lib/date";
 import FlashcardGrid from "@/components/FlashcardGrid";
 import TopicSelector from "@/components/TopicSelector";
 import QuizMode from "@/components/QuizMode";
@@ -98,7 +99,7 @@ export default function HomePage() {
     if (words.length === 0 || flippedCount < words.length || dailyCompleted) return;
     const wordList = words.map((w) => w.word);
     setDailyComplete(wordList);
-    void pushChallenge({ date: new Date().toISOString().slice(0, 10), words: wordList, completed: true });
+    void pushChallenge({ date: localDateKey(), words: wordList, completed: true });
     setDailyCompleted(true);
     setStreak(getStreak());
   }

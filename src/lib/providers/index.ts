@@ -2,9 +2,29 @@ import { GeminiProvider } from "./gemini";
 import { OpenAICompatProvider } from "./openai-compat";
 import type { AIProvider, GenerateOpts, ProviderInfo } from "./types";
 
+const PROVIDER_TIMEOUT_MS = Number(process.env.AI_PROVIDER_TIMEOUT_MS) || 25_000;
+
+class ProviderTimeoutError extends Error {
+  status = 503;
+  constructor(id: string) {
+    super(`${id} timed out after ${PROVIDER_TIMEOUT_MS}ms`);
+  }
+}
+
+// Rate limits, outages, a retired model (404) and network failures (no status) should fall through to the next provider.
 function isRetryableError(error: unknown): boolean {
   const status = (error as { status?: number }).status;
-  return status === 429 || status === 503;
+  if (status === undefined) return true;
+  return status === 404 || status === 408 || status === 429 || status >= 500;
+}
+
+// ponytail: the losing request is not aborted, only abandoned; add AbortSignal support in the providers if it matters.
+function withTimeout<T>(promise: Promise<T>, id: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new ProviderTimeoutError(id)), PROVIDER_TIMEOUT_MS);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
 export function createCallWithFallback(providers: AIProvider[]) {
@@ -32,7 +52,7 @@ export function createCallWithFallback(providers: AIProvider[]) {
     let lastError: unknown;
     for (const provider of ordered) {
       try {
-        const text = await provider.generateContent(prompt, opts);
+        const text = await withTimeout(provider.generateContent(prompt, opts), provider.id);
         return { text, providerId: provider.id };
       } catch (error) {
         if (!isRetryableError(error)) throw error;

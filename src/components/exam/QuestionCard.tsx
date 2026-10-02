@@ -3,6 +3,7 @@
 import type { ExamQuestion, ExamItem } from "@/lib/exam/types";
 import PassageReader from "./PassageReader";
 import ListeningPlayer from "./ListeningPlayer";
+import type { AudioLine } from "@/lib/exam/types";
 
 const READING_PARTS = new Set(["RC6", "RC7", "READ_P1", "READ_P2", "READ_P3"]);
 const LISTENING_PARTS = new Set(["LC1", "LC2", "LC3", "LC4", "LISTEN_S1", "LISTEN_S2", "LISTEN_S3", "LISTEN_S4"]);
@@ -27,6 +28,12 @@ export default function QuestionCard({
   onAnswer,
 }: Props) {
   const isCompletion = !question.options;
+  // Part 2 items carry no script: the question and the three responses are what gets spoken.
+  const script: AudioLine[] | undefined =
+    item.script ??
+    (item.part === "LC2" && question.options
+      ? [{ speaker: "M1", text: question.prompt }, ...question.options.map((text) => ({ speaker: "W1" as const, text }))]
+      : undefined);
 
   // Use PassageReader layout for reading parts with passages
   if (READING_PARTS.has(item.part) && item.passage) {
@@ -53,9 +60,7 @@ export default function QuestionCard({
       </div>
 
       {/* Listening player for LC parts */}
-      {LISTENING_PARTS.has(item.part) && item.script && (
-        <ListeningPlayer script={item.script} />
-      )}
+      {LISTENING_PARTS.has(item.part) && script && <ListeningPlayer script={script} />}
 
       {/* Passage context for non-reading items that have a passage */}
       {!READING_PARTS.has(item.part) && item.passage && (

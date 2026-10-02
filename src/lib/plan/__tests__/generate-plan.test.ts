@@ -91,6 +91,13 @@ describe("generatePlan", () => {
     expect(totalMin).toBeLessThanOrEqual(15);
   });
 
+  it("says never practised instead of a day count when there is no speaking history", () => {
+    const plan = generatePlan({ ...base, dueWords: 0, lastSpeakingAt: undefined });
+    const reason = plan.find((b) => b.kind === "speaking")?.reason;
+    expect(reason).toBe("Chưa luyện nói lần nào");
+    expect(reason).not.toMatch(/999/);
+  });
+
   it("adds speaking block when > 2 days since last speaking", () => {
     const oldDate = new Date(Date.now() - 3 * 86400000).toISOString();
     const plan = generatePlan({ ...base, dueWords: 0, lastSpeakingAt: oldDate });

@@ -106,3 +106,31 @@ test("callWithFallback preferred provider still respects disabledIds", async () 
 test("getProviderById returns undefined for unknown id", () => {
   expect(getProviderById("nonexistent")).toBeUndefined();
 });
+
+test("callWithFallback falls back on a retired model (404) and on network errors without a status", async () => {
+  const gone = jest.fn<Promise<string>, [string]>().mockRejectedValue({ status: 404 });
+  const offline = jest.fn<Promise<string>, [string]>().mockRejectedValue(new TypeError("fetch failed"));
+  const ok = jest.fn<Promise<string>, [string]>().mockResolvedValue("ok");
+  const result = await createCallWithFallback([makeProvider("a", gone), makeProvider("b", offline), makeProvider("c", ok)])("hello");
+  expect(result).toEqual({ text: "ok", providerId: "c" });
+});
+
+test("callWithFallback still throws on non-retryable client errors", async () => {
+  const bad = jest.fn<Promise<string>, [string]>().mockRejectedValue({ status: 400 });
+  const ok = jest.fn<Promise<string>, [string]>().mockResolvedValue("ok");
+  await expect(createCallWithFallback([makeProvider("a", bad), makeProvider("b", ok)])("hello")).rejects.toEqual({ status: 400 });
+  expect(ok).not.toHaveBeenCalled();
+});
+
+test("callWithFallback abandons a provider that hangs and falls back", async () => {
+  jest.useFakeTimers();
+  try {
+    const hang = jest.fn<Promise<string>, [string]>().mockReturnValue(new Promise(() => {}));
+    const ok = jest.fn<Promise<string>, [string]>().mockResolvedValue("ok");
+    const pending = createCallWithFallback([makeProvider("a", hang), makeProvider("b", ok)])("hello");
+    await jest.advanceTimersByTimeAsync(25_000);
+    expect(await pending).toEqual({ text: "ok", providerId: "b" });
+  } finally {
+    jest.useRealTimers();
+  }
+});

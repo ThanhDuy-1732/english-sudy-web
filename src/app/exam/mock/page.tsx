@@ -21,6 +21,7 @@ export default function MockPage() {
   const router = useRouter();
   const settings = getExamSettings();
   const [started, setStarted] = useState(false);
+  const [running, setRunning] = useState(false); // timer starts with the first question, not while items are generated
   const [done, setDone] = useState(false);
   const [attempt, setAttempt] = useState<ExamAttempt | null>(null);
   const sessionIdRef = useRef<string | null>(null);
@@ -55,7 +56,7 @@ export default function MockPage() {
           ? ["400", "500", "650", "780", "900+"][settings.level - 1]
           : ["4.5", "5.0", "6.0", "7.0", "8.0"][settings.level - 1]})</p>
         <p className="warning">
-          ⚠️ Sau khi bắt đầu, timer không thể tạm dừng.
+          ⚠️ Timer bắt đầu khi bạn làm câu đầu tiên và không thể tạm dừng.
         </p>
         <button onClick={() => {
           sessionIdRef.current = startSession("exam", { mode: "mock" });
@@ -139,6 +140,7 @@ export default function MockPage() {
         <span className="mock-label">Mock {kind}</span>
         <ExamTimer
           totalSeconds={timeLimit}
+          enabled={running}
           onTimeUp={() => {
             timedOutRef.current = true;
             setDone(true); // triggers forceComplete on ExamRunner → onComplete fires
@@ -151,6 +153,7 @@ export default function MockPage() {
         mode="mock"
         level={settings.level}
         forceComplete={done}
+        onRunning={() => setRunning(true)}
         onComplete={(a) => {
           setAttempt(a);
           setDone(true);

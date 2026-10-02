@@ -5,14 +5,16 @@ import { useCountdown } from "@/lib/useCountdown";
 interface Props {
   totalSeconds: number;
   onTimeUp?: () => void;
+  /** The countdown only runs while true (e.g. not while questions are still being generated). */
+  enabled?: boolean;
 }
 
 /**
  * Countdown timer for exam attempts.
  * Deliberately separate from TimerContext (which tracks total study time).
  */
-export default function ExamTimer({ totalSeconds, onTimeUp }: Props) {
-  const remaining = useCountdown(totalSeconds, true, onTimeUp);
+export default function ExamTimer({ totalSeconds, onTimeUp, enabled = true }: Props) {
+  const remaining = useCountdown(totalSeconds, enabled, onTimeUp);
 
   const mins = Math.floor(remaining / 60);
   const secs = remaining % 60;

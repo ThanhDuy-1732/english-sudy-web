@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { localDateKey } from "@/lib/date";
 import type { LearnedWord } from "@/lib/storage";
 
 interface DayDrawerProps {
@@ -15,7 +16,7 @@ interface DayDrawerProps {
 function offsetDate(date: string, delta: number): string {
   const d = new Date(`${date}T12:00:00`);
   d.setDate(d.getDate() + delta);
-  return d.toISOString().slice(0, 10);
+  return localDateKey(d);
 }
 
 function formatDateVi(date: string): string {

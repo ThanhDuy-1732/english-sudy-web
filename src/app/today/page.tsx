@@ -7,6 +7,7 @@ import { getWordsForReview } from "@/lib/storage";
 import { getAttempts, getExamSettings } from "@/lib/exam/exam-storage";
 import { getMistakes as getUnifiedMistakes } from "@/lib/mistakes";
 import { recomputeMastery } from "@/lib/mastery-all";
+import { localDateKey } from "@/lib/date";
 
 const BUDGET_OPTIONS = [15, 30, 60] as const;
 
@@ -31,7 +32,7 @@ const KIND_COLOR: Record<PlanBlock["kind"], string> = {
 };
 
 function getTodayKey() {
-  return new Date().toISOString().slice(0, 10);
+  return localDateKey();
 }
 
 function loadStoredPlan(): { date: string; blocks: PlanBlock[] } | null {

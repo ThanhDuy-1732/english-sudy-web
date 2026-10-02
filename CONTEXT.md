@@ -225,6 +225,7 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 ### Streak, weekly report, mastery timeline
 - `streak.ts`: `computeStreak(sessions, refDate?)` → `{currentStreak, longestStreak, activeDaysThisWeek}` (ngày local, dựa trên `learningSessions`).
 - `weekly-report.ts`: `computeWeeklyReport(sessions, attempts)` → `{studyMinutes, sessions, wordsLearned, srsAccuracy|null, examAccuracy|null}` (tuần bắt đầu thứ Hai).
+- `date.ts`: `localDateKey(date?)` → local `YYYY-MM-DD` (never use `toISOString().slice(0,10)` for day keys; it is UTC). Used by `/today`, `mastery-timeline`, `DayDrawer`, daily challenge push.
 - `mastery-timeline.ts`: key `masteryTimeline` — `{date, skill, mastery 0–100}[]`, 1 snapshot/kỹ năng/ngày. `recordMasterySnapshot`, `getMasteryTimeline(skill)`, `getSkillTrend(skill)` → up/down/stable.
 
 ### Daily plan (`src/lib/plan/generate-plan.ts`)
@@ -284,7 +285,7 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 
 **Registry** (`src/lib/providers/index.ts`):
 - Built from env vars at module load time
-- `callWithFallback(prompt, preferredId?, disabledIds?, opts?: GenerateOpts)` — tries preferred first, falls back on 429/503. `GenerateOpts = { temperature? }`
+- `callWithFallback(prompt, preferredId?, disabledIds?, opts?: GenerateOpts)` — tries preferred first, falls back on 429, 5xx, 404 (model retired), 408, network errors (no status) and per-provider timeout (`AI_PROVIDER_TIMEOUT_MS`, default 25 s; the abandoned request is not aborted). Other 4xx are thrown. `GenerateOpts = { temperature? }`
 - `getRegisteredProviders()` — returns all configured providers
 - Active providers: whichever env keys are set in `.env.local`
 
@@ -463,7 +464,7 @@ Supabase client created per call via `createSupabase(syncKey)` in `src/lib/supab
 | `SyncStatusBadge` | Chỉ báo trạng thái sync (`synced/syncing/pending/offline/failed`) trong Settings; manual retry button for failed queue |
 | `AppNavigation` | Compact mobile menu and desktop links, shared timer and due badges; includes Settings on all viewports |
 | `ServiceWorkerRegistration` | Production worker registration; installs through `beforeinstallprompt` when available, native installation instructions otherwise (dismissible with ✕, remembered in `pwaInstallDismissed`); standalone detection and optional persistent storage request; offline notice; waiting-worker update button posts `SKIP_WAITING`, reloads only after user action |
-| `exam/AnswerSheet` · `ExamTimer` · `ListeningPlayer` · `PassageReader` · `QuestionCard` | Thành phần của exam engine (grid câu hỏi, countdown, phát TTS, đoạn đọc, thẻ câu hỏi) |
+| `exam/AnswerSheet` · `ExamTimer` (prop `enabled`; mock timer starts via `ExamRunner.onRunning`, not while items load) · `ListeningPlayer` · `PassageReader` · `QuestionCard` | Thành phần của exam engine (grid câu hỏi, countdown, phát TTS, đoạn đọc, thẻ câu hỏi) |
 | `exam/ReportQuestionModal` | Báo câu hỏi lỗi (lý do + ghi chú) → chỉ lưu local vào `reportedQuestions` (max 200); **không** set `flagged` ở `exam_items` và không sync |
 | `ImportWords` · `QuizCard` | Bulk import từ; thẻ quiz dùng chung |
 
