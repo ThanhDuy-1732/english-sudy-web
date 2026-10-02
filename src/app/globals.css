@@ -81,7 +81,7 @@
       min-width: 44px;
     }
 
-    a.text-sm:is(.text-blue-500, .text-gray-500) {
+    a.text-sm:is(.text-blue-500, .text-gray-400, .text-gray-500) {
       display: inline-flex;
       align-items: center;
       min-height: 44px;

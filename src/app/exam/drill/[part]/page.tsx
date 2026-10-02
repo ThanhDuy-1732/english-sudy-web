@@ -30,6 +30,9 @@ export default function DrillPage({ params }: { params: { part: string } }) {
   const searchParams = useSearchParams();
   const settings = getExamSettings();
   const [done, setDone] = useState(false);
+  // The runner depends on localStorage (settings, question bank); mount it client-side only to avoid a hydration mismatch.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const [attempt, setAttempt] = useState<ExamAttempt | null>(null);
   const [sessionTags, setSessionTags] = useState<string[]>([]);
   const sessionIdRef = useRef<string | null>(null);
@@ -133,7 +136,7 @@ export default function DrillPage({ params }: { params: { part: string } }) {
         </button>
         <h1>{PART_LABELS[part] ?? part}</h1>
       </div>
-      <ExamRunner
+      {mounted && <ExamRunner
         kind={kind}
         parts={[part as ExamPart]}
         mode="drill"
@@ -152,7 +155,7 @@ export default function DrillPage({ params }: { params: { part: string } }) {
             sessionIdRef.current = null;
           }
         }}
-      />
+      />}
       <style jsx>{`
         .drill-header { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem; border-bottom: 1px solid #dee2e6; }
         .back-btn { background: none; border: none; cursor: pointer; font-size: 0.9rem; color: #6c757d; }
