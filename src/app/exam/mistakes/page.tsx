@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getExamMistakes, resolveMistake, type ExamMistake } from "@/lib/mistakes";
 import { runMistakeMigration } from "@/lib/mistake-migration";
@@ -22,10 +22,12 @@ const TYPE_LABELS: Partial<Record<QuestionType, string>> = {
 
 export default function MistakesPage() {
   const router = useRouter();
-  const [mistakes, setMistakes] = useState<ExamMistake[]>(() => {
+  // Storage is read after mount so the first client render matches the server HTML.
+  const [mistakes, setMistakes] = useState<ExamMistake[]>([]);
+  useEffect(() => {
     runMistakeMigration();
-    return getExamMistakes();
-  });
+    setMistakes(getExamMistakes());
+  }, []);
   const [filter, setFilter] = useState<"all" | "unresolved">("unresolved");
 
   const shown = filter === "all" ? mistakes : mistakes.filter((m) => m.status !== "resolved");
@@ -124,23 +126,23 @@ export default function MistakesPage() {
         .page-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
         .back-btn { background: none; border: none; cursor: pointer; color: #6c757d; font-size: 0.9rem; }
         h1 { font-size: 1.25rem; font-weight: 700; margin: 0; flex: 1; }
-        .count { font-size: 0.85rem; color: #6c757d; }
+        .count { font-size: 0.85rem; color: #adb5bd; }
         .filter-row { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
         .filter-row button { color: #212529; padding: 0.4rem 1rem; border: 1.5px solid #dee2e6; border-radius: 16px; background: white; cursor: pointer; font-size: 0.85rem; }
         .filter-row button.active { background: #0d6efd; color: white; border-color: #0d6efd; }
-        .empty { text-align: center; padding: 3rem; color: #6c757d; }
+        .empty { text-align: center; padding: 3rem; color: #adb5bd; }
         .mistakes-list { display: flex; flex-direction: column; gap: 1rem; }
         .mistake-card { padding: 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; }
         .mistake-card.resolved { opacity: 0.65; border-style: dashed; }
         .mistake-meta { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; font-size: 0.8rem; }
         .part-tag { color: #212529; background: #e9ecef; border-radius: 10px; padding: 0.15rem 0.5rem; font-weight: 600; }
-        .date { color: #6c757d; }
+        .date { color: #adb5bd; }
         .resolved-tag { color: #198754; font-weight: 600; }
         .mistake-prompt { font-size: 0.9rem; font-weight: 500; margin-bottom: 0.5rem; }
         .answer-row { display: flex; gap: 1rem; margin-bottom: 0.5rem; font-size: 0.875rem; }
         .wrong-answer { color: #dc3545; }
         .correct-answer { color: #198754; }
-        .explanation { font-size: 0.85rem; color: #495057; margin-bottom: 0.75rem; }
+        .explanation { font-size: 0.85rem; color: #adb5bd; margin-bottom: 0.75rem; }
         .mistake-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
         .drill-btn, .resolve-btn { padding: 0.4rem 0.9rem; border-radius: 6px; font-size: 0.8rem; cursor: pointer; border: 1.5px solid; }
         .drill-btn { border-color: #0d6efd; color: #0d6efd; background: white; }

@@ -176,6 +176,7 @@ export default function WritingTaskPage({ params }: { params: { id: string } }) 
       const recordId = crypto.randomUUID();
       saveWriting({
         id: recordId,
+        taskId: id,
         kind: config.kind as WritingKind,
         prompt: config.prompt,
         chartData: config.chartData,

@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import WritingResultPage from "../result/[id]/page";
 
-jest.mock("next/navigation", () => ({ useRouter: () => ({ push: jest.fn() }) }));
+const push = jest.fn();
+jest.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 
 const record = (kind: string) => ({
   id: "r1",
@@ -20,7 +21,10 @@ const record = (kind: string) => ({
   createdAt: "2026-09-01T00:00:00.000Z",
 });
 
-beforeEach(() => localStorage.clear());
+beforeEach(() => {
+  localStorage.clear();
+  push.mockClear();
+});
 
 test.each([
   ["ielts_task1", "IELTS Task 1"],
@@ -31,4 +35,17 @@ test.each([
   render(<WritingResultPage params={{ id: "r1" }} />);
   expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(title);
   expect(screen.queryByText(kind)).not.toBeInTheDocument();
+});
+
+test("Viết lại goes back to the task the record came from, or to the task list for older records", () => {
+  localStorage.setItem("writingSubmissions", JSON.stringify([{ ...record("ielts_task1"), taskId: "task1-line" }]));
+  const view = render(<WritingResultPage params={{ id: "r1" }} />);
+  fireEvent.click(screen.getByRole("button", { name: "Viết lại" }));
+  expect(push).toHaveBeenCalledWith("/write/task/task1-line");
+  view.unmount();
+
+  localStorage.setItem("writingSubmissions", JSON.stringify([record("ielts_task1")]));
+  render(<WritingResultPage params={{ id: "r1" }} />);
+  fireEvent.click(screen.getByRole("button", { name: "Viết lại" }));
+  expect(push).toHaveBeenLastCalledWith("/write");
 });

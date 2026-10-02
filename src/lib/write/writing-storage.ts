@@ -24,6 +24,8 @@ export interface WritingDraft {
 
 export interface WritingRecord {
   id: string;
+  /** Writing task the record came from (e.g. "task1-line"); missing on older records. */
+  taskId?: string;
   kind: WritingKind;
   prompt: string;
   chartData?: unknown;

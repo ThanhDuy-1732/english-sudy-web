@@ -40,17 +40,19 @@ export default function WritingResultPage({ params }: { params: { id: string } }
     feedback: WritingFeedback;
     content: string;
     config: { title: string; prompt: string };
+    taskId?: string;
   } | null>(null);
 
   useEffect(() => {
     const record = getWriting().find((item) => item.id === id);
     if (record) {
-      setData({ feedback: record.feedback, content: record.content, config: { title: KIND_TITLES[record.kind] ?? record.kind, prompt: record.prompt } });
+      setData({ feedback: record.feedback, content: record.content, config: { title: KIND_TITLES[record.kind] ?? record.kind, prompt: record.prompt }, taskId: record.taskId });
       return;
     }
     try {
       const stored = sessionStorage.getItem(`writing-result-${id}`);
-      if (stored) setData(JSON.parse(stored));
+      // Legacy results were keyed by task id, so the id is the task.
+      if (stored) setData({ ...JSON.parse(stored), taskId: id });
     } catch { /* Ignore invalid legacy result data. */ }
   }, [id]);
 
@@ -141,7 +143,7 @@ export default function WritingResultPage({ params }: { params: { id: string } }
       </section>
 
       <div className="result-actions">
-        <button onClick={() => router.push(`/write/task/${id}`)}>
+        <button onClick={() => router.push(data.taskId ? `/write/task/${data.taskId}` : "/write")}>
           Viết lại
         </button>
         <button onClick={() => router.push("/write")}>
