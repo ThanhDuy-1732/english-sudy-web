@@ -218,9 +218,9 @@ export default function WritingTaskPage({ params }: { params: Promise<{ id: stri
         .task-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; }
         .back-btn { background: none; border: none; cursor: pointer; color: #6c757d; white-space: nowrap; }
         h1 { flex: 1; font-size: 1.1rem; font-weight: 700; margin: 0; }
-        .timer { font-variant-numeric: tabular-nums; font-weight: 700; padding: 0.3rem 0.75rem; border-radius: 20px; background: #f8f9fa; border: 1.5px solid #dee2e6; font-size: 0.9rem; white-space: nowrap; }
+        .timer { color: #212529; font-variant-numeric: tabular-nums; font-weight: 700; padding: 0.3rem 0.75rem; border-radius: 20px; background: #f8f9fa; border: 1.5px solid #dee2e6; font-size: 0.9rem; white-space: nowrap; }
         .timer.urgent { color: #dc3545; border-color: #dc3545; background: #fff5f5; }
-        .prompt-box { background: #f8f9fa; border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem; border-left: 3px solid #0d6efd; }
+        .prompt-box { color: #212529; background: #f8f9fa; border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem; border-left: 3px solid #0d6efd; }
         .prompt-label { font-size: 0.75rem; text-transform: uppercase; color: #6c757d; margin: 0 0 0.5rem; }
         .prompt-text { font-size: 0.9rem; line-height: 1.6; margin: 0 0 0.5rem; }
         .chart-placeholder { font-size: 0.85rem; background: #e9ecef; padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 0.5rem; color: #495057; border-radius: 8px; }

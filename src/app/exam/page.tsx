@@ -134,13 +134,13 @@ export default function ExamPage() {
         h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; }
         h2 { font-size: 1rem; font-weight: 600; margin: 1.5rem 0 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 0.05em; }
         .exam-toggle { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
-        .exam-toggle button { padding: 0.5rem 1.5rem; border: 1.5px solid #dee2e6; border-radius: 20px; background: white; cursor: pointer; font-weight: 500; }
+        .exam-toggle button { color: #212529; padding: 0.5rem 1.5rem; border: 1.5px solid #dee2e6; border-radius: 20px; background: white; cursor: pointer; font-weight: 500; }
         .exam-toggle button.active { background: #0d6efd; color: white; border-color: #0d6efd; }
         .level-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.25rem; font-size: 0.9rem; }
-        .level-btn { width: 32px; height: 32px; border: 1.5px solid #dee2e6; border-radius: 50%; background: white; cursor: pointer; font-size: 0.85rem; }
+        .level-btn { color: #212529; width: 32px; height: 32px; border: 1.5px solid #dee2e6; border-radius: 50%; background: white; cursor: pointer; font-size: 0.85rem; }
         .level-btn.active { background: #0d6efd; color: white; border-color: #0d6efd; font-weight: 700; }
         .level-hint { color: #6c757d; font-size: 0.8rem; }
-        .last-score { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; background: #f8f9fa; border-radius: 8px; margin-bottom: 0.5rem; font-size: 0.9rem; flex-wrap: wrap; }
+        .last-score { color: #212529; display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; background: #f8f9fa; border-radius: 8px; margin-bottom: 0.5rem; font-size: 0.9rem; flex-wrap: wrap; }
         .parts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
         .part-card { display: flex; align-items: center; gap: 0.75rem; padding: 0.9rem 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; text-decoration: none; color: inherit; transition: border-color 0.15s, background 0.15s; }
         .part-card:hover { border-color: #0d6efd; background: #e8f0fe; }
