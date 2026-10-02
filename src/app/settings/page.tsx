@@ -10,7 +10,7 @@ import { clearAllAudio, getAudioCount } from "@/lib/speech/audio-store";
 
 const ALL_PROVIDERS = [
   { id: "gemini", name: "Gemini Flash", model: "gemini-flash-latest", envKey: "GEMINI_API_KEY" },
-  { id: "groq", name: "Groq", model: "llama-3.3-70b-versatile", envKey: "GROQ_API_KEY" },
+  { id: "groq", name: "Groq", model: "openai/gpt-oss-120b", envKey: "GROQ_API_KEY" },
   { id: "openrouter", name: "OpenRouter", model: "nvidia/nemotron-3-nano-30b-a3b:free", envKey: "OPENROUTER_API_KEY" },
   { id: "mistral", name: "Mistral", model: "mistral-small-latest", envKey: "MISTRAL_API_KEY" },
   { id: "cohere", name: "Cohere", model: "command-r7b-12-2024", envKey: "COHERE_API_KEY" },
