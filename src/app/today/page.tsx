@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { generatePlan, type PlanBlock } from "@/lib/plan/generate-plan";
 import { getWordsForReview } from "@/lib/storage";
 import { getAttempts, getExamSettings } from "@/lib/exam/exam-storage";
@@ -51,11 +51,12 @@ function savePlan(plan: PlanBlock[]) {
 
 export default function TodayPage() {
   const [budget, setBudget] = useState<15 | 30 | 60>(30);
-  const [planBlocks, setPlanBlocks] = useState<PlanBlock[] | null>(() => {
+  // Stored plan is read after mount so the first client render matches the server HTML.
+  const [planBlocks, setPlanBlocks] = useState<PlanBlock[] | null>(null);
+  useEffect(() => {
     const stored = loadStoredPlan();
-    if (stored?.date === getTodayKey()) return stored.blocks;
-    return null;
-  });
+    if (stored?.date === getTodayKey()) setPlanBlocks(stored.blocks);
+  }, []);
 
   function buildPlan() {
     const dueWords = getWordsForReview().length;
@@ -201,7 +202,7 @@ export default function TodayPage() {
         .regenerate-btn { width: 100%; padding: 0.6rem; background: transparent; border: 1.5px solid #dee2e6; border-radius: 8px; cursor: pointer; font-size: 0.875rem; color: #6c757d; }
         .regenerate-btn:hover { background: #f8f9fa; }
         @media (prefers-color-scheme: dark) {
-          .plan-block { background: #1a1a2e; }
+          .plan-block { background: #1a1a2e; color: #eee; }
           .budget-selector button { background: #1a1a2e; color: #eee; border-color: #444; }
         }
       `}</style>

@@ -73,7 +73,7 @@ export default function ContextPracticePage() {
       <input
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="w-full border rounded-lg px-3 py-2 text-sm mb-3 dark:bg-gray-900 dark:border-gray-700"
+        className="w-full border rounded-lg px-3 py-2 text-sm mb-3 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
         placeholder="Tìm từ..."
       />
 

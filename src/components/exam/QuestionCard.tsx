@@ -219,7 +219,7 @@ export default function QuestionCard({
           font-style: italic;
         }
         @media (prefers-color-scheme: dark) {
-          .passage-context { background: #1e2a35; }
+          .passage-context { background: #1e2a35; color: #eee; }
           .option-btn { background: #1a1a2e; border-color: #444; color: #eee; }
           .option-btn:hover:not(:disabled) { border-color: #4d9fff; background: #1a2f50; }
           .option-btn.selected { border-color: #4d9fff; background: #1a2f50; }

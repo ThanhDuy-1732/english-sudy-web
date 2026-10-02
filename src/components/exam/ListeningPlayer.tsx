@@ -131,8 +131,8 @@ export default function ListeningPlayer({ script, onPlaybackComplete }: Props) {
         .transcript-line.active { color: #212529; background: #fff3cd; font-weight: 500; }
         .speaker { font-weight: 700; color: #495057; margin-right: 0.3rem; }
         @media (prefers-color-scheme: dark) {
-          .transcript { background: #1e2a35; }
-          .transcript-line.active { background: #3d3a10; }
+          .transcript { background: #1e2a35; color: #eee; }
+          .transcript-line.active { background: #3d3a10; color: #eee; }
           .speaker { color: #adb5bd; }
         }
       `}</style>

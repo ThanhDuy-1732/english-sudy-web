@@ -126,7 +126,7 @@ export default function RewritePage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={feedback !== null}
-            className="w-full border rounded-lg p-3 text-sm h-24 resize-none dark:bg-gray-900 dark:border-gray-700"
+            className="w-full border rounded-lg p-3 text-sm h-24 resize-none dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
             placeholder="Nhập câu đã sửa..."
           />
 

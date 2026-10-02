@@ -142,7 +142,7 @@ export default function PassageReader({
           .passage-pane { position: static; max-height: 200px; }
         }
         @media (prefers-color-scheme: dark) {
-          .passage-pane { background: #1e2a35; }
+          .passage-pane { background: #1e2a35; color: #eee; }
           .option-btn { background: #1a1a2e; border-color: #444; color: #eee; }
           .text-input { background: #1a1a2e; color: #eee; border-color: #444; }
         }

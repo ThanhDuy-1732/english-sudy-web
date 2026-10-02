@@ -210,7 +210,7 @@ export default function VocabQuizPage() {
                 onChange={(e) => setInput(e.target.value)}
                 disabled={selected !== null}
                 onKeyDown={(e) => e.key === "Enter" && selected === null && handleAnswer(input)}
-                className="w-full border rounded-lg px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                className="w-full border rounded-lg px-3 py-2 text-sm dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
                 placeholder="Nhập từ..."
                 autoFocus
               />

@@ -78,7 +78,7 @@ export default function LibraryPage() {
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="w-full border rounded-xl px-4 py-3 text-sm dark:bg-gray-900 dark:border-gray-700 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full border rounded-xl px-4 py-3 text-sm dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
         placeholder="Tìm từ, lỗi sai, bài nói, bài viết..."
         autoFocus
       />
