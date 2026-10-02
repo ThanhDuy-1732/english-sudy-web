@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { getExamSettings, saveExamSettings, getAttempts } from "@/lib/exam/exam-storage";
+import { useEffect, useState } from "react";
+import { DEFAULT_SETTINGS, getExamSettings, saveExamSettings, getAttempts } from "@/lib/exam/exam-storage";
 import { getUnresolvedExamMistakes } from "@/lib/mistakes";
 import { runMistakeMigration } from "@/lib/mistake-migration";
-import type { ExamKind } from "@/lib/exam/types";
+import type { ExamAttempt, ExamKind, ExamSettings } from "@/lib/exam/types";
 
 const TOEIC_PARTS = [
   { part: "RC5", label: "Part 5 – Incomplete Sentences", emoji: "📝" },
@@ -22,12 +22,17 @@ const IELTS_PARTS = [
 ];
 
 export default function ExamPage() {
-  const [settings, setSettings] = useState(getExamSettings);
-  const attempts = getAttempts();
-  const [unresolvedCount] = useState(() => {
+  // Storage is read after mount so the first client render matches the server HTML.
+  const [settings, setSettings] = useState<ExamSettings>(DEFAULT_SETTINGS);
+  const [lastAttempt, setLastAttempt] = useState<ExamAttempt | undefined>();
+  const [unresolvedCount, setUnresolvedCount] = useState(0);
+
+  useEffect(() => {
+    setSettings(getExamSettings());
+    setLastAttempt(getAttempts()[0]);
     runMistakeMigration();
-    return getUnresolvedExamMistakes().length;
-  });
+    setUnresolvedCount(getUnresolvedExamMistakes().length);
+  }, []);
 
   function updateKind(kind: ExamKind) {
     const updated = { ...settings, primaryExam: kind };
@@ -42,7 +47,6 @@ export default function ExamPage() {
   }
 
   const parts = settings.primaryExam === "TOEIC" ? TOEIC_PARTS : IELTS_PARTS;
-  const lastAttempt = attempts[0];
 
   return (
     <div className="exam-dashboard">
@@ -142,15 +146,15 @@ export default function ExamPage() {
         .level-hint { color: #6c757d; font-size: 0.8rem; }
         .last-score { color: #212529; display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; background: #f8f9fa; border-radius: 8px; margin-bottom: 0.5rem; font-size: 0.9rem; flex-wrap: wrap; }
         .parts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-        .part-card { display: flex; align-items: center; gap: 0.75rem; padding: 0.9rem 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; text-decoration: none; color: inherit; transition: border-color 0.15s, background 0.15s; }
-        .part-card:hover { border-color: #0d6efd; background: #e8f0fe; }
+        :global(.part-card) { display: flex; align-items: center; gap: 0.75rem; padding: 0.9rem 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; text-decoration: none; color: inherit; transition: border-color 0.15s, background 0.15s; }
+        :global(.part-card):hover { border-color: #0d6efd; background: rgba(13, 110, 253, 0.18); }
         .part-emoji { font-size: 1.25rem; }
         .part-label { font-size: 0.875rem; line-height: 1.3; }
         .mock-section, .mistakes-section { margin-top: 1rem; }
-        .mock-btn { display: block; padding: 1rem; background: #0d6efd; color: white; border-radius: 10px; text-decoration: none; text-align: center; font-weight: 600; }
-        .mock-btn:hover { background: #0b5ed7; }
-        .mistakes-link { display: flex; align-items: center; gap: 0.5rem; padding: 0.875rem 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; text-decoration: none; color: inherit; font-weight: 500; }
-        .mistakes-link:hover { border-color: #dc3545; background: #fff5f5; }
+        :global(.mock-btn) { display: block; padding: 1rem; background: #0d6efd; color: white; border-radius: 10px; text-decoration: none; text-align: center; font-weight: 600; }
+        :global(.mock-btn):hover { background: #0b5ed7; }
+        :global(.mistakes-link) { display: flex; align-items: center; gap: 0.5rem; padding: 0.875rem 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; text-decoration: none; color: inherit; font-weight: 500; }
+        :global(.mistakes-link):hover { border-color: #dc3545; background: rgba(220, 53, 69, 0.18); }
         .badge { background: #dc3545; color: white; border-radius: 10px; padding: 0.1rem 0.5rem; font-size: 0.75rem; font-weight: 700; }
         @media (max-width: 480px) { .parts-grid { grid-template-columns: 1fr; } }
       `}</style>

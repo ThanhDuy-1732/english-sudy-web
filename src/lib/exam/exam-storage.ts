@@ -118,7 +118,7 @@ export function addMistake(entry: MistakeEntry) {
 }
 
 // ─── Settings ────────────────────────────────────────────────────────────────
-const DEFAULT_SETTINGS: ExamSettings = {
+export const DEFAULT_SETTINGS: ExamSettings = {
   primaryExam: "TOEIC",
   level: 3,
   listeningRate: 1.0,

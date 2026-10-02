@@ -194,7 +194,7 @@ export default function TodayPage() {
         .block-reason { font-size: 0.8rem; color: #6c757d; margin: 0 0 0.15rem; }
         .block-time { font-size: 0.75rem; color: #adb5bd; margin: 0; }
         .block-actions { display: flex; gap: 0.4rem; align-items: center; flex-shrink: 0; }
-        .go-btn { padding: 0.45rem 0.9rem; background: var(--accent, #0d6efd); color: white; border-radius: 8px; text-decoration: none; font-size: 0.85rem; white-space: nowrap; }
+        :global(.go-btn) { padding: 0.45rem 0.9rem; background: var(--accent, #0d6efd); color: white; border-radius: 8px; text-decoration: none; font-size: 0.85rem; white-space: nowrap; }
         .done-btn { color: #212529; width: 32px; height: 32px; border: 1.5px solid #dee2e6; border-radius: 50%; background: white; cursor: pointer; font-size: 0.85rem; }
         .done-btn:hover { background: #d1e7dd; border-color: #198754; }
         .done-label { font-size: 0.85rem; color: #198754; font-weight: 600; }

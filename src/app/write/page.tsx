@@ -63,8 +63,8 @@ export default function WritePage() {
         h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
         .subtitle { color: #6c757d; font-size: 0.9rem; margin-bottom: 1.5rem; }
         .tasks-list { display: flex; flex-direction: column; gap: 0.75rem; }
-        .task-card { display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; text-decoration: none; color: inherit; transition: border-color 0.15s; }
-        .task-card:hover { border-color: #0d6efd; background: #e8f0fe; }
+        :global(.task-card) { display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; text-decoration: none; color: inherit; transition: border-color 0.15s; }
+        :global(.task-card):hover { border-color: #0d6efd; background: rgba(13, 110, 253, 0.18); }
         .emoji { font-size: 1.5rem; flex-shrink: 0; }
         .title { font-weight: 600; font-size: 0.95rem; margin: 0 0 0.2rem; }
         .desc { font-size: 0.8rem; color: #6c757d; margin: 0; }

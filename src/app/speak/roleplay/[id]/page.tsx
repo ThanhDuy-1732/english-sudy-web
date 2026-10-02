@@ -287,7 +287,7 @@ export default function RoleplayPage({ params }: { params: { id: string } }) {
       </div>
 
       <style jsx>{`
-        .roleplay-page { display: flex; flex-direction: column; height: 100vh; max-height: 100vh; overflow: hidden; }
+        .roleplay-page { display: flex; flex-direction: column; height: calc(100vh - 4rem); height: calc(100dvh - 4rem); max-height: calc(100dvh - 4rem); overflow: hidden; }
         .roleplay-header { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem 1rem; border-bottom: 1px solid #dee2e6; flex-shrink: 0; }
         .back-btn { background: none; border: none; cursor: pointer; color: #6c757d; font-size: 0.875rem; white-space: nowrap; }
         .scenario-info { flex: 1; }

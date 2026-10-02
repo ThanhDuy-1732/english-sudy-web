@@ -55,6 +55,7 @@ export default function DiaryCalendar({ data, studyTimeByDate, selectedDate, onS
                 {week.map((day, dayIndex) =>
                   day ? (
                     <button
+                      data-dense
                       key={day.date}
                       type="button"
                       title={`${day.date}: ${day.count} từ · ${studyTimeByDate[day.date] ?? 0} phút`}

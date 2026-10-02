@@ -74,6 +74,29 @@
     padding-bottom: calc(6rem + env(safe-area-inset-bottom));
   }
 
+  /* Touch devices: keep tap targets at Apple's 44pt minimum. data-dense opts out (e.g. calendar heatmap cells). */
+  @media (pointer: coarse) {
+    button:not([data-dense]), select {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    a.text-sm:is(.text-blue-500, .text-gray-500) {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+
+    .part-card, .scenario-card, .mistakes-link, a[href="/grammar/quiz"] {
+      min-height: 44px;
+    }
+
+    a.text-sm.block {
+      display: flex;
+      justify-content: center;
+    }
+  }
+
   @media (max-width: 639px) {
     input, textarea, select {
       font-size: max(16px, 1em) !important;

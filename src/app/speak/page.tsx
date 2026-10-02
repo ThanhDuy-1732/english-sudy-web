@@ -75,23 +75,23 @@ export default function SpeakPage() {
         h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; }
         h2 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #6c757d; margin: 1.5rem 0 0.75rem; }
         .scenarios-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-        .scenario-card { display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; text-decoration: none; color: inherit; transition: border-color 0.15s; }
-        .scenario-card:hover { border-color: #0d6efd; background: #e8f0fe; }
+        :global(.scenario-card) { display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; text-decoration: none; color: inherit; transition: border-color 0.15s; }
+        :global(.scenario-card):hover { border-color: #0d6efd; background: rgba(13, 110, 253, 0.18); }
         .emoji { font-size: 1.25rem; }
         .title { flex: 1; font-size: 0.875rem; line-height: 1.3; }
         .level { font-size: 0.75rem; color: #6c757d; }
         .ielts-list { display: flex; flex-direction: column; gap: 0.75rem; }
-        .ielts-card { display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; text-decoration: none; color: inherit; transition: border-color 0.15s; }
-        .ielts-card:hover { border-color: #0d6efd; background: #e8f0fe; }
-        .ielts-card .emoji { font-size: 1.5rem; }
-        .ielts-card .title { font-weight: 600; margin-bottom: 0.2rem; font-size: 0.95rem; }
-        .ielts-card .desc { font-size: 0.8rem; color: #6c757d; }
+        :global(.ielts-card) { display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; text-decoration: none; color: inherit; transition: border-color 0.15s; }
+        :global(.ielts-card):hover { border-color: #0d6efd; background: rgba(13, 110, 253, 0.18); }
+        :global(.ielts-card) .emoji { font-size: 1.5rem; }
+        :global(.ielts-card) .title { font-weight: 600; margin-bottom: 0.2rem; font-size: 0.95rem; }
+        :global(.ielts-card) .desc { font-size: 0.8rem; color: #6c757d; }
         .tools-list { display: flex; flex-direction: column; gap: 0.75rem; }
-        .tool-card { display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; text-decoration: none; color: inherit; transition: border-color 0.15s; }
-        .tool-card:hover { border-color: #0d6efd; background: #e8f0fe; }
-        .tool-card .emoji { font-size: 1.5rem; }
-        .tool-card .title { font-weight: 600; margin-bottom: 0.2rem; font-size: 0.95rem; }
-        .tool-card .desc { font-size: 0.8rem; color: #6c757d; }
+        :global(.tool-card) { display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; text-decoration: none; color: inherit; transition: border-color 0.15s; }
+        :global(.tool-card):hover { border-color: #0d6efd; background: rgba(13, 110, 253, 0.18); }
+        :global(.tool-card) .emoji { font-size: 1.5rem; }
+        :global(.tool-card) .title { font-weight: 600; margin-bottom: 0.2rem; font-size: 0.95rem; }
+        :global(.tool-card) .desc { font-size: 0.8rem; color: #6c757d; }
         @media (max-width: 480px) { .scenarios-grid { grid-template-columns: 1fr; } }
       `}</style>
     </div>
