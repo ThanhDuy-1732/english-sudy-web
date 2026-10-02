@@ -31,8 +31,8 @@ Next.js 14 App Router · TypeScript · Tailwind CSS · Jest (jsdom) · Supabase 
 | `/speak/roleplay/[id]` | `src/app/speak/roleplay/[id]/page.tsx` | Roleplay hội thoại đa lượt với AI; speaking session ends on user/end-of-turn completion |
 | `/speak/ielts/[part]` | `src/app/speak/ielts/[part]/page.tsx` | IELTS Speaking P1/P2/P3 — mic hoặc nhập text; speaking session ends when grading returns, retry starts a new session |
 | `/write` | `src/app/write/page.tsx` | Chọn dạng bài viết IELTS/TOEIC |
-| `/write/task/[id]` | `src/app/write/task/[id]/page.tsx` | Editor + wall-clock timer + word count + per-task local draft recovery; validates HTTP/feedback before saving; opens result by persisted record UUID; writing session ends after grading result is saved, cancels on early exit |
-| `/write/result/[id]` | `src/app/write/result/[id]/page.tsx` | Kết quả chấm — annotated essay + model answer; reads saved record by UUID (survives PWA restart), with sessionStorage fallback for legacy task-ID URLs |
+| `/write/task/[id]` | `src/app/write/task/[id]/page.tsx` | Editor + wall-clock timer + word count + per-task local draft recovery (a draft past its deadline is still restored, shows "Đã hết giờ" and a "Làm lại từ đầu" button that discards it; submitting stays allowed); validates HTTP/feedback before saving; opens result by persisted record UUID; writing session ends after grading result is saved, cancels on early exit |
+| `/write/result/[id]` | `src/app/write/result/[id]/page.tsx` | Kết quả chấm — annotated essay + model answer; reads saved record by UUID (survives PWA restart), with sessionStorage fallback for legacy task-ID URLs; title is derived from `kind` (IELTS Task 1 / IELTS Task 2 / TOEIC Writing – Business Email) |
 | `/today` | `src/app/today/page.tsx` | Kế hoạch học tự động từ `generatePlan` (SRS debt, điểm yếu exam, lỗi chưa xử lý, grammar mastery, nhắc speaking/writing) |
 | `/path` | `src/app/path/page.tsx` | Lộ trình: learning profile + mastery 6 kỹ năng (`recomputeMastery()`) + top nhóm lỗi; link tới quiz/mistakes |
 | `/mistakes` | `src/app/mistakes/page.tsx` | Sổ lỗi hợp nhất (`unifiedMistakes`) — lọc theo skill/status, đổi status, resolve |
@@ -40,7 +40,7 @@ Next.js 14 App Router · TypeScript · Tailwind CSS · Jest (jsdom) · Supabase 
 | `/vocab/quiz` | `src/app/vocab/quiz/page.tsx` | Quiz điền từ trên từ đã học (`/api/generate-fillblank`); ghi session |
 | `/vocab/context` | `src/app/vocab/context/page.tsx` | Luyện từ trong ngữ cảnh (story/dialogue/email/workplace) qua `/api/vocab/context` |
 | `/grammar/quiz` | `src/app/grammar/quiz/page.tsx` | Quiz ngữ pháp nhiều câu; ghi `grammarAttempts`, lỗi → `unifiedMistakes`, session; ưu tiên sub-rule yếu/bookmark |
-| `/speak/shadowing` | `src/app/speak/shadowing/page.tsx` | Nghe–nhắc lại: ghi âm → Whisper → lưu `SpeakingRecord` (mode `shadowing`) |
+| `/speak/shadowing` | `src/app/speak/shadowing/page.tsx` | Nghe–nhắc lại: ghi âm → Whisper → lưu `SpeakingRecord` (mode `shadowing`); transcribe lỗi thì huỷ session, và session cũ luôn bị huỷ trước khi tạo session mới |
 | `/speak/history` | `src/app/speak/history/page.tsx` | Lịch sử speaking + nghe lại audio (IndexedDB) |
 | `/write/history` | `src/app/write/history/page.tsx` | Lịch sử bài viết; mở rewrite |
 | `/write/rewrite/[id]` | `src/app/write/rewrite/[id]/page.tsx` | Viết lại đoạn sai; chấm qua `/api/exam/grade-open`; lỗi → `unifiedMistakes` |
@@ -68,7 +68,7 @@ Next.js 14 App Router · TypeScript · Tailwind CSS · Jest (jsdom) · Supabase 
 | `/api/exam/generate-item` | `{ kind, part, level, topic? }` | `ExamItem` (zod validated, 1 auto-repair) |
 | `/api/exam/grade-open` | `{ question, userAnswer, correctAnswer }` | `{ correct, feedback }` |
 | `/api/exam/explain` | `{ question, userAnswer, correctAnswer, explanation? }` | `{ explanation }` |
-| `/api/speech/transcribe` | FormData `audio` (WebM/MP4/M4A/Ogg; nonempty, max 25 MiB) | `{ text, durationSec, segments[] }` via Groq Whisper |
+| `/api/speech/transcribe` | FormData `audio` (WebM/MP4/M4A/Ogg; nonempty, max 25 MiB; `Content-Length` > 25 MiB + 64 KiB bị từ chối 413 trước khi đọc body) | `{ text, durationSec, segments[] }` via Groq Whisper |
 | `/api/speech/grade` | `{ task, transcript, durationSec }` | `SpeakingFeedback` (4 band scores) |
 | `/api/speak/roleplay` | `{ scenario, history, userText }` | `{ reply, correction, goalAchieved, suggestedReplies }` |
 | `/api/write/grade` | `{ kind, prompt, content, chartData? }` | `WritingFeedback` (4 bands + annotations + model answer) |
@@ -257,7 +257,8 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 | `lastSpeakingAt` | ISO string | Để /today nhắc luyện nói sau 2 ngày |
 | `lastWritingAt` | ISO string | Để /today nhắc luyện viết sau 5 ngày |
 | `speakingSessions` | `SpeakingRecord[]` | IELTS speaking session history; newest-first, max 200 |
-| `writingTaskDraft:<taskId>` | `{content: string, deadline: number}` | Local unfinished writing task; saved synchronously on edits/start, restored on mount, cleared only after successful grading and local result save |
+| `writingTaskDraft:<taskId>` | `{content: string, deadline: number}` | Local unfinished writing task; saved synchronously on edits/start, restored on mount (even past its deadline), cleared after successful grading and local result save or by "Làm lại từ đầu" |
+| `pwaInstallDismissed` | `"1"` | User hid the install guidance banner (`ServiceWorkerRegistration`) |
 | `writingSubmissions` | `WritingRecord[]` | IELTS/TOEIC writing submission history; newest-first, max 100 |
 | `unifiedMistakes` | `UnifiedMistake[]` | Sổ lỗi hợp nhất 6 kỹ năng, max 1000 |
 | `learningProfile` | `LearningProfile` | Goal, level, phút/ngày, mục tiêu điểm, bật/tắt phím tắt |
@@ -424,7 +425,7 @@ Supabase client created per call via `createSupabase(syncKey)` in `src/lib/supab
 2. **`src/lib/gemini.ts`** is a legacy thin wrapper still used by some tests; new routes use `src/lib/providers/`.
 3. **No auth / no user accounts.** All data keyed by `syncKey` (UUID).
 4. **Firebase is hosting only.** No Firebase Firestore/Auth/Functions used. Config in `firebase.json` and `.firebaserc`.
-5. **PWA**: production-only service worker `public/sw.js`, manifest `src/app/manifest.ts`. Core offline assets are mandatory; all static learning pages and built-in dynamic tasks are best-effort precached, so an optional route outage does not prevent installation. Navigations are network-first (5s timeout), JS/CSS/icons cache-first. HTML is cached by pathname + search; RSC/Flight responses are never mixed with HTML, and successful Next Link/RSC requests warm the separate full-document cache. Next 14 falls back to document navigation if Flight fails offline. Visited pages cache their JS/CSS too. Asset downloads are deduplicated; retain the previous cache for older tabs. AI/API requests are not cached; offline supports saved vocab review, static grammar, cached exam questions, local history and writing drafts. See `docs/pwa.md`.
+5. **PWA**: production-only service worker `public/sw.js`, manifest `src/app/manifest.ts`. Core offline assets are mandatory; all static learning pages and built-in dynamic tasks are best-effort precached, so an optional route outage does not prevent installation. Navigations are network-first (5s timeout applies to time-to-headers only) and are answered immediately; the page HTML and its JS/CSS are cached afterwards via `event.waitUntil`, so caching never delays a navigation. JS/CSS/icons are cache-first. HTML is cached by pathname + search; RSC/Flight responses are never mixed with HTML, and successful Next Link/RSC requests warm the separate full-document cache. Next 14 falls back to document navigation if Flight fails offline. Visited pages cache their JS/CSS too (in the background). Asset downloads are deduplicated; retain the previous cache for older tabs. AI/API requests are not cached; offline supports saved vocab review, static grammar, cached exam questions, local history and writing drafts. See `docs/pwa.md`.
 
 ---
 
@@ -461,7 +462,7 @@ Supabase client created per call via `createSupabase(syncKey)` in `src/lib/supab
 | `SyncInit` | Đăng ký processors của offline queue và drain khi online lại (khác `SyncInitializer` chạy `initSync()`) |
 | `SyncStatusBadge` | Chỉ báo trạng thái sync (`synced/syncing/pending/offline/failed`) trong Settings; manual retry button for failed queue |
 | `AppNavigation` | Compact mobile menu and desktop links, shared timer and due badges; includes Settings on all viewports |
-| `ServiceWorkerRegistration` | Production worker registration; installs through `beforeinstallprompt` when available, native installation instructions otherwise; standalone detection and optional persistent storage request; offline notice; waiting-worker update button posts `SKIP_WAITING`, reloads only after user action |
+| `ServiceWorkerRegistration` | Production worker registration; installs through `beforeinstallprompt` when available, native installation instructions otherwise (dismissible with ✕, remembered in `pwaInstallDismissed`); standalone detection and optional persistent storage request; offline notice; waiting-worker update button posts `SKIP_WAITING`, reloads only after user action |
 | `exam/AnswerSheet` · `ExamTimer` · `ListeningPlayer` · `PassageReader` · `QuestionCard` | Thành phần của exam engine (grid câu hỏi, countdown, phát TTS, đoạn đọc, thẻ câu hỏi) |
 | `exam/ReportQuestionModal` | Báo câu hỏi lỗi (lý do + ghi chú) → chỉ lưu local vào `reportedQuestions` (max 200); **không** set `flagged` ở `exam_items` và không sync |
 | `ImportWords` · `QuizCard` | Bulk import từ; thẻ quiz dùng chung |
@@ -498,7 +499,7 @@ stopCountdown()               // cancels countdown without triggering time-up mo
 clearTimeUp()                 // dismisses time-up state, clears countdownTarget
 ```
 
-Persistence: writes `todaySeconds` to `localStorage["studyTime"][YYYY-MM-DD]` with 5 s debounce, flushes on hidden/pagehide/unmount. Reads on mount to restore today's value. `src/lib/useCountdown.ts` is shared by ExamTimer, writing tasks and IELTS speaking prep/recording; it derives remaining seconds from a deadline and checks visibility/pageshow after suspension. Recording chooses a supported MediaRecorder MIME type, preserves it in Blob/file upload through transcription, releases microphone tracks on failure/unmount, and handles late permission results after disposal.
+Persistence: writes `todaySeconds` to `localStorage["studyTime"][YYYY-MM-DD]` with 5 s debounce, flushes on hidden/pagehide/unmount. Reads on mount to restore today's value. `src/lib/useCountdown.ts` is shared by ExamTimer, writing tasks and IELTS speaking prep/recording; it derives remaining seconds from a deadline, checks visibility/pageshow after suspension, and resets to the full duration while disabled so a later run does not start at 0. Recording chooses a supported MediaRecorder MIME type, preserves it in Blob/file upload through transcription, releases microphone tracks on failure/unmount, and handles late permission results after disposal.
 
 ---
 

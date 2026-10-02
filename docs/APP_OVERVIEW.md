@@ -4,7 +4,7 @@
 > **Chi tiết kỹ thuật** (data model, localStorage key, bảng Supabase, route body/response, component map) nằm trong [`CONTEXT.md`](../CONTEXT.md) — không lặp lại ở đây để tránh lệch.
 > Mục đích: dùng làm đầu vào cho phân tích định hướng phát triển.
 >
-> Cập nhật lần cuối: 2026-10-01 · Nhánh `phase-6-exam-engine` · Batch 1–8 đã code xong · 342 tests / 64 suites pass
+> Cập nhật lần cuối: 2026-10-01 · Nhánh `phase-6-exam-engine` · Batch 1–8 đã code xong · 399 tests / 75 suites pass
 
 ---
 
@@ -95,7 +95,7 @@ Tính toán mastery/plan là **deterministic, không gọi AI**; AI chỉ dùng 
 | `/speak/ielts/[part]` | Ghi âm → IndexedDB (LRU 20) → Whisper → chấm band; hoặc nhập text |
 | `/speak/shadowing` | Nghe–nhắc lại, ghi âm, STT, lưu `SpeakingRecord` |
 | `/speak/history` | Lịch sử + nghe lại audio |
-| `/write` · `/write/task/[id]` · `/write/result/[id]` | Chọn đề → editor + timer → kết quả chấm (annotation + model answer) |
+| `/write` · `/write/task/[id]` · `/write/result/[id]` | Chọn đề → editor + timer → kết quả chấm (annotation + model answer). Bản nháp quá giờ vẫn khôi phục và có nút "Làm lại từ đầu" |
 | `/write/history` · `/write/rewrite/[id]` | Lịch sử bài viết; viết lại đoạn sai, chấm qua `/api/exam/grade-open`, lỗi vào sổ lỗi |
 
 ### Thích ứng & theo dõi
@@ -138,7 +138,7 @@ Navbar chỉ link tới: `/`, `/review`, `/diary`, `/activity`, `/grammar`, `/ex
 
 ## 7. Hiện trạng & nợ kỹ thuật (trung thực)
 
-**Trạng thái repo**: nhánh `phase-6-exam-engine` (~108 commit), còn nhiều thay đổi chưa commit (migration đổi tên, `mastery-all.ts`, unified mistakes sync, scripts, docs kế hoạch). Chưa merge vào `main`.
+**Trạng thái repo**: nhánh `phase-6-exam-engine` (~115 commit). Đã commit: migration đổi tên, `mastery-all.ts`, hợp nhất sổ lỗi vào `unifiedMistakes`, sync request hardening, docs/kế hoạch. Còn thay đổi chưa commit: PWA (`sw.js`, `AppNavigation`, `docs/pwa.md`), timer/`useCountdown`, recorder và các sửa speaking/writing. Chưa merge vào `main`.
 
 | Mức | Vấn đề |
 |---|---|
@@ -177,7 +177,7 @@ Navbar chỉ link tới: `/`, `/review`, `/diary`, `/activity`, `/grammar`, `/ex
 - Mở rộng prompt registry cho mọi task
 - Xác thực thật (thay `syncKey`) nếu có nhu cầu chia sẻ/đa người dùng
 - Làm cho "báo câu hỏi lỗi" thực sự flag đề
-- Dọn nợ: merge nhánh, commit thay đổi dang dở
+- Dọn nợ: commit phần PWA/timer/speaking còn dang dở, merge nhánh
 
 ---
 
@@ -185,7 +185,7 @@ Navbar chỉ link tới: `/`, `/review`, `/diary`, `/activity`, `/grammar`, `/ex
 
 ```bash
 npm run dev      # http://localhost:3000
-npm test         # 342 tests, 64 suites (đã chạy 2026-10-01: all pass)
+npm test         # 399 tests, 75 suites (đã chạy 2026-10-01: all pass)
 npm run build
 npm run lint
 ```
