@@ -135,7 +135,7 @@ export default function ServiceWorkerRegistration() {
         </div>
       )}
       {(offline || waiting) && (
-        <aside role="status" className="pwa-status fixed inset-x-0 bottom-0 z-50 flex flex-wrap items-center justify-center gap-3 border-t border-white/20 bg-[#2c1f4a] px-4 pt-3 text-sm text-white shadow-lg">
+        <aside role="status" className="pwa-status fixed inset-x-0 bottom-0 z-50 flex flex-wrap items-center justify-center gap-3 border-t border-white/20 bg-[#2c1f4a] canvas-surface px-4 pt-3 text-sm text-white shadow-lg">
           {offline && <p>Đang ngoại tuyến. Bạn có thể ôn từ đã lưu, đọc ngữ pháp và viết nháp. Chức năng AI cần mạng.</p>}
           {waiting && <>
             <p>Có phiên bản mới. Lưu bài đang làm trước khi tải lại.</p>

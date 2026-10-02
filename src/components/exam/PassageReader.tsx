@@ -141,11 +141,9 @@ export default function PassageReader({
           .passage-reader { grid-template-columns: 1fr; }
           .passage-pane { position: static; max-height: 200px; }
         }
-        @media (prefers-color-scheme: dark) {
-          .passage-pane { background: #1e2a35; color: #eee; }
-          .option-btn { background: #1a1a2e; border-color: #444; color: #eee; }
-          .text-input { background: #1a1a2e; color: #eee; border-color: #444; }
-        }
+        :global(:root[data-theme="dark"]) .passage-pane { background: #1e2a35; color: #eee; }
+        :global(:root[data-theme="dark"]) .option-btn { background: #1a1a2e; border-color: #444; color: #eee; }
+        :global(:root[data-theme="dark"]) .text-input { background: #1a1a2e; color: #eee; border-color: #444; }
       `}</style>
     </div>
   );

@@ -202,11 +202,9 @@ export default function TodayPage() {
         .done-label { font-size: 0.85rem; color: #198754; font-weight: 600; }
         .regenerate-btn { width: 100%; padding: 0.6rem; background: transparent; border: 1.5px solid #dee2e6; border-radius: 8px; cursor: pointer; font-size: 0.875rem; color: #6c757d; }
         .regenerate-btn:hover { background: #f8f9fa; }
-        @media (prefers-color-scheme: dark) {
-          .plan-block { background: #1a1a2e; color: #eee; }
-          .block-time { color: #adb5bd; }
-          .budget-selector button { background: #1a1a2e; color: #eee; border-color: #444; }
-        }
+        :global(:root[data-theme="dark"]) .plan-block { background: #1a1a2e; color: #eee; }
+        :global(:root[data-theme="dark"]) .block-time { color: #adb5bd; }
+        :global(:root[data-theme="dark"]) .budget-selector button { background: #1a1a2e; color: #eee; border-color: #444; }
       `}</style>
     </div>
   );

@@ -150,6 +150,7 @@ export default function ExamPage() {
         :global(.part-card):hover { border-color: #0d6efd; background: rgba(13, 110, 253, 0.18); }
         .part-emoji { font-size: 1.25rem; }
         .part-label { font-size: 0.875rem; line-height: 1.3; }
+        :global(:root[data-theme="light"]) h2 { color: #6b6384; }
         .mock-section, .mistakes-section { margin-top: 1rem; }
         :global(.mock-btn) { display: block; padding: 1rem; background: #0d6efd; color: white; border-radius: 10px; text-decoration: none; text-align: center; font-weight: 600; }
         :global(.mock-btn):hover { background: #0b5ed7; }

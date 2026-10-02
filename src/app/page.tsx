@@ -148,7 +148,7 @@ export default function HomePage() {
                 <p className="text-sm font-semibold text-[#7f56d9]">Today lesson</p>
                 <h2 className="mt-1 font-display text-3xl font-bold">English Study</h2>
               </div>
-              <span className="rounded-full bg-[#2c1f4a] px-4 py-2 text-sm font-semibold text-white">
+              <span className="rounded-full bg-[#2c1f4a] dark-surface px-4 py-2 text-sm font-semibold text-white">
                 AI
               </span>
             </div>
@@ -164,7 +164,7 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
-            <div className="mt-5 rounded-2xl bg-[#2c1f4a] p-5 text-white">
+            <div className="mt-5 rounded-2xl bg-[#2c1f4a] dark-surface p-5 text-white">
               <p className="text-sm text-[#b0b0d1]">Current category</p>
               <p className="mt-2 text-xl font-semibold">{topic}</p>
               <div className="mt-5 h-2 rounded-full bg-white/10">
@@ -203,7 +203,7 @@ export default function HomePage() {
                   key={step}
                   className="rounded-[24px] border border-[#e0d8ff] bg-white p-6 shadow-sm"
                 >
-                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#2c1f4a] font-display text-xl font-bold text-white">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#2c1f4a] dark-surface font-display text-xl font-bold text-white">
                     {index + 1}
                   </span>
                   <h3 className="mt-5 text-xl font-semibold">{step}</h3>

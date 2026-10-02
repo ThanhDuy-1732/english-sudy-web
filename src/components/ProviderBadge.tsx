@@ -25,7 +25,7 @@ export function ProviderBadge() {
       {open && (
         <>
           <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full z-40 mt-1 min-w-[180px] rounded-lg border border-white/10 bg-[#2c1f4a] shadow-xl">
+          <div className="absolute right-0 top-full z-40 mt-1 min-w-[180px] rounded-lg border border-white/10 bg-[#2c1f4a] canvas-surface shadow-xl">
             {availableProviders.map((p) => (
               <button
                 key={p.id}

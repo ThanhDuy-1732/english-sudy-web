@@ -2,49 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg: #f9fafb;
-  --surface: #ffffff;
-  --border: #e5e7eb;
-  --text: #111827;
-  --text-muted: #6b7280;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0f172a;
-    --surface: #1e293b;
-    --border: #334155;
-    --text: #f1f5f9;
-    --text-muted: #94a3b8;
-  }
-}
-
-:root[data-theme="dark"] {
-  --bg: #0f172a;
-  --surface: #1e293b;
-  --border: #334155;
-  --text: #f1f5f9;
-  --text-muted: #94a3b8;
-}
-
-:root[data-theme="light"] {
-  --bg: #f9fafb;
-  --surface: #ffffff;
-  --border: #e5e7eb;
-  --text: #111827;
-  --text-muted: #6b7280;
-}
-
-@layer components {
-  /* The page text colour is light; in a light OS theme these light surfaces would inherit it. Utilities like text-* still win. */
-  @media (prefers-color-scheme: light) {
-    .bg-white, .bg-gray-50, .bg-gray-100, .bg-blue-50, .bg-red-50, .bg-green-50, .bg-yellow-50, .bg-purple-50 {
-      color: #1f2937;
-    }
-  }
-}
-
 @layer base {
   html {
     background: #2c1f4a;
@@ -132,4 +89,98 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
+}
+
+/*
+ * Light theme. <html data-theme> is always the resolved theme (see lib/theme.ts); dark is the app's native look,
+ * so light only re-maps the canvas-level colours: page, chrome, muted text, borders and translucent overlays.
+ * Light surfaces (white cards, bg-[#f7f4ff] sections) already work on both and are left alone.
+ */
+:root[data-theme="light"] {
+  background: #f7f4ff;
+}
+
+:root[data-theme="light"] body {
+  background-color: #f7f4ff;
+  color: #2c1f4a;
+}
+
+:root[data-theme="light"] .canvas-surface {
+  background-color: #f7f4ff;
+}
+
+:root[data-theme="light"] .app-nav.canvas-surface {
+  background-color: rgb(247 244 255 / 0.95);
+}
+
+:root[data-theme="light"] .text-white:not([class*="bg-"]),
+:root[data-theme="light"] .text-\[\#d9ecff\] {
+  color: #2c1f4a;
+}
+
+:root[data-theme="light"] .text-\[\#b0b0d1\] {
+  color: #6b6384;
+}
+
+:root[data-theme="light"] [class*="border-white/"] {
+  border-color: rgba(44, 31, 74, 0.14);
+}
+
+:root[data-theme="light"] [class*="bg-white/"] {
+  background-color: rgba(44, 31, 74, 0.06);
+}
+
+:root[data-theme="light"] [class*="hover:bg-white/"]:hover {
+  background-color: rgba(44, 31, 74, 0.12);
+}
+
+:root[data-theme="light"] :focus-visible {
+  outline-color: #7f56d9;
+}
+
+:root[data-theme="light"] ::selection {
+  background: #7f56d9;
+  color: #fff;
+}
+
+/* Pale text colours chosen for the dark canvas get their darker equivalents. */
+:root[data-theme="light"] :is(.text-gray-300, .text-gray-400) {
+  color: #6b6384;
+}
+
+:root[data-theme="light"] :is(.text-red-300, .text-red-400) {
+  color: #b91c1c;
+}
+
+:root[data-theme="light"] :is(.text-green-300, .text-green-400) {
+  color: #15803d;
+}
+
+:root[data-theme="light"] :is(.text-blue-300, .text-blue-400) {
+  color: #1d4ed8;
+}
+
+:root[data-theme="light"] :is(.text-purple-300, .text-purple-400) {
+  color: #7e22ce;
+}
+
+:root[data-theme="light"] :is(.text-yellow-300, .text-yellow-400, .text-orange-300, .text-orange-400) {
+  color: #a16207;
+}
+
+/* Deliberately dark cards (e.g. the home hero) keep their light text in the light theme. */
+:root[data-theme="light"] .dark-surface {
+  color: #fff;
+}
+
+:root[data-theme="light"] .dark-surface .text-white {
+  color: #fff;
+}
+
+:root[data-theme="light"] .dark-surface .text-\[\#d9ecff\] {
+  color: #d9ecff;
+}
+
+:root[data-theme="light"] .dark-surface .text-\[\#b0b0d1\] {
+  color: #b0b0d1;
 }

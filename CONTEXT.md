@@ -271,7 +271,7 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 | `reportedQuestions` | `{questionId, itemId, reason, note, reportedAt}[]` | Câu hỏi exam người dùng báo lỗi; max 200, chỉ local |
 | `syncQueue` | `QueueEntry[]` | Hàng đợi offline retry (xem Supabase Sync) |
 | `syncFailedQueue` | `QueueEntry[]` | Mục vượt `MAX_RETRIES = 5` |
-| `theme` | `"system"\|"light"\|"dark"` | Cài đặt trong Settings; script inline ở `layout.tsx` đặt `data-theme` trên `<html>` để tránh nháy |
+| `theme` | `"system"\|"light"\|"dark"` | Lựa chọn của người dùng (Settings → Hồ sơ → Giao diện). `lib/theme.ts` có `THEME_INIT_SCRIPT` (inline trong `<head>`, chạy trước khi vẽ): đặt `data-theme` trên `<html>` luôn là giá trị **đã giải quyết** (`dark`\|`light`; "system" theo OS và cập nhật live), cập nhật `<meta name="theme-color">`, và tạo `window.__setTheme(pref)` (gọi qua `setThemePref`). Xem mục "Theming" |
 
 ---
 
@@ -507,3 +507,12 @@ Persistence: writes `todaySeconds` to `localStorage["studyTime"][YYYY-MM-DD]` wi
 ## Testing
 
 Jest + `@testing-library/react`. Config: `jest.config.ts` + `jest.setup.ts`. Tests live alongside source in `__tests__/` folders. Run: `npm test`.
+
+
+## Theming
+
+- `data-theme="dark"` là giao diện gốc (nền tím `#2c1f4a`, chữ sáng); `light` chỉ ánh xạ lại màu cấp "khung trang" trong `globals.css` (khối `:root[data-theme="light"]`): nền/chữ body, `.canvas-surface` (nav, menu, chân trang, hộp thoại timer, dropdown provider, banner PWA), `text-[#d9ecff]`, `text-[#b0b0d1]`, `text-white` không có `bg-*`, viền/lớp phủ `white/NN`, và các màu nhạt `text-{gray,red,green,blue,purple,yellow,orange}-{300,400}`.
+- Thẻ tối cố ý trong giao diện sáng (hero trang chủ) thêm class `dark-surface` để giữ chữ sáng. Bề mặt sáng (`bg-white`, `bg-[#f7f4ff]`, thẻ trắng) dùng được ở cả hai theme.
+- Tailwind: `darkMode: ["selector", '[data-theme="dark"]']`, nên `dark:` đi theo cài đặt chứ không chỉ theo OS. CSS styled-jsx dùng `:global(:root[data-theme="dark"]) .x { … }` thay cho `@media (prefers-color-scheme: dark)` (đừng dùng media query này nữa).
+- Quy tắc khi thêm UI: màu chữ/nền phải đọc được ở **cả hai** theme. Kiểm tra bằng cách quét tỷ lệ tương phản chữ/nền (≥3) ở cả `dark` và `light`.
+- Giới hạn: trang dùng nền `bg-[#f7f4ff]` cố định (review, stats...) là "đảo sáng" ở theme tối; `apple-mobile-web-app-status-bar-style` (iOS PWA) và `manifest` theme_color là tĩnh.

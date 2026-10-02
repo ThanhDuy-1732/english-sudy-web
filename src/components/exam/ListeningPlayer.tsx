@@ -130,11 +130,9 @@ export default function ListeningPlayer({ script, onPlaybackComplete }: Props) {
         .transcript-line { margin: 0 0 0.4rem; font-size: 0.875rem; line-height: 1.5; transition: background 0.2s; border-radius: 4px; padding: 0.1rem 0.3rem; }
         .transcript-line.active { color: #212529; background: #fff3cd; font-weight: 500; }
         .speaker { font-weight: 700; color: #495057; margin-right: 0.3rem; }
-        @media (prefers-color-scheme: dark) {
-          .transcript { background: #1e2a35; color: #eee; }
-          .transcript-line.active { background: #3d3a10; color: #eee; }
-          .speaker { color: #adb5bd; }
-        }
+        :global(:root[data-theme="dark"]) .transcript { background: #1e2a35; color: #eee; }
+        :global(:root[data-theme="dark"]) .transcript-line.active { background: #3d3a10; color: #eee; }
+        :global(:root[data-theme="dark"]) .speaker { color: #adb5bd; }
       `}</style>
     </div>
   );

@@ -149,6 +149,7 @@ export default function MistakesPage() {
         .drill-btn:hover { background: #e8f0fe; }
         .resolve-btn { border-color: #198754; color: #198754; background: white; }
         .resolve-btn:hover { background: #d1e7dd; }
+        :global(:root[data-theme="light"]) .explanation, :global(:root[data-theme="light"]) .count, :global(:root[data-theme="light"]) .date, :global(:root[data-theme="light"]) .empty { color: #6b6384; }
       `}</style>
     </div>
   );

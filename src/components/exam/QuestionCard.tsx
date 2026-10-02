@@ -223,15 +223,13 @@ export default function QuestionCard({
           color: #555;
           font-style: italic;
         }
-        @media (prefers-color-scheme: dark) {
-          .passage-context { background: #1e2a35; color: #eee; }
-          .option-btn { background: #1a1a2e; border-color: #444; color: #eee; }
-          .option-btn:hover:not(:disabled) { border-color: #4d9fff; background: #1a2f50; }
-          .option-btn.selected { border-color: #4d9fff; background: #1a2f50; }
-          .result-panel { background: #1a3027; }
-          .result-panel.wrong { background: #3a1a1e; }
-          .text-input { background: #1a1a2e; color: #eee; border-color: #444; }
-        }
+        :global(:root[data-theme="dark"]) .passage-context { background: #1e2a35; color: #eee; }
+        :global(:root[data-theme="dark"]) .option-btn { background: #1a1a2e; border-color: #444; color: #eee; }
+        :global(:root[data-theme="dark"]) .option-btn:hover:not(:disabled) { border-color: #4d9fff; background: #1a2f50; }
+        :global(:root[data-theme="dark"]) .option-btn.selected { border-color: #4d9fff; background: #1a2f50; }
+        :global(:root[data-theme="dark"]) .result-panel { background: #1a3027; }
+        :global(:root[data-theme="dark"]) .result-panel.wrong { background: #3a1a1e; }
+        :global(:root[data-theme="dark"]) .text-input { background: #1a1a2e; color: #eee; border-color: #444; }
       `}</style>
     </div>
   );

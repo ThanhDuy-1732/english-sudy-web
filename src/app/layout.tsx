@@ -7,6 +7,7 @@ import { TimerContextProvider } from "@/contexts/TimerContext";
 import { FirebaseInitializer } from "@/components/FirebaseInitializer";
 import { SyncInit } from "@/components/SyncInit";
 import AppNavigation from "@/components/AppNavigation";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -39,7 +40,10 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#2c1f4a",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f7f4ff" },
+    { media: "(prefers-color-scheme: dark)", color: "#2c1f4a" },
+  ],
 };
 
 export default function RootLayout({
@@ -50,7 +54,7 @@ export default function RootLayout({
   return (
     <html lang="vi" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();` }} />
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body
         className={`${inter.variable} ${caladea.variable} grid min-h-screen min-h-svh min-w-0 grid-rows-[auto_1fr_auto] bg-[#2c1f4a] font-sans text-white`}
@@ -59,7 +63,7 @@ export default function RootLayout({
           <TimerContextProvider>
             <AppNavigation />
             <div className="app-content min-w-0">{children}</div>
-            <footer className="app-footer min-w-0 border-t border-white/10 bg-[#2c1f4a] px-4 py-8 text-[#b0b0d1]">
+            <footer className="app-footer min-w-0 border-t border-white/10 bg-[#2c1f4a] canvas-surface px-4 py-8 text-[#b0b0d1]">
               <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="font-display text-2xl font-bold text-[#d9ecff]">English Study</p>
                 <p className="text-sm">Practice smarter vocabulary, one card at a time.</p>

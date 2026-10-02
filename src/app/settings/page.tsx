@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getThemePref, setThemePref, type ThemePref } from "@/lib/theme";
 import VoiceSettingsTab from "@/components/VoiceSettingsTab";
 import { useProvider } from "@/contexts/ProviderContext";
 import { getLastSyncedAt, getSyncKey, pullFromKey } from "@/lib/sync";
@@ -438,16 +439,11 @@ function ProfileSettings() {
 }
 
 function ThemeToggle() {
-  const [theme, setTheme] = useState<"system" | "light" | "dark">(() => {
-    if (typeof window === "undefined") return "system";
-    return (localStorage.getItem("theme") as "system" | "light" | "dark") ?? "system";
-  });
+  const [theme, setTheme] = useState<ThemePref>(() => (typeof window === "undefined" ? "system" : getThemePref()));
 
-  function applyTheme(t: "system" | "light" | "dark") {
+  function applyTheme(t: ThemePref) {
     setTheme(t);
-    localStorage.setItem("theme", t);
-    if (t === "system") document.documentElement.removeAttribute("data-theme");
-    else document.documentElement.setAttribute("data-theme", t);
+    setThemePref(t);
   }
 
   return (

@@ -32,7 +32,7 @@ function SetCountdownModal({ onClose }: { onClose: () => void }) {
   return (
     <ModalPortal>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" role="dialog" aria-modal="true" aria-label="Đặt thời gian học">
-        <div className="w-[calc(100vw-2rem)] max-w-[20rem] rounded-2xl border border-white/10 bg-[#2c1f4a] p-6 shadow-xl">
+        <div className="w-[calc(100vw-2rem)] max-w-[20rem] rounded-2xl border border-white/10 bg-[#2c1f4a] canvas-surface p-6 shadow-xl">
           <h2 className="mb-4 font-display text-lg font-bold text-white">Đặt thời gian học</h2>
           <div className="mb-4 flex gap-2">
             {[10, 25, 45].map((preset) => (
@@ -81,7 +81,7 @@ function TimeUpModal() {
   return (
     <ModalPortal>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" role="dialog" aria-modal="true" aria-label="Hết giờ">
-        <div className="w-[calc(100vw-2rem)] max-w-[20rem] rounded-2xl border border-white/10 bg-[#2c1f4a] p-6 text-center shadow-xl">
+        <div className="w-[calc(100vw-2rem)] max-w-[20rem] rounded-2xl border border-white/10 bg-[#2c1f4a] canvas-surface p-6 text-center shadow-xl">
           <div className="mb-3 text-4xl" aria-hidden="true">🎉</div>
           <h2 className="mb-2 font-display text-lg font-bold text-white">Hết giờ rồi!</h2>
           <p className="mb-6 text-sm text-[#b0b0d1]">
