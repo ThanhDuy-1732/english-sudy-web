@@ -194,7 +194,7 @@ export default function TodayPage() {
         .block-content { flex: 1; }
         .block-title { font-weight: 600; font-size: 0.95rem; margin: 0 0 0.2rem; }
         .block-reason { font-size: 0.8rem; color: #6c757d; margin: 0 0 0.15rem; }
-        .block-time { font-size: 0.75rem; color: #adb5bd; margin: 0; }
+        .block-time { font-size: 0.75rem; color: #6c757d; margin: 0; }
         .block-actions { display: flex; gap: 0.4rem; align-items: center; flex-shrink: 0; }
         :global(.go-btn) { padding: 0.45rem 0.9rem; background: var(--accent, #0d6efd); color: white; border-radius: 8px; text-decoration: none; font-size: 0.85rem; white-space: nowrap; }
         .done-btn { color: #212529; width: 32px; height: 32px; border: 1.5px solid #dee2e6; border-radius: 50%; background: white; cursor: pointer; font-size: 0.85rem; }
@@ -204,6 +204,7 @@ export default function TodayPage() {
         .regenerate-btn:hover { background: #f8f9fa; }
         @media (prefers-color-scheme: dark) {
           .plan-block { background: #1a1a2e; color: #eee; }
+          .block-time { color: #adb5bd; }
           .budget-selector button { background: #1a1a2e; color: #eee; border-color: #444; }
         }
       `}</style>

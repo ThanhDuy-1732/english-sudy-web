@@ -48,7 +48,7 @@ export default function WritingHistoryPage() {
                   <p className="text-sm font-medium mt-0.5 line-clamp-2">{r.prompt}</p>
                   <p className="text-xs text-gray-400 mt-1">{r.wordCount} từ · {formatDate(r.createdAt)}</p>
                 </div>
-                <span className="text-2xl font-bold text-purple-600 ml-2 shrink-0">
+                <span className="text-2xl font-bold text-purple-300 ml-2 shrink-0">
                   {r.feedback.overall.toFixed(1)}
                 </span>
               </div>

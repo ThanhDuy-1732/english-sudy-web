@@ -6,7 +6,7 @@ import type { DailyWordCount } from "@/lib/stats";
 export default function WordsPerDayChart({ data }: { data: DailyWordCount[] }) {
   const displayData = data.map((day) => ({ ...day, label: day.date.slice(5) }));
   return <section aria-labelledby="words-per-day-title">
-    <h2 id="words-per-day-title" className="mb-3 font-semibold text-gray-700 dark:text-gray-300">Từ học mỗi ngày <span className="font-normal text-gray-400">(30 ngày gần nhất)</span></h2>
+    <h2 id="words-per-day-title" className="mb-3 font-semibold text-gray-700">Từ học mỗi ngày <span className="font-normal text-gray-500">(30 ngày gần nhất)</span></h2>
     <div className="h-[220px] w-full" role="img" aria-label="Biểu đồ số từ học theo ngày">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={displayData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>

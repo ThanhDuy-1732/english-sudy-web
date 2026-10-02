@@ -168,7 +168,7 @@ export default function WritingResultPage({ params }: { params: { id: string } }
         .ann-excerpt { font-style: italic; color: #495057; margin: 0 0 0.2rem; }
         .ann-issue { font-weight: 600; margin: 0 0 0.15rem; }
         .ann-suggestion { color: #198754; margin: 0; }
-        .model-answer { font-size: 0.9rem; line-height: 1.7; background: #e8f0fe; padding: 1rem; border-radius: 8px; border-left: 3px solid #0d6efd; white-space: pre-wrap; }
+        .model-answer { color: #212529; font-size: 0.9rem; line-height: 1.7; background: #e8f0fe; padding: 1rem; border-radius: 8px; border-left: 3px solid #0d6efd; white-space: pre-wrap; }
         .result-actions { display: flex; gap: 0.75rem; margin-top: 2rem; flex-wrap: wrap; }
         .result-actions button { color: #212529; padding: 0.6rem 1.25rem; border-radius: 8px; border: 1.5px solid #dee2e6; background: white; cursor: pointer; font-size: 0.9rem; }
         .result-actions button:first-child { background: #0d6efd; color: white; border-color: #0d6efd; }

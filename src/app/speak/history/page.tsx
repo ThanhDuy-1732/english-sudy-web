@@ -89,7 +89,7 @@ export default function SpeakingHistoryPage() {
                   <p className="text-sm font-medium mt-0.5 line-clamp-2">{r.prompt}</p>
                 </div>
                 <div className="text-right ml-2 shrink-0">
-                  <span className="text-2xl font-bold text-blue-600">{r.feedback.overall.toFixed(1)}</span>
+                  <span className="text-2xl font-bold text-blue-300">{r.feedback.overall.toFixed(1)}</span>
                   <p className="text-xs text-gray-400">{formatDate(r.createdAt)}</p>
                 </div>
               </div>

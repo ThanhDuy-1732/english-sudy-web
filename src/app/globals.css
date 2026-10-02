@@ -36,6 +36,15 @@
   --text-muted: #6b7280;
 }
 
+@layer components {
+  /* The page text colour is light; in a light OS theme these light surfaces would inherit it. Utilities like text-* still win. */
+  @media (prefers-color-scheme: light) {
+    .bg-white, .bg-gray-50, .bg-gray-100, .bg-blue-50, .bg-red-50, .bg-green-50, .bg-yellow-50, .bg-purple-50 {
+      color: #1f2937;
+    }
+  }
+}
+
 @layer base {
   html {
     background: #2c1f4a;

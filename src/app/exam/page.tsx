@@ -136,7 +136,7 @@ export default function ExamPage() {
       <style jsx>{`
         .exam-dashboard { max-width: 640px; margin: 0 auto; padding: 1.5rem; }
         h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; }
-        h2 { font-size: 1rem; font-weight: 600; margin: 1.5rem 0 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 0.05em; }
+        h2 { font-size: 1rem; font-weight: 600; margin: 1.5rem 0 0.75rem; color: #b0b0d1; text-transform: uppercase; letter-spacing: 0.05em; }
         .exam-toggle { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
         .exam-toggle button { color: #212529; padding: 0.5rem 1.5rem; border: 1.5px solid #dee2e6; border-radius: 20px; background: white; cursor: pointer; font-weight: 500; }
         .exam-toggle button.active { background: #0d6efd; color: white; border-color: #0d6efd; }

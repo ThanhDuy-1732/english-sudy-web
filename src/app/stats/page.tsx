@@ -163,7 +163,7 @@ export default function StatsPage() {
             <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-6">
               <h2 className="mb-3 font-semibold text-gray-700">Tóm tắt theo chủ đề</h2>
               {topicDistribution.length === 0 ? (
-                <p className="py-8 text-center text-sm text-gray-400">Chưa có dữ liệu</p>
+                <p className="py-8 text-center text-sm text-gray-500">Chưa có dữ liệu</p>
               ) : (
                 <ul className="space-y-3">
                   {topicDistribution.map((item) => (

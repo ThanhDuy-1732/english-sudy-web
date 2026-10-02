@@ -13,17 +13,17 @@ export default function StreakCalendar({ data }: { data: CalendarDay[] }) {
   for (let index = 0; index < cells.length; index += 7) weeks.push(cells.slice(index, index + 7));
 
   return <section aria-labelledby="streak-calendar-title">
-    <h2 id="streak-calendar-title" className="mb-3 font-semibold text-gray-700 dark:text-gray-300">Lịch học tập</h2>
+    <h2 id="streak-calendar-title" className="mb-3 font-semibold text-gray-700">Lịch học tập</h2>
     <div className="overflow-x-auto pb-1" tabIndex={0} aria-label="Lịch đóng góp học tập">
       <div className="flex min-w-max gap-1">
-        <div className="mr-1 flex flex-col gap-1"><div className="h-3 w-8" />{DAY_LABELS.map((label) => <div key={label} className="flex h-3 w-8 items-center text-[10px] text-gray-400">{label}</div>)}</div>
+        <div className="mr-1 flex flex-col gap-1"><div className="h-3 w-8" />{DAY_LABELS.map((label) => <div key={label} className="flex h-3 w-8 items-center text-[10px] text-gray-500">{label}</div>)}</div>
         {weeks.map((week, weekIndex) => {
           const firstDay = week.find((day): day is CalendarDay => day !== null);
           const monthLabel = weekIndex === 0 || firstDay?.date.slice(8) === "01" ? new Date(`${firstDay?.date}T12:00:00`).toLocaleDateString("vi-VN", { month: "short" }) : "";
-          return <div key={`${firstDay?.date ?? weekIndex}`} className="flex flex-col gap-1"><div className="h-3 text-[10px] text-gray-400">{monthLabel}</div>{week.map((day, dayIndex) => day ? <div key={day.date} title={`${day.date}: ${day.count} từ`} aria-label={`${day.date}: ${day.count} từ`} className={`h-3 w-3 rounded-sm ${LEVEL_COLORS[day.level]}`} /> : <div key={`empty-${weekIndex}-${dayIndex}`} className="h-3 w-3" aria-hidden="true" />)}</div>;
+          return <div key={`${firstDay?.date ?? weekIndex}`} className="flex flex-col gap-1"><div className="h-3 text-[10px] text-gray-500">{monthLabel}</div>{week.map((day, dayIndex) => day ? <div key={day.date} title={`${day.date}: ${day.count} từ`} aria-label={`${day.date}: ${day.count} từ`} className={`h-3 w-3 rounded-sm ${LEVEL_COLORS[day.level]}`} /> : <div key={`empty-${weekIndex}-${dayIndex}`} className="h-3 w-3" aria-hidden="true" />)}</div>;
         })}
       </div>
     </div>
-    <div className="mt-2 flex items-center gap-1 text-xs text-gray-400"><span>Ít</span>{LEVEL_COLORS.map((color, index) => <span key={index} aria-label={`Mức ${index}`} className={`h-3 w-3 rounded-sm ${color}`} />)}<span>Nhiều</span></div>
+    <div className="mt-2 flex items-center gap-1 text-xs text-gray-500"><span>Ít</span>{LEVEL_COLORS.map((color, index) => <span key={index} aria-label={`Mức ${index}`} className={`h-3 w-3 rounded-sm ${color}`} />)}<span>Nhiều</span></div>
   </section>;
 }

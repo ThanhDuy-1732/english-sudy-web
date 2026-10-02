@@ -81,7 +81,7 @@ export default function DayDrawer({ date, words, studyMinutes, isOpen, onClose, 
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-600"
             aria-label="Đóng"
           >
             ✕
@@ -91,7 +91,7 @@ export default function DayDrawer({ date, words, studyMinutes, isOpen, onClose, 
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {noData ? (
-            <p className="py-12 text-center text-sm text-gray-400">Không có dữ liệu cho ngày này.</p>
+            <p className="py-12 text-center text-sm text-gray-500">Không có dữ liệu cho ngày này.</p>
           ) : (
             <>
               {/* Summary */}
@@ -114,7 +114,7 @@ export default function DayDrawer({ date, words, studyMinutes, isOpen, onClose, 
 
               {/* Word list */}
               {words.length === 0 ? (
-                <p className="py-4 text-center text-sm text-gray-400">
+                <p className="py-4 text-center text-sm text-gray-500">
                   Không có từ nào được học hôm này.
                 </p>
               ) : (
@@ -131,7 +131,7 @@ export default function DayDrawer({ date, words, studyMinutes, isOpen, onClose, 
                           <span className="mx-2 text-gray-300">—</span>
                           <span className="text-sm text-[#6b6384]">{w.meaning}</span>
                         </div>
-                        <span className="ml-2 text-gray-400 text-xs">{expandedWords.has(w.word) ? "▲" : "▼"}</span>
+                        <span className="ml-2 text-gray-500 text-xs">{expandedWords.has(w.word) ? "▲" : "▼"}</span>
                       </button>
                       {expandedWords.has(w.word) && (
                         <div className="border-t border-gray-100 bg-gray-50 px-4 py-3 space-y-1">
