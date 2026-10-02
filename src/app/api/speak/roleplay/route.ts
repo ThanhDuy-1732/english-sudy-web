@@ -18,12 +18,12 @@ const ResponseSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const {
-    scenario,
-    history,
-    userText,
-  }: { scenario: Scenario; history: ConversationTurn[]; userText: string } =
-    await req.json();
+  const body: Partial<{ scenario: Scenario; history: ConversationTurn[]; userText: string }> | null =
+    await req.json().catch(() => null);
+  const { scenario, history, userText } = body ?? {};
+  if (!scenario?.aiRole || !Array.isArray(history) || typeof userText !== "string") {
+    return NextResponse.json({ error: "scenario, history and userText are required" }, { status: 400 });
+  }
 
   const historyText = history
     .map((t) => `${t.role === "user" ? "User" : scenario.aiRole}: ${t.text}`)
