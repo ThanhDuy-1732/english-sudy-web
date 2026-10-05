@@ -20,9 +20,15 @@ export function initializeFirebaseAnalytics() {
     return Promise.resolve(null);
   }
 
-  analyticsPromise ??= isSupported().then((supported) =>
-    supported ? getAnalytics(firebaseApp) : null
-  );
+  // Analytics is optional: offline or blocked, skip it quietly and try again when the connection returns.
+  if (!navigator.onLine) {
+    window.addEventListener("online", () => void initializeFirebaseAnalytics(), { once: true });
+    return Promise.resolve(null);
+  }
+
+  analyticsPromise ??= isSupported()
+    .then((supported) => (supported ? getAnalytics(firebaseApp) : null))
+    .catch(() => null);
 
   return analyticsPromise;
 }

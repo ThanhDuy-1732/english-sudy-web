@@ -523,3 +523,7 @@ Jest + `@testing-library/react`. Config: `jest.config.ts` + `jest.setup.ts`. Tes
 - Anything that runs during render or in an effect (providers, `SyncInit`, `DueBadge`, timer, session tracking, mastery cache, mistake migration) must never throw when `localStorage` is blocked (`SecurityError`), full (`QuotaExceededError`) or holds a value of the wrong top-level type. Use `lib/safe-json.ts` (`readStored`, `readString`, `asArray`, `asObject`) for reads and wrap writes in `try/catch`. `getSyncKey()` falls back to a session-only key.
 - Writes triggered by a user action may surface an error to the user (e.g. the writing draft warning); they must not be silently swallowed unless the data is a cache.
 - `app/error.tsx` and `app/global-error.tsx` are the last-resort boundaries (a retry button instead of a blank page or a React update loop).
+
+## E2E tests
+
+`e2e/` holds a browser suite (Node test runner + puppeteer-core, `npm run e2e`, needs `npm run dev` and Chrome). Run it after UI, theming, storage or AI-error-handling changes; see `e2e/README.md`. Jest ignores it (files are named `*.e2e.js`).
