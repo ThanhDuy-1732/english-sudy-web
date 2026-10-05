@@ -73,8 +73,10 @@ export default function SettingsPage() {
         count > 0 ? `${count} từ mới được thêm vào thiết bị này.` : "Đồng bộ xong. Không có từ mới."
       );
       setPullInput("");
-    } catch {
-      setPullError("Không thể kết nối. Kiểm tra kết nối mạng và thử lại.");
+    } catch (e) {
+      // 22P02: Postgres rejected the key as a malformed uuid, so this is a typo rather than a network problem.
+      const invalid = (e as { code?: string } | null)?.code === "22P02";
+      setPullError(invalid ? "Key không hợp lệ. Kiểm tra lại key trên thiết bị còn lại." : "Không thể kết nối. Kiểm tra kết nối mạng và thử lại.");
     } finally {
       setPulling(false);
     }

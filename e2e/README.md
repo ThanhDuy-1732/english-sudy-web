@@ -21,6 +21,7 @@ node --test --test-concurrency=1 "e2e/contrast.e2e.js"   # a single file
 - `contrast.e2e.js` – every page in both themes: text contrast ≥ 3, `data-theme` applied, no hydration mismatch, no uncaught errors.
 - `states.e2e.js` – interactive states (flipped cards, quizzes, modals, drawers, mobile menu) in both themes.
 - `mock-exam.e2e.js`, `writing.e2e.js`, `vocab-grammar.e2e.js`, `data-settings.e2e.js` – feature flows with deterministic AI mocks.
+- `sync.e2e.js` – two devices sharing data through a sync key, offline queue replay and invalid-key message (needs the local Supabase from `.env.local`).
 - `resilience.e2e.js` – AI endpoints failing (HTTP 502 and network abort), hostile storage (wrong-typed, blocked, full) and HTML injection.
 
 ## Writing scenarios
