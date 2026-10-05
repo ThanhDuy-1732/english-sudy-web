@@ -515,4 +515,5 @@ Jest + `@testing-library/react`. Config: `jest.config.ts` + `jest.setup.ts`. Tes
 - Thẻ tối cố ý trong giao diện sáng (hero trang chủ) thêm class `dark-surface` để giữ chữ sáng. Bề mặt sáng (`bg-white`, `bg-[#f7f4ff]`, thẻ trắng) dùng được ở cả hai theme.
 - Tailwind: `darkMode: ["selector", '[data-theme="dark"]']`, nên `dark:` đi theo cài đặt chứ không chỉ theo OS. CSS styled-jsx dùng `:global(:root[data-theme="dark"]) .x { … }` thay cho `@media (prefers-color-scheme: dark)` (đừng dùng media query này nữa).
 - Quy tắc khi thêm UI: màu chữ/nền phải đọc được ở **cả hai** theme. Kiểm tra bằng cách quét tỷ lệ tương phản chữ/nền (≥3) ở cả `dark` và `light`.
-- Giới hạn: trang dùng nền `bg-[#f7f4ff]` cố định (review, stats...) là "đảo sáng" ở theme tối; `apple-mobile-web-app-status-bar-style` (iOS PWA) và `manifest` theme_color là tĩnh.
+- Dark cũng ánh xạ lại các bề mặt thiết kế sáng (`bg-white` → thẻ `#3a2a61`, `bg-[#f7f4ff]` → nền tím, `text-[#2c1f4a]`/`text-gray-*`/viền/nền tint trạng thái, legend/trục/lưới Recharts). Nút cố ý sáng ở theme tối thêm class `keep-light`.
+- Giới hạn: `apple-mobile-web-app-status-bar-style` (iOS PWA) và `manifest` theme_color là tĩnh.
