@@ -132,6 +132,9 @@ export default function MockPage() {
           .result-actions { display: flex; gap: 0.75rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap; }
           .result-actions button { color: #212529; padding: 0.6rem 1.25rem; border-radius: 8px; border: 1.5px solid #dee2e6; background: white; cursor: pointer; }
           .result-actions button:first-child { background: #0d6efd; color: white; border-color: #0d6efd; }
+          /* dark theme: light surfaces */
+          :global(:root[data-theme="dark"]) .score-box { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
+          :global(:root[data-theme="dark"]) .result-actions button { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
         `}</style>
       </div>
     );
@@ -172,6 +175,8 @@ export default function MockPage() {
       <style jsx>{`
         .mock-header { color: #212529; display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.5rem; border-bottom: 1px solid #dee2e6; position: sticky; top: 0; background: white; z-index: 10; }
         .mock-label { font-weight: 700; font-size: 0.95rem; }
+        /* dark theme: light surfaces */
+        :global(:root[data-theme="dark"]) .mock-header { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
       `}</style>
     </div>
   );

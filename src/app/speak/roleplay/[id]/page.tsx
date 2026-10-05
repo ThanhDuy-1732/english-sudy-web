@@ -315,7 +315,15 @@ export default function RoleplayPage({ params }: { params: { id: string } }) {
         .input-area button:disabled { background: #adb5bd; cursor: not-allowed; }
         .end-btn { background: #f8f9fa !important; color: #6c757d !important; border: 1.5px solid #dee2e6 !important; }
         .end-btn:hover { background: #e9ecef !important; }
+        :global(:root[data-theme="dark"]) .input-area input { background: rgba(255, 255, 255, 0.08); color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
+        :global(:root[data-theme="dark"]) .intro-message { color: #b0b0d1; }
         .error { padding: 2rem; text-align: center; }
+        /* dark theme: light surfaces */
+        :global(:root[data-theme="dark"]) .goal-badge { background: rgba(34, 197, 94, 0.16); color: #86efac; }
+        :global(:root[data-theme="dark"]) .intro-message { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
+        :global(:root[data-theme="dark"]) .turn.ai .bubble { background: rgba(255, 255, 255, 0.1); color: #f1ecff; }
+        :global(:root[data-theme="dark"]) .end-btn { background: rgba(255, 255, 255, 0.07) !important; color: #f1ecff !important; border-color: rgba(255, 255, 255, 0.22) !important; }
+        :global(:root[data-theme="dark"]) .end-btn:hover { background: rgba(255, 255, 255, 0.12) !important; color: #f1ecff !important; }
       `}</style>
     </div>
   );

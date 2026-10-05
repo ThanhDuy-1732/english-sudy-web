@@ -386,6 +386,10 @@ export default function IeltsSpeakingPage({ params }: { params: { part: string }
         .stop-btn { padding: 0.6rem 1.5rem; border: 1.5px solid #dc3545; color: #dc3545; background: white; border-radius: 8px; cursor: pointer; }
         .processing { color: #6c757d; padding: 2rem; }
         textarea { width: 100%; padding: 0.75rem; border: 1.5px solid #dee2e6; border-radius: 8px; font-size: 0.9rem; resize: vertical; box-sizing: border-box; }
+        /* dark theme: light surfaces */
+        :global(:root[data-theme="dark"]) .mode-btn { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
+        :global(:root[data-theme="dark"]) .task-card { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
+        :global(:root[data-theme="dark"]) .stop-btn { background: #3a2a61; color: #f1ecff; }
       `}</style>
     </div>
   );

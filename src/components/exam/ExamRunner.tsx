@@ -409,6 +409,8 @@ export default function ExamRunner({
         .flag-btn.flagged { border-color: #ffc107; background: #fff3cd; }
         .report-btn { padding: 0.5rem 1rem; background: transparent; border: 1.5px solid #dee2e6; border-radius: 6px; font-size: 0.85rem; cursor: pointer; color: #6c757d; }
         .report-btn:hover { border-color: #adb5bd; color: #495057; }
+        /* dark theme: light surfaces */
+        :global(:root[data-theme="dark"]) .flag-btn.flagged { background: rgba(234, 179, 8, 0.18); color: #fde68a; }
       `}</style>
     </div>
   );
