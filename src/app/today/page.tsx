@@ -205,6 +205,11 @@ export default function TodayPage() {
         :global(:root[data-theme="dark"]) .plan-block { background: #1a1a2e; color: #eee; }
         :global(:root[data-theme="dark"]) .block-time { color: #adb5bd; }
         :global(:root[data-theme="dark"]) .budget-selector button { background: #1a1a2e; color: #eee; border-color: #444; }
+        /* dark theme: light surfaces */
+        :global(:root[data-theme="dark"]) .progress-bar-container { background: rgba(255, 255, 255, 0.12); color: #f1ecff; }
+        :global(:root[data-theme="dark"]) .done-btn { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
+        :global(:root[data-theme="dark"]) .done-btn:hover { background: rgba(34, 197, 94, 0.16); color: #86efac; }
+        :global(:root[data-theme="dark"]) .regenerate-btn:hover { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
       `}</style>
     </div>
   );

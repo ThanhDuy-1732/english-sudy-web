@@ -301,3 +301,19 @@
 :root[data-theme="dark"] .recharts-cartesian-grid line {
   stroke: rgba(255, 255, 255, 0.14);
 }
+
+:root[data-theme="dark"] :is(.bg-orange-50, .bg-orange-100) {
+  background-color: rgba(249, 115, 22, 0.18);
+}
+
+:root[data-theme="dark"] :is(.text-orange-700, .text-orange-800) {
+  color: #fdba74;
+}
+
+:root[data-theme="dark"] .text-pink-700 {
+  color: #f9a8d4;
+}
+
+:root[data-theme="dark"] .text-\[\#7f56d9\] {
+  color: #c4b5fd;
+}

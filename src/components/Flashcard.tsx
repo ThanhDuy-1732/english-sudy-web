@@ -138,7 +138,7 @@ export default function Flashcard({
   }
 
   return (
-    <div className={`relative [perspective:1000px] ${isReviewMode ? "h-[26rem] sm:h-96" : "h-64 sm:h-60"}`}>
+    <div className={`relative [perspective:1000px] ${isReviewMode ? "h-[26rem] sm:h-96" : "h-80 sm:h-72"}`}>
       {/* Pronunciation button floats on front face — positioned outside the front button to avoid nesting <button> */}
       {!flipped && !loading && (
         <div className="absolute bottom-4 right-4 z-10">

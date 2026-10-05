@@ -67,6 +67,12 @@ export default function AnswerSheet({
         .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 2px; }
         .dot.answered { background: #d1e7dd; border: 1.5px solid #198754; }
         .dot.flagged { background: #fff3cd; border: 1.5px solid #ffc107; }
+        /* dark theme: light surfaces */
+        :global(:root[data-theme="dark"]) .cell.current { background: rgba(59, 130, 246, 0.2); color: #bfdbfe; }
+        :global(:root[data-theme="dark"]) .cell.answered { background: rgba(34, 197, 94, 0.16); color: #86efac; }
+        :global(:root[data-theme="dark"]) .cell.flagged { background: rgba(234, 179, 8, 0.18); color: #fde68a; }
+        :global(:root[data-theme="dark"]) .dot.answered { background: rgba(34, 197, 94, 0.16); color: #86efac; }
+        :global(:root[data-theme="dark"]) .dot.flagged { background: rgba(234, 179, 8, 0.18); color: #fde68a; }
       `}</style>
     </div>
   );

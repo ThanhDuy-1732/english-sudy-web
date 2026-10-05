@@ -77,6 +77,9 @@ export default function MockPage() {
           .start-btn { background: #0d6efd; color: white; }
           .start-btn:hover { background: #0b5ed7; }
           .cancel-btn { background: white; border: 1.5px solid #dee2e6 !important; color: #495057; }
+          /* dark theme: light surfaces */
+          :global(:root[data-theme="dark"]) .warning { background: rgba(234, 179, 8, 0.18); color: #fde68a; }
+          :global(:root[data-theme="dark"]) .cancel-btn { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
         `}</style>
       </div>
     );

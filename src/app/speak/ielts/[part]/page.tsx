@@ -296,6 +296,14 @@ export default function IeltsSpeakingPage({ params }: { params: { part: string }
           .replay-label { font-size: 0.75rem; text-transform: uppercase; color: #6c757d; margin: 0 0 0.35rem; }
           .replay-audio { width: 100%; border-radius: 8px; }
           .retry-btn { width: 100%; padding: 0.875rem; background: #0d6efd; color: white; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; margin-top: 1.5rem; }
+          /* dark theme: light surfaces */
+          :global(:root[data-theme="dark"]) .score-box { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
+          :global(:root[data-theme="dark"]) .score-box.overall { background: rgba(34, 197, 94, 0.16); color: #86efac; }
+          :global(:root[data-theme="dark"]) .improvement { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
+          :global(:root[data-theme="dark"]) .transcript { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
+          :global(:root[data-theme="dark"]) .upgraded { background: rgba(59, 130, 246, 0.2); color: #bfdbfe; }
+          :global(:root[data-theme="dark"]) .vocab-chip { background: #3a2a61; color: #f1ecff; }
+          :global(:root[data-theme="dark"]) .vocab-chip:hover { background: rgba(59, 130, 246, 0.2); color: #bfdbfe; }
         `}</style>
       </div>
     );

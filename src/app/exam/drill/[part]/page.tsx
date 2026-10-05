@@ -123,6 +123,9 @@ export default function DrillPage({ params }: { params: { part: string } }) {
           .done-actions { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 2rem; }
           .done-actions button { color: #212529; padding: 0.75rem 1.5rem; border-radius: 8px; border: 1.5px solid #dee2e6; background: white; cursor: pointer; font-size: 0.95rem; }
           .done-actions button:first-child { background: #0d6efd; color: white; border-color: #0d6efd; }
+          /* dark theme: light surfaces */
+          :global(:root[data-theme="dark"]) .tag-bar-bg { background: rgba(255, 255, 255, 0.12); color: #f1ecff; }
+          :global(:root[data-theme="dark"]) .done-actions button { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
         `}</style>
       </div>
     );

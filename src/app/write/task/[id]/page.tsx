@@ -287,6 +287,13 @@ export default function WritingTaskPage({ params }: { params: { id: string } }) 
         .word-count.low { color: #dc3545; }
         .submit-btn { padding: 0.6rem 1.5rem; background: #198754; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
         .submit-btn:disabled { background: #adb5bd; cursor: not-allowed; }
+        /* dark theme: light surfaces */
+        :global(:root[data-theme="dark"]) .timer { background: rgba(255, 255, 255, 0.07); color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
+        :global(:root[data-theme="dark"]) .timer.urgent { background: rgba(239, 68, 68, 0.16); color: #fca5a5; }
+        :global(:root[data-theme="dark"]) .prompt-box { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
+        :global(:root[data-theme="dark"]) .chart-placeholder { background: rgba(255, 255, 255, 0.12); color: #f1ecff; }
+        :global(:root[data-theme="dark"]) .time-up { background: rgba(239, 68, 68, 0.16); color: #fca5a5; }
+        :global(:root[data-theme="dark"]) textarea { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
       `}</style>
     </div>
   );

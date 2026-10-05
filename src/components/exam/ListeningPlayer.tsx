@@ -133,6 +133,7 @@ export default function ListeningPlayer({ script, onPlaybackComplete }: Props) {
         :global(:root[data-theme="dark"]) .transcript { background: #1e2a35; color: #eee; }
         :global(:root[data-theme="dark"]) .transcript-line.active { background: #3d3a10; color: #eee; }
         :global(:root[data-theme="dark"]) .speaker { color: #adb5bd; }
+        /* dark theme: light surfaces */
       `}</style>
     </div>
   );

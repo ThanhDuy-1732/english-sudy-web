@@ -235,7 +235,7 @@ export default function HomePage() {
                   >
                     Kiểm tra kiến thức
                   </button>
-                  <button type="button" onClick={handleReadingMode} disabled={readingLoading} className="rounded-xl bg-teal-500 px-8 py-3 font-medium text-white hover:bg-teal-600 disabled:opacity-50">{readingLoading ? "Đang tạo bài đọc..." : "Đọc hiểu"}</button>
+                  <button type="button" onClick={handleReadingMode} disabled={readingLoading} className="rounded-xl bg-teal-700 px-8 py-3 font-medium text-white hover:bg-teal-600 disabled:opacity-50">{readingLoading ? "Đang tạo bài đọc..." : "Đọc hiểu"}</button>
                 </div>
               )}
               {quizOpen && (

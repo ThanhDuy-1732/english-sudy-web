@@ -222,6 +222,9 @@ export default function RoleplayPage({ params }: { params: { id: string } }) {
           .report-actions { display: flex; gap: 0.75rem; margin-top: 2rem; flex-wrap: wrap; }
           .report-actions button { color: #212529; padding: 0.6rem 1.25rem; border-radius: 8px; border: 1.5px solid #dee2e6; background: white; cursor: pointer; }
           .report-actions button:first-child { background: #0d6efd; color: white; border-color: #0d6efd; }
+          /* dark theme: light surfaces */
+          :global(:root[data-theme="dark"]) .correction-item { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
+          :global(:root[data-theme="dark"]) .report-actions button { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
         `}</style>
       </div>
     );

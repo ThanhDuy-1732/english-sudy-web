@@ -36,6 +36,8 @@ export default function ExamTimer({ totalSeconds, onTimeUp, enabled = true }: Pr
         }
         .exam-timer.urgent { color: #dc3545; border-color: #dc3545; background: #fff5f5; animation: pulse 1s infinite; }
         @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
+        /* dark theme: light surfaces */
+        :global(:root[data-theme="dark"]) .exam-timer.urgent { background: rgba(239, 68, 68, 0.16); color: #fca5a5; }
       `}</style>
     </div>
   );

@@ -150,6 +150,13 @@ export default function MistakesPage() {
         .resolve-btn { border-color: #198754; color: #198754; background: white; }
         .resolve-btn:hover { background: #d1e7dd; }
         :global(:root[data-theme="light"]) .explanation, :global(:root[data-theme="light"]) .count, :global(:root[data-theme="light"]) .date, :global(:root[data-theme="light"]) .empty { color: #6b6384; }
+        /* dark theme: light surfaces */
+        :global(:root[data-theme="dark"]) .filter-row button { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
+        :global(:root[data-theme="dark"]) .part-tag { background: rgba(255, 255, 255, 0.12); color: #f1ecff; }
+        :global(:root[data-theme="dark"]) .drill-btn { background: #3a2a61; color: #f1ecff; }
+        :global(:root[data-theme="dark"]) .drill-btn:hover { background: rgba(59, 130, 246, 0.2); color: #bfdbfe; }
+        :global(:root[data-theme="dark"]) .resolve-btn { background: #3a2a61; color: #f1ecff; }
+        :global(:root[data-theme="dark"]) .resolve-btn:hover { background: rgba(34, 197, 94, 0.16); color: #86efac; }
       `}</style>
     </div>
   );

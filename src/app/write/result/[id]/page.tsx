@@ -177,6 +177,14 @@ export default function WritingResultPage({ params }: { params: { id: string } }
         .not-found { padding: 2rem; text-align: center; }
         .not-found button { background: none; border: none; color: #0d6efd; cursor: pointer; text-decoration: underline; }
         @media (max-width: 560px) { .score-grid { grid-template-columns: repeat(3, 1fr); } }
+        /* dark theme: light surfaces */
+        :global(:root[data-theme="dark"]) .score-box { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
+        :global(:root[data-theme="dark"]) .score-box.overall { background: rgba(34, 197, 94, 0.16); color: #86efac; }
+        :global(:root[data-theme="dark"]) .next-focus { background: rgba(234, 179, 8, 0.18); color: #fde68a; }
+        :global(:root[data-theme="dark"]) .annotated-text { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
+        :global(:root[data-theme="dark"]) .ann-item { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
+        :global(:root[data-theme="dark"]) .model-answer { background: rgba(59, 130, 246, 0.2); color: #bfdbfe; }
+        :global(:root[data-theme="dark"]) .result-actions button { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
       `}</style>
     </div>
   );

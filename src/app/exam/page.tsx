@@ -158,6 +158,10 @@ export default function ExamPage() {
         :global(.mistakes-link):hover { border-color: #dc3545; background: rgba(220, 53, 69, 0.18); }
         .badge { background: #dc3545; color: white; border-radius: 10px; padding: 0.1rem 0.5rem; font-size: 0.75rem; font-weight: 700; }
         @media (max-width: 480px) { .parts-grid { grid-template-columns: 1fr; } }
+        /* dark theme: light surfaces */
+        :global(:root[data-theme="dark"]) .exam-toggle button { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
+        :global(:root[data-theme="dark"]) .level-btn { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
+        :global(:root[data-theme="dark"]) .last-score { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
       `}</style>
     </div>
   );

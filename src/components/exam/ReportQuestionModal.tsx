@@ -120,6 +120,11 @@ export default function ReportQuestionModal({ questionId, itemId, onClose }: Pro
           border-radius: 6px; border: 1.5px solid #dee2e6; background: white;
           cursor: pointer; font-size: 0.875rem;
         }
+        /* dark theme: light surfaces */
+        :global(:root[data-theme="dark"]) .reason-btn.selected { background: rgba(59, 130, 246, 0.2); color: #bfdbfe; }
+        :global(:root[data-theme="dark"]) .report-modal { background: #3a2a61; color: #f1ecff; }
+        :global(:root[data-theme="dark"]) .reason-btn, :global(:root[data-theme="dark"]) .report-cancel-btn, :global(:root[data-theme="dark"]) .report-close-btn { background: rgba(255, 255, 255, 0.08); color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
+        :global(:root[data-theme="dark"]) .report-note { background: rgba(0, 0, 0, 0.25); color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
       `}</style>
     </div>
   );

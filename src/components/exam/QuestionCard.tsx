@@ -223,6 +223,7 @@ export default function QuestionCard({
           color: #555;
           font-style: italic;
         }
+        :global(:root[data-theme="dark"]) .question-header { color: #b0b0d1; }
         :global(:root[data-theme="dark"]) .passage-context { background: #1e2a35; color: #eee; }
         :global(:root[data-theme="dark"]) .option-btn { background: #1a1a2e; border-color: #444; color: #eee; }
         :global(:root[data-theme="dark"]) .option-btn:hover:not(:disabled) { border-color: #4d9fff; background: #1a2f50; }

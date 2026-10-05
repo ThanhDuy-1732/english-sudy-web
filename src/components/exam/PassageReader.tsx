@@ -141,9 +141,15 @@ export default function PassageReader({
           .passage-reader { grid-template-columns: 1fr; }
           .passage-pane { position: static; max-height: 200px; }
         }
+        :global(:root[data-theme="dark"]) .question-header, :global(:root[data-theme="dark"]) .passage-label { color: #b0b0d1; }
         :global(:root[data-theme="dark"]) .passage-pane { background: #1e2a35; color: #eee; }
         :global(:root[data-theme="dark"]) .option-btn { background: #1a1a2e; border-color: #444; color: #eee; }
         :global(:root[data-theme="dark"]) .text-input { background: #1a1a2e; color: #eee; border-color: #444; }
+        /* dark theme: light surfaces */
+        :global(:root[data-theme="dark"]) .option-btn:hover:not(:disabled) { background: rgba(59, 130, 246, 0.2); color: #bfdbfe; }
+        :global(:root[data-theme="dark"]) .option-btn.selected { background: rgba(59, 130, 246, 0.2); color: #bfdbfe; }
+        :global(:root[data-theme="dark"]) .option-btn.correct { background: rgba(34, 197, 94, 0.16); color: #86efac; }
+        :global(:root[data-theme="dark"]) .result-panel { background: rgba(34, 197, 94, 0.16); color: #86efac; }
       `}</style>
     </div>
   );
