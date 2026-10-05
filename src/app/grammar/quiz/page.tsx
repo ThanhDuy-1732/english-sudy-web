@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { startSession, finishSession } from "@/lib/sessions";
 import { recordGrammarAttempt, getWeakSubRules } from "@/lib/grammar-progress";
@@ -73,6 +73,9 @@ export default function GrammarQuizPage() {
   const [results, setResults] = useState<QuizResult[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [questionError, setQuestionError] = useState(false);
+  const inflight = useRef(new Set<number>());
   const sessionId = useRef<string | null>(null);
 
   async function fetchQuestion(item: QuizItem): Promise<QuizQuestion> {
@@ -82,17 +85,48 @@ export default function GrammarQuizPage() {
       body: JSON.stringify({ topic: item.topicName, subRule: item.subRuleName }),
     });
     const q = await res.json() as { type: string; question: string; options?: string[]; answer: string };
+    if (!res.ok || typeof q.question !== "string" || typeof q.answer !== "string") throw new Error("invalid question");
     return { ...item, question: q };
   }
 
+  // Loads pool[index] into questions[index]; used for prefetching and as the fallback when a prefetch failed.
+  function loadQuestion(index: number, items = pool) {
+    if (!items[index] || inflight.current.has(index)) return;
+    inflight.current.add(index);
+    fetchQuestion(items[index])
+      .then((q) => setQuestions((prev) => { const next = [...prev]; next[index] = q; return next; }))
+      .catch(() => { if (index === current) setQuestionError(true); })
+      .finally(() => inflight.current.delete(index));
+  }
+
+  // If the question on screen is missing (e.g. its prefetch failed), fetch it now.
+  useEffect(() => {
+    if (phase === "quiz" && !questions[current]) loadQuestion(current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, current, questions]);
+
   async function startQuiz() {
+    setError(null);
     const items = selectItems(mode, count);
     if (items.length === 0) {
-      alert("Không đủ nội dung cho chế độ này. Hãy thử chế độ khác.");
+      setError(mode === "weak"
+        ? "Chưa có điểm yếu: cần ít nhất 3 lượt trả lời cho cùng một quy tắc với độ chính xác dưới 70%. Hãy thử chế độ \"Tất cả\"."
+        : mode === "bookmarks"
+          ? "Bạn chưa lưu quy tắc nào. Hãy lưu quy tắc ở trang Ngữ pháp trước, hoặc thử chế độ \"Tất cả\"."
+          : "Không đủ nội dung cho chế độ này. Hãy thử chế độ khác.");
       return;
     }
     setLoading(true);
-    const first = await fetchQuestion(items[0]);
+    let first: QuizQuestion;
+    try {
+      first = await fetchQuestion(items[0]);
+    } catch {
+      setLoading(false);
+      setError("Không thể tạo câu hỏi lúc này. Vui lòng thử lại.");
+      return;
+    }
+    setQuestionError(false);
+    inflight.current.clear();
     setPool(items);
     setQuestions([first]);
     sessionId.current = startSession("grammar");
@@ -102,9 +136,7 @@ export default function GrammarQuizPage() {
     setSelected(null);
     setLoading(false);
     // Prefetch next question in background
-    if (items.length > 1) {
-      fetchQuestion(items[1]).then((q) => setQuestions((prev) => [...prev, q]));
-    }
+    if (items.length > 1) loadQuestion(1, items);
   }
 
   function handleAnswer(answer: string) {
@@ -139,11 +171,10 @@ export default function GrammarQuizPage() {
       return;
     }
     setSelected(null);
+    setQuestionError(false);
     setCurrent(next);
     // Prefetch the question after next if not already loaded
-    if (!questions[next + 1] && pool[next + 1]) {
-      fetchQuestion(pool[next + 1]).then((q) => setQuestions((prev) => [...prev, q]));
-    }
+    if (!questions[next + 1]) loadQuestion(next + 1);
   }
 
   if (phase === "setup") {
@@ -173,6 +204,7 @@ export default function GrammarQuizPage() {
               ))}
             </div>
           </div>
+          {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
           <button onClick={startQuiz} disabled={loading}
             className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50">
             {loading ? "Đang tải..." : "Bắt đầu"}
@@ -213,7 +245,14 @@ export default function GrammarQuizPage() {
   }
 
   const currentQ = questions[current];
-  if (!currentQ) return <p className="p-4 text-center">Đang tải câu hỏi...</p>;
+  if (!currentQ) {
+    return questionError ? (
+      <main className="max-w-md mx-auto p-4 text-center">
+        <p role="alert" className="mb-4">Không thể tải câu hỏi. Vui lòng thử lại.</p>
+        <button onClick={() => { setQuestionError(false); loadQuestion(current); }} className="px-6 py-2 bg-blue-600 text-white rounded-lg">Thử lại</button>
+      </main>
+    ) : <p className="p-4 text-center">Đang tải câu hỏi...</p>;
+  }
 
   return (
     <main className="max-w-md mx-auto p-4">

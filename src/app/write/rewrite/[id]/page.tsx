@@ -22,6 +22,7 @@ export default function RewritePage() {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [input, setInput] = useState("");
   const [checking, setChecking] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ correct: boolean; feedback: string } | null>(null);
 
   useEffect(() => {
@@ -56,6 +57,8 @@ export default function RewritePage() {
         }),
       });
       const result = await res.json() as { correct: boolean; feedback: string };
+      if (!res.ok || typeof result.correct !== "boolean") throw new Error("grading failed");
+      setError(null);
       setFeedback(result);
 
       if (!result.correct) {
@@ -74,12 +77,16 @@ export default function RewritePage() {
           ? { ...item, resolved: result.correct, userRewrite: input, feedback: result.feedback }
           : item
       ));
+    } catch {
+      // A failed request says nothing about the learner's answer: no verdict, no mistake logged.
+      setError("Không thể chấm lúc này. Vui lòng thử lại.");
     } finally {
       setChecking(false);
     }
   }
 
   function handleNext() {
+    setError(null);
     setInput("");
     setFeedback(null);
     setCurrentIdx((i) => Math.min(i + 1, items.length - 1));
@@ -139,6 +146,8 @@ export default function RewritePage() {
               )}
             </div>
           ) : (
+            <>
+            {error && <p role="alert" className="mt-2 text-sm text-red-600">{error}</p>}
             <button
               onClick={() => void handleCheck()}
               disabled={checking || !input.trim()}
@@ -146,6 +155,7 @@ export default function RewritePage() {
             >
               {checking ? "Đang kiểm tra..." : "Kiểm tra"}
             </button>
+            </>
           )}
 
           {feedback && currentIdx < items.length - 1 && (

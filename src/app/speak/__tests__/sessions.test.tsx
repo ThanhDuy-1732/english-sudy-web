@@ -46,3 +46,17 @@ test("IELTS speaking finishes after feedback and cancels on early exit", async (
   completed.unmount();
   expect(getSessions()).toHaveLength(1);
 });
+
+test("roleplay shows an error turn instead of an empty bubble when the API fails", async () => {
+  const fetcher = jest.fn().mockResolvedValue({ ok: false, status: 502, json: async () => ({ error: "boom" }) });
+  const previous = global.fetch;
+  global.fetch = fetcher;
+  try {
+    render(<RoleplayPage params={{ id: "hotel" }} />);
+    fireEvent.change(screen.getByPlaceholderText(/Nhập tin nhắn/), { target: { value: "Hello" } });
+    fireEvent.keyDown(screen.getByPlaceholderText(/Nhập tin nhắn/), { key: "Enter" });
+    expect(await screen.findByText("(Lỗi kết nối, thử lại.)")).toBeInTheDocument();
+  } finally {
+    global.fetch = previous;
+  }
+});

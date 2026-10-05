@@ -143,6 +143,7 @@ export default function RoleplayPage({ params }: { params: { id: string } }) {
         body: JSON.stringify({ scenario, history: turns, userText }),
       });
       const data = await res.json();
+      if (!res.ok || typeof data.reply !== "string") throw new Error("roleplay failed");
 
       setTurns([
         ...newTurns,
