@@ -124,7 +124,7 @@ export default function HomePage() {
               type="button"
               onClick={handleGenerate}
               disabled={loading}
-              className="min-h-12 rounded-full bg-white px-7 text-sm font-semibold text-[#2c1f4a] shadow-lg shadow-black/20 transition-colors hover:bg-[#d9ecff] disabled:cursor-not-allowed disabled:opacity-60"
+              className="keep-light min-h-12 rounded-full bg-white px-7 text-sm font-semibold text-[#2c1f4a] shadow-lg shadow-black/20 transition-colors hover:bg-[#d9ecff] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? "Đang sinh từ..." : "Sinh từ mới"}
             </button>
