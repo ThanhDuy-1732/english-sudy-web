@@ -1,3 +1,4 @@
+import { asArray } from "./safe-json";
 export type MasterySkill =
   | "vocabulary"
   | "grammar"
@@ -117,7 +118,7 @@ export function getCachedMastery(): SkillMastery[] {
   if (typeof window === "undefined") return [];
   try {
     const r = localStorage.getItem(KEY);
-    return r ? (JSON.parse(r) as SkillMastery[]) : [];
+    return r ? asArray<SkillMastery>(JSON.parse(r)) : [];
   } catch {
     return [];
   }
@@ -125,5 +126,9 @@ export function getCachedMastery(): SkillMastery[] {
 
 export function saveMasteryCache(skills: SkillMastery[]): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(KEY, JSON.stringify(skills));
+  try {
+    localStorage.setItem(KEY, JSON.stringify(skills));
+  } catch {
+    // Cache only: it is recomputed on the next read.
+  }
 }

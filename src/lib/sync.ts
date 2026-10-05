@@ -18,24 +18,38 @@ const KEY_ALIASES: Record<string, string> = {
   thankz: "7468616e-6b7a-4000-8000-000000000000",
 };
 
+// Used when storage is blocked or full: the key then lives only for this page session.
+let sessionOnlyKey: string | null = null;
+
 export function getSyncKey(): string {
   if (typeof window === "undefined") return "";
-  let key = localStorage.getItem(SYNC_KEY_LS);
-  if (!key) {
-    key = crypto.randomUUID();
-    localStorage.setItem(SYNC_KEY_LS, key);
+  try {
+    let key = localStorage.getItem(SYNC_KEY_LS);
+    if (!key) {
+      key = crypto.randomUUID();
+      localStorage.setItem(SYNC_KEY_LS, key);
+    }
+    return key;
+  } catch {
+    return (sessionOnlyKey ??= crypto.randomUUID());
   }
-  return key;
 }
 
 export function getLastSyncedAt(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem(LAST_SYNCED_LS);
+  try {
+    return localStorage.getItem(LAST_SYNCED_LS);
+  } catch {
+    return null;
+  }
 }
 
 function setLastSyncedAt() {
-  if (typeof window !== "undefined") {
+  if (typeof window === "undefined") return;
+  try {
     localStorage.setItem(LAST_SYNCED_LS, new Date().toISOString());
+  } catch {
+    // Storage blocked or full: the sync itself already succeeded.
   }
 }
 

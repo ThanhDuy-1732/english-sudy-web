@@ -1,3 +1,4 @@
+import { asArray } from "../safe-json";
 import { syncRequest } from "@/lib/sync-request";
 import type { SpeakingFeedback } from "./types";
 import { createSupabase } from "@/lib/supabase";
@@ -24,7 +25,7 @@ export function getSpeaking(): SpeakingRecord[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as SpeakingRecord[]) : [];
+    return raw ? asArray<SpeakingRecord>(JSON.parse(raw)) : [];
   } catch { return []; }
 }
 

@@ -28,7 +28,11 @@ function load(): LearningSession[] {
 function save(sessions: LearningSession[]): void {
   if (typeof window === "undefined") return;
   sessions.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
-  localStorage.setItem(KEY, JSON.stringify(sessions.slice(0, CAP)));
+  try {
+    localStorage.setItem(KEY, JSON.stringify(sessions.slice(0, CAP)));
+  } catch {
+    // Storage blocked or full: the session is simply not recorded.
+  }
 }
 
 export function startSession(type: LearningActivityType, metadata?: Record<string, unknown>): string {

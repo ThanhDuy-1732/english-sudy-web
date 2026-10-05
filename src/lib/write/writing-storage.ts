@@ -1,3 +1,4 @@
+import { asArray } from "../safe-json";
 import { syncRequest } from "@/lib/sync-request";
 import { createSupabase } from "@/lib/supabase";
 import { enqueue } from "@/lib/sync-queue";
@@ -44,7 +45,7 @@ export function getWriting(): WritingRecord[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as WritingRecord[]) : [];
+    return raw ? asArray<WritingRecord>(JSON.parse(raw)) : [];
   } catch { return []; }
 }
 

@@ -1,3 +1,4 @@
+import { asArray } from "./safe-json";
 export interface GrammarBookmark {
   topicId: string;
   subRuleId: string;
@@ -10,7 +11,7 @@ function ls(): GrammarBookmark[] {
   if (typeof window === "undefined") return [];
   try {
     const r = localStorage.getItem(KEY);
-    return r ? (JSON.parse(r) as GrammarBookmark[]) : [];
+    return r ? asArray<GrammarBookmark>(JSON.parse(r)) : [];
   } catch { return []; }
 }
 

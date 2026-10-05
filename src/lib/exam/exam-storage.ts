@@ -1,3 +1,4 @@
+import { readStored } from "../safe-json";
 import type {
   ExamItem,
   ExamAttempt,
@@ -23,13 +24,7 @@ const MAX_ATTEMPTS = 100;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function ls<T>(key: string, fallback: T): T {
-  if (typeof window === "undefined") return fallback;
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
-  } catch {
-    return fallback;
-  }
+  return readStored(key, fallback);
 }
 
 function lsSet(key: string, value: unknown) {

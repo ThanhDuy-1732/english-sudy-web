@@ -517,3 +517,9 @@ Jest + `@testing-library/react`. Config: `jest.config.ts` + `jest.setup.ts`. Tes
 - Quy tắc khi thêm UI: màu chữ/nền phải đọc được ở **cả hai** theme. Kiểm tra bằng cách quét tỷ lệ tương phản chữ/nền (≥3) ở cả `dark` và `light`.
 - Dark cũng ánh xạ lại các bề mặt thiết kế sáng (`bg-white` → thẻ `#3a2a61`, `bg-[#f7f4ff]` → nền tím, `text-[#2c1f4a]`/`text-gray-*`/viền/nền tint trạng thái, legend/trục/lưới Recharts). Nút cố ý sáng ở theme tối thêm class `keep-light`.
 - Giới hạn: `apple-mobile-web-app-status-bar-style` (iOS PWA) và `manifest` theme_color là tĩnh.
+
+## Storage resilience
+
+- Anything that runs during render or in an effect (providers, `SyncInit`, `DueBadge`, timer, session tracking, mastery cache, mistake migration) must never throw when `localStorage` is blocked (`SecurityError`), full (`QuotaExceededError`) or holds a value of the wrong top-level type. Use `lib/safe-json.ts` (`readStored`, `readString`, `asArray`, `asObject`) for reads and wrap writes in `try/catch`. `getSyncKey()` falls back to a session-only key.
+- Writes triggered by a user action may surface an error to the user (e.g. the writing draft warning); they must not be silently swallowed unless the data is a cache.
+- `app/error.tsx` and `app/global-error.tsx` are the last-resort boundaries (a retry button instead of a blank page or a React update loop).

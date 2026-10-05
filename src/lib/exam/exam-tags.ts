@@ -1,3 +1,4 @@
+import { asArray } from "../safe-json";
 const KEY = "examTagAccuracies";
 
 interface TagRecord {
@@ -17,7 +18,7 @@ function load(): TagRecord[] {
   if (typeof window === "undefined") return [];
   try {
     const r = localStorage.getItem(KEY);
-    return r ? (JSON.parse(r) as TagRecord[]) : [];
+    return r ? asArray<TagRecord>(JSON.parse(r)) : [];
   } catch {
     return [];
   }

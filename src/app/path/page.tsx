@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { readString } from "@/lib/safe-json";
 import Link from "next/link";
 import { getProfile } from "@/lib/profile";
 import { recomputeMastery } from "@/lib/mastery-all";
@@ -60,7 +61,7 @@ function buildPath(): PathItem[] {
   }
 
   // Speaking if goal is communication or hasn't practiced recently
-  const lastSpeaking = typeof window !== "undefined" ? localStorage.getItem("lastSpeakingAt") : null;
+  const lastSpeaking = readString("lastSpeakingAt");
   const daysSince = lastSpeaking
     ? (Date.now() - new Date(lastSpeaking).getTime()) / 86400000 : 999;
   if (profile.goal === "communication" || daysSince > 3) {

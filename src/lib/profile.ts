@@ -1,3 +1,4 @@
+import { asObject } from "./safe-json";
 const KEY = "learningProfile";
 
 export type LearningGoal = "communication" | "toeic" | "ielts" | "vocabulary" | "mixed";
@@ -23,7 +24,7 @@ export function getProfile(): LearningProfile {
   if (typeof window === "undefined") return DEFAULTS;
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? { ...DEFAULTS, ...(JSON.parse(raw) as Partial<LearningProfile>) } : DEFAULTS;
+    return raw ? { ...DEFAULTS, ...asObject<Partial<LearningProfile>>(JSON.parse(raw), {}) } : DEFAULTS;
   } catch { return DEFAULTS; }
 }
 

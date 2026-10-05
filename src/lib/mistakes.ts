@@ -1,4 +1,5 @@
 import { pushUnifiedMistake } from "./sync";
+import { asArray } from "./safe-json";
 import type { ExamPart, QuestionType } from "./exam/types";
 
 export type MistakeSkill =
@@ -50,7 +51,7 @@ function ls(): UnifiedMistake[] {
   if (typeof window === "undefined") return [];
   try {
     const r = localStorage.getItem(KEY);
-    return r ? (JSON.parse(r) as UnifiedMistake[]) : [];
+    return r ? asArray<UnifiedMistake>(JSON.parse(r)) : [];
   } catch {
     return [];
   }

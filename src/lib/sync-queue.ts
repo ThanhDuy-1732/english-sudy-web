@@ -1,3 +1,5 @@
+import { asArray } from "./safe-json";
+
 const QUEUE_KEY = "syncQueue";
 const FAILED_KEY = "syncFailedQueue";
 const MAX_RETRIES = 5;
@@ -24,7 +26,7 @@ function ls<T>(key: string): T[] {
   if (typeof window === "undefined") return [];
   try {
     const r = localStorage.getItem(key);
-    return r ? (JSON.parse(r) as T[]) : [];
+    return r ? asArray<T>(JSON.parse(r)) : [];
   } catch { return []; }
 }
 

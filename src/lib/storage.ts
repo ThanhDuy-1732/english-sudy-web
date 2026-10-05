@@ -25,10 +25,9 @@ const KEY = "learnedWords";
 export function getLearnedWords(): LearnedWord[] {
   if (typeof window === "undefined") return [];
 
-  const raw = localStorage.getItem(KEY);
-  if (!raw) return [];
-
   try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return [];
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? (parsed as LearnedWord[]) : [];
   } catch {

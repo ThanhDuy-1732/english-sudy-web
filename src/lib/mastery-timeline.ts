@@ -1,3 +1,4 @@
+import { asArray } from "./safe-json";
 import { localDateKey } from "./date";
 export interface MasterySnapshot {
   date: string;   // YYYY-MM-DD
@@ -12,7 +13,7 @@ function ls(): MasterySnapshot[] {
   if (typeof window === "undefined") return [];
   try {
     const r = localStorage.getItem(KEY);
-    return r ? (JSON.parse(r) as MasterySnapshot[]) : [];
+    return r ? asArray<MasterySnapshot>(JSON.parse(r)) : [];
   } catch { return []; }
 }
 

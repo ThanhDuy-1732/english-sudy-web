@@ -123,7 +123,16 @@ export function needsRemoteMistakeMigration(): boolean {
  * re-running would resurrect entries the user already resolved. `mistakeLog` is
  * never deleted and is backed up to `mistakeLogBackup`.
  */
+/** Safe to call from effects: a blocked or full storage just skips the migration (it retries on the next load). */
 export function runMistakeMigration(remote?: MistakeEntry[]): void {
+  try {
+    migrate(remote);
+  } catch {
+    // Migration is idempotent; nothing to roll back.
+  }
+}
+
+function migrate(remote?: MistakeEntry[]): void {
   if (typeof window === "undefined") return;
   const runLocal = !localStorage.getItem(LOCAL_FLAG);
   const runRemote = remote !== undefined && !localStorage.getItem(REMOTE_FLAG);

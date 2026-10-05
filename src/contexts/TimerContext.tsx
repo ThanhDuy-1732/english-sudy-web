@@ -57,11 +57,19 @@ function readTodaySeconds(): number {
   return typeof seconds === "number" && Number.isFinite(seconds) ? seconds : 0;
 }
 
-function writeTodaySeconds(seconds: number, day = getTodayKey()): void {
+function writeStudyTime(data: Record<string, number>): void {
   if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch {
+    // Storage blocked or full: today's minutes are simply not persisted.
+  }
+}
+
+function writeTodaySeconds(seconds: number, day = getTodayKey()): void {
   const data = readStudyTime();
   data[day] = seconds;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  writeStudyTime(data);
 }
 
 export function useTimer(): TimerContextValue {
@@ -121,7 +129,7 @@ export function TimerContextProvider({ children }: { children: React.ReactNode }
         if (debounceRef.current) { clearTimeout(debounceRef.current); debounceRef.current = null; }
         const allData = readStudyTime();
         allData[dayKeyRef.current] = pendingSecondsRef.current;
-        if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, JSON.stringify(allData));
+        writeStudyTime(allData);
         dayKeyRef.current = currentDay;
         todaySecondsRef.current = 0;
         pendingSecondsRef.current = 0;

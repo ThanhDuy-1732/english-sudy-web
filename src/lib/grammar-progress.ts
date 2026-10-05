@@ -1,4 +1,5 @@
 import { computeSkillMastery, getCachedMastery, saveMasteryCache } from "./mastery";
+import { asArray } from "./safe-json";
 
 export interface GrammarAttempt {
   id: string;
@@ -25,7 +26,7 @@ function ls(): GrammarAttempt[] {
   if (typeof window === "undefined") return [];
   try {
     const r = localStorage.getItem(KEY);
-    return r ? (JSON.parse(r) as GrammarAttempt[]) : [];
+    return r ? asArray<GrammarAttempt>(JSON.parse(r)) : [];
   } catch { return []; }
 }
 
