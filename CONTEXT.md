@@ -526,4 +526,4 @@ Jest + `@testing-library/react`. Config: `jest.config.ts` + `jest.setup.ts`. Tes
 
 ## E2E tests
 
-`e2e/` holds a browser suite (Node test runner + puppeteer-core, `npm run e2e`, needs `npm run dev` and Chrome). Run it after UI, theming, storage or AI-error-handling changes; see `e2e/README.md`. Jest ignores it (files are named `*.e2e.js`).
+`e2e/` holds a browser suite (Node test runner + puppeteer-core, `npm run e2e`, needs `npm run dev` and Chrome). Run it after UI, theming, storage or AI-error-handling changes; see `e2e/README.md`. Jest ignores it (files are named `*.e2e.js`). `pwa.e2e.js` needs a production server (see README); `npm run e2e` skips it; run `npm run e2e:pwa`.
