@@ -16,6 +16,9 @@ interface ProviderContextValue {
   toggleProvider: (id: string) => void;
 }
 
+// OpenCode Go is the preferred default when configured; anything else keeps the old order.
+const DEFAULT_PROVIDER_ID = "opencode";
+
 const ProviderContext = createContext<ProviderContextValue>({
   currentProvider: "",
   availableProviders: [],
@@ -45,7 +48,10 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
         const disabledRaw = localStorage.getItem("disabledProviders");
         const disabled: string[] = disabledRaw ? (JSON.parse(disabledRaw) as string[]) : [];
         const valid = providers.find((p) => p.id === saved && !disabled.includes(p.id));
-        const fallback = providers.find((p) => !disabled.includes(p.id));
+        const preferredDefault = providers.find(
+          (p) => p.id === DEFAULT_PROVIDER_ID && !disabled.includes(p.id)
+        );
+        const fallback = preferredDefault ?? providers.find((p) => !disabled.includes(p.id));
         setCurrentProvider(valid ? saved! : (fallback?.id ?? providers[0]?.id ?? ""));
       })
       .catch(() => {});

@@ -1,5 +1,5 @@
-import { toeicScaled, ieltsBand, isCompletionCorrect } from "../scoring";
-import type { ExamQuestion } from "../types";
+import { toeicScaled, ieltsBand, isCompletionCorrect, computeScore } from "../scoring";
+import type { AnswerRecord, ExamPart, ExamQuestion, QuestionType } from "../types";
 
 describe("toeicScaled", () => {
   it("returns 5 for 0 correct", () => {
@@ -91,5 +91,149 @@ describe("isCompletionCorrect", () => {
 
   it("handles empty user answer", () => {
     expect(isCompletionCorrect("", makeQ("manager"))).toBe(false);
+  });
+});
+
+describe("computeScore", () => {
+  const answer = (
+    part: ExamPart,
+    type: QuestionType,
+    correct: boolean,
+    questionId = "q"
+  ): AnswerRecord => ({
+    itemId: "i1",
+    questionId,
+    type,
+    part,
+    userAnswer: "A",
+    correct,
+    timeSpentSec: 10,
+  });
+
+  it("aggregates raw, byPart and byType", () => {
+    const result = computeScore(
+      [
+        answer("RC5", "incomplete_sentence", true, "q1"),
+        answer("RC5", "incomplete_sentence", false, "q2"),
+        answer("LC1", "photo_description", true, "q3"),
+      ],
+      "TOEIC",
+      []
+    );
+
+    expect(result.raw).toEqual({ correct: 2, total: 3 });
+    expect(result.byPart.RC5).toEqual({ correct: 1, total: 2 });
+    expect(result.byPart.LC1).toEqual({ correct: 1, total: 1 });
+    expect(result.byType.incomplete_sentence).toEqual({ correct: 1, total: 2 });
+    expect(result.byType.photo_description).toEqual({ correct: 1, total: 1 });
+  });
+
+  it("returns only raw stats for an empty attempt", () => {
+    const result = computeScore([], "TOEIC", []);
+    expect(result.raw).toEqual({ correct: 0, total: 0 });
+    expect(result.toeic).toBeUndefined();
+    expect(result.byPart).toEqual({});
+  });
+
+  it("computes TOEIC listening and reading when both sections are present", () => {
+    const answers = [
+      ...Array.from({ length: 10 }, (_, i) =>
+        answer("LC1", "photo_description", i < 5, `lc${i}`)
+      ),
+      ...Array.from({ length: 10 }, (_, i) =>
+        answer("RC5", "incomplete_sentence", i < 8, `rc${i}`)
+      ),
+    ];
+
+    const result = computeScore(answers, "TOEIC", []);
+
+    expect(result.toeic).toEqual({
+      listening: toeicScaled(5, 10, "LC"),
+      reading: toeicScaled(8, 10, "RC"),
+      total: toeicScaled(5, 10, "LC") + toeicScaled(8, 10, "RC"),
+    });
+  });
+
+  it("computes TOEIC listening only when there are no reading answers", () => {
+    const result = computeScore(
+      Array.from({ length: 10 }, (_, i) => answer("LC2", "question_response", i < 4, `lc${i}`)),
+      "TOEIC",
+      []
+    );
+
+    expect(result.toeic).toEqual({
+      listening: toeicScaled(4, 10, "LC"),
+      reading: 0,
+      total: toeicScaled(4, 10, "LC"),
+    });
+  });
+
+  it("computes TOEIC reading only when there are no listening answers", () => {
+    const result = computeScore(
+      Array.from({ length: 10 }, (_, i) => answer("RC7", "single_passage", i < 6, `rc${i}`)),
+      "TOEIC",
+      []
+    );
+
+    expect(result.toeic).toEqual({
+      listening: 0,
+      reading: toeicScaled(6, 10, "RC"),
+      total: toeicScaled(6, 10, "RC"),
+    });
+  });
+
+  it("computes IELTS bands for listening and reading", () => {
+    const answers = [
+      ...Array.from({ length: 10 }, (_, i) => answer("LISTEN_S1", "form_completion", i < 6, `l${i}`)),
+      ...Array.from({ length: 10 }, (_, i) => answer("READ_P1", "true_false_ng", i < 4, `r${i}`)),
+    ];
+
+    const result = computeScore(answers, "IELTS", []);
+
+    expect(result.ielts).toEqual({
+      listening: ieltsBand(6, 10, "listening"),
+      reading: ieltsBand(4, 10, "reading"),
+    });
+    expect(result.toeic).toBeUndefined();
+  });
+
+  it("computes only the IELTS skill that has answers", () => {
+    const result = computeScore(
+      Array.from({ length: 10 }, (_, i) => answer("LISTEN_S2", "mcq", i < 8, `l${i}`)),
+      "IELTS",
+      []
+    );
+
+    expect(result.ielts).toEqual({ listening: ieltsBand(8, 10, "listening") });
+    expect(result.ielts?.reading).toBeUndefined();
+  });
+});
+
+describe("scoring edge cases", () => {
+  it("toeicScaled returns floor score when there are no questions", () => {
+    expect(toeicScaled(0, 0, "LC")).toBe(5);
+  });
+
+  it("normalizes repeated whitespace in completion answers", () => {
+    const q: ExamQuestion = {
+      id: "q1",
+      type: "sentence_completion",
+      prompt: "test",
+      answer: "project manager",
+      explanation: "test",
+    };
+    expect(isCompletionCorrect("  Project   Manager  ", q)).toBe(true);
+  });
+
+  it("does not strip articles inside the answer", () => {
+    const q: ExamQuestion = {
+      id: "q1",
+      type: "sentence_completion",
+      prompt: "test",
+      answer: "award",
+      explanation: "test",
+    };
+    expect(isCompletionCorrect("the award", q)).toBe(true);
+    expect(isCompletionCorrect("award", q)).toBe(true);
   });
 });

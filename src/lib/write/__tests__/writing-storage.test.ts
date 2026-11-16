@@ -1,12 +1,3 @@
-jest.mock("@/lib/sync", () => ({ getSyncKey: jest.fn(() => "test-key") }));
-jest.mock("@/lib/supabase", () => ({
-  createSupabase: jest.fn(() => ({
-    from: jest.fn(() => ({
-      upsert: jest.fn().mockResolvedValue({ error: null }),
-    })),
-  })),
-}));
-
 import { saveWriting, getWriting } from "../writing-storage";
 import type { WritingRecord } from "../writing-storage";
 

@@ -24,9 +24,9 @@ Các trang bổ sung được precache theo best effort; mạng lỗi khi cài c
 - Cache theo `NEXT_PUBLIC_PWA_VERSION` (mặc định tạo tại build); giữ thêm cache phiên bản trước để các tab cũ còn dùng asset.
 - Worker cache offline không thay thế sao lưu dữ liệu. Dữ liệu local vẫn có thể bị xóa bởi người dùng/hệ điều hành. App yêu cầu persistent storage nếu API hỗ trợ trong chế độ standalone; trình duyệt quyết định chấp thuận.
 
-## Đồng bộ
+## Sao lưu dữ liệu
 
-Mục đang gửi vẫn được lưu trong queue cho đến khi server xác nhận thành công. Khi còn thao tác chờ, app xử lý queue trước khi pull để không khôi phục lại dữ liệu đang chờ xóa. Supabase `{error}` cũng được xem là lỗi. Retry có backoff 15s–5 phút, chạy khi có mạng, trở lại app hoặc mỗi 15s. Sau 5 lỗi, mục được giữ ở failed queue; mở Cài đặt → Sync → **Thử đồng bộ lại**. Đồng bộ chỉ hoạt động khi app đang mở; không dựa vào background sync trên iOS.
+Không còn backend đồng bộ. Dữ liệu nằm trong localStorage của từng trình duyệt; chuyển máy hoặc backup bằng **Cài đặt → Dữ liệu** (xuất file JSON, nhập lại trên thiết bị khác). PWA cache không thay thế backup: dữ liệu local vẫn có thể bị xoá bởi người dùng hoặc hệ điều hành.
 
 ## Kiểm tra trước phát hành
 

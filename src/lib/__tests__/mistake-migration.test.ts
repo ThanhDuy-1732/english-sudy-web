@@ -1,8 +1,6 @@
-jest.mock("../sync", () => ({ pushUnifiedMistake: jest.fn().mockResolvedValue(undefined) }));
 
 import { migrateLegacyMistakes, runMistakeMigration, needsRemoteMistakeMigration } from "../mistake-migration";
 import { getMistakes, resolveMistake } from "../mistakes";
-import { pushUnifiedMistake } from "../sync";
 import type { MistakeEntry } from "../exam/types";
 import type { UnifiedMistake } from "../mistakes";
 
@@ -154,10 +152,9 @@ test("is idempotent: running again on its own output changes nothing", () => {
 describe("runMistakeMigration", () => {
   beforeEach(() => {
     localStorage.clear();
-    (pushUnifiedMistake as jest.Mock).mockClear();
   });
 
-  it("migrates local mistakeLog, backs it up, keeps the legacy key, pushes changed entries, sets the flag", () => {
+  it("migrates local mistakeLog, backs it up, keeps the legacy key, sets the flag", () => {
     const raw = JSON.stringify([legacy({ id: "l1" }), legacy({ id: "l2" })]);
     localStorage.setItem("mistakeLog", raw);
     runMistakeMigration();
@@ -166,7 +163,6 @@ describe("runMistakeMigration", () => {
     expect(localStorage.getItem("mistakeLog")).toBe(raw);
     expect(localStorage.getItem("mistakeLogBackup")).toBe(raw);
     expect(localStorage.getItem("mistakeLogMigrated")).toBe("1");
-    expect(pushUnifiedMistake).toHaveBeenCalledTimes(1);
   });
 
   it("runs only once: resolving a unified entry afterwards is not undone by a restart", () => {

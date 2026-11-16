@@ -7,7 +7,6 @@ import type {
   ExamKind,
   ExamPart,
 } from "./types";
-import { pushAttempt } from "@/lib/sync";
 import {
   addMistake as addUnifiedMistake,
   examPartToSkill,
@@ -78,7 +77,6 @@ export function saveAttempt(attempt: ExamAttempt) {
   const stamped = { ...attempt, updatedAt: new Date().toISOString() };
   const attempts = [stamped, ...getAttempts()].slice(0, MAX_ATTEMPTS);
   lsSet(ATTEMPTS_KEY, attempts);
-  pushAttempt(stamped);
 }
 
 export function getAttemptById(id: string): ExamAttempt | undefined {

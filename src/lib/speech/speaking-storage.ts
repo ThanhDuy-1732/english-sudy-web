@@ -1,9 +1,5 @@
 import { asArray } from "../safe-json";
-import { syncRequest } from "@/lib/sync-request";
 import type { SpeakingFeedback } from "./types";
-import { createSupabase } from "@/lib/supabase";
-import { enqueue } from "@/lib/sync-queue";
-import { getSyncKey } from "@/lib/sync";
 
 export interface SpeakingRecord {
   id: string;
@@ -36,25 +32,4 @@ export function saveSpeaking(r: SpeakingRecord): void {
   all.unshift(updated);
   localStorage.setItem(KEY, JSON.stringify(all.slice(0, MAX)));
   localStorage.setItem("lastSpeakingAt", r.createdAt);
-  void pushSpeaking(updated);
-}
-
-export async function pushSpeaking(r: SpeakingRecord, queueOnFailure = true): Promise<void> {
-  if (typeof window === "undefined") return;
-  const syncKey = getSyncKey();
-  const supabase = createSupabase(syncKey);
-  try {
-    await syncRequest(supabase.from("speaking_sessions").upsert({
-      id: r.id,
-      sync_key: syncKey,
-      mode: r.mode,
-      payload: r,
-      overall: r.feedback.overall,
-      created_at: r.createdAt,
-      updated_at: r.updatedAt ?? r.createdAt,
-    }, { onConflict: "id" }));
-  } catch (error) {
-    if (!queueOnFailure) throw error;
-    enqueue({ entity: "speakingSessions", entityId: r.id, op: "upsert", payload: r });
-  }
 }

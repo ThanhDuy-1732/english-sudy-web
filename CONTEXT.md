@@ -6,7 +6,7 @@ Quick reference for Claude. Do not repeat what's already in CLAUDE.md.
 
 ## Tech Stack
 
-Next.js 14 App Router · TypeScript · Tailwind CSS · Jest (jsdom) · Supabase (no auth) · Firebase (hosting only) · PWA (service worker in `public/sw.js`)
+Next.js 14 App Router · TypeScript · Tailwind CSS · Jest (jsdom) · localStorage + JSON backup · Firebase (hosting only) · PWA (service worker in `public/sw.js`)
 
 ---
 
@@ -22,7 +22,7 @@ Next.js 14 App Router · TypeScript · Tailwind CSS · Jest (jsdom) · Supabase 
 | `/diary` | `src/app/diary/page.tsx` | Daily learning journal — interactive 26-week heatmap, click a day to see words learned and study time in a slide-in drawer |
 | `/grammar` | `src/app/grammar/page.tsx` | Grammar study page — desktop sidebar/mobile selector, static grammar rules, AI examples/exercises, user-generated grammar topics |
 | `/import` | `src/app/import/page.tsx` | Bulk import words |
-| `/settings` | `src/app/settings/page.tsx` | 3 tabs: AI Providers · Voice · Sync |
+| `/settings` | `src/app/settings/page.tsx` | 4 tabs: AI Providers · Voice · Dữ liệu · Hồ sơ |
 | `/exam` | `src/app/exam/page.tsx` | Exam dashboard — chọn TOEIC/IELTS, level, drill/mock |
 | `/exam/drill/[part]` | `src/app/exam/drill/[part]/page.tsx` | Luyện 1 part (RC5/RC6/RC7/LC2/LC3/LC4/READ_P3/LISTEN_S1); records an exam session with part metadata and result totals |
 | `/exam/mock` | `src/app/exam/mock/page.tsx` | Full mock test rút gọn với countdown timer; records an exam session with mock metadata and result totals |
@@ -197,11 +197,11 @@ interface UnifiedMistake {
 }
 type ExamMistake = UnifiedMistake & { exam: NonNullable<UnifiedMistake["exam"]> };
 ```
-Local key `unifiedMistakes`, max 1000. `addMistake(input)` **dedupes** theo `source + category` trong các lỗi chưa `resolved`: gặp lại thì tăng `occurrenceCount`, không tạo bản ghi mới. Mọi mutation (`addMistake`, `resolveMistake`, `setMistakeStatus`) gọi `pushUnifiedMistake` (fire-and-forget, lỗi → offline queue). `saveMistakes(items)` ghi đè local, **không push** (dùng sau sync merge). Truy vấn: `getMistakes`, `getMistakesBySkill`, `getMistakesByStatus`, `getTopCategories(skill?, limit)`, `getExamMistakes()` / `getUnresolvedExamMistakes()` (lỗi có `exam`), `examPartToSkill(part)`.
+Local key `unifiedMistakes`, max 1000. `addMistake(input)` **dedupes** theo `source + category` trong các lỗi chưa `resolved`: gặp lại thì tăng `occurrenceCount`, không tạo bản ghi mới. Mọi mutation (`addMistake`, `resolveMistake`, `setMistakeStatus`) chỉ ghi localStorage. `saveMistakes(items)` ghi đè toàn bộ danh sách local. Truy vấn: `getMistakes`, `getMistakesBySkill`, `getMistakesByStatus`, `getTopCategories(skill?, limit)`, `getExamMistakes()` / `getUnresolvedExamMistakes()` (lỗi có `exam`), `examPartToSkill(part)`.
 
 **Một sổ lỗi duy nhất**: `unifiedMistakes` là source of truth. `exam-storage.addMistake(entry)` (`@deprecated`, adapter cho `ExamRunner`) chỉ gọi `mistakes.addMistake` kèm `exam`, không còn ghi `mistakeLog`/`pushMistake`; resolve dùng `mistakes.resolveMistake` ở mọi UI. `pruneBank` pin theo `getUnresolvedExamMistakes()`. Dedupe theo `source = exam:<part>:<questionId>` + `category = type`: sai lặp lại tăng `occurrenceCount`; resolve rồi sai lại tạo bản ghi mới. Nguồn khác ghi thẳng unified: `/grammar/quiz`, `/write/rewrite/[id]`.
 
-**Migration `mistakeLog` → unified** (`src/lib/mistake-migration.ts`): `migrateLegacyMistakes(legacy, unified)` thuần/deterministic (nhóm theo câu+type+resolved, id = id legacy mới nhất, không cộng đôi lỗi mà dual-write cũ đã đếm, propagate resolve nếu unified không mới hơn). `runMistakeMigration(remote?)` chạy đúng một lần, cờ riêng cho local (`mistakeLogMigrated`) và remote (`mistakeLogRemoteMigrated`), backup `mistakeLogBackup`, không xoá `mistakeLog`; gọi từ `SyncInit`, `initSync` (remote) và hai trang `/exam`, `/exam/mistakes`. `needsRemoteMistakeMigration()` cho `initSync`.
+**Migration `mistakeLog` → unified** (`src/lib/mistake-migration.ts`): `migrateLegacyMistakes(legacy, unified)` thuần/deterministic (nhóm theo câu+type+resolved, id = id legacy mới nhất, không cộng đôi lỗi mà dual-write cũ đã đếm, propagate resolve nếu unified không mới hơn). `runMistakeMigration(remote?)` chạy đúng một lần, cờ `mistakeLogMigrated`, backup `mistakeLogBackup`, không xoá `mistakeLog`; gọi từ hai trang `/exam`, `/exam/mistakes` và khi app khởi động.
 
 ### LearningProfile (`src/lib/profile.ts`)
 ```ts
@@ -213,7 +213,7 @@ interface LearningProfile {
   shortcutsEnabled: boolean;        // default true; tắt phím tắt ExamRunner
 }
 ```
-`getProfile()` (merge defaults, SSR-safe), `saveProfile`, `updateProfile(partial)`. Local key `learningProfile`. Không sync lên Supabase.
+`getProfile()` (merge defaults, SSR-safe), `saveProfile`, `updateProfile(partial)`. Local key `learningProfile`.
 
 ### Grammar progress & bookmarks
 - `grammar-progress.ts`: `GrammarAttempt {id, topicId, subRuleId, correct, at}` (key `grammarAttempts`, max 2000); `recordGrammarAttempt`, `getGrammarProgress(topicId, subRuleId)`, `getTopicProgress`, `getWeakSubRules(threshold=70)`. `GrammarProgress.mastery` = accuracy 0–100. Sau attempt cập nhật mastery `grammar` trong cache.
@@ -244,8 +244,6 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 | `studyTime` | `Record<string, number>` | Daily study seconds — `{ "YYYY-MM-DD": seconds }` |
 | `grammarTopics` | `GrammarTopic[]` | User-generated grammar topics |
 | `voiceSettings` | `VoiceSettings` | TTS settings |
-| `syncKey` | `string` (UUID) | Supabase identity (auto-generated) |
-| `lastSyncedAt` | ISO string | Timestamp of last Supabase sync |
 | `preferredProvider` | `string` | Provider id (e.g. `"gemini"`) |
 | `disabledProviders` | `string[]` | Opt-out provider ids |
 | `examBank` | `Record<string, ExamItem[]>` | Cache đề exam, key = `"TOEIC:RC5:3"`. Max 30/key |
@@ -269,8 +267,6 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 | `grammarBookmarks` | `GrammarBookmark[]` | Sub-rule đã bookmark |
 | `examTagAccuracies` | `{tag, correct, total}[]` | Accuracy theo tag cho drill thích ứng |
 | `reportedQuestions` | `{questionId, itemId, reason, note, reportedAt}[]` | Câu hỏi exam người dùng báo lỗi; max 200, chỉ local |
-| `syncQueue` | `QueueEntry[]` | Hàng đợi offline retry (xem Supabase Sync) |
-| `syncFailedQueue` | `QueueEntry[]` | Mục vượt `MAX_RETRIES = 5` |
 | `theme` | `"system"\|"light"\|"dark"` | Lựa chọn của người dùng (Settings → Hồ sơ → Giao diện). `lib/theme.ts` có `THEME_INIT_SCRIPT` (inline trong `<head>`, chạy trước khi vẽ): đặt `data-theme` trên `<html>` luôn là giá trị **đã giải quyết** (`dark`\|`light`; "system" theo OS và cập nhật live), cập nhật `<meta name="theme-color">`, và tạo `window.__setTheme(pref)` (gọi qua `setThemePref`). Xem mục "Theming" |
 
 ---
@@ -281,11 +277,11 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 
 **Implementations**:
 - `gemini.ts` — Google Gemini (via `@google/generative-ai`)
-- `openai-compat.ts` — OpenAI-compatible (Groq, OpenRouter, Mistral, Cohere, HuggingFace)
+- `openai-compat.ts` — OpenAI-compatible (Groq, OpenRouter, Mistral, Cohere, OpenCode Go; accepts optional `defaultHeaders`, used by OpenCode Go for `x-opencode-session`)
 
 **Registry** (`src/lib/providers/index.ts`):
 - Built from env vars at module load time
-- `callWithFallback(prompt, preferredId?, disabledIds?, opts?: GenerateOpts)` — tries preferred first, falls back on 429, 5xx, 404 (model retired), 408, network errors (no status) and per-provider timeout (`AI_PROVIDER_TIMEOUT_MS`, default 25 s; the abandoned request is not aborted). Other 4xx are thrown. `GenerateOpts = { temperature? }`
+- `callWithFallback(prompt, preferredId?, disabledIds?, opts?: GenerateOpts)` — tries preferred first, falls back on 402 (provider wants billing), 404 (model retired), 408, 429, 5xx, network errors (no status) and per-provider timeout (`AI_PROVIDER_TIMEOUT_MS`, default 25 s; the abandoned request is not aborted). Other 4xx are thrown. `GenerateOpts = { temperature? }`
 - `getRegisteredProviders()` — returns all configured providers
 - Active providers: whichever env keys are set in `.env.local`
 
@@ -295,14 +291,17 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 - `ai-json.ts` — `stripFences`, `parseAiJson(schema, …)` (Zod validate; dùng cho exam item).
 
 **Supported providers** (env key → default model):
-- `GEMINI_API_KEY` → `gemini-flash-latest`
-- `GROQ_API_KEY` → `llama-3.3-70b-versatile`
-- `OPENROUTER_API_KEY` → `nvidia/nemotron-3-nano-30b-a3b:free`
+- `GEMINI_API_KEY` → `gemini-flash-lite-latest`
+- `GROQ_API_KEY` → `openai/gpt-oss-120b`
+- `OPENROUTER_API_KEY` → `nvidia/nemotron-3-ultra-550b-a55b:free`
 - `MISTRAL_API_KEY` → `mistral-small-latest`
 - `COHERE_API_KEY` → `command-r7b-12-2024`
-- `HUGGINGFACE_API_KEY` → `meta-llama/Llama-3.2-1B-Instruct`
+- `OPENCODE_API_KEY` → `deepseek-v4.1-flash` (OpenCode Go gateway `https://opencode.ai/inference/go/openai/v1`; sends `x-opencode-session` from `OPENCODE_SESSION_ID` or a per-process generated id; override the API base with `OPENCODE_BASE_URL` — pay-as-you-go uses `https://opencode.ai/inference/openai/v1`)
+- HuggingFace đã bị bỏ khỏi registry: account hiện tại không có credit (`canPay:false`, không PRO) nên mọi call trả 402. Thêm lại block trong `buildRegistry` nếu mua credit.
 
 Model can be overridden via env: `GEMINI_MODEL`, `GROQ_MODEL`, etc.
+
+Registry order: `opencode` đứng đầu khi `OPENCODE_API_KEY` có mặt, nên nó là fallback mặc định khi client không gửi `provider`. `ProviderContext` cũng mặc định chọn `opencode` nếu localStorage chưa có `preferredProvider` (hoặc provider đó bị tắt); nếu không có OpenCode thì giữ thứ tự cũ.
 
 **Client-side flow**: `useApiFetch` hook (reads `ProviderContext`) → POST with `{ provider, disabledProviders }` → API route → `callWithFallback` → sets `X-Provider-Used` header → `useApiFetch` updates context if provider changed.
 
@@ -318,7 +317,7 @@ Model can be overridden via env: `GEMINI_MODEL`, `GROQ_MODEL`, etc.
 
 On first flip: fetches sentence + synonyms in parallel. Saved state is lazy (only after flip). Pronunciation button (`PronunciationButton`) floats on front face.
 
-In **review mode** (`isReviewMode=true`): shows 4 SM-2 quality buttons — Quên (0), Khó (3), Được (4), Dễ (5) — instead of save. Updates SM-2 fields via `updateWordReviewSm2(word, quality)`, pushes to Supabase, and passes the quality to `onReviewed` for session tracking. `/review` cancels unfinished sessions on exit; its summary reports counts, accuracy (Được + Dễ), duration, and remaining due words.
+In **review mode** (`isReviewMode=true`): shows 4 SM-2 quality buttons — Quên (0), Khó (3), Được (4), Dễ (5) — instead of save. Updates SM-2 fields via `updateWordReviewSm2(word, quality)` and passes the quality to `onReviewed` for session tracking. `/review` cancels unfinished sessions on exit; its summary reports counts, accuracy (Được + Dễ), duration, and remaining due words.
 
 ---
 
@@ -335,7 +334,7 @@ Built-in topics (`"Daily Communication"`, `"TOEIC"`) are hardcoded in `TopicSele
 - Built-in topics live in `STATIC_GRAMMAR_TOPICS` (`src/lib/grammar-data.ts`)
 - `getUserGrammarTopics()` — reads `localStorage["grammarTopics"]`; returns `[]` on SSR or malformed JSON
 - `saveUserGrammarTopic(topic)` — appends or updates by `id`
-- `/grammar` combines static topics with user topics; AI-generated topics are saved locally and pushed to Supabase via `pushGrammarTopic`
+- `/grammar` combines static topics with user topics; AI-generated topics are saved locally
 
 ---
 
@@ -369,54 +368,22 @@ interface DailyStudyTime { date: string; minutes: number; }
 ## Spaced Repetition (`src/lib/storage.ts`)
 
 - `getWordsForReview()` — returns words where `nextReviewAt <= now`
-- `updateWordReviewSm2(word, quality: 0|3|4|5)` — **đường chính**, dùng SM-2 trong `src/lib/srs.ts` (EF ≥ 1.3; quality < 3 → interval 1; `nextReviewAt = now + interval * 86400000`), cập nhật `updatedAt`, push Supabase.
+- `updateWordReviewSm2(word, quality: 0|3|4|5)` — **đường chính**, dùng SM-2 trong `src/lib/srs.ts` (EF ≥ 1.3; quality < 3 → interval 1; `nextReviewAt = now + interval * 86400000`), cập nhật `updatedAt`.
 - `updateWordReview(word, remembered)` — **legacy**, giữ để tương thích: remembered → `interval = min(interval*2, 30)`, `mastery+1`; quên → `interval = 1`, `mastery-1`.
 
 ---
 
-## Supabase Sync (`src/lib/sync.ts`)
+## Data Transfer / Backup (`src/lib/data-transfer.ts`)
 
-No authentication. Identity = `syncKey` (UUID in localStorage, auto-generated).
+Không dùng Supabase hay backend nào. Toàn bộ dữ liệu nằm trong localStorage của trình duyệt.
 
-**Tables**:
-- `learned_words` — mirrors `LearnedWord` shape; includes `easiness`, `repetitions`, `updated_at`
-- `exam_items` — shared bank (no `sync_key`); `{ id, exam_type, part, level, payload: jsonb, flagged }`
-- `exam_attempts` — per-user; `{ id, sync_key, exam_type, mode, parts, started_at, finished_at, answers, score, updated_at }`
-- `mistake_log` — per-user; `{ id, sync_key, payload: jsonb, resolved, updated_at }`. **Legacy**: không còn được ghi; `initSync` chỉ pull một lần để migrate sang `unified_mistakes`
-- `speaking_sessions` — per-user; `{ id, sync_key, payload: jsonb, created_at, updated_at }`
-- `writing_submissions` — per-user; `{ id, sync_key, payload: jsonb, created_at, updated_at }`
-- `daily_challenges` — mirrors `DailyChallenge`
-- `custom_topics` — `{ sync_key, topic }`
-- `grammar_topics` — `{ sync_key: uuid, id, name, rules: jsonb, created_at }`
-- `user_settings` — `{ sync_key, voice_settings: jsonb }`
-- `unified_mistakes` — per-user; `{ sync_key: uuid, id, payload: jsonb, updated_at }`, PK `(sync_key, id)`, RLS by `x-sync-key` header (see `supabase/migrations/20260930120000_unified_mistakes.sql`)
-
-All per-user tables (`learned_words`, `custom_topics`, `daily_challenges`, `grammar_topics`, `exam_attempts`, `mistake_log`, `speaking_sessions`, `writing_submissions`, `unified_mistakes`) have RLS enabled with the `sync_key_rls` policy (`sync_key::text = x-sync-key header`). `exam_items` is an intentionally shared, non-per-user content bank and has no RLS. `exam_attempts`/`mistake_log`/`speaking_sessions`/`writing_submissions` got RLS in `supabase/migrations/20260930130000_rls_gap_fix.sql` (they predated the RLS convention). Migration files dùng timestamp `YYYYMMDDHHMMSS` (bản đầu `001`–`005` giữ tên cũ). Supabase local (CLI + Docker) dùng cổng tuỳ chỉnh 543xx trong `supabase/config.toml`.
-
-**Operations**:
-- `initSync()` — bidirectional sync on app load; **pull-before-push LWW merge** for words, `exam_attempts`, and `unified_mistakes` (`updatedAt` wins; tie → local; only diff pushed); `completed=true` wins for challenges. `src/lib/sync-merge.ts` provides `mergeLww<T>()` and `stamp()`.
-- `pushExamItem(item)` / `pushAttempt(attempt)` / `pushUnifiedMistake(mistake)` — push to Supabase; on failure, `enqueue()`s into the offline retry queue (`src/lib/sync-queue.ts`) instead of silently dropping
-- `pullExamItems(kind, part, level, limit?)` — pull from shared `exam_items` bank (excludes flagged)
-- `pushWord(entry)` — upsert, enqueues on failure
-- `deleteWord(word)` — delete, enqueues (op: "delete") on failure
-- `pushTopic(topic)` — upsert to `custom_topics`, enqueues on failure
-- `pushGrammarTopic(topic)` — upsert to `grammar_topics`, enqueues on failure
-- `pushChallenge(record)` — upsert, enqueues on failure
-- `pullFromKey(key)` — one-way pull from another device's sync key; returns count of new words added
-
-`initSync()` also upserts local user-generated grammar topics and pulls missing remote grammar topics into `localStorage["grammarTopics"]`.
-
-**Offline queue** (`src/lib/sync-queue.ts`): `enqueue()`/`drainQueue()`/`registerProcessor()` back the retry path above; `SyncInit` component (`src/components/SyncInit.tsx`, mounted in `layout.tsx` cạnh `SyncInitializer`) calls `registerSyncProcessors()` and `initSyncQueueManager()` (drain on reconnect). Mục đang gửi vẫn nằm trong localStorage cho đến khi processor thành công. Mỗi lượt drain chỉ thử một lần cho mỗi mục; dừng ở lỗi đầu để giữ thứ tự. Lỗi tăng `retryCount`, đặt `nextRetryAt` (15s exponential backoff, cap 5 minutes); đạt `MAX_RETRIES = 5` thì chuyển sang `syncFailedQueue` và giữ dữ liệu đến khi người dùng bấm **Thử đồng bộ lại** trên `SyncStatusBadge`. Mục thiếu processor được giữ lại. Manager drain khi online, app visible và mỗi 15s. Processor `mistakeLog` được giữ chỉ để drain các mục cũ còn trong queue (không còn mục mới). `QueueEntity` gồm 13 loại (learnedWords, learningSessions, examAttempts, mistakeLog, unifiedMistakes, grammarAttempts, speakingSessions, writingSubmissions, dailyChallenges, grammarTopics, voiceSettings, customTopics, examItems). `getSyncStatus()` → `offline` (navigator offline) › `syncing` (drain active) › `failed` (có mục failed) › `pending` (queue không rỗng) › `synced`; `SyncStatusBadge` hiển thị trạng thái này.
-
-**Error handling**: `sync-request.ts` checks Supabase resolved `{error}` responses as well as rejected requests. All `sync.ts` writes/processors use it; `initSync` does not set `lastSyncedAt` on error and marks initialization errors for the sync badge. Pending writes/deletions are drained before an initial pull; successful drain reruns `initSync`, preventing pending deletions from being restored by remote data. Speaking/writing pushes now enqueue failures too, with corresponding retry processors; rewriting a saved writing version also pushes the updated record.
-
-**LWW chưa phủ**: speaking/writing/grammar topics/settings vẫn upsert kiểu cũ (không `mergeLww`).
-
-**Key alias**: `"thankz"` resolves to a hardcoded UUID (for easy sharing).
-
-`VoiceSettings` is synced too: pushed on `initSync`, pulled and merged (device must have the voice URI available, otherwise `voiceURI` is nulled out).
-
-Supabase client created per call via `createSupabase(syncKey)` in `src/lib/supabase.ts`.
+- `exportData()` → JSON string `{ app: "english-study", version: 1, exportedAt, data: { key: value } }`, giữ nguyên raw string của từng key. Bỏ qua key runtime (`syncKey`, `syncFailedQueue`).
+- `importData(json)` → validate `app`/`version`/`data`, ghi đè từng key có trong file; key không có trong file được giữ nguyên. Trả `{ imported, skipped }`.
+- `clearAllData()` → xoá mọi key của app (trừ key runtime), trả số key đã xoá.
+- `backupFileName(date?)` → `english-study-backup-YYYY-MM-DD.json`.
+- UI: Settings → tab **Dữ liệu** (`src/app/settings/page.tsx`) — xuất file, nhập file (confirm rồi reload), xoá toàn bộ (confirm 2 bước).
+- Không đồng bộ tự động giữa các thiết bị; chuyển máy bằng xuất/nhập file.
+- `exam_items`: đề sinh ra chỉ lưu local trong `examBank`; không còn kho đề dùng chung trên server.
 
 ---
 
@@ -424,7 +391,7 @@ Supabase client created per call via `createSupabase(syncKey)` in `src/lib/supab
 
 1. **API keys are server-side only.** Never import `src/lib/providers/` or `src/lib/gemini.ts` from client components. Only API routes (`src/app/api/*/route.ts`) call them.
 2. **`src/lib/gemini.ts`** is a legacy thin wrapper still used by some tests; new routes use `src/lib/providers/`.
-3. **No auth / no user accounts.** All data keyed by `syncKey` (UUID).
+3. **No auth / no user accounts.** All data lives in localStorage; backup/chuyển máy bằng file JSON (Settings → Dữ liệu).
 4. **Firebase is hosting only.** No Firebase Firestore/Auth/Functions used. Config in `firebase.json` and `.firebaserc`.
 5. **PWA**: production-only service worker `public/sw.js`, manifest `src/app/manifest.ts`. Core offline assets are mandatory; all static learning pages and built-in dynamic tasks are best-effort precached, so an optional route outage does not prevent installation. Navigations are network-first (5s timeout applies to time-to-headers only) and are answered immediately; the page HTML and its JS/CSS are cached afterwards via `event.waitUntil`, so caching never delays a navigation. JS/CSS/icons are cache-first. HTML is cached by pathname + search; RSC/Flight responses are never mixed with HTML, and successful Next Link/RSC requests warm the separate full-document cache. Next 14 falls back to document navigation if Flight fails offline. Visited pages cache their JS/CSS too (in the background). Asset downloads are deduplicated; retain the previous cache for older tabs. AI/API requests are not cached; offline supports saved vocab review, static grammar, cached exam questions, local history and writing drafts. See `docs/pwa.md`.
 
@@ -447,7 +414,6 @@ Supabase client created per call via `createSupabase(syncKey)` in `src/lib/supab
 | `PronunciationButton` | Web Speech API TTS button |
 | `StreakCalendar` | 26-week calendar heatmap |
 | `VoiceSettingsTab` | Voice picker + sliders |
-| `SyncInitializer` | Runs `initSync()` on app mount |
 | `FirebaseInitializer` | Initializes Firebase analytics in the browser when config is available |
 | `ProviderBadge` | Shows current AI provider name |
 | `HeaderTimer` | Navbar timer: shows today's study time or countdown; click to pause/resume; ＋ button opens SetCountdownModal; TimeUpModal shown when countdown ends |
@@ -460,8 +426,6 @@ Supabase client created per call via `createSupabase(syncKey)` in `src/lib/supab
 | `DueBadge` | Client component — live SRS-due word count badge next to "Ôn tập" nav link, updates every 60 s |
 | `DiaryCalendar` | Interactive 26-week heatmap calendar for /diary; purple color levels 0–3; click cell opens DayDrawer |
 | `DayDrawer` | Slide-in right drawer for /diary; shows daily word list (expandable) + study minutes + prev/next nav |
-| `SyncInit` | Đăng ký processors của offline queue và drain khi online lại (khác `SyncInitializer` chạy `initSync()`) |
-| `SyncStatusBadge` | Chỉ báo trạng thái sync (`synced/syncing/pending/offline/failed`) trong Settings; manual retry button for failed queue |
 | `AppNavigation` | Compact mobile menu and desktop links, shared timer and due badges; includes Settings on all viewports |
 | `ServiceWorkerRegistration` | Production worker registration; installs through `beforeinstallprompt` when available, native installation instructions otherwise (dismissible with ✕, remembered in `pwaInstallDismissed`); standalone detection and optional persistent storage request; offline notice; waiting-worker update button posts `SKIP_WAITING`, reloads only after user action |
 | `exam/AnswerSheet` · `ExamTimer` (prop `enabled`; mock timer starts via `ExamRunner.onRunning`, not while items load) · `ListeningPlayer` · `PassageReader` · `QuestionCard` | Thành phần của exam engine (grid câu hỏi, countdown, phát TTS, đoạn đọc, thẻ câu hỏi) |
@@ -520,7 +484,7 @@ Jest + `@testing-library/react`. Config: `jest.config.ts` + `jest.setup.ts`. Tes
 
 ## Storage resilience
 
-- Anything that runs during render or in an effect (providers, `SyncInit`, `DueBadge`, timer, session tracking, mastery cache, mistake migration) must never throw when `localStorage` is blocked (`SecurityError`), full (`QuotaExceededError`) or holds a value of the wrong top-level type. Use `lib/safe-json.ts` (`readStored`, `readString`, `asArray`, `asObject`) for reads and wrap writes in `try/catch`. `getSyncKey()` falls back to a session-only key.
+- Anything that runs during render or in an effect (providers, `DueBadge`, timer, session tracking, mastery cache, mistake migration) must never throw when `localStorage` is blocked (`SecurityError`), full (`QuotaExceededError`) or holds a value of the wrong top-level type. Use `lib/safe-json.ts` (`readStored`, `readString`, `asArray`, `asObject`) for reads and wrap writes in `try/catch`.
 - Writes triggered by a user action may surface an error to the user (e.g. the writing draft warning); they must not be silently swallowed unless the data is a cache.
 - `app/error.tsx` and `app/global-error.tsx` are the last-resort boundaries (a retry button instead of a blank page or a React update loop).
 

@@ -4,6 +4,12 @@ import type { AIProvider, GenerateOpts, ProviderInfo } from "./types";
 
 const PROVIDER_TIMEOUT_MS = Number(process.env.AI_PROVIDER_TIMEOUT_MS) || 25_000;
 
+// OpenCode Go needs a stable session id on every request so the gateway can route it
+// consistently and reuse its prompt cache. One id per server process is enough here.
+const OPENCODE_SESSION_ID =
+  process.env.OPENCODE_SESSION_ID ??
+  `ses_${(globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`).replace(/[^a-z0-9]/gi, "")}`;
+
 class ProviderTimeoutError extends Error {
   status = 503;
   constructor(id: string) {
@@ -11,11 +17,12 @@ class ProviderTimeoutError extends Error {
   }
 }
 
-// Rate limits, outages, a retired model (404) and network failures (no status) should fall through to the next provider.
+// Rate limits, outages, a retired model (404), a provider that needs billing (402)
+// and network failures (no status) should fall through to the next provider.
 function isRetryableError(error: unknown): boolean {
   const status = (error as { status?: number }).status;
   if (status === undefined) return true;
-  return status === 404 || status === 408 || status === 429 || status >= 500;
+  return status === 402 || status === 404 || status === 408 || status === 429 || status >= 500;
 }
 
 // ponytail: the losing request is not aborted, only abandoned; add AbortSignal support in the providers if it matters.
@@ -66,11 +73,24 @@ export function createCallWithFallback(providers: AIProvider[]) {
 function buildRegistry(): AIProvider[] {
   const providers: AIProvider[] = [];
 
+  if (process.env.OPENCODE_API_KEY) {
+    providers.push(
+      new OpenAICompatProvider({
+        id: "opencode",
+        name: "OpenCode Go",
+        apiKey: process.env.OPENCODE_API_KEY,
+        model: process.env.OPENCODE_MODEL ?? "deepseek-v4.1-flash",
+        baseURL: process.env.OPENCODE_BASE_URL ?? "https://opencode.ai/inference/go/openai/v1",
+        defaultHeaders: { "x-opencode-session": OPENCODE_SESSION_ID },
+      })
+    );
+  }
+
   if (process.env.GEMINI_API_KEY) {
     providers.push(
       new GeminiProvider(
         process.env.GEMINI_API_KEY,
-        process.env.GEMINI_MODEL ?? "gemini-flash-latest"
+        process.env.GEMINI_MODEL ?? "gemini-flash-lite-latest"
       )
     );
   }
@@ -93,7 +113,7 @@ function buildRegistry(): AIProvider[] {
         id: "openrouter",
         name: "OpenRouter",
         apiKey: process.env.OPENROUTER_API_KEY,
-        model: process.env.OPENROUTER_MODEL ?? "nvidia/nemotron-3-nano-30b-a3b:free",
+        model: process.env.OPENROUTER_MODEL ?? "nvidia/nemotron-3-ultra-550b-a55b:free",
         baseURL: "https://openrouter.ai/api/v1",
       })
     );
@@ -123,17 +143,8 @@ function buildRegistry(): AIProvider[] {
     );
   }
 
-  if (process.env.HUGGINGFACE_API_KEY) {
-    providers.push(
-      new OpenAICompatProvider({
-        id: "huggingface",
-        name: "HuggingFace",
-        apiKey: process.env.HUGGINGFACE_API_KEY,
-        model: process.env.HUGGINGFACE_MODEL ?? "meta-llama/Llama-3.2-1B-Instruct",
-        baseURL: "https://router.huggingface.co/featherless-ai/v1",
-      })
-    );
-  }
+  // HuggingFace provider removed: Inference Providers requires paid credits; this
+  // account has none and every call returns 402. Re-add the block if credits are bought.
 
   return providers;
 }

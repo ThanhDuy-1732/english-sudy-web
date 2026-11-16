@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import { saveLearnedWord, updateWordReview, updateWordReviewSm2, getLearnedWords } from "@/lib/storage";
-import { pushWord } from "@/lib/sync";
 import { useApiFetch } from "@/lib/useApiFetch";
 import PronunciationButton from "./PronunciationButton";
 import WritingChallenge from "./WritingChallenge";
@@ -132,8 +131,6 @@ export default function Flashcard({
     });
     if (didSave) {
       setSaved(true);
-      const saved = getLearnedWords().find((w) => w.word === word);
-      if (saved) void pushWord(saved);
     }
   }
 
@@ -230,8 +227,6 @@ export default function Flashcard({
                   onClick={(e) => {
                     e.stopPropagation();
                     updateWordReviewSm2(word, quality);
-                    const updated = getLearnedWords().find((w) => w.word === word);
-                    if (updated) void pushWord(updated);
                     onReviewed?.(quality);
                   }}
                   className={`min-h-11 flex-1 rounded-lg px-3 py-2 text-sm font-medium ${cls}`}

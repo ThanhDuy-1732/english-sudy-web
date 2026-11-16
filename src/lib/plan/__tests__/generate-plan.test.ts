@@ -1,6 +1,6 @@
 import { generatePlan, weakestType } from "../generate-plan";
 import type { ExamAttempt } from "@/lib/exam/types";
-import type { ExamSettings } from "@/lib/exam/types";
+import type { AnswerRecord, ExamSettings } from "@/lib/exam/types";
 import type { UnifiedMistake } from "@/lib/mistakes";
 
 const settings: ExamSettings = {
@@ -44,7 +44,7 @@ describe("weakestType", () => {
   });
 
   it("returns weakest type when sufficient samples exist", () => {
-    const answers = Array(10).fill(null).map((_, i) => ({
+    const answers: AnswerRecord[] = Array(10).fill(null).map((_, i) => ({
       itemId: "i1",
       questionId: `q${i}`,
       type: "incomplete_sentence",
@@ -72,7 +72,7 @@ describe("generatePlan", () => {
   };
 
   it("links the exam drill to the weakest type's part", () => {
-    const answers = Array(10).fill(null).map((_, i) => ({
+    const answers: AnswerRecord[] = Array(10).fill(null).map((_, i) => ({
       itemId: "i1", questionId: `q${i}`, type: "conversation", part: "LC3",
       userAnswer: "A", correct: i < 3, timeSpentSec: 30,
     }));

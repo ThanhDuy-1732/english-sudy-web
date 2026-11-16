@@ -1,4 +1,3 @@
-jest.mock("../sync", () => ({ pushUnifiedMistake: jest.fn().mockResolvedValue(undefined) }));
 
 import {
   getMistakes,

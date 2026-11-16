@@ -1,12 +1,3 @@
-jest.mock("@/lib/sync", () => ({ getSyncKey: jest.fn(() => "test-key") }));
-jest.mock("@/lib/supabase", () => ({
-  createSupabase: jest.fn(() => ({
-    from: jest.fn(() => ({
-      upsert: jest.fn().mockResolvedValue({ error: null }),
-    })),
-  })),
-}));
-
 import { saveSpeaking, getSpeaking } from "../speaking-storage";
 import type { SpeakingRecord } from "../speaking-storage";
 

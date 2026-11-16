@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import { getThemePref, setThemePref, type ThemePref } from "@/lib/theme";
 import VoiceSettingsTab from "@/components/VoiceSettingsTab";
 import { useProvider } from "@/contexts/ProviderContext";
-import { getLastSyncedAt, getSyncKey, pullFromKey } from "@/lib/sync";
-import { SyncStatusBadge } from "@/components/SyncStatusBadge";
 import { getProfile, saveProfile, type LearningProfile, type LearningGoal } from "@/lib/profile";
 import { clearAllAudio, getAudioCount } from "@/lib/speech/audio-store";
+import { backupFileName, clearAllData, exportData, importData } from "@/lib/data-transfer";
 
 const ALL_PROVIDERS = [
   { id: "gemini", name: "Gemini Flash", model: "gemini-flash-latest", envKey: "GEMINI_API_KEY" },
@@ -15,16 +14,16 @@ const ALL_PROVIDERS = [
   { id: "openrouter", name: "OpenRouter", model: "nvidia/nemotron-3-nano-30b-a3b:free", envKey: "OPENROUTER_API_KEY" },
   { id: "mistral", name: "Mistral", model: "mistral-small-latest", envKey: "MISTRAL_API_KEY" },
   { id: "cohere", name: "Cohere", model: "command-r7b-12-2024", envKey: "COHERE_API_KEY" },
-  { id: "huggingface", name: "HuggingFace", model: "meta-llama/Llama-3.2-1B-Instruct", envKey: "HUGGINGFACE_API_KEY" },
+  { id: "opencode", name: "OpenCode Go", model: "deepseek-v4.1-flash", envKey: "OPENCODE_API_KEY" },
 ];
 
 type TestResult = "loading" | { ok: boolean; latency?: number; error?: string };
-type Tab = "providers" | "voice" | "sync" | "profile";
+type Tab = "providers" | "voice" | "data" | "profile";
 
 const TAB_LABELS: Record<Tab, string> = {
   providers: "AI Providers",
   voice: "Voice",
-  sync: "Sync",
+  data: "Dữ liệu",
   profile: "Hồ sơ",
 };
 
@@ -32,54 +31,61 @@ export default function SettingsPage() {
   const { currentProvider, availableProviders, setProvider, disabledProviders, toggleProvider } =
     useProvider();
   const [activeTab, setActiveTab] = useState<Tab>("providers");
-  const [syncKey, setSyncKey] = useState("");
-  const [lastSynced, setLastSynced] = useState<string | null>(null);
-  const [pullInput, setPullInput] = useState("");
-  const [pulling, setPulling] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [pullSuccess, setPullSuccess] = useState<string | null>(null);
-  const [pullError, setPullError] = useState<string | null>(null);
+  const [dataMessage, setDataMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
+  const [confirmClear, setConfirmClear] = useState(false);
   const [testResults, setTestResults] = useState<Record<string, TestResult>>({});
   const [audioCount, setAudioCount] = useState(0);
 
   useEffect(() => {
-    setSyncKey(getSyncKey());
-    setLastSynced(getLastSyncedAt());
     getAudioCount().then(setAudioCount);
   }, []);
 
   const isActive = (id: string) => availableProviders.some((provider) => provider.id === id);
   const isDisabled = (id: string) => disabledProviders.includes(id);
 
-  function handleCopy() {
-    navigator.clipboard
-      .writeText(syncKey)
-      .then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      })
-      .catch(() => {});
+  function handleExport() {
+    try {
+      const blob = new Blob([exportData()], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = backupFileName();
+      link.click();
+      URL.revokeObjectURL(url);
+      setDataMessage({ kind: "ok", text: "Đã xuất file sao lưu." });
+    } catch {
+      setDataMessage({ kind: "error", text: "Không thể xuất dữ liệu." });
+    }
   }
 
-  async function handlePull() {
-    const trimmed = pullInput.trim();
-    if (!trimmed) return;
-    setPulling(true);
-    setPullSuccess(null);
-    setPullError(null);
-    try {
-      const count = await pullFromKey(trimmed);
-      setPullSuccess(
-        count > 0 ? `${count} từ mới được thêm vào thiết bị này.` : "Đồng bộ xong. Không có từ mới."
-      );
-      setPullInput("");
-    } catch (e) {
-      // 22P02: Postgres rejected the key as a malformed uuid, so this is a typo rather than a network problem.
-      const invalid = (e as { code?: string } | null)?.code === "22P02";
-      setPullError(invalid ? "Key không hợp lệ. Kiểm tra lại key trên thiết bị còn lại." : "Không thể kết nối. Kiểm tra kết nối mạng và thử lại.");
-    } finally {
-      setPulling(false);
+  async function handleImportFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (!window.confirm("Nhập dữ liệu sẽ ghi đè các mục trùng trong trình duyệt này. Tiếp tục?")) {
+      return;
     }
+    try {
+      const result = importData(await file.text());
+      setDataMessage({ kind: "ok", text: `Đã nhập ${result.imported} mục. Đang tải lại…` });
+      setTimeout(() => window.location.reload(), 800);
+    } catch (error) {
+      setDataMessage({
+        kind: "error",
+        text: error instanceof Error ? error.message : "File không hợp lệ.",
+      });
+    }
+  }
+
+  function handleClearAll() {
+    if (!confirmClear) {
+      setConfirmClear(true);
+      return;
+    }
+    const removed = clearAllData();
+    setConfirmClear(false);
+    setDataMessage({ kind: "ok", text: `Đã xoá ${removed} mục. Đang tải lại…` });
+    setTimeout(() => window.location.reload(), 800);
   }
 
   async function handleTest(id: string) {
@@ -104,15 +110,6 @@ export default function SettingsPage() {
     }, 5000);
   }
 
-  function formatSynced(iso: string | null) {
-    if (!iso) return "Chưa đồng bộ";
-    const date = new Date(iso);
-    return `Đã đồng bộ lúc ${date.getHours().toString().padStart(2, "0")}:${date
-      .getMinutes()
-      .toString()
-      .padStart(2, "0")}`;
-  }
-
   function renderTestResult(id: string) {
     const result = testResults[id];
     if (!result) return null;
@@ -127,7 +124,7 @@ export default function SettingsPage() {
         <h1 className="mb-6 font-display text-3xl font-bold text-[#d9ecff]">Cài đặt</h1>
 
         <div className="mb-8 flex w-fit max-w-full flex-wrap gap-1 rounded-xl border border-white/10 bg-white/5 p-1">
-          {(["providers", "voice", "sync", "profile"] as Tab[]).map((tab) => (
+          {(["providers", "voice", "data", "profile"] as Tab[]).map((tab) => (
             <button
               key={tab}
               type="button"
@@ -278,65 +275,73 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {activeTab === "sync" && (
+      {activeTab === "data" && (
         <div>
-          <div className="mb-2 flex items-center gap-3">
-            <h2 className="font-display text-xl font-bold text-[#d9ecff]">Đồng bộ dữ liệu</h2>
-            <SyncStatusBadge />
-          </div>
+          <h2 className="mb-2 font-display text-xl font-bold text-[#d9ecff]">Dữ liệu</h2>
           <p className="mb-6 text-sm text-[#b0b0d1]">
-            Dùng sync key để backup và đồng bộ dữ liệu giữa các thiết bị. Không cần đăng nhập.
+            Dữ liệu được lưu trong trình duyệt này. Xuất file JSON để backup hoặc chuyển sang thiết
+            bị khác; nhập lại file đó trên thiết bị mới.
           </p>
 
           <div className="space-y-6 rounded-xl border border-white/10 p-6">
             <div>
-              <p className="mb-2 text-sm font-medium text-[#d9ecff]">Sync Key của thiết bị này</p>
-              <div className="flex items-center gap-3">
-                <code className="flex-1 overflow-hidden rounded-lg bg-white/5 px-3 py-2 font-mono text-sm text-[#b0b0d1]">
-                  {syncKey ? `${syncKey.slice(0, 8)}••••••••••••••••••••••••••••` : "Đang tải..."}
-                </code>
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                  className="shrink-0 rounded-lg bg-white/10 px-3 py-2 text-sm font-medium text-[#d9ecff] hover:bg-white/20"
-                >
-                  {copied ? "Đã copy!" : "Copy full key"}
-                </button>
-              </div>
-              <p className="mt-1 text-xs text-[#b0b0d1]">{formatSynced(lastSynced)}</p>
+              <p className="mb-2 text-sm font-medium text-[#d9ecff]">Xuất dữ liệu</p>
+              <p className="mb-3 text-xs text-[#b0b0d1]">
+                Tải toàn bộ từ vựng, lỗi sai, đề thi, bài nói, bài viết và cài đặt thành một file
+                JSON.
+              </p>
+              <button
+                type="button"
+                onClick={handleExport}
+                className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-[#d9ecff] hover:bg-white/20"
+              >
+                ⬇️ Xuất file sao lưu
+              </button>
             </div>
 
             <div>
-              <p className="mb-2 text-sm font-medium text-[#d9ecff]">Lấy dữ liệu từ thiết bị khác</p>
+              <p className="mb-2 text-sm font-medium text-[#d9ecff]">Nhập dữ liệu</p>
               <p className="mb-3 text-xs text-[#b0b0d1]">
-                Nhập sync key của thiết bị khác để thêm từ vựng của thiết bị đó vào đây. Dữ liệu
-                hiện tại trên thiết bị này sẽ không bị mất.
+                Chọn file đã xuất trước đó. Các mục trùng sẽ bị ghi đè bằng dữ liệu trong file.
               </p>
-              <div className="flex flex-col gap-3 sm:flex-row">
+              <label className="inline-block cursor-pointer rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-[#d9ecff] hover:bg-white/20">
+                ⬆️ Chọn file JSON
                 <input
-                  type="text"
-                  value={pullInput}
-                  onChange={(event) => setPullInput(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") void handlePull();
-                  }}
-                  placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx hoặc ThankZ"
-                  className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm text-white placeholder-[#b0b0d1] focus:border-white/30 focus:outline-none"
+                  type="file"
+                  accept="application/json,.json"
+                  onChange={handleImportFile}
+                  className="hidden"
                 />
-                <button
-                  type="button"
-                  onClick={() => void handlePull()}
-                  disabled={pulling || !pullInput.trim()}
-                  className="shrink-0 rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-[#d9ecff] hover:bg-white/20 disabled:opacity-50"
-                >
-                  {pulling ? "Đang lấy..." : "Pull data"}
-                </button>
-              </div>
-              {pullSuccess && (
-                <p className="mt-2 text-sm font-medium text-green-400">{pullSuccess}</p>
-              )}
-              {pullError && <p className="mt-2 text-sm font-medium text-red-400">{pullError}</p>}
+              </label>
             </div>
+
+            <div>
+              <p className="mb-2 text-sm font-medium text-[#d9ecff]">Xoá toàn bộ dữ liệu</p>
+              <p className="mb-3 text-xs text-[#b0b0d1]">
+                Chỉ xoá dữ liệu của app trên trình duyệt này. Nên xuất file sao lưu trước.
+              </p>
+              <button
+                type="button"
+                onClick={handleClearAll}
+                className={`rounded-lg px-4 py-2 text-sm font-medium ${
+                  confirmClear
+                    ? "bg-red-500/80 text-white hover:bg-red-500"
+                    : "bg-white/10 text-[#d9ecff] hover:bg-white/20"
+                }`}
+              >
+                {confirmClear ? "Bấm lần nữa để xoá toàn bộ" : "🗑 Xoá toàn bộ dữ liệu"}
+              </button>
+            </div>
+
+            {dataMessage && (
+              <p
+                className={`text-sm font-medium ${
+                  dataMessage.kind === "ok" ? "text-green-400" : "text-red-400"
+                }`}
+              >
+                {dataMessage.text}
+              </p>
+            )}
           </div>
         </div>
       )}

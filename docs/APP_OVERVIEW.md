@@ -1,7 +1,7 @@
 # English Study App — Tổng quan sản phẩm & hiện trạng
 
 > Tài liệu tường thuật: ứng dụng làm gì, hoạt động ra sao, đang ở đâu, thiếu gì.
-> **Chi tiết kỹ thuật** (data model, localStorage key, bảng Supabase, route body/response, component map) nằm trong [`CONTEXT.md`](../CONTEXT.md) — không lặp lại ở đây để tránh lệch.
+> **Chi tiết kỹ thuật** (data model, localStorage key, backup JSON, route body/response, component map) nằm trong [`CONTEXT.md`](../CONTEXT.md) — không lặp lại ở đây để tránh lệch.
 > Mục đích: dùng làm đầu vào cho phân tích định hướng phát triển.
 >
 > Cập nhật lần cuối: 2026-10-01 · Nhánh `phase-6-exam-engine` · Batch 1–8 đã code xong · 399 tests / 75 suites pass
@@ -24,13 +24,13 @@ Năng lực hiện có:
 | Writing | IELTS Task 1/2, TOEIC email, chấm 4 tiêu chí + model answer, lịch sử, viết lại (rewrite) |
 | Thích ứng | Sổ lỗi hợp nhất, Skill Mastery Engine, kế hoạch hôm nay (`/today`), lộ trình (`/path`), learning profile |
 | Thống kê | Streak, mastery timeline, báo cáo tuần, band timeline, radar kỹ năng, heatmap, accuracy theo question type |
-| Hạ tầng | Sync LWW qua Supabase, hàng đợi offline có retry, task router + metrics + prompt registry cho AI, dark mode |
+| Hạ tầng | localStorage + backup JSON, task router + metrics + prompt registry cho AI, dark mode |
 
 ---
 
 ## 2. Tech stack
 
-Next.js 14 App Router · TypeScript · Tailwind · Jest + Testing Library · `localStorage` (nguồn chính) + IndexedDB (audio) + Supabase (sync, không auth) · Firebase **chỉ hosting** · PWA (`public/sw.js`) · AI: Gemini, Groq (+ Whisper STT), OpenRouter, Mistral, Cohere, HuggingFace với fallback chain.
+Next.js 14 App Router · TypeScript · Tailwind · Jest + Testing Library · `localStorage` (nguồn chính) + IndexedDB (audio) + file JSON (backup) · Firebase **chỉ hosting** · PWA (`public/sw.js`) · AI: OpenCode Go, Gemini, Groq (+ Whisper STT), OpenRouter, Mistral, Cohere với fallback chain.
 
 ---
 
@@ -126,13 +126,12 @@ Navbar chỉ link tới: `/`, `/review`, `/diary`, `/activity`, `/grammar`, `/ex
 
 ---
 
-## 6. Dữ liệu & sync (tóm tắt — chi tiết ở CONTEXT.md)
+## 6. Dữ liệu & backup (tóm tắt — chi tiết ở CONTEXT.md)
 
-- **Nguồn chính là localStorage**; mỗi thực thể có giới hạn kích thước (sessions 500, attempts 100, mistakes 1000, speaking 200, writing 100, bank 30/key).
-- **Sync Supabase** theo `syncKey`, RLS bằng header `x-sync-key`. 11 bảng (words, challenges, topics, grammar topics, settings, exam_items dùng chung, exam_attempts, mistake_log, speaking, writing, unified_mistakes).
-- **LWW** (`updatedAt` thắng, hòa → local, chỉ push phần khác) hiện áp cho: words, exam_attempts, unified_mistakes (`mistake_log` là legacy, chỉ pull một lần để migrate). `completed=true` thắng với challenges.
-- **Offline queue**: push lỗi → `enqueue`; `drainQueue` khi online lại; `getSyncStatus()` ∈ synced/syncing/pending/offline/failed.
-- **Migration**: 9+ file trong `supabase/migrations/` đã đổi sang timestamp `YYYYMMDDHHMMSS`; stack Supabase local đã chạy được (cổng tuỳ chỉnh 543xx do trùng dự án khác).
+- **Nguồn duy nhất là localStorage**; mỗi thực thể có giới hạn kích thước (sessions 500, attempts 100, mistakes 1000, speaking 200, writing 100, bank 30/key).
+- **Không có backend/sync**: bỏ Supabase hoàn toàn.
+- **Backup/chuyển máy**: `src/lib/data-transfer.ts` — xuất/nhập file JSON trong Cài đặt → Dữ liệu; `clearAllData()` để reset máy.
+- **examBank**: đề sinh ra chỉ lưu local, không còn kho đề dùng chung.
 
 ---
 
@@ -190,4 +189,4 @@ npm run build
 npm run lint
 ```
 
-Env: ít nhất một `*_API_KEY` của provider; `GROQ_API_KEY` (+ `GROQ_WHISPER_MODEL`) cho STT; tuỳ chọn `GRADING_PROVIDER`, `ADMIN_SECRET`; `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` cho sync (có thể trỏ Supabase local). Deploy: `npm run build && firebase deploy`.
+Env: ít nhất một `*_API_KEY` của provider; `GROQ_API_KEY` (+ `GROQ_WHISPER_MODEL`) cho STT; tuỳ chọn `GRADING_PROVIDER`, `ADMIN_SECRET`; đặc biệt `OPENCODE_API_KEY` cho provider mặc định. Deploy: `npm run build && firebase deploy`.

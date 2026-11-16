@@ -1,4 +1,3 @@
-import { pushUnifiedMistake } from "./sync";
 import { asArray } from "./safe-json";
 import type { ExamPart, QuestionType } from "./exam/types";
 
@@ -98,7 +97,6 @@ export function addMistake(input: {
       updatedAt: now,
     };
     save(all.map((m) => (m.id === existing.id ? updated : m)));
-    void pushUnifiedMistake(updated);
     return updated;
   }
   const m: UnifiedMistake = {
@@ -110,34 +108,27 @@ export function addMistake(input: {
     updatedAt: now,
   };
   save([m, ...all]);
-  void pushUnifiedMistake(m);
   return m;
 }
 
 export function resolveMistake(id: string): void {
   const now = new Date().toISOString();
-  let resolved: UnifiedMistake | undefined;
   save(
     ls().map((m) => {
       if (m.id !== id) return m;
-      resolved = { ...m, status: "resolved" as MistakeStatus, reviewedAt: now, updatedAt: now };
-      return resolved;
+      return { ...m, status: "resolved" as MistakeStatus, reviewedAt: now, updatedAt: now };
     })
   );
-  if (resolved) void pushUnifiedMistake(resolved);
 }
 
 export function setMistakeStatus(id: string, status: MistakeStatus): void {
   const now = new Date().toISOString();
-  let updated: UnifiedMistake | undefined;
   save(
     ls().map((m) => {
       if (m.id !== id) return m;
-      updated = { ...m, status, updatedAt: now };
-      return updated;
+      return { ...m, status, updatedAt: now };
     })
   );
-  if (updated) void pushUnifiedMistake(updated);
 }
 
 export function getMistakesBySkill(skill: MistakeSkill): UnifiedMistake[] {

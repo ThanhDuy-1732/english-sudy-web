@@ -3,8 +3,6 @@ import ExamRunner from "../ExamRunner";
 import { addItemToBank } from "@/lib/exam/exam-storage";
 import type { ExamItem } from "@/lib/exam/types";
 
-jest.mock("@/lib/sync", () => ({ pushExamItem: jest.fn(), pushAttempt: jest.fn(), pushMistake: jest.fn() }));
-
 test("loads a cached question offline and shows an error when no question is available", async () => {
   localStorage.clear();
   Object.defineProperty(navigator, "onLine", { configurable: true, value: false });

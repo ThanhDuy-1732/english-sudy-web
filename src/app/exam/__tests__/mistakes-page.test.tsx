@@ -3,7 +3,6 @@ import MistakesPage from "../mistakes/page";
 import ExamPage from "../page";
 import { addMistake, getMistakes } from "@/lib/mistakes";
 
-jest.mock("@/lib/sync", () => ({ pushUnifiedMistake: jest.fn().mockResolvedValue(undefined) }));
 jest.mock("next/navigation", () => ({ useRouter: () => ({ push: jest.fn() }) }));
 
 const input = {

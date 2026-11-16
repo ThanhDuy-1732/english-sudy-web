@@ -6,7 +6,6 @@ import {
   type ExamMistakeMeta,
   type UnifiedMistake,
 } from "./mistakes";
-import { pushUnifiedMistake } from "./sync";
 
 const sourceOf = (e: MistakeEntry) => `exam:${e.part}:${e.questionId}`;
 
@@ -152,7 +151,6 @@ function migrate(remote?: MistakeEntry[]): void {
   const { merged, changed } = migrateLegacyMistakes(input, getMistakes());
   if (changed.length > 0) {
     saveMistakes(merged);
-    for (const m of changed) void pushUnifiedMistake(m);
   }
   if (runLocal) localStorage.setItem(LOCAL_FLAG, "1");
   if (runRemote) localStorage.setItem(REMOTE_FLAG, "1");

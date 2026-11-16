@@ -8,6 +8,7 @@ export interface OpenAICompatConfig {
   apiKey: string;
   model: string;
   baseURL: string;
+  defaultHeaders?: Record<string, string>;
 }
 
 export class OpenAICompatProvider implements AIProvider {
@@ -27,6 +28,7 @@ export class OpenAICompatProvider implements AIProvider {
     this.client = new OpenAI({
       apiKey: config.apiKey,
       baseURL: config.baseURL,
+      ...(config.defaultHeaders && { defaultHeaders: config.defaultHeaders }),
       dangerouslyAllowBrowser: process.env.NODE_ENV === "test",
       fetch: testFetch,
     });

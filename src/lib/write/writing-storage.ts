@@ -1,8 +1,4 @@
 import { asArray } from "../safe-json";
-import { syncRequest } from "@/lib/sync-request";
-import { createSupabase } from "@/lib/supabase";
-import { enqueue } from "@/lib/sync-queue";
-import { getSyncKey } from "@/lib/sync";
 
 export type WritingKind = "ielts_task1" | "ielts_task2" | "toeic_email";
 
@@ -56,7 +52,6 @@ export function saveWriting(r: WritingRecord): void {
   all.unshift(updated);
   localStorage.setItem(KEY, JSON.stringify(all.slice(0, MAX)));
   localStorage.setItem("lastWritingAt", r.createdAt);
-  void pushWriting(updated);
 }
 
 export function addWritingVersion(id: string, draft: Omit<WritingDraft, "version">): void {
@@ -76,25 +71,4 @@ export function addWritingVersion(id: string, draft: Omit<WritingDraft, "version
   const rest = all.filter((r) => r.id !== id);
   rest.unshift(updated);
   localStorage.setItem(KEY, JSON.stringify(rest.slice(0, MAX)));
-  void pushWriting(updated);
-}
-
-export async function pushWriting(r: WritingRecord, queueOnFailure = true): Promise<void> {
-  if (typeof window === "undefined") return;
-  const syncKey = getSyncKey();
-  const supabase = createSupabase(syncKey);
-  try {
-    await syncRequest(supabase.from("writing_submissions").upsert({
-      id: r.id,
-      sync_key: syncKey,
-      kind: r.kind,
-      payload: r,
-      overall: r.feedback.overall,
-      created_at: r.createdAt,
-      updated_at: r.updatedAt ?? r.createdAt,
-    }, { onConflict: "id" }));
-  } catch (error) {
-    if (!queueOnFailure) throw error;
-    enqueue({ entity: "writingSubmissions", entityId: r.id, op: "upsert", payload: r });
-  }
 }

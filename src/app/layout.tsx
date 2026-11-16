@@ -1,11 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Caladea, Inter } from "next/font/google";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
-import { SyncInitializer } from "@/components/SyncInitializer";
 import { ProviderContextProvider } from "@/contexts/ProviderContext";
 import { TimerContextProvider } from "@/contexts/TimerContext";
 import { FirebaseInitializer } from "@/components/FirebaseInitializer";
-import { SyncInit } from "@/components/SyncInit";
 import AppNavigation from "@/components/AppNavigation";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
@@ -71,8 +69,6 @@ export default function RootLayout({
             </footer>
             <FirebaseInitializer />
             <ServiceWorkerRegistration />
-            <SyncInitializer />
-            <SyncInit />
           </TimerContextProvider>
         </ProviderContextProvider>
       </body>

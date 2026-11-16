@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { deleteCustomTopic, getCustomTopics, saveCustomTopic } from "@/lib/custom-topics";
-import { pushTopic } from "@/lib/sync";
 
 const TOPICS = ["Daily Communication", "TOEIC"];
 
@@ -21,7 +20,6 @@ export default function TopicSelector({ value, onChange }: TopicSelectorProps) {
     const topic = inputValue.trim();
     if (!topic) return;
     saveCustomTopic(topic);
-    void pushTopic(topic);
     setCustomTopics(getCustomTopics());
     onChange(topic);
     setInputValue("");

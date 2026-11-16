@@ -2,7 +2,6 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import ReviewPage from "../page";
 import { getSessions } from "@/lib/sessions";
 
-jest.mock("@/lib/sync", () => ({ pushWord: jest.fn() }));
 jest.mock("next/navigation", () => ({ useRouter: () => ({ push: jest.fn() }) }));
 
 beforeEach(() => {

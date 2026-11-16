@@ -1,6 +1,5 @@
 import { asArray, asObject, readStored, readString } from "../safe-json";
 import { getLearnedWords } from "../storage";
-import { getSyncKey } from "../sync";
 import { startSession, getSessions } from "../sessions";
 import { runMistakeMigration } from "../mistake-migration";
 
@@ -46,13 +45,6 @@ describe("when storage throws", () => {
     block("getItem");
     expect(readString("x")).toBeNull();
     expect(getLearnedWords()).toEqual([]);
-  });
-
-  test("getSyncKey falls back to a stable session-only key", () => {
-    block("getItem");
-    const key = getSyncKey();
-    expect(key).toMatch(/^[0-9a-f-]{36}$/);
-    expect(getSyncKey()).toBe(key);
   });
 
   test("a full storage never breaks session tracking or the mistake migration", () => {

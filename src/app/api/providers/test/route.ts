@@ -21,11 +21,12 @@ export async function POST(req: NextRequest) {
 
   const start = Date.now();
   let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+  const timeoutMs = Number(process.env.AI_PROVIDER_TIMEOUT_MS) || 25_000;
   try {
     await Promise.race([
       provider.generateContent("Reply with just: OK"),
       new Promise<never>((_, reject) => {
-        timeoutHandle = setTimeout(() => reject(new Error("timeout")), 10_000);
+        timeoutHandle = setTimeout(() => reject(new Error("timeout")), timeoutMs);
       }),
     ]);
     clearTimeout(timeoutHandle);

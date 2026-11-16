@@ -7,7 +7,6 @@ import TopicSelector from "@/components/TopicSelector";
 import QuizMode from "@/components/QuizMode";
 import ReadingMode from "@/components/ReadingMode";
 import { getDailyChallenge, getStreak, setDailyComplete } from "@/lib/daily-challenge";
-import { pushChallenge } from "@/lib/sync";
 import { useApiFetch } from "@/lib/useApiFetch";
 
 interface Word {
@@ -99,7 +98,6 @@ export default function HomePage() {
     if (words.length === 0 || flippedCount < words.length || dailyCompleted) return;
     const wordList = words.map((w) => w.word);
     setDailyComplete(wordList);
-    void pushChallenge({ date: localDateKey(), words: wordList, completed: true });
     setDailyCompleted(true);
     setStreak(getStreak());
   }

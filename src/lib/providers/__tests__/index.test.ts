@@ -78,6 +78,23 @@ test("getRegisteredProviders returns ProviderInfo without generateContent when G
   jest.resetModules();
 });
 
+test("registers the opencode provider when OPENCODE_API_KEY is set", () => {
+  jest.resetModules();
+  process.env.OPENCODE_API_KEY = "oc_test_key";
+  try {
+    const { getRegisteredProviders: getProviders } = require("../index") as typeof import("../index");
+    const opencode = getProviders().find((p) => p.id === "opencode");
+    expect(opencode).toEqual({
+      id: "opencode",
+      name: "OpenCode Go",
+      model: "deepseek-v4.1-flash",
+    });
+  } finally {
+    delete process.env.OPENCODE_API_KEY;
+    jest.resetModules();
+  }
+});
+
 test("callWithFallback skips disabled providers", async () => {
   const mockA = jest.fn<Promise<string>, [string]>().mockResolvedValue("result-a");
   const mockB = jest.fn<Promise<string>, [string]>().mockResolvedValue("result-b");
@@ -113,6 +130,13 @@ test("callWithFallback falls back on a retired model (404) and on network errors
   const ok = jest.fn<Promise<string>, [string]>().mockResolvedValue("ok");
   const result = await createCallWithFallback([makeProvider("a", gone), makeProvider("b", offline), makeProvider("c", ok)])("hello");
   expect(result).toEqual({ text: "ok", providerId: "c" });
+});
+
+test("callWithFallback falls back when a provider needs billing (402)", async () => {
+  const billing = jest.fn<Promise<string>, [string]>().mockRejectedValue({ status: 402 });
+  const ok = jest.fn<Promise<string>, [string]>().mockResolvedValue("ok");
+  const result = await createCallWithFallback([makeProvider("a", billing), makeProvider("b", ok)])("hello");
+  expect(result).toEqual({ text: "ok", providerId: "b" });
 });
 
 test("callWithFallback still throws on non-retryable client errors", async () => {

@@ -1,9 +1,3 @@
-jest.mock("@/lib/sync", () => ({
-  pushAttempt: jest.fn().mockResolvedValue(undefined),
-  pushUnifiedMistake: jest.fn().mockResolvedValue(undefined),
-  getSyncKey: jest.fn(() => "test-key"),
-}));
-
 import { recomputeMastery } from "../mastery-all";
 import { saveAttempt } from "../exam/exam-storage";
 import { saveSpeaking } from "../speech/speaking-storage";

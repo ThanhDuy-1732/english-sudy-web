@@ -6,7 +6,6 @@ import GrammarContent from "@/components/GrammarContent";
 import GrammarSidebar from "@/components/GrammarSidebar";
 import { STATIC_GRAMMAR_TOPICS, type GrammarTopic } from "@/lib/grammar-data";
 import { getUserGrammarTopics, saveUserGrammarTopic } from "@/lib/grammar-storage";
-import { pushGrammarTopic } from "@/lib/sync";
 import { getTopicProgress } from "@/lib/grammar-progress";
 import { isBookmarked, toggleBookmark } from "@/lib/grammar-bookmarks";
 
@@ -51,7 +50,6 @@ export default function GrammarPage() {
         createdAt: topic.createdAt ?? new Date().toISOString(),
       };
       saveUserGrammarTopic(normalizedTopic);
-      void pushGrammarTopic(normalizedTopic);
       setUserTopics(getUserGrammarTopics());
       setSelectedId(normalizedTopic.id);
     } catch {

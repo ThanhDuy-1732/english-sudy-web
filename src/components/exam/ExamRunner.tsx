@@ -3,7 +3,6 @@
 import { useReducer, useCallback, useEffect, useRef, useState } from "react";
 import type { ExamItem, ExamQuestion, AnswerRecord, ExamAttempt, ExamPart, ExamKind } from "@/lib/exam/types";
 import { saveAttempt, addMistake, addItemToBank, getItemsFromBank } from "@/lib/exam/exam-storage";
-import { pushExamItem } from "@/lib/sync";
 import { computeScore, isCompletionCorrect } from "@/lib/exam/scoring";
 import { recordTagResult } from "@/lib/exam/exam-tags";
 import { getProfile } from "@/lib/profile";
@@ -149,7 +148,6 @@ export default function ExamRunner({
           if (!item.id || !Array.isArray(item.questions)) throw new Error("invalid item");
           fetched.push(item);
           addItemToBank(item);
-          void pushExamItem(item);
         } catch {
           // Only reuse the general bank when no specific topic was requested.
           const cached = !topic ? getItemsFromBank(kind, part, level)[0] : undefined;

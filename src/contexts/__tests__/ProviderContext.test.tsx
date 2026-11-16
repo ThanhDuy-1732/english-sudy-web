@@ -34,6 +34,41 @@ test("loads providers from API and sets first as default", async () => {
   expect(screen.getByTestId("count").textContent).toBe("2");
 });
 
+test("defaults to opencode when it is available", async () => {
+  global.fetch = jest.fn().mockResolvedValue({
+    json: () =>
+      Promise.resolve([
+        { id: "gemini", name: "Gemini Flash", model: "gemini-flash-latest" },
+        { id: "opencode", name: "OpenCode Go", model: "deepseek-v4.1-flash" },
+      ]),
+  }) as jest.Mock;
+
+  render(
+    <ProviderContextProvider>
+      <TestConsumer />
+    </ProviderContextProvider>
+  );
+  await waitFor(() => expect(screen.getByTestId("current").textContent).toBe("opencode"));
+});
+
+test("saved preference wins over the opencode default", async () => {
+  global.fetch = jest.fn().mockResolvedValue({
+    json: () =>
+      Promise.resolve([
+        { id: "gemini", name: "Gemini Flash", model: "gemini-flash-latest" },
+        { id: "opencode", name: "OpenCode Go", model: "deepseek-v4.1-flash" },
+      ]),
+  }) as jest.Mock;
+  localStorage.setItem("preferredProvider", "gemini");
+
+  render(
+    <ProviderContextProvider>
+      <TestConsumer />
+    </ProviderContextProvider>
+  );
+  await waitFor(() => expect(screen.getByTestId("current").textContent).toBe("gemini"));
+});
+
 test("restores provider from localStorage", async () => {
   localStorage.setItem("preferredProvider", "groq");
   render(

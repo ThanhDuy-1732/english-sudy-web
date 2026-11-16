@@ -1,8 +1,3 @@
-jest.mock("@/lib/sync", () => ({
-  pushAttempt: jest.fn().mockResolvedValue(undefined),
-  pushUnifiedMistake: jest.fn().mockResolvedValue(undefined),
-}));
-
 import {
   pruneBank,
   bankKey,
