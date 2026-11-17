@@ -79,7 +79,7 @@ scenario("settings: providers, voice, data and profile", async ({ browser, check
   check("toggling a provider persists it", /gemini/.test((await page.evaluate(() => localStorage.getItem("disabledProviders"))) || ""));
   await goto(page, "/"); await clickText(page, "Sinh từ mới"); await sleep(1000);
   check("disabled providers travel with AI requests", (sent.at(-1)?.disabledProviders || []).includes("gemini"), JSON.stringify(sent.at(-1)));
-  await goto(page, "/settings"); await clickIn(page, "main", "Voice"); await sleep(400);
+  await goto(page, "/settings"); await clickIn(page, "main", "Giọng đọc"); await sleep(400);
   await page.evaluate(() => { const r = document.querySelector("main input[type=range]"); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set.call(r, "1.5"); r.dispatchEvent(new Event("input", { bubbles: true })); r.dispatchEvent(new Event("change", { bubbles: true })); }); await sleep(400);
   check("speech rate persists", /1\.5/.test((await page.evaluate(() => localStorage.getItem("voiceSettings"))) || ""));
   await page.evaluate(() => [...document.querySelectorAll("main button")].find((b) => /Reset/.test(b.innerText))?.click()); await sleep(400);

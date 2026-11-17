@@ -15,7 +15,7 @@ const states = {
   "timer modal": async (p) => { await goto(p, "/exam"); await p.evaluate(() => document.querySelector('button[aria-label="Đặt countdown"]')?.click()); await sleep(600); },
   "provider dropdown": async (p) => { await goto(p, "/exam"); await p.evaluate(() => [...document.querySelectorAll("button")].find((b) => /Gemini|Groq/.test(b.innerText))?.click()); await sleep(600); },
   "diary day drawer": async (p) => { await goto(p, "/diary"); await p.evaluate(() => { const c = [...document.querySelectorAll("button[aria-label*=' từ,']")]; (c.reverse().find((x) => /: [1-9]/.test(x.getAttribute("aria-label"))) || c[0])?.click(); }); await sleep(800); },
-  "settings voice": async (p) => { await goto(p, "/settings"); await clickIn(p, "main", "Voice"); await sleep(600); },
+  "settings voice": async (p) => { await goto(p, "/settings"); await clickIn(p, "main", "Giọng đọc"); await sleep(600); },
   "settings sync": async (p) => { await goto(p, "/settings"); await clickIn(p, "main", "Sync"); await sleep(600); },
   "settings profile": async (p) => { await goto(p, "/settings"); await clickIn(p, "main", "Hồ sơ"); await sleep(600); },
   "writing editor": async (p) => { await goto(p, "/write/task/task2-opinion"); await clickContains(p, "Bắt đầu viết"); await sleep(500); await p.type("textarea", "Technology improves education."); },

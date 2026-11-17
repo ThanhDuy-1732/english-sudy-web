@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Segmented from "@/components/Segmented";
 import {
   getMistakes,
   resolveMistake,
@@ -40,57 +41,22 @@ export default function MistakesPage() {
     <main className="page">
       <div className="flex items-center justify-between mb-4">
         <h1 className="page-title">Sổ lỗi</h1>
-        <Link href="/today" className="text-sm text-blue-500">
+        <Link href="/today" className="text-sm font-medium text-primary hover:underline">
           ← Hôm nay
         </Link>
       </div>
 
-      <div className="flex gap-2 flex-wrap mb-4">
-        {(
-          [
-            "all",
-            "vocabulary",
-            "grammar",
-            "reading",
-            "listening",
-            "speaking",
-            "writing",
-          ] as const
-        ).map((s) => (
-          <button
-            key={s}
-            onClick={() => setFilterSkill(s)}
-            className={`px-3 py-1 rounded text-sm ${
-              filterSkill === s
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 dark:bg-gray-800"
-            }`}
-          >
-            {s === "all" ? "Tất cả" : SKILL_LABELS[s]}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex gap-2 mb-6">
-        {(["all", "new", "reviewing", "resolved"] as const).map((s) => (
-          <button
-            key={s}
-            onClick={() => setFilterStatus(s)}
-            className={`px-3 py-1 rounded text-sm ${
-              filterStatus === s
-                ? "bg-purple-600 text-white"
-                : "bg-gray-100 dark:bg-gray-800"
-            }`}
-          >
-            {s === "all"
-              ? "Tất cả"
-              : s === "new"
-              ? "Mới"
-              : s === "reviewing"
-              ? "Đang học"
-              : "Đã giải quyết"}
-          </button>
-        ))}
+      <div className="mb-6 space-y-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="w-20 text-sm text-muted">Kỹ năng</span>
+          <Segmented label="Kỹ năng" value={filterSkill} onChange={setFilterSkill}
+            options={(["all", "vocabulary", "grammar", "reading", "listening", "speaking", "writing"] as const).map((s) => ({ value: s, label: s === "all" ? "Tất cả" : SKILL_LABELS[s] }))} />
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="w-20 text-sm text-muted">Trạng thái</span>
+          <Segmented label="Trạng thái" value={filterStatus} onChange={setFilterStatus}
+            options={[{ value: "all", label: "Tất cả" }, { value: "new", label: "Mới" }, { value: "reviewing", label: "Đang học" }, { value: "resolved", label: "Đã giải quyết" }] as const} />
+        </div>
       </div>
 
       {filtered.length === 0 && (

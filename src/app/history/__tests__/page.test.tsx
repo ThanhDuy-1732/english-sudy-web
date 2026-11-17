@@ -11,8 +11,8 @@ test("uses an accessible empty state and selected filter", async () => {
   render(<HistoryPage />);
 
   await waitFor(() => expect(screen.getByText("Chưa có từ nào được lưu.")).toBeInTheDocument());
-  expect(screen.getByRole("button", { name: "Tất cả" })).toHaveAttribute(
-    "aria-pressed",
+  expect(screen.getByRole("radio", { name: "Tất cả" })).toHaveAttribute(
+    "aria-checked",
     "true",
   );
 });
@@ -36,8 +36,8 @@ test("renders long saved content with an accessible delete action", async () => 
 
   await waitFor(() => expect(screen.getByText(longWord)).toBeInTheDocument());
   expect(screen.getByRole("button", { name: `Xóa ${longWord}` })).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "Daily Communication" })).toHaveAttribute(
-    "aria-pressed",
+  expect(screen.getByRole("radio", { name: "Daily Communication" })).toHaveAttribute(
+    "aria-checked",
     "false",
   );
 });
@@ -50,7 +50,7 @@ test("shows mastery stars and filters weak words", async () => {
   render(<HistoryPage />);
   await waitFor(() => expect(screen.getByText("weak")).toBeInTheDocument());
   expect(screen.getByLabelText("Mastery 1 trên 5 sao")).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: "★ Chưa thành thạo" }));
+  fireEvent.click(screen.getByRole("button", { name: "Chỉ từ chưa thuộc" }));
   expect(screen.getByText("weak")).toBeInTheDocument();
   expect(screen.queryByText("strong")).not.toBeInTheDocument();
 });

@@ -30,7 +30,7 @@ async function renderDataTab() {
   await act(async () => {
     render(<SettingsPage />);
   });
-  fireEvent.click(screen.getByRole("button", { name: "Dữ liệu" }));
+  fireEvent.click(screen.getByRole("radio", { name: "Dữ liệu" }));
 }
 
 test("data tab exposes export, import and clear actions", async () => {

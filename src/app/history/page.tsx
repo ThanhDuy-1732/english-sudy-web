@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Segmented from "@/components/Segmented";
 import {
   deleteLearnedWord,
   getLearnedWords,
@@ -53,33 +54,17 @@ export default function HistoryPage() {
         </div>
       </div>
 
-      <div className="mb-6 flex flex-wrap gap-2">
-        {topics.map((topic) => (
-          <button
-            type="button"
-            key={topic}
-            onClick={() => setFilter(topic)}
-            aria-pressed={filter === topic}
-            className={`min-h-11 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-              filter === topic
-                ? "bg-blue-600 text-white"
-                : "bg-white text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            {topic}
-          </button>
-        ))}
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <Segmented label="Chủ đề" value={filter} onChange={setFilter} options={topics.map((topic) => ({ value: topic, label: topic }))} />
         <button
           type="button"
           onClick={() => setMasteryFilter((current) => (current === "all" ? "weak" : "all"))}
           aria-pressed={masteryFilter === "weak"}
-          className={`min-h-11 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-            masteryFilter === "weak"
-              ? "border-orange-400 bg-orange-100 text-orange-700"
-              : "border-gray-200 bg-white text-gray-500 hover:border-gray-400"
+          className={`min-h-11 rounded-lg border px-4 text-sm font-medium transition-colors ${
+            masteryFilter === "weak" ? "border-primary bg-primary-soft text-primary" : "border-rule bg-card text-muted hover:border-primary hover:text-ink"
           }`}
         >
-          {masteryFilter === "weak" ? "★ Chưa thành thạo ✓" : "★ Chưa thành thạo"}
+          Chỉ từ chưa thuộc
         </button>
       </div>
 

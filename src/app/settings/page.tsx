@@ -1,5 +1,7 @@
 "use client";
 
+import Segmented from "@/components/Segmented";
+
 import { useEffect, useState, type ChangeEvent } from "react";
 import { getThemePref, setThemePref, type ThemePref } from "@/lib/theme";
 import VoiceSettingsTab from "@/components/VoiceSettingsTab";
@@ -21,8 +23,8 @@ type TestResult = "loading" | { ok: boolean; latency?: number; error?: string };
 type Tab = "providers" | "voice" | "data" | "profile";
 
 const TAB_LABELS: Record<Tab, string> = {
-  providers: "AI Providers",
-  voice: "Voice",
+  providers: "Mô hình AI",
+  voice: "Giọng đọc",
   data: "Dữ liệu",
   profile: "Hồ sơ",
 };
@@ -113,9 +115,9 @@ export default function SettingsPage() {
   function renderTestResult(id: string) {
     const result = testResults[id];
     if (!result) return null;
-    if (result === "loading") return <span className="text-xs text-muted">Testing…</span>;
-    if (result.ok) return <span className="text-xs text-green-400">{result.latency} ms</span>;
-    return <span className="text-xs text-red-400">{result.error ?? "Error"}</span>;
+    if (result === "loading") return <span className="text-sm text-muted">Đang kiểm tra…</span>;
+    if (result.ok) return <span className="text-sm text-ok">Phản hồi sau {result.latency} ms</span>;
+    return <span className="break-words text-sm text-margin">{result.error ?? "Không kết nối được"}</span>;
   }
 
   return (
@@ -123,128 +125,70 @@ export default function SettingsPage() {
       <div>
         <h1 className="page-title mb-6">Cài đặt</h1>
 
-        <div className="mb-8 flex w-fit max-w-full flex-wrap gap-1 rounded-xl border border-white/10 bg-white/5 p-1">
-          {(["providers", "voice", "data", "profile"] as Tab[]).map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setActiveTab(tab)}
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                activeTab === tab
-                  ? "bg-white/15 text-ink"
-                  : "text-muted hover:text-ink"
-              }`}
-            >
-              {TAB_LABELS[tab]}
-            </button>
-          ))}
+        <div className="mb-8">
+          <Segmented label="Mục cài đặt" value={activeTab} onChange={setActiveTab}
+            options={(["providers", "voice", "data", "profile"] as Tab[]).map((tab) => ({ value: tab, label: TAB_LABELS[tab] }))} />
         </div>
       </div>
 
       {activeTab === "providers" && (
         <div>
-          <p className="mb-8 text-sm text-muted">
-            Quản lý AI provider. Provider được kích hoạt khi có API key trong{" "}
-            <code className="rounded bg-white/10 px-1">.env.local</code>.
+          <p className="mb-6 text-sm leading-6 text-muted">
+            Mỗi mô hình được bật khi có API key tương ứng trong <code className="rounded bg-ink/[0.06] px-1">.env.local</code>. Mô hình đang dùng được thử trước; nếu lỗi, app chuyển sang mô hình bật tiếp theo.
           </p>
 
-          <div className="max-w-full overflow-x-auto rounded-xl border border-white/10">
-            <table className="min-w-[36rem] w-full text-sm">
-              <thead>
-                <tr className="border-b border-white/10 bg-white/5 text-left">
-                  <th className="px-4 py-3 font-semibold text-ink">Provider</th>
-                  <th className="px-4 py-3 font-semibold text-ink">Model</th>
-                  <th className="px-4 py-3 font-semibold text-ink">Trạng thái</th>
-                  <th className="px-4 py-3 font-semibold text-ink">Bật/Tắt</th>
-                  <th className="px-4 py-3 font-semibold text-ink">Test</th>
-                  <th className="px-4 py-3 font-semibold text-ink">Ưu tiên</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ALL_PROVIDERS.map((provider) => {
-                  const active = isActive(provider.id);
-                  const disabled = isDisabled(provider.id);
-                  const isCurrent = provider.id === currentProvider;
-                  const testResult = testResults[provider.id];
+          <ul className="panel divide-y divide-rule">
+            {ALL_PROVIDERS.map((provider) => {
+              const active = isActive(provider.id);
+              const disabled = isDisabled(provider.id);
+              const isCurrent = provider.id === currentProvider;
+              const testResult = testResults[provider.id];
+              const model = active ? availableProviders.find((available) => available.id === provider.id)?.model ?? provider.model : provider.model;
 
-                  return (
-                    <tr key={provider.id} className="border-b border-white/5 last:border-0">
-                      <td className="px-4 py-4 font-medium text-white">{provider.name}</td>
-                      <td className="px-4 py-4 font-mono text-xs text-muted">
-                        {active
-                          ? availableProviders.find((available) => available.id === provider.id)?.model ??
-                            provider.model
-                          : provider.model}
-                      </td>
-                      <td className="px-4 py-4">
-                        {active ? (
-                          <span className="inline-flex items-center gap-1 text-green-400">
-                            Đang bật
-                          </span>
-                        ) : (
-                          <span className="text-xs text-muted">
-                            <code className="rounded bg-white/5 px-1">{provider.envKey}</code>
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-4">
-                        <button
-                          type="button"
-                          onClick={() => active && toggleProvider(provider.id)}
-                          disabled={!active}
-                          title={active ? (disabled ? "Bật provider này" : "Tắt provider này") : "Chưa cấu hình"}
-                          className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus:outline-none ${
-                            !active
-                              ? "cursor-not-allowed bg-white/10 opacity-30"
-                              : disabled
-                                ? "bg-white/20"
-                                : "bg-green-600 hover:bg-green-500"
-                          }`}
-                        >
-                          <span
-                            className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition-transform ${
-                              !disabled ? "translate-x-5" : "translate-x-1"
-                            }`}
-                          />
+              return (
+                <li key={provider.id} className="flex flex-col gap-3 px-4 py-4 sm:px-5">
+                  <div className="flex items-start gap-4">
+                    <div className="min-w-0 flex-1">
+                      <p className="flex flex-wrap items-center gap-2 font-medium text-ink">
+                        {provider.name}
+                        {isCurrent && active && !disabled && <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-semibold text-primary">Đang dùng</span>}
+                      </p>
+                      <p className="mt-0.5 break-all font-mono text-xs text-muted">{model}</p>
+                      {!active && <p className="mt-1 text-sm text-muted">Chưa cấu hình: thêm <code className="rounded bg-ink/[0.06] px-1">{provider.envKey}</code></p>}
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={active && !disabled}
+                      aria-label={`Bật ${provider.name}`}
+                      onClick={() => active && toggleProvider(provider.id)}
+                      disabled={!active}
+                      className="group -m-2 flex size-11 shrink-0 items-center justify-center disabled:cursor-not-allowed"
+                    >
+                      <span className={`relative inline-flex h-6 w-10 items-center rounded-full transition-colors ${!active ? "bg-rule opacity-50" : disabled ? "bg-rule" : "bg-primary"}`}>
+                        <span className={`inline-block size-5 rounded-full bg-white shadow transition-transform ${active && !disabled ? "translate-x-[1.125rem]" : "translate-x-0.5"}`} />
+                      </span>
+                    </button>
+                  </div>
+                  {active && (
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                      {!testResult && (
+                        <button type="button" onClick={() => void handleTest(provider.id)} className="btn btn-secondary min-h-9 px-3 text-sm">
+                          Test
                         </button>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-2">
-                          {active && !testResult && (
-                            <button
-                              type="button"
-                              onClick={() => void handleTest(provider.id)}
-                              className="rounded-lg bg-white/10 px-2 py-1 text-xs font-medium text-ink hover:bg-white/20"
-                            >
-                              Test
-                            </button>
-                          )}
-                          {renderTestResult(provider.id)}
-                        </div>
-                      </td>
-                      <td className="px-4 py-4">
-                        {active && !disabled ? (
-                          isCurrent ? (
-                            <span className="text-ink">✓ Đang dùng</span>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => setProvider(provider.id)}
-                              className="rounded-lg bg-white/10 px-3 py-1 text-xs font-medium text-ink hover:bg-white/20"
-                            >
-                              Dùng cái này
-                            </button>
-                          )
-                        ) : (
-                          <span className="text-xs text-muted">—</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      )}
+                      {renderTestResult(provider.id)}
+                      {!disabled && !isCurrent && (
+                        <button type="button" onClick={() => setProvider(provider.id)} className="text-sm font-medium text-primary hover:underline">
+                          Dùng mô hình này trước
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         </div>
       )}
 

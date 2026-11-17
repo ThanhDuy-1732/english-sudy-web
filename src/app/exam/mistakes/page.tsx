@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Segmented from "@/components/Segmented";
 import { getExamMistakes, resolveMistake, type ExamMistake } from "@/lib/mistakes";
 import { runMistakeMigration } from "@/lib/mistake-migration";
 import { saveLearnedWord } from "@/lib/storage";
@@ -64,15 +65,8 @@ export default function MistakesPage() {
       </div>
 
       <div className="filter-row">
-        {(["unresolved", "all"] as const).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={filter === f ? "active" : ""}
-          >
-            {f === "unresolved" ? "Chưa giải quyết" : "Tất cả"}
-          </button>
-        ))}
+        <Segmented label="Lọc lỗi" value={filter} onChange={setFilter}
+          options={[{ value: "unresolved", label: "Chưa giải quyết" }, { value: "all", label: "Tất cả" }] as const} />
       </div>
 
       {shown.length === 0 ? (
@@ -128,8 +122,6 @@ export default function MistakesPage() {
         h1 { color: rgb(var(--ink)); letter-spacing: -0.015em; font-size: 1.625rem; font-weight: 600; margin: 0; flex: 1; }
         .count { font-size: 0.85rem; color: rgb(var(--muted)); }
         .filter-row { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
-        .filter-row button { color: rgb(var(--ink)); padding: 0.4rem 1rem; border: 1.5px solid rgb(var(--rule)); border-radius: 16px; background: rgb(var(--card)); cursor: pointer; font-size: 0.85rem; }
-        .filter-row button.active { background: rgb(var(--primary)); color: white; border-color: rgb(var(--primary)); }
         .empty { text-align: center; padding: 3rem; color: rgb(var(--muted)); }
         .mistakes-list { display: flex; flex-direction: column; gap: 1rem; }
         .mistake-card { padding: 1rem; border: 1.5px solid rgb(var(--rule)); border-radius: 10px; }
