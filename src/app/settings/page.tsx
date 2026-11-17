@@ -113,15 +113,15 @@ export default function SettingsPage() {
   function renderTestResult(id: string) {
     const result = testResults[id];
     if (!result) return null;
-    if (result === "loading") return <span className="text-xs text-[#b0b0d1]">Testing…</span>;
-    if (result.ok) return <span className="text-xs text-green-400">✅ {result.latency}ms</span>;
-    return <span className="text-xs text-red-400">❌ {result.error ?? "Error"}</span>;
+    if (result === "loading") return <span className="text-xs text-muted">Testing…</span>;
+    if (result.ok) return <span className="text-xs text-green-400">{result.latency} ms</span>;
+    return <span className="text-xs text-red-400">{result.error ?? "Error"}</span>;
   }
 
   return (
-    <main className="mx-auto w-full min-w-0 max-w-4xl space-y-8 px-4 py-10">
+    <main className="page">
       <div>
-        <h1 className="mb-6 font-display text-3xl font-bold text-[#d9ecff]">Cài đặt</h1>
+        <h1 className="page-title mb-6">Cài đặt</h1>
 
         <div className="mb-8 flex w-fit max-w-full flex-wrap gap-1 rounded-xl border border-white/10 bg-white/5 p-1">
           {(["providers", "voice", "data", "profile"] as Tab[]).map((tab) => (
@@ -131,8 +131,8 @@ export default function SettingsPage() {
               onClick={() => setActiveTab(tab)}
               className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                 activeTab === tab
-                  ? "bg-white/15 text-[#d9ecff]"
-                  : "text-[#b0b0d1] hover:text-[#d9ecff]"
+                  ? "bg-white/15 text-ink"
+                  : "text-muted hover:text-ink"
               }`}
             >
               {TAB_LABELS[tab]}
@@ -143,7 +143,7 @@ export default function SettingsPage() {
 
       {activeTab === "providers" && (
         <div>
-          <p className="mb-8 text-sm text-[#b0b0d1]">
+          <p className="mb-8 text-sm text-muted">
             Quản lý AI provider. Provider được kích hoạt khi có API key trong{" "}
             <code className="rounded bg-white/10 px-1">.env.local</code>.
           </p>
@@ -152,12 +152,12 @@ export default function SettingsPage() {
             <table className="min-w-[36rem] w-full text-sm">
               <thead>
                 <tr className="border-b border-white/10 bg-white/5 text-left">
-                  <th className="px-4 py-3 font-semibold text-[#d9ecff]">Provider</th>
-                  <th className="px-4 py-3 font-semibold text-[#d9ecff]">Model</th>
-                  <th className="px-4 py-3 font-semibold text-[#d9ecff]">Trạng thái</th>
-                  <th className="px-4 py-3 font-semibold text-[#d9ecff]">Bật/Tắt</th>
-                  <th className="px-4 py-3 font-semibold text-[#d9ecff]">Test</th>
-                  <th className="px-4 py-3 font-semibold text-[#d9ecff]">Ưu tiên</th>
+                  <th className="px-4 py-3 font-semibold text-ink">Provider</th>
+                  <th className="px-4 py-3 font-semibold text-ink">Model</th>
+                  <th className="px-4 py-3 font-semibold text-ink">Trạng thái</th>
+                  <th className="px-4 py-3 font-semibold text-ink">Bật/Tắt</th>
+                  <th className="px-4 py-3 font-semibold text-ink">Test</th>
+                  <th className="px-4 py-3 font-semibold text-ink">Ưu tiên</th>
                 </tr>
               </thead>
               <tbody>
@@ -170,7 +170,7 @@ export default function SettingsPage() {
                   return (
                     <tr key={provider.id} className="border-b border-white/5 last:border-0">
                       <td className="px-4 py-4 font-medium text-white">{provider.name}</td>
-                      <td className="px-4 py-4 font-mono text-xs text-[#b0b0d1]">
+                      <td className="px-4 py-4 font-mono text-xs text-muted">
                         {active
                           ? availableProviders.find((available) => available.id === provider.id)?.model ??
                             provider.model
@@ -179,10 +179,10 @@ export default function SettingsPage() {
                       <td className="px-4 py-4">
                         {active ? (
                           <span className="inline-flex items-center gap-1 text-green-400">
-                            ✅ Active
+                            Đang bật
                           </span>
                         ) : (
-                          <span className="text-xs text-[#b0b0d1]">
+                          <span className="text-xs text-muted">
                             <code className="rounded bg-white/5 px-1">{provider.envKey}</code>
                           </span>
                         )}
@@ -214,7 +214,7 @@ export default function SettingsPage() {
                             <button
                               type="button"
                               onClick={() => void handleTest(provider.id)}
-                              className="rounded-lg bg-white/10 px-2 py-1 text-xs font-medium text-[#d9ecff] hover:bg-white/20"
+                              className="rounded-lg bg-white/10 px-2 py-1 text-xs font-medium text-ink hover:bg-white/20"
                             >
                               Test
                             </button>
@@ -225,18 +225,18 @@ export default function SettingsPage() {
                       <td className="px-4 py-4">
                         {active && !disabled ? (
                           isCurrent ? (
-                            <span className="text-[#d9ecff]">✓ Đang dùng</span>
+                            <span className="text-ink">✓ Đang dùng</span>
                           ) : (
                             <button
                               type="button"
                               onClick={() => setProvider(provider.id)}
-                              className="rounded-lg bg-white/10 px-3 py-1 text-xs font-medium text-[#d9ecff] hover:bg-white/20"
+                              className="rounded-lg bg-white/10 px-3 py-1 text-xs font-medium text-ink hover:bg-white/20"
                             >
                               Dùng cái này
                             </button>
                           )
                         ) : (
-                          <span className="text-xs text-[#b0b0d1]">—</span>
+                          <span className="text-xs text-muted">—</span>
                         )}
                       </td>
                     </tr>
@@ -250,15 +250,15 @@ export default function SettingsPage() {
 
       {activeTab === "voice" && (
         <div>
-          <p className="mb-8 text-sm text-[#b0b0d1]">
+          <p className="mb-8 text-sm text-muted">
             Chọn giọng đọc và điều chỉnh thông số phát âm.
           </p>
           <div className="rounded-xl border border-white/10 p-6">
             <VoiceSettingsTab />
           </div>
           <div className="mt-6 rounded-xl border border-white/10 p-6">
-            <p className="mb-2 text-sm font-medium text-[#d9ecff]">Bản ghi âm</p>
-            <p className="mb-4 text-xs text-[#b0b0d1]">
+            <p className="mb-2 text-sm font-medium text-ink">Bản ghi âm</p>
+            <p className="mb-4 text-xs text-muted">
               Bản ghi âm được lưu cục bộ (tối đa 20). Không đồng bộ lên server.
             </p>
             <button
@@ -277,34 +277,34 @@ export default function SettingsPage() {
 
       {activeTab === "data" && (
         <div>
-          <h2 className="mb-2 font-display text-xl font-bold text-[#d9ecff]">Dữ liệu</h2>
-          <p className="mb-6 text-sm text-[#b0b0d1]">
+          <h2 className="mb-2 text-lg font-semibold text-ink">Dữ liệu</h2>
+          <p className="mb-6 text-sm text-muted">
             Dữ liệu được lưu trong trình duyệt này. Xuất file JSON để backup hoặc chuyển sang thiết
             bị khác; nhập lại file đó trên thiết bị mới.
           </p>
 
           <div className="space-y-6 rounded-xl border border-white/10 p-6">
             <div>
-              <p className="mb-2 text-sm font-medium text-[#d9ecff]">Xuất dữ liệu</p>
-              <p className="mb-3 text-xs text-[#b0b0d1]">
+              <p className="mb-2 text-sm font-medium text-ink">Xuất dữ liệu</p>
+              <p className="mb-3 text-xs text-muted">
                 Tải toàn bộ từ vựng, lỗi sai, đề thi, bài nói, bài viết và cài đặt thành một file
                 JSON.
               </p>
               <button
                 type="button"
                 onClick={handleExport}
-                className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-[#d9ecff] hover:bg-white/20"
+                className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-ink hover:bg-white/20"
               >
                 ⬇️ Xuất file sao lưu
               </button>
             </div>
 
             <div>
-              <p className="mb-2 text-sm font-medium text-[#d9ecff]">Nhập dữ liệu</p>
-              <p className="mb-3 text-xs text-[#b0b0d1]">
+              <p className="mb-2 text-sm font-medium text-ink">Nhập dữ liệu</p>
+              <p className="mb-3 text-xs text-muted">
                 Chọn file đã xuất trước đó. Các mục trùng sẽ bị ghi đè bằng dữ liệu trong file.
               </p>
-              <label className="inline-block cursor-pointer rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-[#d9ecff] hover:bg-white/20">
+              <label className="inline-block cursor-pointer rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-ink hover:bg-white/20">
                 ⬆️ Chọn file JSON
                 <input
                   type="file"
@@ -316,8 +316,8 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <p className="mb-2 text-sm font-medium text-[#d9ecff]">Xoá toàn bộ dữ liệu</p>
-              <p className="mb-3 text-xs text-[#b0b0d1]">
+              <p className="mb-2 text-sm font-medium text-ink">Xoá toàn bộ dữ liệu</p>
+              <p className="mb-3 text-xs text-muted">
                 Chỉ xoá dữ liệu của app trên trình duyệt này. Nên xuất file sao lưu trước.
               </p>
               <button
@@ -326,10 +326,10 @@ export default function SettingsPage() {
                 className={`rounded-lg px-4 py-2 text-sm font-medium ${
                   confirmClear
                     ? "bg-red-500/80 text-white hover:bg-red-500"
-                    : "bg-white/10 text-[#d9ecff] hover:bg-white/20"
+                    : "bg-white/10 text-ink hover:bg-white/20"
                 }`}
               >
-                {confirmClear ? "Bấm lần nữa để xoá toàn bộ" : "🗑 Xoá toàn bộ dữ liệu"}
+                {confirmClear ? "Bấm lần nữa để xoá toàn bộ" : "Xoá dữ liệu"}
               </button>
             </div>
 
@@ -350,7 +350,7 @@ export default function SettingsPage() {
         <div className="space-y-8">
           <ProfileSettings />
           <div>
-            <h3 className="mb-3 font-semibold text-[#d9ecff]">Giao diện</h3>
+            <h3 className="mb-3 font-semibold text-ink">Giao diện</h3>
             <ThemeToggle />
           </div>
         </div>
@@ -376,12 +376,12 @@ function ProfileSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="mb-2 text-sm font-medium text-[#d9ecff]">Mục tiêu học</p>
+        <p className="mb-2 text-sm font-medium text-ink">Mục tiêu học</p>
         <div className="flex flex-wrap gap-2">
           {([["communication","Giao tiếp"],["toeic","TOEIC"],["ielts","IELTS"],
             ["vocabulary","Từ vựng"],["mixed","Tổng hợp"]] as [LearningGoal, string][]).map(([v,l]) => (
             <button key={v} onClick={() => update({ goal: v })}
-              className={`px-3 py-2 rounded-lg text-sm ${profile.goal === v ? "bg-[#7f56d9] text-white" : "bg-white/10 text-[#b0b0d1] hover:bg-white/20"}`}>
+              className={`px-3 py-2 rounded-lg text-sm ${profile.goal === v ? "bg-primary text-white" : "bg-white/10 text-muted hover:bg-white/20"}`}>
               {l}
             </button>
           ))}
@@ -389,11 +389,11 @@ function ProfileSettings() {
       </div>
 
       <div>
-        <p className="mb-2 text-sm font-medium text-[#d9ecff]">Trình độ hiện tại</p>
+        <p className="mb-2 text-sm font-medium text-ink">Trình độ hiện tại</p>
         <div className="flex flex-wrap gap-2">
           {([1,2,3,4,5] as const).map((n) => (
             <button key={n} onClick={() => update({ currentLevel: n })}
-              className={`px-3 py-2 rounded-lg text-sm ${profile.currentLevel === n ? "bg-[#7f56d9] text-white" : "bg-white/10 text-[#b0b0d1] hover:bg-white/20"}`}>
+              className={`px-3 py-2 rounded-lg text-sm ${profile.currentLevel === n ? "bg-primary text-white" : "bg-white/10 text-muted hover:bg-white/20"}`}>
               {["Sơ cấp","Tiền trung","Trung cấp","Trung cao","Nâng cao"][n-1]}
             </button>
           ))}
@@ -401,11 +401,11 @@ function ProfileSettings() {
       </div>
 
       <div>
-        <p className="mb-2 text-sm font-medium text-[#d9ecff]">Thời gian học mỗi ngày</p>
+        <p className="mb-2 text-sm font-medium text-ink">Thời gian học mỗi ngày</p>
         <div className="flex flex-wrap gap-2">
           {[15, 30, 45, 60, 90].map((m) => (
             <button key={m} onClick={() => update({ dailyStudyMinutes: m })}
-              className={`px-3 py-2 rounded-lg text-sm ${profile.dailyStudyMinutes === m ? "bg-[#7f56d9] text-white" : "bg-white/10 text-[#b0b0d1] hover:bg-white/20"}`}>
+              className={`px-3 py-2 rounded-lg text-sm ${profile.dailyStudyMinutes === m ? "bg-primary text-white" : "bg-white/10 text-muted hover:bg-white/20"}`}>
               {m} phút
             </button>
           ))}
@@ -414,29 +414,29 @@ function ProfileSettings() {
 
       {profile.goal === "toeic" && (
         <div>
-          <label className="text-sm font-medium text-[#d9ecff]">Mục tiêu TOEIC</label>
+          <label className="text-sm font-medium text-ink">Mục tiêu TOEIC</label>
           <input type="number" min={10} max={990} step={5}
             value={profile.targetToeicScore ?? ""}
             onChange={(e) => update({ targetToeicScore: Number(e.target.value) })}
-            className="mt-1 w-full max-w-xs rounded-lg bg-white/10 px-3 py-2 text-sm text-[#d9ecff] border border-white/20" />
+            className="mt-1 w-full max-w-xs rounded-lg bg-white/10 px-3 py-2 text-sm text-ink border border-white/20" />
         </div>
       )}
 
       {profile.goal === "ielts" && (
         <div>
-          <label className="text-sm font-medium text-[#d9ecff]">Mục tiêu IELTS</label>
+          <label className="text-sm font-medium text-ink">Mục tiêu IELTS</label>
           <input type="number" min={1} max={9} step={0.5}
             value={profile.targetIeltsScore ?? ""}
             onChange={(e) => update({ targetIeltsScore: Number(e.target.value) })}
-            className="mt-1 w-full max-w-xs rounded-lg bg-white/10 px-3 py-2 text-sm text-[#d9ecff] border border-white/20" />
+            className="mt-1 w-full max-w-xs rounded-lg bg-white/10 px-3 py-2 text-sm text-ink border border-white/20" />
         </div>
       )}
 
       <div className="flex items-center justify-between max-w-xs">
-        <p className="text-sm text-[#d9ecff]">Phím tắt bàn phím</p>
+        <p className="text-sm text-ink">Phím tắt bàn phím</p>
         <button
           onClick={() => update({ shortcutsEnabled: !profile.shortcutsEnabled })}
-          className={`relative w-12 h-6 rounded-full transition-colors ${profile.shortcutsEnabled ? "bg-[#7f56d9]" : "bg-white/20"}`}
+          className={`relative w-12 h-6 rounded-full transition-colors ${profile.shortcutsEnabled ? "bg-primary" : "bg-white/20"}`}
         >
           <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${profile.shortcutsEnabled ? "translate-x-6" : ""}`} />
         </button>
@@ -457,7 +457,7 @@ function ThemeToggle() {
     <div className="flex gap-2">
       {(["system", "light", "dark"] as const).map((t) => (
         <button key={t} onClick={() => applyTheme(t)}
-          className={`px-3 py-2 rounded-lg text-sm ${theme === t ? "bg-[#7f56d9] text-white" : "bg-white/10 text-[#b0b0d1] hover:bg-white/20"}`}>
+          className={`px-3 py-2 rounded-lg text-sm ${theme === t ? "bg-primary text-white" : "bg-white/10 text-muted hover:bg-white/20"}`}>
           {t === "system" ? "Hệ thống" : t === "light" ? "Sáng" : "Tối"}
         </button>
       ))}

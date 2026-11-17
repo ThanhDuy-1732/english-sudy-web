@@ -5,7 +5,7 @@ beforeEach(() => localStorage.clear());
 
 test("renders both built-in topic buttons", () => {
   render(<TopicSelector value="Daily Communication" onChange={jest.fn()} />);
-  expect(screen.getByText("Daily Communication")).toBeInTheDocument();
+  expect(screen.getByText("Giao tiếp hằng ngày")).toBeInTheDocument();
   expect(screen.getByText("TOEIC")).toBeInTheDocument();
 });
 
@@ -19,9 +19,9 @@ test("calls onChange with selected topic", () => {
 test("active topic button has different style", () => {
   render(<TopicSelector value="TOEIC" onChange={jest.fn()} />);
   const active = screen.getByText("TOEIC");
-  expect(active.className).toContain("bg-[#7f56d9]");
+  expect(active.className).toContain("bg-ink");
   expect(active).toHaveAttribute("aria-pressed", "true");
-  expect(screen.getByText("Daily Communication")).toHaveAttribute("aria-pressed", "false");
+  expect(screen.getByText("Giao tiếp hằng ngày")).toHaveAttribute("aria-pressed", "false");
 });
 
 test("built-in topics do not have a delete button", () => {

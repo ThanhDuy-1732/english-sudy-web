@@ -4,9 +4,9 @@ import type { CalendarDay } from "@/lib/stats";
 
 const LEVEL_COLORS = [
   "bg-gray-100",
-  "bg-[#ede9fe]",
-  "bg-[#c4b5fd]",
-  "bg-[#7f56d9]",
+  "bg-primary-soft",
+  "bg-primary-soft",
+  "bg-primary",
 ] as const;
 
 const DAY_LABELS = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
@@ -64,7 +64,7 @@ export default function DiaryCalendar({ data, studyTimeByDate, selectedDate, onS
                       className={[
                         "h-3 w-3 rounded-sm transition-opacity hover:opacity-80",
                         LEVEL_COLORS[day.level],
-                        selectedDate === day.date ? "ring-2 ring-[#7f56d9] ring-offset-1" : "",
+                        selectedDate === day.date ? "ring-2 ring-primary ring-offset-1" : "",
                       ].join(" ")}
                     />
                   ) : (

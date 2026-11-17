@@ -30,14 +30,12 @@ export default function ExamTimer({ totalSeconds, onTimeUp, enabled = true }: Pr
           font-size: 1rem;
           padding: 0.3rem 0.75rem;
           border-radius: 20px;
-          background: #f8f9fa;
-          border: 1.5px solid #dee2e6;
-          color: #495057;
+          background: rgb(var(--paper));
+          border: 1.5px solid rgb(var(--rule));
+          color: rgb(var(--muted));
         }
-        .exam-timer.urgent { color: #dc3545; border-color: #dc3545; background: #fff5f5; animation: pulse 1s infinite; }
+        .exam-timer.urgent { color: rgb(var(--margin)); border-color: rgb(var(--margin)); background: rgb(var(--margin-soft)); animation: pulse 1s infinite; }
         @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
-        /* dark theme: light surfaces */
-        :global(:root[data-theme="dark"]) .exam-timer.urgent { background: rgba(239, 68, 68, 0.16); color: #fca5a5; }
       `}</style>
     </div>
   );

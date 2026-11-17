@@ -5,10 +5,10 @@ import {
 import type { WeeklyBand } from "@/lib/stats-skills";
 
 const COLORS = {
-  speaking: "#7c3aed",
-  writing: "#2563eb",
-  listening: "#059669",
-  reading: "#d97706",
+  speaking: "#c8435a",
+  writing: "#7a5bd6",
+  listening: "#4a6fe3",
+  reading: "#14998a",
 } as const;
 
 export default function BandTimelineChart({ data }: { data: WeeklyBand[] }) {

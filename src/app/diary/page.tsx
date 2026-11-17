@@ -46,19 +46,16 @@ export default function DiaryPage() {
   }
 
   return (
-    <main className="min-h-full min-w-0 bg-[#f7f4ff] px-4 py-10 text-[#2c1f4a] sm:px-6 lg:py-14">
+    <main className="page-wide">
       <div className="mx-auto w-full min-w-0 max-w-6xl">
         <div className="mb-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#7f56d9]">
-            Nhật ký học tập
-          </p>
-          <h1 className="mt-2 font-display text-4xl font-bold">Lộ trình học</h1>
-          <p className="mt-2 text-sm text-[#6b6384]">
-            Click vào một ngày để xem chi tiết hôm đó học gì.
+          <h1 className="page-title">Nhật ký học</h1>
+          <p className="page-lead">
+            Chọn một ngày để xem hôm đó bạn học những từ nào và học bao lâu.
           </p>
         </div>
 
-        <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-6">
+        <section className="panel p-5 sm:p-6">
           <DiaryCalendar
             data={calendarData}
             studyTimeByDate={studyTimeByDate}

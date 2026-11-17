@@ -63,7 +63,7 @@ export default function ListeningPlayer({ script, onPlaybackComplete }: Props) {
       <div className="player-controls">
         {playState !== "playing" ? (
           <button onClick={handlePlay} className="play-btn" aria-label="Phát audio">
-            {playState === "done" ? "🔁 Phát lại" : "▶ Phát"}
+            {playState === "done" ? "Phát lại" : "Phát"}
           </button>
         ) : (
           <button onClick={handleStop} className="stop-btn" aria-label="Dừng">
@@ -111,14 +111,14 @@ export default function ListeningPlayer({ script, onPlaybackComplete }: Props) {
           font-size: 0.9rem;
           font-weight: 600;
         }
-        .play-btn { background: #0d6efd; color: white; }
-        .play-btn:hover { background: #0b5ed7; }
-        .stop-btn { background: #dc3545; color: white; }
-        .stop-btn:hover { background: #bb2d3b; }
-        .state-label { font-size: 0.85rem; color: #6c757d; }
+        .play-btn { background: rgb(var(--primary)); color: white; }
+        .play-btn:hover { background: rgb(var(--primary-strong)); }
+        .stop-btn { background: rgb(var(--margin)); color: white; }
+        .stop-btn:hover { background: rgb(var(--margin)); }
+        .state-label { font-size: 0.85rem; color: rgb(var(--muted)); }
         .transcript-toggle {
           font-size: 0.8rem;
-          color: #6c757d;
+          color: rgb(var(--muted));
           background: none;
           border: none;
           cursor: pointer;
@@ -126,14 +126,10 @@ export default function ListeningPlayer({ script, onPlaybackComplete }: Props) {
           padding: 0;
           margin-bottom: 0.5rem;
         }
-        .transcript { color: #212529; background: #f8f9fa; border-radius: 8px; padding: 0.75rem 1rem; margin-top: 0.5rem; }
+        .transcript { color: rgb(var(--ink)); background: rgb(var(--paper)); border-radius: 8px; padding: 0.75rem 1rem; margin-top: 0.5rem; }
         .transcript-line { margin: 0 0 0.4rem; font-size: 0.875rem; line-height: 1.5; transition: background 0.2s; border-radius: 4px; padding: 0.1rem 0.3rem; }
-        .transcript-line.active { color: #212529; background: #fff3cd; font-weight: 500; }
-        .speaker { font-weight: 700; color: #495057; margin-right: 0.3rem; }
-        :global(:root[data-theme="dark"]) .transcript { background: #1e2a35; color: #eee; }
-        :global(:root[data-theme="dark"]) .transcript-line.active { background: #3d3a10; color: #eee; }
-        :global(:root[data-theme="dark"]) .speaker { color: #adb5bd; }
-        /* dark theme: light surfaces */
+        .transcript-line.active { color: rgb(var(--ink)); background: rgb(var(--warn-soft)); font-weight: 500; }
+        .speaker { font-weight: 700; color: rgb(var(--muted)); margin-right: 0.3rem; }
       `}</style>
     </div>
   );

@@ -94,7 +94,7 @@ export default function RewritePage() {
 
   if (items.length === 0) {
     return (
-      <main className="max-w-lg mx-auto p-4 text-center py-16">
+      <main className="page">
         <p className="text-gray-500">Không có lỗi nào để luyện lại.</p>
         <Link href="/write/history" className="text-blue-500 text-sm mt-4 block">
           ← Quay lại lịch sử
@@ -106,17 +106,16 @@ export default function RewritePage() {
   const done = items.every((item) => item.resolved);
 
   return (
-    <main className="max-w-lg mx-auto p-4">
+    <main className="page">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold">Luyện viết lại</h1>
+        <h1 className="page-title">Luyện viết lại</h1>
         <span className="text-sm text-gray-400">{currentIdx + 1}/{items.length}</span>
       </div>
 
       {done ? (
         <div className="text-center py-12">
-          <p className="text-2xl mb-2">🎉</p>
           <p className="font-medium mb-4">Đã hoàn thành tất cả lỗi!</p>
-          <Link href="/write/history" className="px-6 py-2 bg-purple-600 text-white rounded-lg text-sm">
+          <Link href="/write/history" className="btn btn-primary min-h-10 px-4 text-sm">
             Quay lại lịch sử
           </Link>
         </div>
@@ -133,7 +132,7 @@ export default function RewritePage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={feedback !== null}
-            className="w-full border rounded-lg p-3 text-sm h-24 resize-none dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
+            className="field w-full h-24 resize-none text-sm"
             placeholder="Nhập câu đã sửa..."
           />
 
@@ -151,7 +150,7 @@ export default function RewritePage() {
             <button
               onClick={() => void handleCheck()}
               disabled={checking || !input.trim()}
-              className="mt-3 w-full py-3 bg-purple-600 text-white rounded-lg font-medium disabled:opacity-50"
+              className="btn btn-primary mt-3 w-full"
             >
               {checking ? "Đang kiểm tra..." : "Kiểm tra"}
             </button>
@@ -161,7 +160,7 @@ export default function RewritePage() {
           {feedback && currentIdx < items.length - 1 && (
             <button
               onClick={handleNext}
-              className="mt-3 w-full py-3 bg-gray-100 dark:bg-gray-800 rounded-lg font-medium"
+              className="btn btn-secondary mt-3 w-full"
             >
               Câu tiếp theo
             </button>

@@ -54,7 +54,7 @@ test("export button downloads the JSON produced by exportData", async () => {
 test("clear requires a second click before wiping data", async () => {
   await renderDataTab();
 
-  fireEvent.click(screen.getByText("🗑 Xoá toàn bộ dữ liệu"));
+  fireEvent.click(screen.getByText("Xoá dữ liệu"));
   expect(clearAllDataMock).not.toHaveBeenCalled();
   expect(screen.getByText("Bấm lần nữa để xoá toàn bộ")).toBeInTheDocument();
 });

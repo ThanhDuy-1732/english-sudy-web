@@ -1,99 +1,38 @@
-"use client";
+import LinkList from "@/components/LinkList";
 
-import Link from "next/link";
+const LEVEL = ["", "Cơ bản", "Trung bình", "Khá"];
 
 const SCENARIOS = [
-  { id: "hotel", title: "Đặt phòng khách sạn", level: 2, emoji: "🏨" },
-  { id: "interview", title: "Phỏng vấn xin việc", level: 3, emoji: "💼" },
-  { id: "complaint", title: "Khiếu nại dịch vụ", level: 3, emoji: "📞" },
-  { id: "restaurant", title: "Đặt bàn nhà hàng", level: 1, emoji: "🍽️" },
-  { id: "doctor", title: "Khám bệnh", level: 2, emoji: "🏥" },
-  { id: "shopping", title: "Mua sắm / Trả hàng", level: 1, emoji: "🛍️" },
+  { id: "restaurant", title: "Đặt bàn nhà hàng", level: 1 },
+  { id: "shopping", title: "Mua sắm, trả hàng", level: 1 },
+  { id: "hotel", title: "Đặt phòng khách sạn", level: 2 },
+  { id: "doctor", title: "Khám bệnh", level: 2 },
+  { id: "interview", title: "Phỏng vấn xin việc", level: 3 },
+  { id: "complaint", title: "Khiếu nại dịch vụ", level: 3 },
 ];
 
 const IELTS_PARTS = [
-  { part: "p1", title: "IELTS Speaking Part 1", desc: "Câu hỏi về bản thân, 4-5 phút", emoji: "🎯" },
-  { part: "p2", title: "IELTS Speaking Part 2", desc: "Cue card, 1 phút chuẩn bị + 2 phút nói", emoji: "📋" },
-  { part: "p3", title: "IELTS Speaking Part 3", desc: "Thảo luận chủ đề, 4-5 phút", emoji: "💬" },
+  { part: "p1", title: "Part 1", desc: "Câu hỏi về bản thân, 4–5 phút" },
+  { part: "p2", title: "Part 2", desc: "Cue card: 1 phút chuẩn bị, 2 phút nói" },
+  { part: "p3", title: "Part 3", desc: "Thảo luận mở rộng chủ đề, 4–5 phút" },
 ];
 
 export default function SpeakPage() {
   return (
-    <div className="speak-page">
-      <h1>Luyện nói</h1>
+    <main className="mx-auto w-full max-w-3xl px-4 pb-16 pt-8 sm:px-8 lg:pt-12">
+      <h1 className="text-3xl font-semibold tracking-tight text-ink sm:text-4xl">Luyện nói</h1>
+      <p className="page-lead">Hội thoại tình huống với AI, có sửa lỗi từng câu. Phần IELTS cho nói bằng micro hoặc gõ câu trả lời, rồi chấm band theo 4 tiêu chí.</p>
 
-      <section>
-        <h2>Giao tiếp hàng ngày</h2>
-        <div className="scenarios-grid">
-          {SCENARIOS.map((s) => (
-            <Link key={s.id} href={`/speak/roleplay/${s.id}`} className="scenario-card">
-              <span className="emoji">{s.emoji}</span>
-              <span className="title">{s.title}</span>
-              <span className="level">Lv.{s.level}</span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <h2>IELTS Speaking</h2>
-        <div className="ielts-list">
-          {IELTS_PARTS.map((p) => (
-            <Link key={p.part} href={`/speak/ielts/${p.part}`} className="ielts-card">
-              <span className="emoji">{p.emoji}</span>
-              <div>
-                <p className="title">{p.title}</p>
-                <p className="desc">{p.desc}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <h2>Công cụ</h2>
-        <div className="tools-list">
-          <Link href="/speak/shadowing" className="tool-card">
-            <span className="emoji">🎯</span>
-            <div>
-              <p className="title">Shadowing</p>
-              <p className="desc">Nghe và lặp lại câu mẫu để luyện phát âm</p>
-            </div>
-          </Link>
-          <Link href="/speak/history" className="tool-card">
-            <span className="emoji">📋</span>
-            <div>
-              <p className="title">Lịch sử</p>
-              <p className="desc">Xem lại các bài nói và điểm số</p>
-            </div>
-          </Link>
-        </div>
-      </section>
-
-      <style jsx>{`
-        .speak-page { max-width: 640px; margin: 0 auto; padding: 1.5rem; }
-        h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; }
-        h2 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #6c757d; margin: 1.5rem 0 0.75rem; }
-        .scenarios-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-        :global(.scenario-card) { display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; text-decoration: none; color: inherit; transition: border-color 0.15s; }
-        :global(.scenario-card):hover { border-color: #0d6efd; background: rgba(13, 110, 253, 0.18); }
-        .emoji { font-size: 1.25rem; }
-        .title { flex: 1; font-size: 0.875rem; line-height: 1.3; }
-        .level { font-size: 0.75rem; color: #6c757d; }
-        .ielts-list { display: flex; flex-direction: column; gap: 0.75rem; }
-        :global(.ielts-card) { display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; text-decoration: none; color: inherit; transition: border-color 0.15s; }
-        :global(.ielts-card):hover { border-color: #0d6efd; background: rgba(13, 110, 253, 0.18); }
-        :global(.ielts-card) .emoji { font-size: 1.5rem; }
-        :global(.ielts-card) .title { font-weight: 600; margin-bottom: 0.2rem; font-size: 0.95rem; }
-        :global(.ielts-card) .desc { font-size: 0.8rem; color: #6c757d; }
-        .tools-list { display: flex; flex-direction: column; gap: 0.75rem; }
-        :global(.tool-card) { display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; text-decoration: none; color: inherit; transition: border-color 0.15s; }
-        :global(.tool-card):hover { border-color: #0d6efd; background: rgba(13, 110, 253, 0.18); }
-        :global(.tool-card) .emoji { font-size: 1.5rem; }
-        :global(.tool-card) .title { font-weight: 600; margin-bottom: 0.2rem; font-size: 0.95rem; }
-        :global(.tool-card) .desc { font-size: 0.8rem; color: #6c757d; }
-        @media (max-width: 480px) { .scenarios-grid { grid-template-columns: 1fr; } }
-      `}</style>
-    </div>
+      <div className="mt-8">
+        <LinkList title="Hội thoại tình huống" description="Gõ tin nhắn để đóng vai với AI cho đến khi đạt mục tiêu cuộc hội thoại."
+          items={SCENARIOS.map((s) => ({ href: `/speak/roleplay/${s.id}`, title: s.title, aside: LEVEL[s.level] }))} />
+        <LinkList title="IELTS Speaking"
+          items={IELTS_PARTS.map((p) => ({ href: `/speak/ielts/${p.part}`, title: p.title, meta: p.desc }))} />
+        <LinkList title="Phát âm và lịch sử" items={[
+          { href: "/speak/shadowing", title: "Shadowing", meta: "Nghe câu mẫu rồi nhắc lại để luyện phát âm" },
+          { href: "/speak/history", title: "Bài nói đã làm", meta: "Nghe lại bản ghi và xem điểm" },
+        ]} />
+      </div>
+    </main>
   );
 }

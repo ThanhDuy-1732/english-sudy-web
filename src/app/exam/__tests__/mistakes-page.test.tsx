@@ -26,7 +26,7 @@ test("lists unified exam mistakes with an occurrence badge, and resolve updates 
 
   fireEvent.click(screen.getByRole("button", { name: "✓ Đánh dấu xử lý" }));
   expect(getMistakes()[0].status).toBe("resolved");
-  expect(screen.getByText("🎉 Không có lỗi chưa giải quyết!")).toBeInTheDocument();
+  expect(screen.getByText("Không có lỗi chưa giải quyết.")).toBeInTheDocument();
 });
 
 test("migrates a legacy mistakeLog on first load so old mistakes are not lost", () => {
@@ -46,6 +46,6 @@ test("migrates a legacy mistakeLog on first load so old mistakes are not lost", 
 
 test("/exam shows the unresolved exam mistake count from unified", () => {
   addMistake(input);
-  const { container } = render(<ExamPage />);
-  expect(container.querySelector(".badge")?.textContent).toBe("1");
+  render(<ExamPage />);
+  expect(screen.getByText("1 chưa xong")).toBeInTheDocument();
 });

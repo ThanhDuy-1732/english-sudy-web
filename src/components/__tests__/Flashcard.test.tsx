@@ -56,7 +56,7 @@ beforeEach(() => {
 
 test("shows word on front face initially", () => {
   render(<Flashcard word="greet" meaning="chào hỏi" topic="Daily Communication" />);
-  expect(screen.getByText("greet")).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Xem nghĩa của greet" })).toHaveTextContent("greet");
 });
 
 test("shows meaning and example after clicking", async () => {
@@ -86,8 +86,8 @@ test("uses a saved example and synonyms without requesting the network", async (
 test("calls saveLearnedWord when Đã học is clicked", async () => {
   render(<Flashcard word="greet" meaning="chào hỏi" topic="Daily Communication" />);
   fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của greet" }));
-  await waitFor(() => screen.getByText("Đã học ✓"));
-  fireEvent.click(screen.getByText("Đã học ✓"));
+  await waitFor(() => screen.getByText("Lưu để ôn"));
+  fireEvent.click(screen.getByText("Lưu để ôn"));
   expect(saveLearnedWord).toHaveBeenCalledWith(
     expect.objectContaining({
       word: "greet",
@@ -124,12 +124,12 @@ test("setSaved stays false when saveLearnedWord returns false (duplicate)", asyn
 
   render(<Flashcard word="greet" meaning="chào hỏi" topic="Daily Communication" />);
   fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của greet" }));
-  await waitFor(() => screen.getByText("Đã học ✓"));
-  fireEvent.click(screen.getByText("Đã học ✓"));
+  await waitFor(() => screen.getByText("Lưu để ôn"));
+  fireEvent.click(screen.getByText("Lưu để ôn"));
 
-  // Button label should NOT change to "Đã lưu ✓"
-  expect(screen.getByText("Đã học ✓")).toBeInTheDocument();
-  expect(screen.queryByText("Đã lưu ✓")).not.toBeInTheDocument();
+  // Button label should NOT change to "Đã lưu"
+  expect(screen.getByText("Lưu để ôn")).toBeInTheDocument();
+  expect(screen.queryByText("Đã lưu")).not.toBeInTheDocument();
 });
 
 test("keeps flip and save actions as separate accessible buttons", async () => {
@@ -137,7 +137,7 @@ test("keeps flip and save actions as separate accessible buttons", async () => {
 
   fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của greet" }));
   await waitFor(() =>
-    expect(screen.getByRole("button", { name: "Đã học ✓" })).toBeInTheDocument(),
+    expect(screen.getByRole("button", { name: "Lưu để ôn" })).toBeInTheDocument(),
   );
 
   expect(screen.getByRole("button", { name: "Lật lại" })).toBeInTheDocument();

@@ -79,7 +79,7 @@ export default function VoiceSettingsTab() {
   return (
     <div className="space-y-8">
       <div>
-        <label className="mb-2 block text-sm font-medium text-[#d9ecff]" htmlFor="voice-select">
+        <label className="mb-2 block text-sm font-medium text-ink" htmlFor="voice-select">
           Giọng đọc
         </label>
         <div className="flex gap-3">
@@ -99,7 +99,7 @@ export default function VoiceSettingsTab() {
           <button
             type="button"
             onClick={handleTest}
-            className="shrink-0 rounded-lg bg-white/10 px-3 py-2 text-sm font-medium text-[#d9ecff] hover:bg-white/20"
+            className="shrink-0 rounded-lg bg-white/10 px-3 py-2 text-sm font-medium text-ink hover:bg-white/20"
           >
             Thử nghe
           </button>
@@ -109,8 +109,8 @@ export default function VoiceSettingsTab() {
       {SLIDERS.map(({ field, label, min, max, step }) => (
         <div key={field}>
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-sm font-medium text-[#d9ecff]">{label}</span>
-            <span className="text-sm text-[#b0b0d1]">{sliders[field].toFixed(1)}</span>
+            <span className="text-sm font-medium text-ink">{label}</span>
+            <span className="text-sm text-muted">{sliders[field].toFixed(1)}</span>
           </div>
           <input
             type="range"
@@ -127,7 +127,7 @@ export default function VoiceSettingsTab() {
       <button
         type="button"
         onClick={handleReset}
-        className="rounded-lg border border-white/10 px-4 py-2 text-sm text-[#b0b0d1] hover:bg-white/5"
+        className="rounded-lg border border-white/10 px-4 py-2 text-sm text-muted hover:bg-white/5"
       >
         Reset về mặc định
       </button>

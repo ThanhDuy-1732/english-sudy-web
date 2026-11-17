@@ -35,23 +35,20 @@ export default function HistoryPage() {
   }).length;
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:py-14">
+    <main className="page-wide">
       <div className="mb-8 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#d9ecff]">
-            Learning library
-          </p>
-          <h1 className="mt-2 font-display text-4xl font-bold text-white">Từ đã học</h1>
-          <p className="mt-2 text-[#b0b0d1]">Theo dõi vốn từ và chọn nhóm cần ôn lại.</p>
+          <h1 className="page-title">Từ đã học</h1>
+          <p className="page-lead">Theo dõi vốn từ và chọn nhóm cần ôn lại.</p>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:min-w-64">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.08] p-4">
-            <p className="font-display text-3xl font-bold text-white">{words.length}</p>
-            <p className="mt-1 text-sm text-[#b0b0d1]">Từ đã lưu</p>
+          <div className="panel p-4">
+            <p className="text-2xl font-semibold tabular-nums tracking-tight text-ink">{words.length}</p>
+            <p className="mt-1 text-sm text-muted">Từ đã lưu</p>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.08] p-4">
-            <p className="font-display text-3xl font-bold text-white">{dueCount}</p>
-            <p className="mt-1 text-sm text-[#b0b0d1]">Đến hạn ôn</p>
+          <div className="panel p-4">
+            <p className="text-2xl font-semibold tabular-nums tracking-tight text-ink">{dueCount}</p>
+            <p className="mt-1 text-sm text-muted">Đến hạn ôn</p>
           </div>
         </div>
       </div>
@@ -87,13 +84,13 @@ export default function HistoryPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-[#b0b0d1]">Chưa có từ nào được lưu.</p>
+        <p className="text-muted">Chưa có từ nào được lưu.</p>
       ) : (
         <ul className="space-y-3">
           {filtered.map((entry) => (
             <li
               key={entry.word}
-              className="flex items-start gap-3 rounded-xl bg-white p-4 shadow-sm"
+              className="flex items-start gap-3 panel p-4"
             >
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-start justify-between gap-2">

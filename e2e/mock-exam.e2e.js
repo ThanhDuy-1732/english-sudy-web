@@ -30,11 +30,11 @@ scenario("mock exam runs end to end", async ({ browser, check }) => {
     await page.evaluate(() => [...document.querySelectorAll("button")].find((b) => b.className.includes("option-btn"))?.click());
     await sleep(150);
     if (await clickText(page, "Xem kết quả")) break;
-    await clickText(page, "Tiếp"); await sleep(200);
+    await clickText(page, "Câu tiếp"); await sleep(200);
   }
   await sleep(2000);
   const t = await bodyText(page);
-  check("result page with score", /Kết quả Mock Test/.test(t) && /18 \/ 18 câu đúng/.test(t), t.match(/\d+ \/ \d+ câu đúng/)?.[0]);
+  check("result page with score", /Kết quả thi thử/.test(t) && /18 \/ 18 câu đúng/.test(t), t.match(/\d+ \/ \d+ câu đúng/)?.[0]);
   check("TOEIC estimate with listening, reading and total", /Listening \(ước lượng\)/.test(t) && /Reading \(ước lượng\)/.test(t) && /\/ 990/.test(t));
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("examAttempts") || "[]").filter((a) => a.mode === "mock").length);
   check("mock attempt saved", saved === 1, `saved=${saved}`);
@@ -47,5 +47,5 @@ scenario("mock exam ends automatically when time runs out", async ({ browser, ch
   await clickText(page, "Bắt đầu thi"); await waitText(page, "Sẵn sàng chưa?", 20000); await clickText(page, "Bắt đầu"); await sleep(600);
   await page.evaluate(() => { const real = Date.now.bind(Date); Date.now = () => real() + 46 * 60 * 1000; });
   await sleep(2500);
-  check("result shown after time-up", /Kết quả Mock Test/.test(await bodyText(page)));
+  check("result shown after time-up", /Kết quả thi thử/.test(await bodyText(page)));
 });

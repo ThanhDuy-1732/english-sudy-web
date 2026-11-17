@@ -8,27 +8,18 @@ import { getAttempts, getExamSettings } from "@/lib/exam/exam-storage";
 import { getMistakes as getUnifiedMistakes } from "@/lib/mistakes";
 import { recomputeMastery } from "@/lib/mastery-all";
 import { localDateKey } from "@/lib/date";
+import Segmented from "@/components/Segmented";
 
 const BUDGET_OPTIONS = [15, 30, 60] as const;
 
-const KIND_EMOJI: Record<PlanBlock["kind"], string> = {
-  srs_review: "🔄",
-  new_words: "✨",
-  exam_drill: "📝",
-  speaking: "🎤",
-  writing: "📖",
-  grammar: "📚",
-  mistakes: "🔍",
-};
-
-const KIND_COLOR: Record<PlanBlock["kind"], string> = {
-  srs_review: "#0d6efd",
-  new_words: "#6610f2",
-  exam_drill: "#fd7e14",
-  speaking: "#20c997",
-  writing: "#6f42c1",
-  grammar: "#0dcaf0",
-  mistakes: "#dc3545",
+const KIND_LABEL: Record<PlanBlock["kind"], string> = {
+  srs_review: "Ôn tập",
+  new_words: "Từ mới",
+  exam_drill: "Luyện thi",
+  speaking: "Nói",
+  writing: "Viết",
+  grammar: "Ngữ pháp",
+  mistakes: "Sổ lỗi",
 };
 
 function getTodayKey() {
@@ -92,125 +83,89 @@ export default function TodayPage() {
 
   const doneCount = planBlocks?.filter((b) => b.done).length ?? 0;
   const totalCount = planBlocks?.length ?? 0;
+  const minutesLeft = planBlocks?.filter((b) => !b.done).reduce((sum, b) => sum + b.estimatedMin, 0) ?? 0;
+
+  // Read after mount: the date and due count come from the device, not the server render.
+  const [today, setToday] = useState<{ label: string; due: number } | null>(null);
+  useEffect(() => {
+    const label = new Intl.DateTimeFormat("vi-VN", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
+    setToday({ label: label.charAt(0).toUpperCase() + label.slice(1), due: getWordsForReview().length });
+  }, [planBlocks]);
 
   return (
-    <div className="today-page">
-      <h1>Hôm nay học gì?</h1>
-      <p className="subtitle">
-        Kế hoạch học tự động dựa trên điểm yếu và nợ ôn tập của bạn.
+    <main className="mx-auto w-full max-w-2xl px-4 pb-16 pt-8 sm:px-8 lg:pt-12">
+      <p className="text-sm text-muted" suppressHydrationWarning>{today?.label ?? "\u00a0"}</p>
+      <h1 className="mt-1 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">Hôm nay học gì?</h1>
+      <p className="page-lead">
+        {today && today.due > 0
+          ? <>Có <span className="marker-stroke font-semibold tabular-nums">{today.due} từ</span> đến hạn ôn. Kế hoạch dưới đây xếp việc quan trọng nhất lên trước.</>
+          : "Kế hoạch được lập từ từ cần ôn, điểm yếu khi luyện thi và lỗi bạn hay mắc."}
       </p>
 
       {!planBlocks ? (
-        <div className="setup">
-          <p className="setup-label">Bạn có bao nhiêu thời gian hôm nay?</p>
-          <div className="budget-selector">
-            {BUDGET_OPTIONS.map((b) => (
-              <button
-                key={b}
-                onClick={() => setBudget(b)}
-                className={budget === b ? "active" : ""}
-              >
-                {b} phút
-              </button>
-            ))}
+        <section aria-labelledby="budget-label" className="mt-8 rounded-xl border border-rule bg-card p-5 sm:p-6">
+          <p id="budget-label" className="font-medium text-ink">Hôm nay bạn có bao nhiêu thời gian?</p>
+          <div className="mt-4">
+            <Segmented label="Thời gian học hôm nay" value={budget} onChange={setBudget}
+              options={BUDGET_OPTIONS.map((b) => ({ value: b, label: `${b} phút` }))} />
           </div>
-          <button onClick={buildPlan} className="generate-btn">
-            🎯 Tạo kế hoạch
-          </button>
-        </div>
+          <div className="mt-6">
+            <button type="button" onClick={buildPlan} className="min-h-12 rounded-xl bg-primary px-6 font-semibold text-white transition-colors hover:bg-primary-strong">
+              Lập kế hoạch
+            </button>
+          </div>
+        </section>
       ) : (
-        <>
-          <div className="progress-bar-container">
-            <div
-              className="progress-bar"
-              style={{ width: totalCount > 0 ? `${(doneCount / totalCount) * 100}%` : "0%" }}
-            />
+        <section aria-label="Kế hoạch hôm nay" className="mt-8">
+          <div className="flex items-baseline justify-between gap-4">
+            <p className="text-sm text-muted">
+              <span className="font-semibold tabular-nums text-ink">{doneCount}/{totalCount}</span> việc xong
+              {minutesLeft > 0 && <> · còn khoảng <span className="tabular-nums">{minutesLeft}</span> phút</>}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setPlanBlocks(null);
+                localStorage.removeItem("dailyPlan");
+              }}
+              className="min-h-11 text-sm font-medium text-primary hover:underline"
+            >
+              Lập lại
+            </button>
           </div>
-          <p className="progress-text">
-            {doneCount}/{totalCount} hoàn thành
-          </p>
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-rule">
+            <div className="h-full rounded-full bg-primary transition-[width] duration-300" style={{ width: totalCount > 0 ? `${(doneCount / totalCount) * 100}%` : "0%" }} />
+          </div>
 
-          <div className="plan-blocks">
+          <ol className="mt-6 divide-y divide-rule overflow-hidden rounded-xl border border-rule bg-card">
             {planBlocks.map((block) => (
-              <div
-                key={block.id}
-                className={`plan-block ${block.done ? "done" : ""}`}
-                style={{ "--accent": KIND_COLOR[block.kind] } as React.CSSProperties}
-              >
-                <div className="block-icon">{KIND_EMOJI[block.kind]}</div>
-                <div className="block-content">
-                  <p className="block-title">{block.title}</p>
-                  <p className="block-reason">{block.reason}</p>
-                  <p className="block-time">~{block.estimatedMin} phút</p>
+              <li key={block.id} className="flex items-start gap-4 px-4 py-4 sm:px-5">
+                <button
+                  type="button"
+                  onClick={() => markDone(block.id)}
+                  disabled={block.done}
+                  aria-label={block.done ? `${block.title}: đã xong` : `Đánh dấu xong: ${block.title}`}
+                  className="group -m-2.5 flex size-11 shrink-0 items-center justify-center"
+                >
+                  <span className={`flex size-6 items-center justify-center rounded-full border-2 transition-colors ${block.done ? "border-primary bg-primary text-white" : "border-rule group-hover:border-primary"}`}>
+                    {block.done && <svg aria-hidden="true" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3.5 8.5 3 3 6-7" /></svg>}
+                  </span>
+                </button>
+                <div className={`min-w-0 flex-1 ${block.done ? "opacity-55" : ""}`}>
+                  <p className={`font-medium text-ink ${block.done ? "line-through decoration-muted" : ""}`}>{block.title}</p>
+                  <p className="mt-0.5 text-sm leading-6 text-muted">{block.reason}</p>
+                  <p className="mt-1 text-xs text-muted">{KIND_LABEL[block.kind]} · khoảng {block.estimatedMin} phút</p>
                 </div>
-                <div className="block-actions">
-                  {!block.done ? (
-                    <>
-                      <Link href={block.href} className="go-btn">
-                        Bắt đầu →
-                      </Link>
-                      <button onClick={() => markDone(block.id)} className="done-btn">
-                        ✓
-                      </button>
-                    </>
-                  ) : (
-                    <span className="done-label">✅ Xong</span>
-                  )}
-                </div>
-              </div>
+                {!block.done && (
+                  <Link href={block.href} className="shrink-0 self-center rounded-lg border border-rule px-3 py-2 text-sm font-medium text-ink transition-colors hover:border-primary hover:text-primary">
+                    Bắt đầu
+                  </Link>
+                )}
+              </li>
             ))}
-          </div>
-
-          <button
-            onClick={() => {
-              setPlanBlocks(null);
-              localStorage.removeItem("dailyPlan");
-            }}
-            className="regenerate-btn"
-          >
-            🔄 Tạo lại kế hoạch
-          </button>
-        </>
+          </ol>
+        </section>
       )}
-
-      <style jsx>{`
-        .today-page { max-width: 640px; margin: 0 auto; padding: 1.5rem; }
-        h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
-        .subtitle { color: #6c757d; font-size: 0.9rem; margin-bottom: 1.5rem; }
-        .setup { text-align: center; padding: 2rem; }
-        .setup-label { font-size: 1rem; margin-bottom: 1rem; }
-        .budget-selector { display: flex; justify-content: center; gap: 0.75rem; margin-bottom: 1.5rem; }
-        .budget-selector button { color: #212529; padding: 0.6rem 1.5rem; border: 2px solid #dee2e6; border-radius: 20px; background: white; cursor: pointer; font-size: 0.95rem; }
-        .budget-selector button.active { border-color: #0d6efd; background: #0d6efd; color: white; font-weight: 700; }
-        .generate-btn { padding: 0.875rem 2rem; background: #0d6efd; color: white; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; }
-        .generate-btn:hover { background: #0b5ed7; }
-        .progress-bar-container { height: 6px; background: #e9ecef; border-radius: 3px; margin-bottom: 0.4rem; }
-        .progress-bar { height: 100%; background: #198754; border-radius: 3px; transition: width 0.4s; }
-        .progress-text { font-size: 0.8rem; color: #6c757d; margin-bottom: 1.25rem; }
-        .plan-blocks { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
-        .plan-block { color: #212529; display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 2px solid var(--accent, #dee2e6); border-radius: 12px; background: white; transition: opacity 0.2s; }
-        .plan-block.done { opacity: 0.5; }
-        .block-icon { font-size: 1.5rem; flex-shrink: 0; }
-        .block-content { flex: 1; }
-        .block-title { font-weight: 600; font-size: 0.95rem; margin: 0 0 0.2rem; }
-        .block-reason { font-size: 0.8rem; color: #6c757d; margin: 0 0 0.15rem; }
-        .block-time { font-size: 0.75rem; color: #6c757d; margin: 0; }
-        .block-actions { display: flex; gap: 0.4rem; align-items: center; flex-shrink: 0; }
-        :global(.go-btn) { padding: 0.45rem 0.9rem; background: var(--accent, #0d6efd); color: white; border-radius: 8px; text-decoration: none; font-size: 0.85rem; white-space: nowrap; }
-        .done-btn { color: #212529; width: 32px; height: 32px; border: 1.5px solid #dee2e6; border-radius: 50%; background: white; cursor: pointer; font-size: 0.85rem; }
-        .done-btn:hover { background: #d1e7dd; border-color: #198754; }
-        .done-label { font-size: 0.85rem; color: #198754; font-weight: 600; }
-        .regenerate-btn { width: 100%; padding: 0.6rem; background: transparent; border: 1.5px solid #dee2e6; border-radius: 8px; cursor: pointer; font-size: 0.875rem; color: #6c757d; }
-        .regenerate-btn:hover { background: #f8f9fa; }
-        :global(:root[data-theme="dark"]) .plan-block { background: #1a1a2e; color: #eee; }
-        :global(:root[data-theme="dark"]) .block-time { color: #adb5bd; }
-        :global(:root[data-theme="dark"]) .budget-selector button { background: #1a1a2e; color: #eee; border-color: #444; }
-        /* dark theme: light surfaces */
-        :global(:root[data-theme="dark"]) .progress-bar-container { background: rgba(255, 255, 255, 0.12); color: #f1ecff; }
-        :global(:root[data-theme="dark"]) .done-btn { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
-        :global(:root[data-theme="dark"]) .done-btn:hover { background: rgba(34, 197, 94, 0.16); color: #86efac; }
-        :global(:root[data-theme="dark"]) .regenerate-btn:hover { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
-      `}</style>
-    </div>
+    </main>
   );
 }

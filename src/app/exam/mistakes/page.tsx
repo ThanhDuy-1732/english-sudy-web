@@ -55,7 +55,7 @@ export default function MistakesPage() {
     <div className="mistakes-page">
       <div className="page-header">
         <button onClick={() => router.push("/exam")} className="back-btn">
-          ← Exam
+          ← Luyện thi
         </button>
         <h1>Sổ lỗi</h1>
         <span className="count">
@@ -77,7 +77,7 @@ export default function MistakesPage() {
 
       {shown.length === 0 ? (
         <div className="empty">
-          <p>🎉 Không có lỗi {filter === "unresolved" ? "chưa giải quyết" : ""}!</p>
+          <p>Không có lỗi {filter === "unresolved" ? "chưa giải quyết" : ""}.</p>
         </div>
       ) : (
         <div className="mistakes-list">
@@ -122,41 +122,33 @@ export default function MistakesPage() {
       )}
 
       <style jsx>{`
-        .mistakes-page { max-width: 720px; margin: 0 auto; padding: 1.5rem; }
+        .mistakes-page { max-width: 48rem; margin: 0 auto; padding: 2rem 1rem 4rem; }
         .page-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
-        .back-btn { background: none; border: none; cursor: pointer; color: #6c757d; font-size: 0.9rem; }
-        h1 { font-size: 1.25rem; font-weight: 700; margin: 0; flex: 1; }
-        .count { font-size: 0.85rem; color: #adb5bd; }
+        .back-btn { background: none; border: none; cursor: pointer; color: rgb(var(--muted)); font-size: 0.9rem; }
+        h1 { color: rgb(var(--ink)); letter-spacing: -0.015em; font-size: 1.625rem; font-weight: 600; margin: 0; flex: 1; }
+        .count { font-size: 0.85rem; color: rgb(var(--muted)); }
         .filter-row { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
-        .filter-row button { color: #212529; padding: 0.4rem 1rem; border: 1.5px solid #dee2e6; border-radius: 16px; background: white; cursor: pointer; font-size: 0.85rem; }
-        .filter-row button.active { background: #0d6efd; color: white; border-color: #0d6efd; }
-        .empty { text-align: center; padding: 3rem; color: #adb5bd; }
+        .filter-row button { color: rgb(var(--ink)); padding: 0.4rem 1rem; border: 1.5px solid rgb(var(--rule)); border-radius: 16px; background: rgb(var(--card)); cursor: pointer; font-size: 0.85rem; }
+        .filter-row button.active { background: rgb(var(--primary)); color: white; border-color: rgb(var(--primary)); }
+        .empty { text-align: center; padding: 3rem; color: rgb(var(--muted)); }
         .mistakes-list { display: flex; flex-direction: column; gap: 1rem; }
-        .mistake-card { padding: 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; }
+        .mistake-card { padding: 1rem; border: 1.5px solid rgb(var(--rule)); border-radius: 10px; }
         .mistake-card.resolved { opacity: 0.65; border-style: dashed; }
         .mistake-meta { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; font-size: 0.8rem; }
-        .part-tag { color: #212529; background: #e9ecef; border-radius: 10px; padding: 0.15rem 0.5rem; font-weight: 600; }
-        .date { color: #adb5bd; }
-        .resolved-tag { color: #198754; font-weight: 600; }
+        .part-tag { color: rgb(var(--ink)); background: rgb(var(--rule)); border-radius: 10px; padding: 0.15rem 0.5rem; font-weight: 600; }
+        .date { color: rgb(var(--muted)); }
+        .resolved-tag { color: rgb(var(--ok)); font-weight: 600; }
         .mistake-prompt { font-size: 0.9rem; font-weight: 500; margin-bottom: 0.5rem; }
         .answer-row { display: flex; gap: 1rem; margin-bottom: 0.5rem; font-size: 0.875rem; }
-        .wrong-answer { color: #dc3545; }
-        .correct-answer { color: #198754; }
-        .explanation { font-size: 0.85rem; color: #adb5bd; margin-bottom: 0.75rem; }
+        .wrong-answer { color: rgb(var(--margin)); }
+        .correct-answer { color: rgb(var(--ok)); }
+        .explanation { font-size: 0.85rem; color: rgb(var(--muted)); margin-bottom: 0.75rem; }
         .mistake-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
         .drill-btn, .resolve-btn { padding: 0.4rem 0.9rem; border-radius: 6px; font-size: 0.8rem; cursor: pointer; border: 1.5px solid; }
-        .drill-btn { border-color: #0d6efd; color: #0d6efd; background: white; }
-        .drill-btn:hover { background: #e8f0fe; }
-        .resolve-btn { border-color: #198754; color: #198754; background: white; }
-        .resolve-btn:hover { background: #d1e7dd; }
-        :global(:root[data-theme="light"]) .explanation, :global(:root[data-theme="light"]) .count, :global(:root[data-theme="light"]) .date, :global(:root[data-theme="light"]) .empty { color: #6b6384; }
-        /* dark theme: light surfaces */
-        :global(:root[data-theme="dark"]) .filter-row button { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
-        :global(:root[data-theme="dark"]) .part-tag { background: rgba(255, 255, 255, 0.12); color: #f1ecff; }
-        :global(:root[data-theme="dark"]) .drill-btn { background: #3a2a61; color: #f1ecff; }
-        :global(:root[data-theme="dark"]) .drill-btn:hover { background: rgba(59, 130, 246, 0.2); color: #bfdbfe; }
-        :global(:root[data-theme="dark"]) .resolve-btn { background: #3a2a61; color: #f1ecff; }
-        :global(:root[data-theme="dark"]) .resolve-btn:hover { background: rgba(34, 197, 94, 0.16); color: #86efac; }
+        .drill-btn { border-color: rgb(var(--primary)); color: rgb(var(--primary-text)); background: rgb(var(--card)); }
+        .drill-btn:hover { background: rgb(var(--primary-soft)); }
+        .resolve-btn { border-color: rgb(var(--ok)); color: rgb(var(--ok)); background: rgb(var(--card)); }
+        .resolve-btn:hover { background: rgb(var(--ok-soft)); }
       `}</style>
     </div>
   );

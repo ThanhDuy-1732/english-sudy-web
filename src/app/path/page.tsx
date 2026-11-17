@@ -90,10 +90,10 @@ export default function LearningPathPage() {
   useEffect(() => { setItems(buildPath()); }, []);
 
   return (
-    <main className="max-w-lg mx-auto p-4">
+    <main className="page">
       <div className="flex justify-between items-center mb-2">
-        <h1 className="text-xl font-bold">Lộ trình học</h1>
-        <Link href="/settings" className="text-sm text-gray-400 hover:text-gray-600">Chỉnh mục tiêu →</Link>
+        <h1 className="page-title">Lộ trình học</h1>
+        <Link href="/settings" className="text-sm text-gray-400 hover:text-gray-600">Chỉnh mục tiêu</Link>
       </div>
       <p className="text-sm text-gray-500 mb-6">
         Mục tiêu: {GOAL_LABELS[profile.goal]} · {profile.dailyStudyMinutes} phút/ngày
@@ -107,8 +107,8 @@ export default function LearningPathPage() {
         {items.map((item) => (
           <li key={item.rank}>
             <Link href={item.href}
-              className="flex items-start gap-3 p-4 border rounded-xl hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 transition-colors">
-              <span className="text-2xl font-bold text-gray-200 dark:text-gray-700 w-8 shrink-0 text-center leading-none pt-1">
+              className="flex items-start gap-3 p-4 border rounded-xl hover:bg-primary-soft/50 transition-colors border-rule">
+              <span className="text-2xl font-bold text-gray-200 w-8 shrink-0 text-center leading-none pt-1">
                 {item.rank}
               </span>
               <div className="flex-1 min-w-0">
@@ -123,7 +123,7 @@ export default function LearningPathPage() {
                   </div>
                 )}
               </div>
-              <span className="text-gray-300 dark:text-gray-600 self-center">→</span>
+              <span className="text-gray-300 self-center">→</span>
             </Link>
           </li>
         ))}

@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 import { deleteCustomTopic, getCustomTopics, saveCustomTopic } from "@/lib/custom-topics";
 
 const TOPICS = ["Daily Communication", "TOEIC"];
+// The topic string goes to the AI as-is; the chip shows a Vietnamese name.
+const TOPIC_LABELS: Record<string, string> = { "Daily Communication": "Giao tiếp hằng ngày" };
+const CHIP = "min-h-11 text-sm font-medium transition-colors";
+const ON = "bg-ink text-paper";
+const OFF = "border border-rule bg-card text-ink hover:border-primary";
 
 interface TopicSelectorProps {
   value: string;
@@ -33,20 +38,16 @@ export default function TopicSelector({ value, onChange }: TopicSelectorProps) {
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-3">
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2">
         {TOPICS.map((topic) => (
           <button
             type="button"
             key={topic}
             onClick={() => onChange(topic)}
             aria-pressed={value === topic}
-            className={`min-h-12 rounded-full px-5 text-sm font-semibold transition-colors ${
-              value === topic
-                ? "bg-[#7f56d9] text-white shadow-lg shadow-black/20"
-                : "bg-white/10 text-[#d9ecff] hover:bg-white/15"
-            }`}
+            className={`${CHIP} rounded-full px-4 ${value === topic ? ON : OFF}`}
           >
-            {topic}
+            {TOPIC_LABELS[topic] ?? topic}
           </button>
         ))}
         {customTopics.map((topic) => (
@@ -55,11 +56,7 @@ export default function TopicSelector({ value, onChange }: TopicSelectorProps) {
               type="button"
               onClick={() => onChange(topic)}
               aria-pressed={value === topic}
-              className={`min-h-12 min-w-0 truncate rounded-l-full pl-5 pr-3 text-sm font-semibold transition-colors ${
-                value === topic
-                  ? "bg-[#7f56d9] text-white shadow-lg shadow-black/20"
-                  : "bg-white/10 text-[#d9ecff] hover:bg-white/15"
-              }`}
+              className={`${CHIP} min-w-0 truncate rounded-l-full border-r-0 pl-4 pr-2 ${value === topic ? ON : OFF}`}
             >
               {topic}
             </button>
@@ -67,11 +64,7 @@ export default function TopicSelector({ value, onChange }: TopicSelectorProps) {
               type="button"
               onClick={() => removeTopic(topic)}
               aria-label={`Xóa chủ đề ${topic}`}
-              className={`min-h-12 flex-none rounded-r-full pl-1 pr-4 text-sm transition-colors ${
-                value === topic
-                  ? "bg-[#7f56d9] text-white/70 shadow-lg shadow-black/20 hover:text-white"
-                  : "bg-white/10 text-[#b0b0d1] hover:bg-white/15 hover:text-white"
-              }`}
+              className={`${CHIP} flex-none rounded-r-full border-l-0 pl-1 pr-3 ${value === topic ? `${ON} opacity-90` : `${OFF} text-muted`}`}
             >
               ×
             </button>
@@ -83,16 +76,16 @@ export default function TopicSelector({ value, onChange }: TopicSelectorProps) {
           value={inputValue}
           onChange={(event) => setInputValue(event.target.value)}
           onKeyDown={(event) => { if (event.key === "Enter") addTopic(); }}
-          placeholder="Chủ đề khác... (nhấn Enter)"
-          className="min-h-11 min-w-0 flex-1 rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm text-white placeholder:text-[#b0b0d1] focus:border-[#d9ecff] focus:outline-none"
+          placeholder="Chủ đề khác, ví dụ: du lịch"
+          className="min-h-11 min-w-0 flex-1 rounded-lg border border-rule bg-card px-3 py-2 text-sm text-ink placeholder:text-muted focus:border-primary focus:outline-none sm:w-72 sm:flex-none"
         />
         <button
           type="button"
           onClick={addTopic}
           disabled={!inputValue.trim()}
-          className="min-h-11 rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-[#d9ecff] transition-colors hover:bg-white/15 disabled:opacity-50"
+          className="min-h-11 rounded-lg border border-rule bg-card px-4 py-2 text-sm font-medium text-ink transition-colors enabled:hover:border-primary disabled:text-muted"
         >
-          + Thêm
+          Thêm chủ đề
         </button>
       </div>
     </div>

@@ -1,74 +1,32 @@
-"use client";
+import LinkList from "@/components/LinkList";
 
-import Link from "next/link";
-
-const TASKS = [
-  {
-    id: "task2-opinion",
-    kind: "ielts_task2",
-    title: "IELTS Task 2 – Opinion Essay",
-    desc: "250 từ · 40 phút · Agree/Disagree",
-    emoji: "📝",
-  },
-  {
-    id: "task2-discuss",
-    kind: "ielts_task2",
-    title: "IELTS Task 2 – Discussion Essay",
-    desc: "250 từ · 40 phút · Discuss both views",
-    emoji: "⚖️",
-  },
-  {
-    id: "task1-line",
-    kind: "ielts_task1",
-    title: "IELTS Task 1 – Line Chart",
-    desc: "150 từ · 20 phút · Mô tả biểu đồ",
-    emoji: "📈",
-  },
-  {
-    id: "task1-bar",
-    kind: "ielts_task1",
-    title: "IELTS Task 1 – Bar Chart",
-    desc: "150 từ · 20 phút · So sánh dữ liệu",
-    emoji: "📊",
-  },
-  {
-    id: "toeic-email",
-    kind: "toeic_email",
-    title: "TOEIC Writing – Business Email",
-    desc: "100-150 từ · 10 phút",
-    emoji: "📧",
-  },
+const GROUPS = [
+  { title: "IELTS Task 2", description: "Bài luận 250 từ, 40 phút.", tasks: [
+    { id: "task2-opinion", name: "Opinion essay", desc: "Đồng ý hay không đồng ý với một quan điểm" },
+    { id: "task2-discuss", name: "Discussion essay", desc: "Bàn về hai quan điểm và nêu ý kiến của bạn" },
+  ] },
+  { title: "IELTS Task 1", description: "Mô tả biểu đồ, 150 từ, 20 phút.", tasks: [
+    { id: "task1-line", name: "Line chart", desc: "Mô tả xu hướng theo thời gian" },
+    { id: "task1-bar", name: "Bar chart", desc: "So sánh số liệu giữa các nhóm" },
+  ] },
+  { title: "TOEIC Writing", description: "100–150 từ, 10 phút.", tasks: [
+    { id: "toeic-email", name: "Business email", desc: "Trả lời một email công việc" },
+  ] },
 ];
 
 export default function WritePage() {
   return (
-    <div className="write-page">
-      <h1>Luyện viết</h1>
-      <p className="subtitle">Chọn dạng bài để bắt đầu. AI sẽ chấm theo 4 tiêu chí và đưa bài mẫu.</p>
+    <main className="mx-auto w-full max-w-3xl px-4 pb-16 pt-8 sm:px-8 lg:pt-12">
+      <h1 className="text-3xl font-semibold tracking-tight text-ink sm:text-4xl">Luyện viết</h1>
+      <p className="page-lead">Chọn dạng bài để bắt đầu. AI chấm theo 4 tiêu chí, chỉ ra từng lỗi trong bài và đưa bài mẫu.</p>
 
-      <div className="tasks-list">
-        {TASKS.map((t) => (
-          <Link key={t.id} href={`/write/task/${t.id}`} className="task-card">
-            <span className="emoji">{t.emoji}</span>
-            <div className="task-info">
-              <p className="title">{t.title}</p>
-              <p className="desc">{t.desc}</p>
-            </div>
-          </Link>
+      <div className="mt-8">
+        {GROUPS.map((group) => (
+          <LinkList key={group.title} title={group.title} description={group.description}
+            items={group.tasks.map((t) => ({ href: `/write/task/${t.id}`, title: <span className="font-en">{t.name}</span>, meta: t.desc }))} />
         ))}
+        <LinkList title="Bài đã viết" items={[{ href: "/write/history", title: "Lịch sử bài viết", meta: "Xem lại điểm, viết lại những câu bị sửa" }]} />
       </div>
-
-      <style jsx>{`
-        .write-page { max-width: 640px; margin: 0 auto; padding: 1.5rem; }
-        h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
-        .subtitle { color: #6c757d; font-size: 0.9rem; margin-bottom: 1.5rem; }
-        .tasks-list { display: flex; flex-direction: column; gap: 0.75rem; }
-        :global(.task-card) { display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; text-decoration: none; color: inherit; transition: border-color 0.15s; }
-        :global(.task-card):hover { border-color: #0d6efd; background: rgba(13, 110, 253, 0.18); }
-        .emoji { font-size: 1.5rem; flex-shrink: 0; }
-        .title { font-weight: 600; font-size: 0.95rem; margin: 0 0 0.2rem; }
-        .desc { font-size: 0.8rem; color: #6c757d; margin: 0; }
-      `}</style>
-    </div>
+    </main>
   );
 }

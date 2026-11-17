@@ -104,52 +104,43 @@ export default function PassageReader({
           align-items: start;
         }
         .passage-pane {
-          color: #212529;
+          color: rgb(var(--ink));
           position: sticky;
           top: 80px;
           max-height: calc(100vh - 120px);
           overflow-y: auto;
           padding: 1rem;
-          background: #f8f9fa;
+          background: rgb(var(--paper));
           border-radius: 10px;
-          border-left: 3px solid #6c757d;
+          border-left: 3px solid rgb(var(--muted));
         }
         .passage-label {
           font-size: 0.75rem;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-          color: #6c757d;
+
+
+          color: rgb(var(--muted));
           margin-bottom: 0.75rem;
         }
         .passage-text p { margin: 0 0 0.75rem; line-height: 1.7; font-size: 0.9rem; }
         .question-pane { padding: 0.5rem; }
-        .question-header { display: flex; justify-content: space-between; font-size: 0.8rem; color: #6c757d; margin-bottom: 0.75rem; }
+        .question-header { display: flex; justify-content: space-between; font-size: 0.8rem; color: rgb(var(--muted)); margin-bottom: 0.75rem; }
         .q-type { font-style: italic; }
         .question-prompt { font-size: 0.95rem; font-weight: 500; line-height: 1.6; margin-bottom: 1rem; }
         .options-list { display: flex; flex-direction: column; gap: 0.5rem; }
-        .option-btn { color: #212529; text-align: left; padding: 0.65rem 0.9rem; border: 1.5px solid #dee2e6; border-radius: 6px; background: white; cursor: pointer; font-size: 0.9rem; }
-        .option-btn:hover:not(:disabled) { border-color: #0d6efd; background: #e8f0fe; }
-        .option-btn.selected { border-color: #0d6efd; background: #e8f0fe; }
-        .option-btn.correct { border-color: #198754; background: #d1e7dd; }
-        .option-btn.wrong { border-color: #dc3545; background: #f8d7da; }
-        .text-input { width: 100%; padding: 0.6rem 0.8rem; border: 1.5px solid #dee2e6; border-radius: 6px; font-size: 0.9rem; box-sizing: border-box; }
-        .result-panel { margin-top: 0.75rem; padding: 0.75rem; border-radius: 6px; background: #d1e7dd; border-left: 3px solid #198754; font-size: 0.875rem; }
-        .result-panel.wrong { background: #f8d7da; border-color: #dc3545; }
+        .option-btn { color: rgb(var(--ink)); text-align: left; padding: 0.65rem 0.9rem; border: 1.5px solid rgb(var(--rule)); border-radius: 6px; background: rgb(var(--card)); cursor: pointer; font-size: 0.9rem; }
+        .option-btn:hover:not(:disabled) { border-color: rgb(var(--primary)); background: rgb(var(--primary-soft)); }
+        .option-btn.selected { border-color: rgb(var(--primary)); background: rgb(var(--primary-soft)); }
+        .option-btn.correct { border-color: rgb(var(--ok)); background: rgb(var(--ok-soft)); }
+        .option-btn.wrong { border-color: rgb(var(--margin)); background: rgb(var(--margin-soft)); }
+        .text-input { width: 100%; padding: 0.6rem 0.8rem; border: 1.5px solid rgb(var(--rule)); border-radius: 6px; font-size: 0.9rem; box-sizing: border-box; }
+        .result-panel { margin-top: 0.75rem; padding: 0.75rem; border-radius: 6px; background: rgb(var(--ok-soft)); border-left: 3px solid rgb(var(--ok)); font-size: 0.875rem; }
+        .result-panel.wrong { background: rgb(var(--margin-soft)); border-color: rgb(var(--margin)); }
         .result-panel p { margin: 0 0 0.35rem; }
-        .vocab { font-style: italic; color: #555; }
+        .vocab { font-style: italic; color: rgb(var(--muted)); }
         @media (max-width: 700px) {
           .passage-reader { grid-template-columns: 1fr; }
           .passage-pane { position: static; max-height: 200px; }
         }
-        :global(:root[data-theme="dark"]) .question-header, :global(:root[data-theme="dark"]) .passage-label { color: #b0b0d1; }
-        :global(:root[data-theme="dark"]) .passage-pane { background: #1e2a35; color: #eee; }
-        :global(:root[data-theme="dark"]) .option-btn { background: #1a1a2e; border-color: #444; color: #eee; }
-        :global(:root[data-theme="dark"]) .text-input { background: #1a1a2e; color: #eee; border-color: #444; }
-        /* dark theme: light surfaces */
-        :global(:root[data-theme="dark"]) .option-btn:hover:not(:disabled) { background: rgba(59, 130, 246, 0.2); color: #bfdbfe; }
-        :global(:root[data-theme="dark"]) .option-btn.selected { background: rgba(59, 130, 246, 0.2); color: #bfdbfe; }
-        :global(:root[data-theme="dark"]) .option-btn.correct { background: rgba(34, 197, 94, 0.16); color: #86efac; }
-        :global(:root[data-theme="dark"]) .result-panel { background: rgba(34, 197, 94, 0.16); color: #86efac; }
       `}</style>
     </div>
   );

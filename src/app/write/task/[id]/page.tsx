@@ -201,7 +201,7 @@ export default function WritingTaskPage() {
     <div className="writing-task">
       {error && <p role="alert" className="mb-4 rounded-lg bg-red-950 p-3 text-red-100">{error}</p>}
       <div className="task-header">
-        <button onClick={() => router.push("/write")} className="back-btn">← Write</button>
+        <button onClick={() => router.push("/write")} className="back-btn">← Luyện viết</button>
         <h1>{config.title}</h1>
         {started && (
           <div className={`timer ${timeLeft < 300 ? "urgent" : ""}`}>
@@ -224,7 +224,7 @@ export default function WritingTaskPage() {
           saveDraft(content, end);
           setStarted(true);
         }} className="start-btn">
-          ▶ Bắt đầu viết (timer sẽ chạy)
+          Bắt đầu viết, đồng hồ bắt đầu chạy
         </button>
       ) : (
         <>
@@ -255,7 +255,7 @@ export default function WritingTaskPage() {
                 disabled={!meetsMin || submitting}
                 className="submit-btn"
               >
-                {submitting ? "⏳ Đang chấm…" : "📤 Nộp bài"}
+                {submitting ? "Đang chấm…" : "Nộp bài"}
               </button>
             </div>
           </div>
@@ -263,43 +263,36 @@ export default function WritingTaskPage() {
       )}
 
       <style jsx>{`
-        .writing-task { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        .writing-task { max-width: 48rem; margin: 0 auto; padding: 2rem 1rem 4rem; }
         .task-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; }
-        .back-btn { background: none; border: none; cursor: pointer; color: #6c757d; white-space: nowrap; }
-        h1 { flex: 1; font-size: 1.1rem; font-weight: 700; margin: 0; }
-        .timer { color: #212529; font-variant-numeric: tabular-nums; font-weight: 700; padding: 0.3rem 0.75rem; border-radius: 20px; background: #f8f9fa; border: 1.5px solid #dee2e6; font-size: 0.9rem; white-space: nowrap; }
-        .timer.urgent { color: #dc3545; border-color: #dc3545; background: #fff5f5; }
-        .prompt-box { color: #212529; background: #f8f9fa; border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem; border-left: 3px solid #0d6efd; }
-        .prompt-label { font-size: 0.75rem; text-transform: uppercase; color: #6c757d; margin: 0 0 0.5rem; }
+        .back-btn { background: none; border: none; cursor: pointer; color: rgb(var(--muted)); white-space: nowrap; }
+        h1 { color: rgb(var(--ink)); letter-spacing: -0.015em; flex: 1; font-size: 1.625rem; font-weight: 600; margin: 0; }
+        .timer { color: rgb(var(--ink)); font-variant-numeric: tabular-nums; font-weight: 700; padding: 0.3rem 0.75rem; border-radius: 20px; background: rgb(var(--paper)); border: 1.5px solid rgb(var(--rule)); font-size: 0.9rem; white-space: nowrap; }
+        .timer.urgent { color: rgb(var(--margin)); border-color: rgb(var(--margin)); background: rgb(var(--margin-soft)); }
+        .prompt-box { color: rgb(var(--ink)); background: rgb(var(--paper)); border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem; border-left: 3px solid rgb(var(--primary)); }
+        .prompt-label { font-size: 0.75rem; color: rgb(var(--muted)); margin: 0 0 0.5rem; }
         .prompt-text { font-size: 0.9rem; line-height: 1.6; margin: 0 0 0.5rem; }
-        .chart-placeholder { font-size: 0.85rem; background: #e9ecef; padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 0.5rem; color: #495057; border-radius: 8px; }
-        .task-meta { font-size: 0.8rem; color: #6c757d; margin: 0; }
-        .start-btn { display: block; width: 100%; padding: 1rem; background: #0d6efd; color: white; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; }
-        .start-btn:hover { background: #0b5ed7; }
-        .time-up { margin: 0; padding: 0.6rem 0.75rem; border-radius: 8px; background: #fff5f5; color: #b02a37; font-size: 0.875rem; }
-        .restart-btn { background: none; border: none; padding: 0; color: #0d6efd; text-decoration: underline; cursor: pointer; font-size: inherit; }
+        .chart-placeholder { font-size: 0.85rem; background: rgb(var(--rule)); padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 0.5rem; color: rgb(var(--muted)); border-radius: 8px; }
+        .task-meta { font-size: 0.8rem; color: rgb(var(--muted)); margin: 0; }
+        .start-btn { display: block; width: 100%; padding: 1rem; background: rgb(var(--primary)); color: white; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; }
+        .start-btn:hover { background: rgb(var(--primary-strong)); }
+        .time-up { margin: 0; padding: 0.6rem 0.75rem; border-radius: 8px; background: rgb(var(--margin-soft)); color: rgb(var(--margin)); font-size: 0.875rem; }
+        .restart-btn { background: none; border: none; padding: 0; color: rgb(var(--primary-text)); text-decoration: underline; cursor: pointer; font-size: inherit; }
         .editor-area { display: flex; flex-direction: column; gap: 0.75rem; }
-        textarea { width: 100%; padding: 0.875rem; border: 1.5px solid #dee2e6; border-radius: 10px; font-size: 1rem; line-height: 1.6; resize: vertical; box-sizing: border-box; font-family: inherit; color: #111827; background: white; }
-        textarea:focus { border-color: #0d6efd; outline: none; }
+        textarea { width: 100%; padding: 0.875rem; border: 1.5px solid rgb(var(--rule)); border-radius: 10px; font-size: 1rem; line-height: 1.6; resize: vertical; box-sizing: border-box; font-family: inherit; color: rgb(var(--ink)); background: rgb(var(--card)); }
+        textarea:focus { border-color: rgb(var(--primary)); outline: none; }
         .word-count-row { display: flex; align-items: center; justify-content: space-between; }
         .word-count { font-size: 0.875rem; font-weight: 600; }
-        .word-count.ok { color: #198754; }
-        .word-count.low { color: #dc3545; }
-        .submit-btn { padding: 0.6rem 1.5rem; background: #198754; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
-        .submit-btn:disabled { background: #adb5bd; cursor: not-allowed; }
-        /* dark theme: light surfaces */
-        :global(:root[data-theme="dark"]) .timer { background: rgba(255, 255, 255, 0.07); color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
-        :global(:root[data-theme="dark"]) .timer.urgent { background: rgba(239, 68, 68, 0.16); color: #fca5a5; }
-        :global(:root[data-theme="dark"]) .prompt-box { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
-        :global(:root[data-theme="dark"]) .chart-placeholder { background: rgba(255, 255, 255, 0.12); color: #f1ecff; }
-        :global(:root[data-theme="dark"]) .time-up { background: rgba(239, 68, 68, 0.16); color: #fca5a5; }
-        :global(:root[data-theme="dark"]) textarea { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
+        .word-count.ok { color: rgb(var(--ok)); }
+        .word-count.low { color: rgb(var(--margin)); }
+        .submit-btn { padding: 0.6rem 1.5rem; background: rgb(var(--ok)); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
+        .submit-btn:disabled { background: rgb(var(--muted)); cursor: not-allowed; }
       `}</style>
     </div>
   );
 }
 
-const COLORS = ["#7f56d9", "#0d6efd", "#20c997", "#fd7e14"];
+const COLORS = ["#4a6fe3", "#14998a", "#c98a12", "#c8435a"];
 
 function TaskChart({ data }: { data: Record<string, unknown> }) {
   const type = data.type as string;
@@ -318,7 +311,7 @@ function TaskChart({ data }: { data: Record<string, unknown> }) {
         {title && <p style={{ fontSize: "0.8rem", fontWeight: 600, marginBottom: "0.5rem" }}>{title}</p>}
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 4 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#dee2e6" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#d4ddee" />
             <XAxis dataKey="cat" tick={{ fontSize: 10 }} />
             <YAxis tick={{ fontSize: 10 }} />
             <Tooltip />
@@ -345,7 +338,7 @@ function TaskChart({ data }: { data: Record<string, unknown> }) {
       {title && <p style={{ fontSize: "0.8rem", fontWeight: 600, marginBottom: "0.5rem" }}>{title}</p>}
       <ResponsiveContainer width="100%" height={180}>
         <LineChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 4 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#dee2e6" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#d4ddee" />
           <XAxis dataKey="x" tick={{ fontSize: 10 }} />
           <YAxis tick={{ fontSize: 10 }} unit="%" />
           <Tooltip />

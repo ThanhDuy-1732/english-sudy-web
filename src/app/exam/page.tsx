@@ -6,20 +6,33 @@ import { DEFAULT_SETTINGS, getExamSettings, saveExamSettings, getAttempts } from
 import { getUnresolvedExamMistakes } from "@/lib/mistakes";
 import { runMistakeMigration } from "@/lib/mistake-migration";
 import type { ExamAttempt, ExamKind, ExamSettings } from "@/lib/exam/types";
+import LinkList from "@/components/LinkList";
+import Segmented from "@/components/Segmented";
 
-const TOEIC_PARTS = [
-  { part: "RC5", label: "Part 5 – Incomplete Sentences", emoji: "📝" },
-  { part: "RC6", label: "Part 6 – Text Completion", emoji: "📄" },
-  { part: "RC7", label: "Part 7 – Reading Comprehension", emoji: "📖" },
-  { part: "LC2", label: "Part 2 – Question-Response", emoji: "🎧" },
-  { part: "LC3", label: "Part 3 – Conversations", emoji: "💬" },
-  { part: "LC4", label: "Part 4 – Short Talks", emoji: "🗣️" },
-];
+// Grouped by skill: the section title is real structure (TOEIC scores Listening and Reading separately).
+const PARTS: Record<ExamKind, { skill: string; items: { part: string; name: string; desc: string }[] }[]> = {
+  TOEIC: [
+    { skill: "Nghe", items: [
+      { part: "LC2", name: "Part 2, Question–Response", desc: "Nghe câu hỏi, chọn câu đáp phù hợp" },
+      { part: "LC3", name: "Part 3, Conversations", desc: "Hội thoại ngắn giữa 2–3 người" },
+      { part: "LC4", name: "Part 4, Short Talks", desc: "Thông báo, bài nói của một người" },
+    ] },
+    { skill: "Đọc", items: [
+      { part: "RC5", name: "Part 5, Incomplete Sentences", desc: "Điền từ vào câu: ngữ pháp và từ vựng" },
+      { part: "RC6", name: "Part 6, Text Completion", desc: "Điền từ, điền câu vào đoạn văn" },
+      { part: "RC7", name: "Part 7, Reading Comprehension", desc: "Đọc email, quảng cáo, bài báo rồi trả lời" },
+    ] },
+  ],
+  IELTS: [
+    { skill: "Nghe", items: [{ part: "LISTEN_S1", name: "Listening, Section 1", desc: "Hội thoại đời thường, điền thông tin" }] },
+    { skill: "Đọc", items: [{ part: "READ_P3", name: "Reading, Academic", desc: "Bài đọc học thuật, nhiều dạng câu hỏi" }] },
+  ],
+};
 
-const IELTS_PARTS = [
-  { part: "READ_P3", label: "Reading – Academic", emoji: "📚" },
-  { part: "LISTEN_S1", label: "Listening – Section 1", emoji: "🎙️" },
-];
+const TARGET: Record<ExamKind, string[]> = {
+  TOEIC: ["400", "500", "650", "780", "900+"],
+  IELTS: ["4.5", "5.0", "6.0", "7.0", "8.0"],
+};
 
 export default function ExamPage() {
   // Storage is read after mount so the first client render matches the server HTML.
@@ -46,123 +59,56 @@ export default function ExamPage() {
     saveExamSettings(updated);
   }
 
-  const parts = settings.primaryExam === "TOEIC" ? TOEIC_PARTS : IELTS_PARTS;
+  const kind = settings.primaryExam;
+  const score = lastAttempt?.score;
 
   return (
-    <div className="exam-dashboard">
-      <h1>Luyện thi</h1>
+    <main className="mx-auto w-full max-w-3xl px-4 pb-16 pt-8 sm:px-8 lg:pt-12">
+      <h1 className="text-3xl font-semibold tracking-tight text-ink sm:text-4xl">Luyện thi</h1>
+      <p className="page-lead">Luyện từng part hoặc làm một bài thi thử rút gọn. Câu sai được ghi vào sổ lỗi để ôn lại.</p>
 
-      {/* Exam selector */}
-      <div className="exam-toggle">
-        {(["TOEIC", "IELTS"] as ExamKind[]).map((k) => (
-          <button
-            key={k}
-            onClick={() => updateKind(k)}
-            className={settings.primaryExam === k ? "active" : ""}
-          >
-            {k}
-          </button>
-        ))}
-      </div>
-
-      {/* Level selector */}
-      <div className="level-row">
-        <span>Trình độ:</span>
-        {[1, 2, 3, 4, 5].map((l) => (
-          <button
-            key={l}
-            onClick={() => updateLevel(l)}
-            className={`level-btn ${settings.level === l ? "active" : ""}`}
-          >
-            {l}
-          </button>
-        ))}
-        <span className="level-hint">
-          {settings.primaryExam === "TOEIC"
-            ? ["400", "500", "650", "780", "900+"][settings.level - 1]
-            : ["4.5", "5.0", "6.0", "7.0", "8.0"][settings.level - 1]}
-        </span>
-      </div>
-
-      {/* Last score */}
-      {lastAttempt?.score && (
-        <div className="last-score">
-          <p>Lần làm gần nhất:</p>
-          {lastAttempt.score.toeic && (
-            <strong>TOEIC {lastAttempt.score.toeic.total} điểm</strong>
-          )}
-          {lastAttempt.score.ielts && (
-            <strong>
-              IELTS R:{lastAttempt.score.ielts.reading ?? "-"} L:{lastAttempt.score.ielts.listening ?? "-"}
-            </strong>
-          )}
-          <span>
-            ({lastAttempt.score.raw.correct}/{lastAttempt.score.raw.total} câu đúng)
-          </span>
+      <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+        <Segmented label="Kỳ thi" value={kind} onChange={updateKind}
+          options={[{ value: "TOEIC", label: "TOEIC" }, { value: "IELTS", label: "IELTS" }]} />
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-sm text-muted">Trình độ</span>
+          <Segmented label="Trình độ" value={settings.level} onChange={updateLevel}
+            options={[1, 2, 3, 4, 5].map((level) => ({ value: level as 1 | 2 | 3 | 4 | 5, label: String(level) }))} />
+          <span className="text-sm text-muted">khoảng <span className="font-semibold tabular-nums text-ink">{TARGET[kind][settings.level - 1]}</span> điểm</span>
         </div>
+      </div>
+
+      {score && (
+        <p className="mt-6 rounded-xl border border-rule bg-card px-4 py-3 text-sm text-muted">
+          Lần làm gần nhất:{" "}
+          {score.toeic && <strong className="font-semibold text-ink">TOEIC {score.toeic.total} điểm</strong>}
+          {score.ielts && <strong className="font-semibold text-ink">IELTS Reading {score.ielts.reading ?? "–"}, Listening {score.ielts.listening ?? "–"}</strong>}
+          {", "}<span className="tabular-nums">{score.raw.correct}/{score.raw.total}</span> câu đúng
+        </p>
       )}
 
-      {/* Drill parts */}
-      <section>
-        <h2>Luyện theo Part</h2>
-        <div className="parts-grid">
-          {parts.map(({ part, label, emoji }) => (
-            <Link key={part} href={`/exam/drill/${part}`} className="part-card">
-              <span className="part-emoji">{emoji}</span>
-              <span className="part-label">{label}</span>
-            </Link>
-          ))}
+      <section aria-labelledby="mock-title" className="mt-8 flex flex-col gap-4 rounded-xl border border-rule bg-card p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div>
+          <h2 id="mock-title" className="text-base font-semibold text-ink">Thi thử rút gọn</h2>
+          <p className="mt-0.5 text-sm text-muted">Các part đã học gộp trong một bài, có đồng hồ đếm ngược và điểm ước lượng.</p>
         </div>
-      </section>
-
-      {/* Mock test */}
-      <section className="mock-section">
-        <h2>Mock Test</h2>
-        <Link href="/exam/mock" className="mock-btn">
-          🏆 Thi thử rút gọn
+        <Link href="/exam/mock" className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-primary px-5 font-semibold text-white transition-colors hover:bg-primary-strong">
+          Làm bài thi thử
         </Link>
       </section>
 
-      {/* Mistakes */}
-      <section className="mistakes-section">
-        <Link href="/exam/mistakes" className="mistakes-link">
-          📋 Sổ lỗi
-          {unresolvedCount > 0 && (
-            <span className="badge">{unresolvedCount}</span>
-          )}
-        </Link>
-      </section>
-
-      <style jsx>{`
-        .exam-dashboard { max-width: 640px; margin: 0 auto; padding: 1.5rem; }
-        h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; }
-        h2 { font-size: 1rem; font-weight: 600; margin: 1.5rem 0 0.75rem; color: #b0b0d1; text-transform: uppercase; letter-spacing: 0.05em; }
-        .exam-toggle { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
-        .exam-toggle button { color: #212529; padding: 0.5rem 1.5rem; border: 1.5px solid #dee2e6; border-radius: 20px; background: white; cursor: pointer; font-weight: 500; }
-        .exam-toggle button.active { background: #0d6efd; color: white; border-color: #0d6efd; }
-        .level-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.25rem; font-size: 0.9rem; }
-        .level-btn { color: #212529; width: 32px; height: 32px; border: 1.5px solid #dee2e6; border-radius: 50%; background: white; cursor: pointer; font-size: 0.85rem; }
-        .level-btn.active { background: #0d6efd; color: white; border-color: #0d6efd; font-weight: 700; }
-        .level-hint { color: #6c757d; font-size: 0.8rem; }
-        .last-score { color: #212529; display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; background: #f8f9fa; border-radius: 8px; margin-bottom: 0.5rem; font-size: 0.9rem; flex-wrap: wrap; }
-        .parts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-        :global(.part-card) { display: flex; align-items: center; gap: 0.75rem; padding: 0.9rem 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; text-decoration: none; color: inherit; transition: border-color 0.15s, background 0.15s; }
-        :global(.part-card):hover { border-color: #0d6efd; background: rgba(13, 110, 253, 0.18); }
-        .part-emoji { font-size: 1.25rem; }
-        .part-label { font-size: 0.875rem; line-height: 1.3; }
-        :global(:root[data-theme="light"]) h2 { color: #6b6384; }
-        .mock-section, .mistakes-section { margin-top: 1rem; }
-        :global(.mock-btn) { display: block; padding: 1rem; background: #0d6efd; color: white; border-radius: 10px; text-decoration: none; text-align: center; font-weight: 600; }
-        :global(.mock-btn):hover { background: #0b5ed7; }
-        :global(.mistakes-link) { display: flex; align-items: center; gap: 0.5rem; padding: 0.875rem 1rem; border: 1.5px solid #dee2e6; border-radius: 10px; text-decoration: none; color: inherit; font-weight: 500; }
-        :global(.mistakes-link):hover { border-color: #dc3545; background: rgba(220, 53, 69, 0.18); }
-        .badge { background: #dc3545; color: white; border-radius: 10px; padding: 0.1rem 0.5rem; font-size: 0.75rem; font-weight: 700; }
-        @media (max-width: 480px) { .parts-grid { grid-template-columns: 1fr; } }
-        /* dark theme: light surfaces */
-        :global(:root[data-theme="dark"]) .exam-toggle button { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
-        :global(:root[data-theme="dark"]) .level-btn { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
-        :global(:root[data-theme="dark"]) .last-score { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
-      `}</style>
-    </div>
+      <div className="mt-8">
+        {PARTS[kind].map((group) => (
+          <LinkList key={group.skill} title={group.skill}
+            items={group.items.map((item) => ({ href: `/exam/drill/${item.part}`, title: <span className="font-en">{item.name}</span>, meta: item.desc }))} />
+        ))}
+        <LinkList title="Ôn lại" items={[{
+          href: "/exam/mistakes",
+          title: "Sổ lỗi luyện thi",
+          meta: "Câu đã làm sai, kèm giải thích",
+          aside: unresolvedCount > 0 ? <span className="rounded-full bg-margin/15 px-2 py-0.5 text-xs font-semibold tabular-nums text-ink">{unresolvedCount} chưa xong</span> : undefined,
+        }]} />
+      </div>
+    </main>
   );
 }

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Caladea, Inter } from "next/font/google";
+import { Be_Vietnam_Pro, Literata } from "next/font/google";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import { ProviderContextProvider } from "@/contexts/ProviderContext";
 import { TimerContextProvider } from "@/contexts/TimerContext";
@@ -8,12 +8,10 @@ import AppNavigation from "@/components/AppNavigation";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const caladea = Caladea({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-display",
-});
+// Vietnamese interface text: Be Vietnam Pro (drawn for Vietnamese diacritics).
+const ui = Be_Vietnam_Pro({ subsets: ["latin", "vietnamese"], weight: ["400", "500", "600", "700"], variable: "--font-ui" });
+// English being studied (words, example sentences, passages): Literata, a reading serif.
+const en = Literata({ subsets: ["latin", "vietnamese"], variable: "--font-en" });
 
 export const metadata: Metadata = {
   title: "English Study",
@@ -39,8 +37,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f7f4ff" },
-    { media: "(prefers-color-scheme: dark)", color: "#2c1f4a" },
+    { media: "(prefers-color-scheme: light)", color: "#f4f7fc" },
+    { media: "(prefers-color-scheme: dark)", color: "#0e182b" },
   ],
 };
 
@@ -54,19 +52,13 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
-      <body
-        className={`${inter.variable} ${caladea.variable} grid min-h-screen min-h-svh min-w-0 grid-rows-[auto_1fr_auto] bg-[#2c1f4a] font-sans text-white`}
-      >
+      <body className={`${ui.variable} ${en.variable} min-h-svh min-w-0 bg-paper font-sans text-ink`}>
         <ProviderContextProvider>
           <TimerContextProvider>
-            <AppNavigation />
-            <div className="app-content min-w-0">{children}</div>
-            <footer className="app-footer min-w-0 border-t border-white/10 bg-[#2c1f4a] canvas-surface px-4 py-8 text-[#b0b0d1]">
-              <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="font-display text-2xl font-bold text-[#d9ecff]">English Study</p>
-                <p className="text-sm">Practice smarter vocabulary, one card at a time.</p>
-              </div>
-            </footer>
+            <div className="flex min-h-svh min-w-0 flex-col lg:flex-row">
+              <AppNavigation />
+              <div className="app-content min-w-0 flex-1">{children}</div>
+            </div>
             <FirebaseInitializer />
             <ServiceWorkerRegistration />
           </TimerContextProvider>

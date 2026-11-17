@@ -32,7 +32,7 @@ export default function GrammarSidebar({
 
   return (
     <aside className="flex w-64 flex-none flex-col gap-1">
-      <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-[#b0b0d1]">
+      <p className="mb-2 px-2 text-[13px] font-medium text-muted">
         Chủ đề ngữ pháp
       </p>
       {topics.map((topic) => (
@@ -43,7 +43,7 @@ export default function GrammarSidebar({
             className={`flex min-h-11 min-w-0 w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
               selectedId === topic.id
                 ? "bg-purple-600/40 font-medium text-white"
-                : "text-[#b0b0d1] hover:bg-white/10 hover:text-white"
+                : "text-muted hover:bg-white/10 hover:text-white"
             }`}
           >
             <span className="min-w-0 flex-1 truncate">{topic.name}</span>
@@ -77,7 +77,7 @@ export default function GrammarSidebar({
           <button
             type="submit"
             disabled={!input.trim() || isAdding}
-            className="mt-2 min-h-11 w-full rounded-lg bg-purple-600 py-2 text-sm font-medium text-white hover:bg-purple-500 disabled:opacity-40"
+            className="btn btn-primary mt-2 w-full"
           >
             {isAdding ? "Đang tạo..." : "+ Thêm chủ đề"}
           </button>

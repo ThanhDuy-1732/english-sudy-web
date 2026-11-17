@@ -22,18 +22,18 @@ export default function ExamAccuracyChart({ attempts }: { attempts: ExamAttempt[
 
   return (
     <section aria-labelledby="exam-accuracy-title">
-      <h2 id="exam-accuracy-title" className="mb-3 font-semibold text-gray-700">
+      <h2 id="exam-accuracy-title" className="mb-3 text-base font-semibold text-ink">
         Độ chính xác luyện thi{" "}
         <span className="font-normal text-gray-500">(4 tuần)</span>
       </h2>
       <div className="h-[200px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-            <CartesianGrid stroke="#f0f0f0" strokeDasharray="3 3" />
+            <CartesianGrid stroke="#d4ddee" strokeDasharray="3 3" />
             <XAxis dataKey="label" tick={{ fontSize: 11 }} />
             <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
             <Tooltip formatter={(v) => [`${v}%`, "Accuracy"]} />
-            <Bar dataKey="accuracy" fill="#7f56d9" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="accuracy" fill="#4a6fe3" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

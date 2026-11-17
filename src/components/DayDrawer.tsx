@@ -74,8 +74,8 @@ export default function DayDrawer({ date, words, studyMinutes, isOpen, onClose, 
         ].join(" ")}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
-          <p className="font-semibold text-[#2c1f4a] capitalize">
+        <div className="flex items-center justify-between border-b border-rule px-5 py-4">
+          <p className="font-semibold text-ink capitalize">
             {date ? formatDateVi(date) : ""}
           </p>
           <button
@@ -96,18 +96,18 @@ export default function DayDrawer({ date, words, studyMinutes, isOpen, onClose, 
             <>
               {/* Summary */}
               <div className="mb-5 flex gap-4">
-                <div className="flex items-center gap-2 rounded-xl bg-[#f7f4ff] px-4 py-3">
-                  <span className="text-lg">📚</span>
+                <div className="flex items-center gap-2 rounded-xl bg-paper px-4 py-3">
+                  
                   <div>
-                    <p className="font-display text-2xl font-bold text-[#2c1f4a]">{words.length}</p>
-                    <p className="text-xs text-[#6b6384]">từ</p>
+                    <p className="text-2xl font-semibold tabular-nums text-ink">{words.length}</p>
+                    <p className="text-xs text-muted">từ</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 rounded-xl bg-[#f7f4ff] px-4 py-3">
+                <div className="flex items-center gap-2 rounded-xl bg-paper px-4 py-3">
                   <span className="text-lg">⏱</span>
                   <div>
-                    <p className="font-display text-2xl font-bold text-[#2c1f4a]">{studyMinutes}</p>
-                    <p className="text-xs text-[#6b6384]">phút</p>
+                    <p className="text-2xl font-semibold tabular-nums text-ink">{studyMinutes}</p>
+                    <p className="text-xs text-muted">phút</p>
                   </div>
                 </div>
               </div>
@@ -120,21 +120,21 @@ export default function DayDrawer({ date, words, studyMinutes, isOpen, onClose, 
               ) : (
                 <ul className="space-y-2">
                   {words.map((w) => (
-                    <li key={w.word} className="rounded-xl border border-gray-100 overflow-hidden">
+                    <li key={w.word} className="rounded-xl border border-rule overflow-hidden">
                       <button
                         type="button"
                         onClick={() => toggleWord(w.word)}
-                        className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-gray-50"
+                        className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-primary-soft/50"
                       >
                         <div>
-                          <span className="font-medium text-[#2c1f4a]">{w.word}</span>
+                          <span className="font-medium text-ink">{w.word}</span>
                           <span className="mx-2 text-gray-300">—</span>
-                          <span className="text-sm text-[#6b6384]">{w.meaning}</span>
+                          <span className="text-sm text-muted">{w.meaning}</span>
                         </div>
                         <span className="ml-2 text-gray-500 text-xs">{expandedWords.has(w.word) ? "▲" : "▼"}</span>
                       </button>
                       {expandedWords.has(w.word) && (
-                        <div className="border-t border-gray-100 bg-gray-50 px-4 py-3 space-y-1">
+                        <div className="border-t border-rule bg-gray-50 px-4 py-3 space-y-1">
                           {w.example && (
                             <p className="text-sm text-gray-600 italic">&quot;{w.example}&quot;</p>
                           )}
@@ -151,18 +151,18 @@ export default function DayDrawer({ date, words, studyMinutes, isOpen, onClose, 
 
         {/* Footer navigation */}
         {date && (
-          <div className="flex items-center justify-between border-t border-gray-100 px-5 py-3">
+          <div className="flex items-center justify-between border-t border-rule px-5 py-3">
             <button
               type="button"
               onClick={() => onNavigate(offsetDate(date, -1))}
-              className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-[#7f56d9] hover:bg-[#f7f4ff]"
+              className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-primary hover:bg-paper"
             >
               ← Ngày trước
             </button>
             <button
               type="button"
               onClick={() => onNavigate(offsetDate(date, 1))}
-              className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-[#7f56d9] hover:bg-[#f7f4ff]"
+              className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-primary hover:bg-paper"
             >
               Ngày sau →
             </button>

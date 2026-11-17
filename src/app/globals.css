@@ -2,16 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Design tokens — "sổ tay thẻ từ" (index-card notebook).
+ * RGB triplets so Tailwind can add alpha: bg-primary/10. <html data-theme> is always the resolved theme (lib/theme.ts).
+ *   paper   page background          card    raised surfaces (cards, sheets)
+ *   ink     main text                muted   secondary text
+ *   rule    lines, borders           primary ballpoint blue: actions, links, focus
+ *   marker  highlighter: only for what needs you now (due words, today)
+ *   margin  index-card red line; also errors / mistakes        ok / warn  correct answers, warnings
+ * Each status colour has a -soft background tint.
+ */
+:root,
+:root[data-theme="light"] {
+  --paper: 244 247 252;
+  --card: 255 255 255;
+  --ink: 22 35 63;
+  --muted: 82 96 124;
+  --rule: 212 221 238;
+  --primary: 45 85 214;
+  --primary-strong: 31 64 176;
+  --primary-soft: 226 233 252;
+  --primary-text: 45 85 214;
+  --marker: 247 226 92;
+  --margin: 214 64 76;
+  --margin-soft: 252 232 234;
+  --ok: 27 128 84;
+  --ok-soft: 222 242 232;
+  --warn: 150 92 6;
+  --warn-soft: 253 242 208;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --paper: 14 24 43;
+  --card: 23 36 62;
+  --ink: 228 234 246;
+  --muted: 156 170 198;
+  --rule: 44 61 98;
+  --primary: 61 99 224;
+  --primary-strong: 84 122 240;
+  --primary-soft: 33 52 98;
+  --primary-text: 146 172 255;
+  --marker: 240 214 78;
+  --margin: 255 122 132;
+  --margin-soft: 72 32 44;
+  --ok: 110 214 158;
+  --ok-soft: 22 60 46;
+  --warn: 240 192 84;
+  --warn-soft: 68 54 20;
+  color-scheme: dark;
+}
+
 @layer base {
   html {
-    background: #2c1f4a;
+    background: rgb(var(--paper));
   }
 
   body {
     min-width: 320px;
+    background: rgb(var(--paper));
+    color: rgb(var(--ink));
+    -webkit-font-smoothing: antialiased;
   }
 
-  .app-nav {
+  .app-topbar {
     padding-top: calc(0.5rem + env(safe-area-inset-top));
     padding-left: max(1rem, env(safe-area-inset-left));
     padding-right: max(1rem, env(safe-area-inset-right));
@@ -22,18 +76,31 @@
     padding-right: env(safe-area-inset-right);
   }
 
-  .app-footer {
-    padding-bottom: calc(2rem + env(safe-area-inset-bottom));
-    padding-left: max(1rem, env(safe-area-inset-left));
-    padding-right: max(1rem, env(safe-area-inset-right));
+  /* Phones: the bottom tab bar sits over the content, so the page reserves its height. */
+  @media (max-width: 1023px) {
+    .app-content {
+      padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+    }
   }
 
-  .mobile-menu {
-    max-height: calc(100dvh - 6rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  .app-tabbar {
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .more-sheet {
+    max-height: calc(100dvh - 8rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 
   .pwa-status {
     padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  }
+
+  @media (max-width: 1023px) {
+    .pwa-status {
+      bottom: calc(4rem + env(safe-area-inset-bottom)) !important;
+    }
   }
 
   body:has(.pwa-status) {
@@ -70,13 +137,90 @@
   }
 
   ::selection {
-    background: #d9ecff;
-    color: #2c1f4a;
+    background: rgb(var(--marker));
+    color: #16233f;
   }
 
   :focus-visible {
-    outline: 3px solid #d9ecff;
+    outline: 3px solid rgb(var(--primary-text));
     outline-offset: 3px;
+  }
+
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+}
+
+@layer components {
+  /* Page scaffolding shared by every screen: one column, left-aligned, a title and one line of lead text. */
+  .page {
+    @apply mx-auto w-full max-w-3xl px-4 pb-16 pt-8 sm:px-8 lg:pt-12;
+  }
+
+  .page-wide {
+    @apply mx-auto w-full max-w-6xl px-4 pb-16 pt-8 sm:px-8 lg:pt-12;
+  }
+
+  .page-title {
+    @apply text-3xl font-semibold tracking-tight text-ink sm:text-4xl;
+  }
+
+  .page-lead {
+    @apply mt-2 max-w-2xl text-base leading-7 text-muted;
+  }
+
+  .section-title {
+    @apply text-base font-semibold text-ink;
+  }
+
+  .panel {
+    @apply rounded-xl border border-rule bg-card;
+  }
+
+  .btn {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 text-[15px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* color is set directly: @apply text-white would also pull in the light-theme .text-white re-map below. */
+  .btn-primary {
+    @apply bg-primary enabled:hover:bg-primary-strong [&:is(a)]:hover:bg-primary-strong;
+    color: #fff;
+  }
+
+  .btn-secondary {
+    @apply border border-rule bg-card text-ink enabled:hover:border-primary [&:is(a)]:hover:border-primary;
+  }
+
+  .field {
+    @apply min-h-11 rounded-lg border border-rule bg-card px-3 py-2 text-ink placeholder:text-muted focus:border-primary focus:outline-none;
+  }
+
+  /*
+   * The ruled index card: a 3.5rem header, a red line, then blue rules every 1.75rem.
+   * Content below the header uses leading-7 (1.75rem) with no vertical gaps so each line of text sits on a rule.
+   * The flashcard is the one place the app spends its boldness.
+   */
+  .index-card {
+    background-color: rgb(var(--card));
+    background-image:
+      linear-gradient(rgb(var(--margin) / 0.7), rgb(var(--margin) / 0.7)),
+      repeating-linear-gradient(to bottom, transparent 0 calc(1.75rem - 1px), rgb(var(--primary) / 0.16) calc(1.75rem - 1px) 1.75rem);
+    background-size: 100% 1.5px, 100% 100%;
+    background-position: 0 3.5rem, 0 calc(3.5rem + 1.5px);
+    background-repeat: no-repeat;
+  }
+
+  /* Highlighter stroke behind a number or short label that needs attention now. */
+  .marker-stroke {
+    background: linear-gradient(transparent 50%, rgb(var(--marker) / 0.85) 50%, rgb(var(--marker) / 0.85) 92%, transparent 92%);
+    color: rgb(var(--ink));
+    padding: 0 0.15em;
+  }
+
+  /* A highlighter stroke doesn't read on dark paper: the number itself takes the marker colour. */
+  :root[data-theme="dark"] .marker-stroke {
+    background: none;
+    color: rgb(var(--marker));
   }
 }
 
@@ -91,61 +235,33 @@
   }
 }
 
+/* Tokens read correctly on both themes; text-primary uses a lighter blue on the dark paper. */
+.text-primary {
+  color: rgb(var(--primary-text));
+}
+
 /*
- * Light theme. <html data-theme> is always the resolved theme (see lib/theme.ts); dark is the app's native look,
- * so light only re-maps the canvas-level colours: page, chrome, muted text, borders and translucent overlays.
- * Light surfaces (white cards, bg-[#f7f4ff] sections) already work on both and are left alone.
+ * Older pages were written for a dark canvas (text-white, white/NN overlays) or for light cards (bg-white, grey ink).
+ * The two blocks below re-map those generic classes so both kinds of page read correctly in both themes.
  */
-:root[data-theme="light"] {
-  background: #f7f4ff;
-}
-
-:root[data-theme="light"] body {
-  background-color: #f7f4ff;
-  color: #2c1f4a;
-}
-
-:root[data-theme="light"] .canvas-surface {
-  background-color: #f7f4ff;
-}
-
-:root[data-theme="light"] .app-nav.canvas-surface {
-  background-color: rgb(247 244 255 / 0.95);
-}
-
-:root[data-theme="light"] .text-white:not([class*="bg-"]),
-:root[data-theme="light"] .text-\[\#d9ecff\] {
-  color: #2c1f4a;
-}
-
-:root[data-theme="light"] .text-\[\#b0b0d1\] {
-  color: #6b6384;
+:root[data-theme="light"] .text-white:not([class*="bg-"]) {
+  color: rgb(var(--ink));
 }
 
 :root[data-theme="light"] [class*="border-white/"] {
-  border-color: rgba(44, 31, 74, 0.14);
+  border-color: rgb(var(--rule));
 }
 
 :root[data-theme="light"] [class*="bg-white/"] {
-  background-color: rgba(44, 31, 74, 0.06);
+  background-color: rgb(var(--ink) / 0.05);
 }
 
 :root[data-theme="light"] [class*="hover:bg-white/"]:hover {
-  background-color: rgba(44, 31, 74, 0.12);
+  background-color: rgb(var(--ink) / 0.09);
 }
 
-:root[data-theme="light"] :focus-visible {
-  outline-color: #7f56d9;
-}
-
-:root[data-theme="light"] ::selection {
-  background: #7f56d9;
-  color: #fff;
-}
-
-/* Pale text colours chosen for the dark canvas get their darker equivalents. */
 :root[data-theme="light"] :is(.text-gray-300, .text-gray-400) {
-  color: #6b6384;
+  color: rgb(var(--muted));
 }
 
 :root[data-theme="light"] :is(.text-red-300, .text-red-400) {
@@ -156,91 +272,58 @@
   color: #15803d;
 }
 
-:root[data-theme="light"] :is(.text-blue-300, .text-blue-400) {
-  color: #1d4ed8;
-}
-
-:root[data-theme="light"] :is(.text-purple-300, .text-purple-400) {
-  color: #7e22ce;
+:root[data-theme="light"] :is(.text-blue-300, .text-blue-400, .text-purple-300, .text-purple-400) {
+  color: rgb(var(--primary-text));
 }
 
 :root[data-theme="light"] :is(.text-yellow-300, .text-yellow-400, .text-yellow-500, .text-orange-300, .text-orange-400, .text-orange-500) {
   color: #a16207;
 }
 
-/* Translucent variants written for the dark canvas. */
 :root[data-theme="light"] :is(.text-white[class*="bg-white/"], .text-white[class*="bg-purple-600/"]) {
-  color: #2c1f4a;
+  color: rgb(var(--ink));
 }
 
 :root[data-theme="light"] [class*="text-white/"] {
-  color: rgba(44, 31, 74, 0.6);
+  color: rgb(var(--ink) / 0.62);
 }
 
 :root[data-theme="light"] [class*="placeholder-white/"]::placeholder {
-  color: rgba(44, 31, 74, 0.5);
+  color: rgb(var(--ink) / 0.5);
 }
 
 :root[data-theme="light"] :is(.recharts-cartesian-axis-tick-value, .recharts-polar-angle-axis-tick-value, .recharts-polar-radius-axis-tick-value) {
-  fill: #6b6384 !important;
+  fill: rgb(var(--muted)) !important;
 }
 
-/* Deliberately dark cards (e.g. the home hero) keep their light text in the light theme. */
-:root[data-theme="light"] .dark-surface {
-  color: #fff;
-}
-
+/* Deliberately dark elements keep light text in the light theme. */
+:root[data-theme="light"] .dark-surface,
 :root[data-theme="light"] .dark-surface .text-white {
   color: #fff;
 }
 
-:root[data-theme="light"] .dark-surface .text-\[\#d9ecff\] {
-  color: #d9ecff;
-}
-
-:root[data-theme="light"] .dark-surface .text-\[\#b0b0d1\] {
-  color: #b0b0d1;
-}
-
-/*
- * Dark variants for the surfaces that were designed light (white cards, bg-[#f7f4ff] sections).
- * Same idea as the light block above: re-map a small set of surface/ink/border classes, leave coloured UI alone.
- */
-:root[data-theme="dark"] .bg-\[\#f7f4ff\],
-:root[data-theme="dark"] .bg-\[\#f4f2ff\] {
-  background-color: #2c1f4a;
-}
-
 :root[data-theme="dark"] .bg-white {
-  background-color: #3a2a61;
+  background-color: rgb(var(--card));
 }
 
 :root[data-theme="dark"] .bg-white:not([class*="text-"]) {
-  color: #f1ecff;
+  color: rgb(var(--ink));
 }
 
-:root[data-theme="dark"] .bg-\[\#ede9fe\] {
-  background-color: rgba(127, 86, 217, 0.25);
-}
-
-:root[data-theme="dark"] .text-\[\#2c1f4a\]:not([class*="bg-[#d9ecff]"]) {
-  color: #f1ecff;
-}
-
-:root[data-theme="dark"] :is(.text-\[\#6b6384\], .text-gray-500, .text-gray-600) {
-  color: #b0b0d1;
+:root[data-theme="dark"] :is(.text-gray-500, .text-gray-600) {
+  color: rgb(var(--muted));
 }
 
 :root[data-theme="dark"] :is(.text-gray-700, .text-gray-800, .text-gray-900) {
-  color: #f1ecff;
+  color: rgb(var(--ink));
 }
 
 :root[data-theme="dark"] :is(.bg-gray-50, .bg-gray-100) {
-  background-color: rgba(255, 255, 255, 0.07);
+  background-color: rgb(255 255 255 / 0.06);
 }
 
 :root[data-theme="dark"] :is(.border-gray-100, .border-gray-200, .border-gray-300) {
-  border-color: rgba(255, 255, 255, 0.16);
+  border-color: rgb(var(--rule));
 }
 
 :root[data-theme="dark"] :is(.bg-green-50, .bg-green-100) {
@@ -255,15 +338,19 @@
   background-color: rgba(234, 179, 8, 0.16);
 }
 
-:root[data-theme="dark"] :is(.bg-blue-50, .bg-blue-100) {
-  background-color: rgba(59, 130, 246, 0.18);
+:root[data-theme="dark"] :is(.bg-blue-50, .bg-blue-100, .bg-purple-50, .bg-purple-100) {
+  background-color: rgb(var(--primary-soft));
+}
+
+:root[data-theme="dark"] :is(.bg-orange-50, .bg-orange-100) {
+  background-color: rgba(249, 115, 22, 0.18);
 }
 
 :root[data-theme="dark"] :is(.text-green-600, .text-green-700, .text-green-800) {
   color: #86efac;
 }
 
-:root[data-theme="dark"] :is(.text-red-600, .text-red-700, .text-red-800) {
+:root[data-theme="dark"] :is(.text-red-500, .text-red-600, .text-red-700, .text-red-800) {
   color: #fca5a5;
 }
 
@@ -271,39 +358,8 @@
   color: #fde047;
 }
 
-:root[data-theme="dark"] :is(.text-blue-600, .text-blue-700, .text-blue-800) {
-  color: #93c5fd;
-}
-
-:root[data-theme="dark"] :is(.text-purple-600, .text-purple-700) {
-  color: #d8b4fe;
-}
-
-/* Deliberately light controls (e.g. the home CTA) stay light in the dark theme. */
-:root[data-theme="dark"] .keep-light {
-  background-color: #fff;
-  color: #2c1f4a;
-}
-
-:root[data-theme="dark"] .keep-light:hover:not(:disabled) {
-  background-color: #d9ecff;
-}
-
-/* Recharts colours legend text with the series colour inline; those hues are too dark on the dark cards. */
-:root[data-theme="dark"] .recharts-legend-item-text {
-  color: #f1ecff !important;
-}
-
-:root[data-theme="dark"] :is(.recharts-cartesian-axis-tick-value, .recharts-polar-angle-axis-tick-value, .recharts-polar-radius-axis-tick-value) {
-  fill: #b0b0d1 !important;
-}
-
-:root[data-theme="dark"] .recharts-cartesian-grid line {
-  stroke: rgba(255, 255, 255, 0.14);
-}
-
-:root[data-theme="dark"] :is(.bg-orange-50, .bg-orange-100) {
-  background-color: rgba(249, 115, 22, 0.18);
+:root[data-theme="dark"] :is(.text-blue-500, .text-blue-600, .text-blue-700, .text-blue-800, .text-purple-600, .text-purple-700) {
+  color: rgb(var(--primary-text));
 }
 
 :root[data-theme="dark"] :is(.text-orange-700, .text-orange-800) {
@@ -314,6 +370,24 @@
   color: #f9a8d4;
 }
 
-:root[data-theme="dark"] .text-\[\#7f56d9\] {
-  color: #c4b5fd;
+/* Deliberately light controls stay light in the dark theme. */
+:root[data-theme="dark"] .keep-light {
+  background-color: #fff;
+  color: #16233f;
+}
+
+:root[data-theme="dark"] .keep-light:hover:not(:disabled) {
+  background-color: rgb(var(--marker));
+}
+
+:root[data-theme="dark"] .recharts-legend-item-text {
+  color: rgb(var(--ink)) !important;
+}
+
+:root[data-theme="dark"] :is(.recharts-cartesian-axis-tick-value, .recharts-polar-angle-axis-tick-value, .recharts-polar-radius-axis-tick-value) {
+  fill: rgb(var(--muted)) !important;
+}
+
+:root[data-theme="dark"] .recharts-cartesian-grid line {
+  stroke: rgb(var(--rule));
 }

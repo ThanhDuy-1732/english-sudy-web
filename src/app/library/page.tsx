@@ -73,12 +73,12 @@ export default function LibraryPage() {
   }, {});
 
   return (
-    <main className="max-w-lg mx-auto p-4">
-      <h1 className="text-xl font-bold mb-4">Thư viện kiến thức</h1>
+    <main className="page">
+      <h1 className="page-title mb-4">Thư viện kiến thức</h1>
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="w-full border rounded-xl px-4 py-3 text-sm dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="field w-full mb-4 text-sm py-3"
         placeholder="Tìm từ, lỗi sai, bài nói, bài viết..."
         autoFocus
       />
@@ -102,7 +102,7 @@ export default function LibraryPage() {
           <ul className="space-y-1">
             {items.slice(0, 8).map((item, i) => {
               const content = (
-                <div className="px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                <div className="px-3 py-2 rounded-lg hover:bg-primary-soft/50 transition-colors">
                   <p className="text-sm font-medium">{item.title}</p>
                   <p className="text-xs text-gray-400">{item.subtitle}</p>
                 </div>

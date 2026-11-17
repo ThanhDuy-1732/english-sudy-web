@@ -50,7 +50,7 @@ export default function ReportQuestionModal({ questionId, itemId, onClose }: Pro
       <div className="report-modal" onClick={(e) => e.stopPropagation()}>
         {submitted ? (
           <>
-            <p className="report-thanks">✅ Đã ghi nhận. Cảm ơn bạn!</p>
+            <p className="report-thanks">Đã ghi nhận câu hỏi lỗi.</p>
             <button onClick={onClose} className="report-close-btn">Đóng</button>
           </>
         ) : (
@@ -87,44 +87,39 @@ export default function ReportQuestionModal({ questionId, itemId, onClose }: Pro
           display: flex; align-items: center; justify-content: center; z-index: 50;
         }
         .report-modal {
-          color: #212529;
-          background: white; border-radius: 12px; padding: 1.5rem;
+          color: rgb(var(--ink));
+          background: rgb(var(--card)); border-radius: 12px; padding: 1.5rem;
           width: min(400px, 90vw); box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
         h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; }
         .report-reasons { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
         .reason-btn {
-          color: #212529;
+          color: rgb(var(--ink));
           padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.8rem;
-          border: 1.5px solid #dee2e6; background: white; cursor: pointer;
+          border: 1.5px solid rgb(var(--rule)); background: rgb(var(--card)); cursor: pointer;
         }
-        .reason-btn.selected { border-color: #0d6efd; background: #e7f0ff; color: #0d6efd; }
+        .reason-btn.selected { border-color: rgb(var(--primary)); background: rgb(var(--primary-soft)); color: rgb(var(--primary-text)); }
         .report-note {
-          width: 100%; padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 6px;
+          width: 100%; padding: 0.5rem; border: 1px solid rgb(var(--rule)); border-radius: 6px;
           font-size: 0.85rem; resize: none; margin-bottom: 1rem;
         }
         .report-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
         .report-cancel-btn {
-          color: #212529;
-          padding: 0.5rem 1rem; border-radius: 6px; border: 1.5px solid #dee2e6;
-          background: white; cursor: pointer; font-size: 0.875rem;
+          color: rgb(var(--ink));
+          padding: 0.5rem 1rem; border-radius: 6px; border: 1.5px solid rgb(var(--rule));
+          background: rgb(var(--card)); cursor: pointer; font-size: 0.875rem;
         }
         .report-submit-btn {
           padding: 0.5rem 1rem; border-radius: 6px; border: none;
-          background: #0d6efd; color: white; cursor: pointer; font-size: 0.875rem;
+          background: rgb(var(--primary)); color: white; cursor: pointer; font-size: 0.875rem;
         }
         .report-thanks { text-align: center; padding: 1rem 0; font-size: 1rem; }
         .report-close-btn {
-          color: #212529;
+          color: rgb(var(--ink));
           display: block; width: 100%; padding: 0.6rem; margin-top: 0.5rem;
-          border-radius: 6px; border: 1.5px solid #dee2e6; background: white;
+          border-radius: 6px; border: 1.5px solid rgb(var(--rule)); background: rgb(var(--card));
           cursor: pointer; font-size: 0.875rem;
         }
-        /* dark theme: light surfaces */
-        :global(:root[data-theme="dark"]) .reason-btn.selected { background: rgba(59, 130, 246, 0.2); color: #bfdbfe; }
-        :global(:root[data-theme="dark"]) .report-modal { background: #3a2a61; color: #f1ecff; }
-        :global(:root[data-theme="dark"]) .reason-btn, :global(:root[data-theme="dark"]) .report-cancel-btn, :global(:root[data-theme="dark"]) .report-close-btn { background: rgba(255, 255, 255, 0.08); color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
-        :global(:root[data-theme="dark"]) .report-note { background: rgba(0, 0, 0, 0.25); color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
       `}</style>
     </div>
   );

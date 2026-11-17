@@ -8,8 +8,8 @@ test("provides an installable standalone manifest", () => {
     start_url: "/",
     scope: "/",
     display: "standalone",
-    theme_color: "#2c1f4a",
-    background_color: "#2c1f4a",
+    theme_color: "#0e182b",
+    background_color: "#0e182b",
   });
   expect(value.icons).toEqual(
     expect.arrayContaining([

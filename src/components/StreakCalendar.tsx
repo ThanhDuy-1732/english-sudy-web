@@ -2,7 +2,7 @@
 
 import type { CalendarDay } from "@/lib/stats";
 
-const LEVEL_COLORS = ["bg-gray-100 dark:bg-gray-800", "bg-[#d9ecff]", "bg-[#8cb8ef]", "bg-[#4c78c5]"] as const;
+const LEVEL_COLORS = ["bg-gray-100 dark:bg-gray-800", "bg-primary/30", "bg-primary/60", "bg-primary"] as const;
 const DAY_LABELS = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
 
 export default function StreakCalendar({ data }: { data: CalendarDay[] }) {
@@ -13,7 +13,7 @@ export default function StreakCalendar({ data }: { data: CalendarDay[] }) {
   for (let index = 0; index < cells.length; index += 7) weeks.push(cells.slice(index, index + 7));
 
   return <section aria-labelledby="streak-calendar-title">
-    <h2 id="streak-calendar-title" className="mb-3 font-semibold text-gray-700">Lịch học tập</h2>
+    <h2 id="streak-calendar-title" className="mb-3 text-base font-semibold text-ink">Lịch học tập</h2>
     <div className="overflow-x-auto pb-1" tabIndex={0} aria-label="Lịch đóng góp học tập">
       <div className="flex min-w-max gap-1">
         <div className="mr-1 flex flex-col gap-1"><div className="h-3 w-8" />{DAY_LABELS.map((label) => <div key={label} className="flex h-3 w-8 items-center text-[10px] text-gray-500">{label}</div>)}</div>

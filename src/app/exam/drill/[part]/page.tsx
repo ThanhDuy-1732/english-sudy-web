@@ -64,7 +64,7 @@ export default function DrillPage() {
 
     return (
       <div className="done-container">
-        <h1>✅ Drill hoàn thành</h1>
+        <h1>Đã xong bài luyện</h1>
         <p>
           {attempt.answers.filter((a) => a.correct).length} / {attempt.answers.length} câu đúng
         </p>
@@ -90,7 +90,7 @@ export default function DrillPage() {
                     className="tag-bar-fill"
                     style={{
                       width: `${t.accuracy}%`,
-                      background: t.accuracy < 60 ? "#dc3545" : t.accuracy < 80 ? "#fd7e14" : "#198754",
+                      background: t.accuracy < 60 ? "rgb(var(--margin))" : t.accuracy < 80 ? "rgb(var(--warn))" : "rgb(var(--ok))",
                     }}
                   />
                 </div>
@@ -112,20 +112,17 @@ export default function DrillPage() {
         </div>
         <style jsx>{`
           .done-container { max-width: 480px; margin: 3rem auto; text-align: center; padding: 2rem; }
-          h1 { font-size: 1.5rem; margin-bottom: 1rem; }
-          .tag-stats { text-align: left; margin: 1.5rem 0; padding: 1rem; border: 1px solid #dee2e6; border-radius: 8px; }
-          .tag-stats-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6c757d; margin-bottom: 0.75rem; }
+          h1 { color: rgb(var(--ink)); letter-spacing: -0.015em; font-weight: 600; font-size: 1.625rem; margin-bottom: 1rem; }
+          .tag-stats { text-align: left; margin: 1.5rem 0; padding: 1rem; border: 1px solid rgb(var(--rule)); border-radius: 8px; }
+          .tag-stats-title { font-size: 0.75rem; font-weight: 600; color: rgb(var(--muted)); margin-bottom: 0.75rem; }
           .tag-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
           .tag-name { font-size: 0.8rem; min-width: 120px; flex-shrink: 0; }
-          .tag-bar-bg { flex: 1; height: 6px; background: #e9ecef; border-radius: 3px; overflow: hidden; }
+          .tag-bar-bg { flex: 1; height: 6px; background: rgb(var(--rule)); border-radius: 3px; overflow: hidden; }
           .tag-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
-          .tag-pct { font-size: 0.75rem; color: #6c757d; min-width: 32px; text-align: right; }
+          .tag-pct { font-size: 0.75rem; color: rgb(var(--muted)); min-width: 32px; text-align: right; }
           .done-actions { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 2rem; }
-          .done-actions button { color: #212529; padding: 0.75rem 1.5rem; border-radius: 8px; border: 1.5px solid #dee2e6; background: white; cursor: pointer; font-size: 0.95rem; }
-          .done-actions button:first-child { background: #0d6efd; color: white; border-color: #0d6efd; }
-          /* dark theme: light surfaces */
-          :global(:root[data-theme="dark"]) .tag-bar-bg { background: rgba(255, 255, 255, 0.12); color: #f1ecff; }
-          :global(:root[data-theme="dark"]) .done-actions button { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
+          .done-actions button { color: rgb(var(--ink)); padding: 0.75rem 1.5rem; border-radius: 8px; border: 1.5px solid rgb(var(--rule)); background: rgb(var(--card)); cursor: pointer; font-size: 0.95rem; }
+          .done-actions button:first-child { background: rgb(var(--primary)); color: white; border-color: rgb(var(--primary)); }
         `}</style>
       </div>
     );
@@ -135,7 +132,7 @@ export default function DrillPage() {
     <div>
       <div className="drill-header">
         <button onClick={() => router.push("/exam")} className="back-btn">
-          ← Exam
+          ← Luyện thi
         </button>
         <h1>{PART_LABELS[part] ?? part}</h1>
       </div>
@@ -160,9 +157,9 @@ export default function DrillPage() {
         }}
       />}
       <style jsx>{`
-        .drill-header { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem; border-bottom: 1px solid #dee2e6; }
-        .back-btn { background: none; border: none; cursor: pointer; font-size: 0.9rem; color: #6c757d; }
-        h1 { font-size: 1.1rem; font-weight: 600; margin: 0; }
+        .drill-header { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem; border-bottom: 1px solid rgb(var(--rule)); }
+        .back-btn { background: none; border: none; cursor: pointer; font-size: 0.9rem; color: rgb(var(--muted)); }
+        h1 { color: rgb(var(--ink)); letter-spacing: -0.015em; font-size: 1.625rem; font-weight: 600; margin: 0; }
       `}</style>
     </div>
   );

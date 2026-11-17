@@ -138,7 +138,7 @@ export default function Flashcard({
     <div className={`relative [perspective:1000px] ${isReviewMode ? "h-[26rem] sm:h-96" : "h-80 sm:h-72"}`}>
       {/* Pronunciation button floats on front face — positioned outside the front button to avoid nesting <button> */}
       {!flipped && !loading && (
-        <div className="absolute bottom-4 right-4 z-10">
+        <div className="absolute right-2 top-1.5 z-10">
           <PronunciationButton word={word} />
         </div>
       )}
@@ -157,11 +157,13 @@ export default function Flashcard({
           tabIndex={flipped ? -1 : 0}
           onClick={handleFlip}
           disabled={loading}
-          className="absolute inset-0 flex h-full w-full flex-col items-center justify-center rounded-xl bg-white p-4 shadow-md [backface-visibility:hidden] disabled:cursor-wait"
+          className="index-card absolute inset-0 flex h-full w-full flex-col rounded-xl border border-rule px-5 pb-5 text-left shadow-[0_1px_2px_rgb(22_35_63/0.06)] transition-[border-color,box-shadow] [backface-visibility:hidden] hover:border-primary/50 hover:shadow-[0_6px_20px_rgb(22_35_63/0.08)] disabled:cursor-wait"
         >
-          <span className="break-words text-center text-2xl font-bold text-gray-800 [overflow-wrap:anywhere]">
-            {loading ? "Đang tạo câu ví dụ..." : word}
+          <span className="flex h-14 shrink-0 items-center pr-12 text-sm text-muted">{topic === "Daily Communication" ? "Giao tiếp hằng ngày" : topic}</span>
+          <span className="break-words pt-[1.5px] font-en text-[2rem] font-medium leading-[3.5rem] text-ink [overflow-wrap:anywhere]">
+            {loading ? <span className="text-xl text-muted">Đang tạo câu ví dụ...</span> : word}
           </span>
+          {!loading && <span className="text-sm leading-7 text-muted">Chạm để xem nghĩa</span>}
           {error && (
             <span className="mt-3 text-center text-sm text-red-700" role="alert">
               {error}
@@ -172,29 +174,29 @@ export default function Flashcard({
         {/* Back face */}
         <div
           aria-hidden={!flipped}
-          className="absolute inset-0 flex flex-col items-center gap-3 overflow-y-auto rounded-xl bg-blue-50 p-4 text-center shadow-md [backface-visibility:hidden] [transform:rotateY(180deg)]"
+          className="index-card absolute inset-0 flex flex-col overflow-y-auto rounded-xl border border-rule px-5 pb-4 text-left shadow-[0_1px_2px_rgb(22_35_63/0.06)] [backface-visibility:hidden] [transform:rotateY(180deg)]"
         >
-          <div className="flex w-full gap-1" onClick={(event) => event.stopPropagation()}>
+          <div className="flex h-14 shrink-0 items-center"><div role="group" aria-label="Cách học thẻ này" className="flex w-full gap-0.5 rounded-lg bg-paper p-0.5" onClick={(event) => event.stopPropagation()}>
             {(["study", "write", "fill", "dictation"] as CardMode[]).map((cardMode) => (
-              <button key={cardMode} type="button" onClick={() => selectMode(cardMode)} className={`min-h-10 flex-1 rounded-lg px-1 text-[11px] font-medium transition-colors ${mode === cardMode ? "bg-blue-500 text-white" : "bg-white text-gray-600 hover:bg-blue-100"}`}>
+              <button key={cardMode} type="button" onClick={() => selectMode(cardMode)} aria-pressed={mode === cardMode} className={`min-h-9 flex-1 rounded-md px-1 text-xs font-medium transition-colors ${mode === cardMode ? "bg-card text-ink shadow-sm" : "text-muted hover:text-ink"}`}>
                 {cardMode === "study" ? "Nghĩa" : cardMode === "write" ? "Viết câu" : cardMode === "fill" ? "Điền từ" : "Nghe"}
               </button>
             ))}
-          </div>
-          {mode === "study" && <>
-            <p className="break-words font-semibold text-blue-800 [overflow-wrap:anywhere]">{meaning}</p>
-            {example && <p className="break-words text-sm italic leading-6 text-gray-700 [overflow-wrap:anywhere]">{example}</p>}
-            {synonymData && <div className="text-sm">{synonymData.synonyms.length > 0 && <p><span className="font-medium text-green-600">Đồng nghĩa:</span>{" "}{synonymData.synonyms.join(", ")}</p>}{synonymData.antonyms.length > 0 && <p><span className="font-medium text-red-500">Trái nghĩa:</span>{" "}{synonymData.antonyms.join(", ")}</p>}</div>}
-          </>}
+          </div></div>
+          {mode === "study" && <div className="pt-[1.5px]">
+            <p className="break-words leading-7 [overflow-wrap:anywhere]"><span className="font-en text-lg font-medium text-ink">{word}</span> <span className="font-semibold text-primary">{meaning}</span></p>
+            {example && <p className="break-words font-en text-[15px] italic leading-7 text-ink [overflow-wrap:anywhere]">{example}</p>}
+            {synonymData && <div className="text-sm leading-7 text-muted">{synonymData.synonyms.length > 0 && <p><span className="font-medium text-ink">Đồng nghĩa</span>{" "}<span className="font-en">{synonymData.synonyms.join(", ")}</span></p>}{synonymData.antonyms.length > 0 && <p><span className="font-medium text-ink">Trái nghĩa</span>{" "}<span className="font-en">{synonymData.antonyms.join(", ")}</span></p>}</div>}
+          </div>}
           {mode === "write" && <WritingChallenge word={word} />}
-          {mode === "fill" && (fillSentence ? <FillBlank word={word} sentence={fillSentence} /> : <p className="text-sm text-gray-500">{fillLoading ? "Đang tạo câu điền từ..." : "Chưa có câu điền từ."}</p>)}
-          {mode === "dictation" && (example ? <DictationMode sentence={example} /> : <p className="text-sm text-gray-500">Đang tạo câu ví dụ...</p>)}
-          <div className="mt-auto flex flex-wrap items-center justify-center gap-2 pt-1">
+          {mode === "fill" && (fillSentence ? <FillBlank word={word} sentence={fillSentence} /> : <p className="text-sm text-muted">{fillLoading ? "Đang tạo câu điền từ..." : "Chưa có câu điền từ."}</p>)}
+          {mode === "dictation" && (example ? <DictationMode sentence={example} /> : <p className="text-sm text-muted">Đang tạo câu ví dụ...</p>)}
+          <div className="mt-auto flex flex-wrap items-center justify-end gap-2 pt-1">
             <button
               type="button"
               tabIndex={flipped ? 0 : -1}
               onClick={handleFlip}
-              className="inline-flex min-h-11 items-center rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-medium text-blue-800 transition-colors hover:bg-blue-100"
+              className="inline-flex min-h-11 items-center rounded-lg px-3 py-2 text-sm font-medium text-muted transition-colors hover:text-ink"
             >
               Lật lại
             </button>
@@ -204,9 +206,9 @@ export default function Flashcard({
                 tabIndex={flipped ? 0 : -1}
                 onClick={handleSave}
                 disabled={saved || !example}
-                className="inline-flex min-h-11 items-center rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-800 disabled:opacity-50"
+                className="inline-flex min-h-11 items-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-strong disabled:bg-rule disabled:text-muted"
               >
-                {saved ? "Đã lưu ✓" : "Đã học ✓"}
+                {saved ? "Đã lưu" : "Lưu để ôn"}
               </button>
             )}
           </div>

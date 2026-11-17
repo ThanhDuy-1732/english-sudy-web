@@ -82,25 +82,25 @@ export default function GrammarContent({ topic }: { topic: GrammarTopic }) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#d9ecff]">{topic.name}</h1>
+        <h1 className="text-2xl font-bold text-ink">{topic.name}</h1>
         {topic.isUserGenerated && (
           <p className="mt-1 text-sm text-purple-300">Chủ đề do AI tạo</p>
         )}
       </div>
 
       {topic.rules.map((rule) => (
-        <section key={rule.id} className="rounded-lg border border-white/10 bg-white/5 p-5">
+        <section key={rule.id} className="rounded-xl border border-rule bg-card p-5">
           <h2 className="mb-2 text-lg font-semibold text-white">{rule.name}</h2>
-          <code className="mb-3 block overflow-x-auto rounded bg-black/30 px-3 py-2 font-mono text-sm text-purple-300">
+          <code className="mb-3 block overflow-x-auto rounded-md bg-primary-soft px-3 py-2 font-en text-[15px] text-ink">
             {rule.formula}
           </code>
-          <p className="mb-4 text-sm leading-6 text-[#b0b0d1]">{rule.explanation}</p>
+          <p className="mb-4 text-sm leading-6 text-muted">{rule.explanation}</p>
 
           <ul className="mb-4 space-y-1.5">
             {rule.examples.map((example) => (
               <li
                 key={example}
-                className="text-sm text-[#d9ecff] before:mr-2 before:text-purple-400 before:content-['>']"
+                className="font-en text-[15px] leading-7 text-ink before:mr-2 before:text-primary before:content-['–']"
               >
                 {example}
               </li>
@@ -108,7 +108,7 @@ export default function GrammarContent({ topic }: { topic: GrammarTopic }) {
             {(aiExamples[rule.id] ?? []).map((example) => (
               <li
                 key={`ai-${example}`}
-                className="text-sm italic text-[#d9ecff]/80 before:mr-2 before:text-purple-300 before:content-['>']"
+                className="text-sm italic text-ink/80 before:mr-2 before:text-purple-300 before:content-['>']"
               >
                 {example}
               </li>
@@ -120,7 +120,7 @@ export default function GrammarContent({ topic }: { topic: GrammarTopic }) {
               type="button"
               onClick={() => void fetchExamples(rule)}
               disabled={loadingExamples.has(rule.id)}
-              className="min-h-9 rounded bg-white/10 px-3 py-1.5 text-xs font-medium text-[#d9ecff] hover:bg-white/20 disabled:opacity-50"
+              className="min-h-9 rounded bg-white/10 px-3 py-1.5 text-xs font-medium text-ink hover:bg-white/20 disabled:opacity-50"
             >
               {loadingExamples.has(rule.id) ? "Đang tạo..." : "+ Thêm ví dụ"}
             </button>
@@ -128,7 +128,7 @@ export default function GrammarContent({ topic }: { topic: GrammarTopic }) {
               type="button"
               onClick={() => void fetchExercise(rule)}
               disabled={loadingExercise.has(rule.id)}
-              className="min-h-9 rounded bg-purple-700/50 px-3 py-1.5 text-xs font-medium text-[#d9ecff] hover:bg-purple-700/70 disabled:opacity-50"
+              className="min-h-9 rounded bg-purple-700/50 px-3 py-1.5 text-xs font-medium text-ink hover:bg-purple-700/70 disabled:opacity-50"
             >
               {loadingExercise.has(rule.id) ? "Đang tạo..." : "Luyện tập"}
             </button>

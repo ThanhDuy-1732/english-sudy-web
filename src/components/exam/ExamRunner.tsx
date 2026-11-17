@@ -286,7 +286,7 @@ export default function ExamRunner({
         <div className="spinner" />
         <style jsx>{`
           .runner-loading { text-align: center; padding: 3rem; }
-          .spinner { margin: 1rem auto; width: 32px; height: 32px; border: 3px solid #dee2e6; border-top-color: #0d6efd; border-radius: 50%; animation: spin 0.8s linear infinite; }
+          .spinner { margin: 1rem auto; width: 32px; height: 32px; border: 3px solid rgb(var(--rule)); border-top-color: rgb(var(--primary)); border-radius: 50%; animation: spin 0.8s linear infinite; }
           @keyframes spin { to { transform: rotate(360deg); } }
         `}</style>
       </div>
@@ -296,12 +296,12 @@ export default function ExamRunner({
   if (state.phase === "error") {
     return (
       <div className="runner-error">
-        <p>⚠️ Không thể tải câu hỏi. Kiểm tra kết nối và thử lại.</p>
+        <p>Không thể tải câu hỏi. Kiểm tra kết nối và thử lại.</p>
         <button onClick={() => window.location.reload()}>Thử lại</button>
         <style jsx>{`
           .runner-error { text-align: center; padding: 3rem; }
-          .runner-error p { color: #856404; margin-bottom: 1rem; }
-          .runner-error button { padding: 0.5rem 1.5rem; background: #0d6efd; color: white; border: none; border-radius: 8px; cursor: pointer; }
+          .runner-error p { color: rgb(var(--ink)); margin-bottom: 1rem; }
+          .runner-error button { padding: 0.5rem 1.5rem; background: rgb(var(--primary)); color: white; border: none; border-radius: 8px; cursor: pointer; }
         `}</style>
       </div>
     );
@@ -317,8 +317,8 @@ export default function ExamRunner({
         </button>
         <style jsx>{`
           .runner-ready { text-align: center; padding: 3rem; }
-          .start-btn { padding: 0.75rem 2rem; background: #0d6efd; color: white; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; }
-          .start-btn:hover { background: #0b5ed7; }
+          .start-btn { padding: 0.75rem 2rem; background: rgb(var(--primary)); color: white; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; }
+          .start-btn:hover { background: rgb(var(--primary-strong)); }
         `}</style>
       </div>
     );
@@ -342,7 +342,7 @@ export default function ExamRunner({
   if (state.phase === "done") {
     return (
       <div className="runner-done">
-        <h2>✅ Hoàn thành!</h2>
+        <h2>Đã làm xong</h2>
         <p>Kết quả đã được lưu.</p>
         <style jsx>{`
           .runner-done { text-align: center; padding: 3rem; }
@@ -373,13 +373,13 @@ export default function ExamRunner({
             onClick={() => dispatch({ type: "FLAG", questionId: current.q.id })}
             className={`flag-btn ${state.flags.has(current.q.id) ? "flagged" : ""}`}
           >
-            {state.flags.has(current.q.id) ? "🚩 Đã đánh dấu" : "🚩 Đánh dấu"}
+            {state.flags.has(current.q.id) ? "Đã đánh dấu xem lại" : "Đánh dấu xem lại"}
           </button>
           <button
             onClick={() => setReporting({ questionId: current.q.id, itemId: current.item.id })}
             className="report-btn"
           >
-            ⚑ Báo cáo
+            Báo câu hỏi lỗi
           </button>
         </div>
         <button
@@ -387,7 +387,7 @@ export default function ExamRunner({
           disabled={!answered}
           className="next-btn"
         >
-          {state.cursor + 1 >= state.flatQuestions.length ? "Xem kết quả" : "Tiếp →"}
+          {state.cursor + 1 >= state.flatQuestions.length ? "Xem kết quả" : "Câu tiếp"}
         </button>
       </div>
       {reporting && (
@@ -400,15 +400,13 @@ export default function ExamRunner({
       <style jsx>{`
         .runner-controls { display: flex; justify-content: space-between; align-items: center; max-width: 720px; margin: 1rem auto; padding: 0 1.5rem; }
         .controls-left { display: flex; gap: 0.5rem; }
-        .next-btn { padding: 0.6rem 1.5rem; background: #0d6efd; color: white; border: none; border-radius: 6px; font-size: 0.95rem; cursor: pointer; }
-        .next-btn:disabled { background: #adb5bd; cursor: not-allowed; }
-        .next-btn:hover:not(:disabled) { background: #0b5ed7; }
-        .flag-btn { padding: 0.5rem 1rem; background: transparent; border: 1.5px solid #dee2e6; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
-        .flag-btn.flagged { border-color: #ffc107; background: #fff3cd; }
-        .report-btn { padding: 0.5rem 1rem; background: transparent; border: 1.5px solid #dee2e6; border-radius: 6px; font-size: 0.85rem; cursor: pointer; color: #6c757d; }
-        .report-btn:hover { border-color: #adb5bd; color: #495057; }
-        /* dark theme: light surfaces */
-        :global(:root[data-theme="dark"]) .flag-btn.flagged { background: rgba(234, 179, 8, 0.18); color: #fde68a; }
+        .next-btn { padding: 0.6rem 1.5rem; background: rgb(var(--primary)); color: white; border: none; border-radius: 6px; font-size: 0.95rem; cursor: pointer; }
+        .next-btn:disabled { background: rgb(var(--muted)); cursor: not-allowed; }
+        .next-btn:hover:not(:disabled) { background: rgb(var(--primary-strong)); }
+        .flag-btn { padding: 0.5rem 1rem; background: transparent; border: 1.5px solid rgb(var(--rule)); border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
+        .flag-btn.flagged { border-color: rgb(var(--warn)); background: rgb(var(--warn-soft)); }
+        .report-btn { padding: 0.5rem 1rem; background: transparent; border: 1.5px solid rgb(var(--rule)); border-radius: 6px; font-size: 0.85rem; cursor: pointer; color: rgb(var(--muted)); }
+        .report-btn:hover { border-color: rgb(var(--muted)); color: rgb(var(--muted)); }
       `}</style>
     </div>
   );
@@ -458,8 +456,8 @@ function ReviewSummary({
         .review-summary { max-width: 720px; margin: 0 auto; padding: 1.5rem; }
         .score { font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem; }
         .review-list { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2rem; }
-        .done-btn { width: 100%; padding: 0.75rem; background: #198754; color: white; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; }
-        .done-btn:hover { background: #157347; }
+        .done-btn { width: 100%; padding: 0.75rem; background: rgb(var(--ok)); color: white; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; }
+        .done-btn:hover { background: rgb(var(--ok)); }
       `}</style>
     </div>
   );

@@ -49,12 +49,11 @@ export default function ActivityPage() {
 
   if (groups.length === 0) {
     return (
-      <main className="min-h-full bg-[#f7f4ff] px-4 py-16 text-[#2c1f4a] sm:px-6">
+      <main className="page">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-6 text-5xl" aria-hidden="true">📖</p>
-          <h1 className="mb-3 font-display text-3xl font-bold">Chưa có hoạt động</h1>
-          <p className="mb-8 text-[#6b6384]">Bắt đầu học để xem lịch sử tại đây.</p>
-          <Link href="/" className="inline-flex min-h-11 items-center rounded-xl bg-[#7f56d9] px-6 font-semibold text-white hover:bg-[#6941c6]">
+          <h1 className="page-title mb-3">Chưa có hoạt động</h1>
+          <p className="mb-8 text-muted">Bắt đầu học để xem lịch sử tại đây.</p>
+          <Link href="/" className="inline-flex min-h-11 items-center rounded-xl bg-primary px-6 font-semibold text-white hover:bg-primary-strong">
             Bắt đầu học
           </Link>
         </div>
@@ -65,13 +64,13 @@ export default function ActivityPage() {
   const today = localDate(new Date().toISOString());
 
   return (
-    <main className="min-h-full bg-[#f7f4ff] px-4 py-12 text-[#2c1f4a] sm:px-6">
+    <main className="page">
       <div className="mx-auto max-w-2xl">
-        <h1 className="mb-8 font-display text-4xl font-bold">Hoạt động</h1>
+        <h1 className="page-title mb-8">Hoạt động</h1>
         <div className="space-y-6">
           {groups.map(([date, sessions]) => (
-            <section key={date} className="rounded-2xl bg-white p-5 shadow-sm">
-              <h2 className="mb-3 text-sm font-semibold text-[#6b6384]">
+            <section key={date} className="panel p-5">
+              <h2 className="mb-3 text-sm font-semibold text-muted">
                 {date === today ? "Hôm nay" : new Date(`${date}T12:00:00`).toLocaleDateString("vi-VN", {
                   weekday: "long", day: "numeric", month: "long",
                 })}
@@ -83,18 +82,18 @@ export default function ActivityPage() {
                     ? Math.round(session.correctItems / session.totalItems * 100)
                     : null;
                   return (
-                    <li key={session.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e8e0f7] py-3 last:border-0">
+                    <li key={session.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-rule py-3 last:border-0">
                       <div className="flex items-center gap-3">
                         <span className={`rounded-full px-2 py-1 text-xs font-semibold ${badgeColors[session.type]}`}>
                           {labels[session.type]}
                         </span>
-                        <span className="text-sm text-[#6b6384]">
+                        <span className="text-sm text-muted">
                           {new Date(session.startedAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
                         </span>
                       </div>
                       <div className="flex items-center gap-4 text-sm">
-                        {accuracy !== null && <span className="text-[#6b6384]">{accuracy}%</span>}
-                        {session.totalItems !== undefined && <span className="text-[#6b6384]">{session.totalItems} mục</span>}
+                        {accuracy !== null && <span className="text-muted">{accuracy}%</span>}
+                        {session.totalItems !== undefined && <span className="text-muted">{session.totalItems} mục</span>}
                         <span className="font-medium">{duration(session.durationSeconds)}</span>
                       </div>
                     </li>

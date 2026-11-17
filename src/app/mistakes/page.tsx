@@ -37,9 +37,9 @@ export default function MistakesPage() {
   }
 
   return (
-    <main className="max-w-2xl mx-auto p-4">
+    <main className="page">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold">Sổ lỗi</h1>
+        <h1 className="page-title">Sổ lỗi</h1>
         <Link href="/today" className="text-sm text-blue-500">
           ← Hôm nay
         </Link>
@@ -99,7 +99,7 @@ export default function MistakesPage() {
 
       <ul className="space-y-3">
         {filtered.map((m) => (
-          <li key={m.id} className="border rounded-lg p-4 dark:border-gray-700">
+          <li key={m.id} className="border rounded-lg p-4 border-rule">
             <div className="flex justify-between items-start mb-1">
               <span className="text-xs font-medium text-blue-500">
                 {SKILL_LABELS[m.skill]} · {m.category}

@@ -179,8 +179,8 @@ export default function GrammarQuizPage() {
 
   if (phase === "setup") {
     return (
-      <main className="max-w-md mx-auto p-4">
-        <h1 className="text-xl font-bold mb-6">Quiz Ngữ pháp</h1>
+      <main className="page">
+        <h1 className="page-title mb-6">Quiz Ngữ pháp</h1>
         <div className="space-y-4">
           <div>
             <p className="text-sm font-medium mb-2">Số câu</p>
@@ -206,7 +206,7 @@ export default function GrammarQuizPage() {
           </div>
           {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
           <button onClick={startQuiz} disabled={loading}
-            className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50">
+            className="btn btn-primary w-full">
             {loading ? "Đang tải..." : "Bắt đầu"}
           </button>
           <Link href="/grammar" className="block text-center text-sm text-gray-500 mt-2">← Quay lại ngữ pháp</Link>
@@ -225,8 +225,8 @@ export default function GrammarQuizPage() {
       }, {});
     const topWeak = Object.keys(worstCounts)[0];
     return (
-      <main className="max-w-md mx-auto p-4 text-center">
-        <h1 className="text-2xl font-bold mb-2">Kết quả</h1>
+      <main className="page">
+        <h1 className="page-title mb-2">Kết quả</h1>
         <p className="text-4xl font-bold text-blue-600 mb-1">{correct}/{results.length}</p>
         <p className="text-gray-500 mb-8">{Math.round((correct / results.length) * 100)}% chính xác</p>
         {topWeak && (
@@ -237,8 +237,8 @@ export default function GrammarQuizPage() {
           </Link>
         )}
         <div className="flex gap-3 justify-center">
-          <button onClick={() => setPhase("setup")} className="px-6 py-2 bg-blue-600 text-white rounded-lg">Làm lại</button>
-          <Link href="/grammar" className="px-6 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg">Quay lại</Link>
+          <button onClick={() => setPhase("setup")} className="btn btn-primary">Làm lại</button>
+          <Link href="/grammar" className="btn btn-secondary">Quay lại</Link>
         </div>
       </main>
     );
@@ -247,15 +247,15 @@ export default function GrammarQuizPage() {
   const currentQ = questions[current];
   if (!currentQ) {
     return questionError ? (
-      <main className="max-w-md mx-auto p-4 text-center">
+      <main className="page">
         <p role="alert" className="mb-4">Không thể tải câu hỏi. Vui lòng thử lại.</p>
-        <button onClick={() => { setQuestionError(false); loadQuestion(current); }} className="px-6 py-2 bg-blue-600 text-white rounded-lg">Thử lại</button>
+        <button onClick={() => { setQuestionError(false); loadQuestion(current); }} className="btn btn-primary">Thử lại</button>
       </main>
     ) : <p className="p-4 text-center">Đang tải câu hỏi...</p>;
   }
 
   return (
-    <main className="max-w-md mx-auto p-4">
+    <main className="page">
       <div className="flex justify-between text-sm text-gray-500 mb-4">
         <span>{currentQ.topicName} — {currentQ.subRuleName}</span>
         <span>{current + 1}/{count}</span>
@@ -278,7 +278,7 @@ export default function GrammarQuizPage() {
         })}
       </div>
       {selected !== null && (
-        <button onClick={handleNext} className="mt-6 w-full py-3 bg-blue-600 text-white rounded-lg font-medium">
+        <button onClick={handleNext} className="btn btn-primary mt-6 w-full">
           {current + 1 >= count ? "Xem kết quả" : "Tiếp theo"}
         </button>
       )}

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { getWordsForReview } from "@/lib/storage";
 
 /** Badge showing number of due SRS words. Updates every 60s. */
-export function DueBadge() {
+export function DueBadge({ compact = false }: { compact?: boolean }) {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
@@ -15,7 +15,7 @@ export function DueBadge() {
 
   if (count === 0) return null;
   return (
-    <span className="ml-1 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[#7f56d9] px-1.5 text-xs font-bold text-white">
+    <span title={`${count} từ đến hạn`} className={`inline-flex items-center justify-center rounded-full bg-marker font-semibold tabular-nums text-deep ${compact ? "ml-1 h-4 min-w-4 px-1 text-[10px]" : "ml-1 h-5 min-w-5 px-1.5 text-xs"}`}>
       {count > 99 ? "99+" : count}
     </span>
   );

@@ -2,11 +2,12 @@
 
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
-const COLORS = ["#7f56d9", "#10b981", "#f59e0b", "#ef4444", "#3b82f6", "#ec4899"];
+// Categorical set, ≥3:1 against both the light and the dark card.
+const COLORS = ["#4a6fe3", "#14998a", "#c98a12", "#c8435a", "#7a5bd6", "#64748b"];
 
 export default function TopicDistributionChart({ data }: { data: { topic: string; count: number }[] }) {
   return <section aria-labelledby="topic-distribution-title">
-    <h2 id="topic-distribution-title" className="mb-3 font-semibold text-gray-700">Phân bổ theo chủ đề</h2>
+    <h2 id="topic-distribution-title" className="mb-3 text-base font-semibold text-ink">Phân bổ theo chủ đề</h2>
     {data.length === 0 ? <p className="py-8 text-center text-sm text-gray-500">Chưa có dữ liệu</p> : <div className="h-[220px] w-full" role="img" aria-label="Biểu đồ phân bổ từ theo chủ đề">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>

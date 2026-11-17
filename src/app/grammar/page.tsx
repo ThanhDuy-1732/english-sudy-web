@@ -60,10 +60,10 @@ export default function GrammarPage() {
   }
 
   return (
-    <main className="mx-auto min-w-0 max-w-6xl px-4 py-6 sm:px-6">
+    <main className="page-wide">
       <div className="mb-4 flex items-center justify-between">
         <span />
-        <Link href="/grammar/quiz" className="text-sm px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-500">
+        <Link href="/grammar/quiz" className="btn btn-primary min-h-10 px-4 text-sm">
           Quiz Ngữ pháp
         </Link>
       </div>
@@ -106,7 +106,7 @@ export default function GrammarPage() {
 
       <div className="mt-6 md:hidden">
         <div className="rounded-lg border border-white/10 bg-white/5 p-4">
-          <p className="mb-2 text-sm font-medium text-[#d9ecff]">Thêm chủ đề ngữ pháp</p>
+          <p className="mb-2 text-sm font-medium text-ink">Thêm chủ đề ngữ pháp</p>
           <form
             onSubmit={(event) => {
               event.preventDefault();
@@ -128,7 +128,7 @@ export default function GrammarPage() {
             <button
               type="submit"
               disabled={isAdding}
-              className="min-h-11 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500 disabled:opacity-40"
+              className="btn btn-primary min-h-10 px-4 text-sm"
             >
               {isAdding ? "..." : "+"}
             </button>

@@ -38,7 +38,7 @@ test("system follows the OS and updates live when the OS changes", () => {
   expect(theme()).toBe("dark");
   os.set(false);
   expect(theme()).toBe("light");
-  expect(document.querySelector('meta[name="theme-color"]')?.getAttribute("content")).toBe("#f7f4ff");
+  expect(document.querySelector('meta[name="theme-color"]')?.getAttribute("content")).toBe("#f4f7fc");
 });
 
 test("an explicit preference wins over the OS and ignores OS changes", () => {
@@ -58,7 +58,7 @@ test("setThemePref persists the choice and re-resolves immediately", () => {
   setThemePref("dark");
   expect(theme()).toBe("dark");
   expect(getThemePref()).toBe("dark");
-  expect(document.querySelector('meta[name="theme-color"]')?.getAttribute("content")).toBe("#2c1f4a");
+  expect(document.querySelector('meta[name="theme-color"]')?.getAttribute("content")).toBe("#0e182b");
   setThemePref("system");
   expect(theme()).toBe("light");
   expect(getThemePref()).toBe("system");

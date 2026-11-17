@@ -62,9 +62,9 @@ export default function ContextPracticePage() {
   }
 
   return (
-    <main className="max-w-lg mx-auto p-4">
+    <main className="page">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold">Luyện từ trong ngữ cảnh</h1>
+        <h1 className="page-title">Luyện từ trong ngữ cảnh</h1>
         <Link href="/" className="text-sm text-blue-500">← Trang chủ</Link>
       </div>
 
@@ -73,11 +73,11 @@ export default function ContextPracticePage() {
       <input
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="w-full border rounded-lg px-3 py-2 text-sm mb-3 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
+        className="w-full border rounded-lg px-3 py-2 text-sm mb-3 border-rule"
         placeholder="Tìm từ..."
       />
 
-      <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto mb-4 border rounded-lg p-3 dark:border-gray-700">
+      <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto mb-4 border rounded-lg p-3 border-rule">
         {filtered.length === 0 && (
           <p className="text-sm text-gray-400 w-full text-center py-2">
             {allWords.length === 0 ? "Chưa có từ nào." : "Không tìm thấy từ."}
@@ -105,13 +105,13 @@ export default function ContextPracticePage() {
       <button
         onClick={() => void generate()}
         disabled={selected.size < 2 || loading}
-        className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50 mb-4"
+        className="btn btn-primary w-full mb-4"
       >
         {loading ? "Đang tạo..." : "Tạo nội dung"}
       </button>
 
       {result && (
-        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap">
+        <div className="bg-paper rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap">
           {renderWithBold(result)}
         </div>
       )}

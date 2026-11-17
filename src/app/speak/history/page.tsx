@@ -66,9 +66,9 @@ export default function SpeakingHistoryPage() {
   }
 
   return (
-    <main className="max-w-2xl mx-auto p-4">
+    <main className="page">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold">Lịch sử Speaking</h1>
+        <h1 className="page-title">Lịch sử Speaking</h1>
         <Link href="/speak" className="text-sm text-blue-500">← Quay lại</Link>
       </div>
 
@@ -78,7 +78,7 @@ export default function SpeakingHistoryPage() {
 
       <ul className="space-y-3">
         {records.map((r) => (
-          <li key={r.id} className="border rounded-lg dark:border-gray-700">
+          <li key={r.id} className="border rounded-lg border-rule">
             <button
               onClick={() => setExpanded(expanded === r.id ? null : r.id)}
               className="w-full text-left p-4"
@@ -96,14 +96,14 @@ export default function SpeakingHistoryPage() {
             </button>
 
             {expanded === r.id && (
-              <div className="px-4 pb-4 border-t dark:border-gray-700">
+              <div className="px-4 pb-4 border-t">
                 <ScoreBars bands={r.feedback.bands} />
                 <p className="text-xs text-gray-500 mt-3 italic line-clamp-4">{r.transcript}</p>
                 <div className="flex gap-2 mt-3 flex-wrap">
                   {r.audioId && (
                     <button
                       onClick={() => void handleReplay(r.audioId!, r.id)}
-                      className="text-xs px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded"
+                      className="text-xs px-3 py-1.5 bg-gray-100 rounded"
                     >
                       ▶ Nghe lại
                     </button>

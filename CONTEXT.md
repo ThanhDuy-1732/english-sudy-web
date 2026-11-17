@@ -45,7 +45,7 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 | `/write/history` | `src/app/write/history/page.tsx` | Lịch sử bài viết; mở rewrite |
 | `/write/rewrite/[id]` | `src/app/write/rewrite/[id]/page.tsx` | Viết lại đoạn sai; chấm qua `/api/exam/grade-open`; lỗi → `unifiedMistakes` |
 
-**Navbar** (`AppNavigation.tsx`, mounted in `layout.tsx`): compact native `<details>` menu below `lg`, full links on desktop. Links include `/`, `/review`, `/today`, `/grammar`, `/exam`, `/speak`, `/write`, `/history`, `/diary`, `/activity`, `/path`, `/library`, `/mistakes`, `/stats`, `/vocab/context`, `/import`, `/settings`. Settings remains reachable on phones; menu entries have ≥44px touch targets. Layout uses `viewport-fit=cover` and safe-area padding; mobile form fields use ≥16px text.
+**Navigation** (`AppNavigation.tsx`, mounted in `layout.tsx`): desktop (`lg+`) = sticky left sidebar grouped Hôm nay/Ôn tập · Học · Luyện · Tiến độ, with Cài đặt, `HeaderTimer` and `ProviderBadge` at the bottom; phones = top bar (brand + timer) and a fixed bottom tab bar (Hôm nay, Từ mới, Ôn tập, Luyện thi, Thêm). "Thêm" is a `<details>` sheet with every other link (≥44px targets, backdrop closes it, closes on route change). Active link uses `usePathname` + `aria-current`. `.app-content` reserves the tab bar height below `lg`. No footer.
 
 ---
 
@@ -415,7 +415,7 @@ Không dùng Supabase hay backend nào. Toàn bộ dữ liệu nằm trong local
 | `VoiceSettingsTab` | Voice picker + sliders |
 | `FirebaseInitializer` | Initializes Firebase analytics in the browser when config is available |
 | `ProviderBadge` | Shows current AI provider name |
-| `HeaderTimer` | Navbar timer: shows today's study time or countdown; click to pause/resume; ＋ button opens SetCountdownModal; TimeUpModal shown when countdown ends |
+| `HeaderTimer` | Sidebar/top-bar timer: shows today's study time or countdown; click to pause/resume; ＋ button opens SetCountdownModal; TimeUpModal shown when countdown ends |
 | `charts/StudyTimeChart` | Bar chart — study minutes per day for last 30 days |
 | `charts/ExamAccuracyChart` | Bar chart — weekly exam accuracy % for last 4 weeks |
 | `charts/WeaknessRadar` | Radar chart — exam accuracy % grouped by QuestionType |
@@ -425,10 +425,12 @@ Không dùng Supabase hay backend nào. Toàn bộ dữ liệu nằm trong local
 | `DueBadge` | Client component — live SRS-due word count badge next to "Ôn tập" nav link, updates every 60 s |
 | `DiaryCalendar` | Interactive 26-week heatmap calendar for /diary; purple color levels 0–3; click cell opens DayDrawer |
 | `DayDrawer` | Slide-in right drawer for /diary; shows daily word list (expandable) + study minutes + prev/next nav |
-| `AppNavigation` | Compact mobile menu and desktop links, shared timer and due badges; includes Settings on all viewports |
+| `AppNavigation` | Desktop grouped sidebar; phone top bar + bottom tab bar with "Thêm" sheet; timer, provider badge, due badge (marker yellow) |
 | `ServiceWorkerRegistration` | Production worker registration; installs through `beforeinstallprompt` when available, native installation instructions otherwise (dismissible with ✕, remembered in `pwaInstallDismissed`); standalone detection and optional persistent storage request; offline notice; waiting-worker update button posts `SKIP_WAITING`, reloads only after user action |
 | `ExamTimer` (prop `enabled`; mock timer starts via `ExamRunner.onRunning`, not while items load) · `ListeningPlayer` · `PassageReader` · `QuestionCard` | Thành phần của exam engine. Trang động (`[id]`/`[part]`) là client component đọc tham số bằng `useParams()` (countdown, phát TTS, đoạn đọc, thẻ câu hỏi) |
 | `exam/ReportQuestionModal` | Báo câu hỏi lỗi (lý do + ghi chú) → chỉ lưu local vào `reportedQuestions` (max 200); **không** set `flagged` ở `exam_items` và không sync |
+| `LinkList` | Titled list of destinations in one bordered card (rows divided by rules, chevron); used by `/exam`, `/speak`, `/write` |
+| `Segmented` | Single-choice segmented control (`role=radiogroup`); used by `/exam` (kỳ thi, trình độ), `/stats` tabs, `/today` minutes |
 | `ImportWords` · `QuizCard` | Bulk import từ; thẻ quiz dùng chung |
 
 ---
@@ -474,12 +476,18 @@ Jest + `@testing-library/react`. Config: `jest.config.ts` + `jest.setup.ts`. Tes
 
 ## Theming
 
-- `data-theme="dark"` là giao diện gốc (nền tím `#2c1f4a`, chữ sáng); `light` chỉ ánh xạ lại màu cấp "khung trang" trong `globals.css` (khối `:root[data-theme="light"]`): nền/chữ body, `.canvas-surface` (nav, menu, chân trang, hộp thoại timer, dropdown provider, banner PWA), `text-[#d9ecff]`, `text-[#b0b0d1]`, `text-white` không có `bg-*`, viền/lớp phủ `white/NN`, và các màu nhạt `text-{gray,red,green,blue,purple,yellow,orange}-{300,400}`.
-- Thẻ tối cố ý trong giao diện sáng (hero trang chủ) thêm class `dark-surface` để giữ chữ sáng. Bề mặt sáng (`bg-white`, `bg-[#f7f4ff]`, thẻ trắng) dùng được ở cả hai theme.
-- Tailwind: `darkMode: ["selector", '[data-theme="dark"]']`, nên `dark:` đi theo cài đặt chứ không chỉ theo OS. CSS styled-jsx dùng `:global(:root[data-theme="dark"]) .x { … }` thay cho `@media (prefers-color-scheme: dark)` (đừng dùng media query này nữa).
-- Quy tắc khi thêm UI: màu chữ/nền phải đọc được ở **cả hai** theme. Kiểm tra bằng cách quét tỷ lệ tương phản chữ/nền (≥3) ở cả `dark` và `light`.
-- Dark cũng ánh xạ lại các bề mặt thiết kế sáng (`bg-white` → thẻ `#3a2a61`, `bg-[#f7f4ff]` → nền tím, `text-[#2c1f4a]`/`text-gray-*`/viền/nền tint trạng thái, legend/trục/lưới Recharts). Nút cố ý sáng ở theme tối thêm class `keep-light`.
-- Giới hạn: `apple-mobile-web-app-status-bar-style` (iOS PWA) và `manifest` theme_color là tĩnh.
+- **Design tokens** ("sổ tay thẻ từ"): RGB triplets in `globals.css` per `data-theme` — `paper` (page), `card` (raised surfaces), `ink`, `muted`, `rule` (lines/borders), `primary` (+`strong`, `soft`; ballpoint blue for actions/links/focus), `marker` (highlighter yellow — only for what needs the learner now, e.g. due counts), `margin` (index-card red; errors). Tailwind exposes them as `bg-paper`, `text-ink`, `border-rule`, `bg-primary/10`… plus fixed `deep` (#16233f, ink on yellow/light pills). Use tokens for new UI; never hardcode hex.
+- Tailwind remaps `purple`/`violet`/`indigo` → `blue` and `gray` → `slate`, so older accent classes fall into one palette.
+- Status tokens: `ok`, `warn`, `margin` each with `-soft` (`bg-ok-soft`, `text-margin`). styled-jsx and inline styles use `rgb(var(--token))` — no hex, and no `:root[data-theme="dark"]` overrides (tokens already switch).
+- **Shared classes** (`@layer components` in `globals.css`) — use them for every new screen:
+  `page` (max-w-3xl column) / `page-wide` (max-w-6xl), `page-title` (h1), `page-lead` (one line under the title), `section-title`, `panel` (bordered card), `btn` + `btn-primary` / `btn-secondary`, `field` (input/textarea).
+- Copy rules: sentence case, no emoji in labels or headings (✓ ✗ and media glyphs ▶ ⏹ are fine), no "→" on buttons, no ALL-CAPS eyebrow labels. Back links read "← <page name>".
+- **Type**: `font-sans` = Be Vietnam Pro (Vietnamese UI); `font-en`/`font-display` = Literata — set English study content (words, example sentences, formulas, passages) in `font-en`.
+- `.index-card`: ruled card (3.5rem header, red line, blue rules every 1.75rem). Content below the header uses `leading-7` and no vertical gaps so text sits on the rules (`Flashcard`, home empty state). `.marker-stroke`: highlighter behind a short number (plain marker colour on dark).
+- `data-theme` is the resolved theme; `dark:` follows it (`darkMode: ["selector", '[data-theme="dark"]']`). Older pages written for a dark canvas (`text-white`, `white/NN`) or light cards (`bg-white`, grey ink, `*-50/100` tints) are re-mapped by the two blocks at the end of `globals.css`. styled-jsx uses `rgb(var(--token))` and `:global(:root[data-theme="dark"]) .x`.
+- `dark-surface` keeps light text on deliberately dark elements in light theme; `keep-light` keeps a light button in dark theme.
+- Rule when adding UI: text/background must read in **both** themes (contrast ≥3; `e2e/contrast.e2e.js`).
+- Limits: `apple-mobile-web-app-status-bar-style` and manifest `theme_color` are static (#0e182b).
 
 ## Storage resilience
 

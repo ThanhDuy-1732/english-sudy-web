@@ -35,9 +35,9 @@ test("IELTS speaking finishes after feedback and cancels on early exit", async (
     newVocabulary: [],
   }) });
   const completed = render(<IeltsSpeakingPage />);
-  fireEvent.click(screen.getByRole("button", { name: "⌨️ Nhập text" }));
+  fireEvent.click(screen.getByRole("button", { name: "Gõ câu trả lời" }));
   fireEvent.change(screen.getByPlaceholderText("Nhập câu trả lời của bạn bằng tiếng Anh…"), { target: { value: "Hello there" } });
-  fireEvent.click(screen.getByRole("button", { name: "📤 Nộp bài" }));
+  fireEvent.click(screen.getByRole("button", { name: "Nộp bài" }));
   await waitFor(() => expect(getSessions()[0].finishedAt).toBeDefined());
   expect(getSessions()[0].totalItems).toBeUndefined();
   fireEvent.click(screen.getByRole("button", { name: "Thử lại" }));

@@ -18,7 +18,7 @@ scenario("data pages render stored data", async ({ browser, check }) => {
   const charts = await page.evaluate(() => ({ wrappers: document.querySelectorAll(".recharts-wrapper").length, marks: document.querySelectorAll(".recharts-bar-rectangle, .recharts-line-curve, .recharts-pie-sector, .recharts-radar-polygon, .recharts-area-curve").length }));
   check("stats charts render with data", charts.wrappers >= 3 && charts.marks > 0, JSON.stringify(charts));
   await clickIn(page, "main", "Tuần này"); await sleep(800);
-  check("stats weekly tab has a report", /Streak hiện tại/.test(await bodyText(page)));
+  check("stats weekly tab has a report", /Chuỗi ngày học/.test(await bodyText(page)));
   await goto(page, "/activity");
   check("activity lists sessions", !/Chưa có hoạt động/.test(await bodyText(page)));
   await goto(page, "/path");
@@ -74,7 +74,7 @@ scenario("settings: providers, voice, data and profile", async ({ browser, check
   check("all configured providers are listed", names.length > 0 && names.every((n) => t.includes(n)), names.join(", "));
   await page.evaluate(() => [...document.querySelectorAll("main button")].filter((b) => b.innerText.trim() === "Test").slice(0, 2).forEach((b) => b.click())); await sleep(900);
   t = await bodyText(page);
-  check("test button shows latency or the failure reason", /321ms/.test(t) && /model not found/.test(t));
+  check("test button shows latency or the failure reason", /321 ms/.test(t) && /model not found/.test(t));
   await page.evaluate(() => [...document.querySelectorAll("main button")].filter((b) => !b.innerText.trim())[0]?.click()); await sleep(500);
   check("toggling a provider persists it", /gemini/.test((await page.evaluate(() => localStorage.getItem("disabledProviders"))) || ""));
   await goto(page, "/"); await clickText(page, "Sinh từ mới"); await sleep(1000);
@@ -98,7 +98,7 @@ scenario("theme setting switches the whole UI and survives reload", async ({ bro
   const state = () => page.evaluate(() => ({ attr: document.documentElement.getAttribute("data-theme"), pref: localStorage.getItem("theme"), bg: getComputedStyle(document.body).backgroundColor }));
   await clickIn(page, "main", "Sáng"); await sleep(300);
   let s = await state();
-  check("light applies instantly", s.attr === "light" && s.pref === "light" && s.bg === "rgb(247, 244, 255)", JSON.stringify(s));
+  check("light applies instantly", s.attr === "light" && s.pref === "light" && s.bg === "rgb(244, 247, 252)", JSON.stringify(s));
   await page.reload({ waitUntil: "networkidle2" });
   s = await state();
   check("light survives a reload", s.attr === "light", JSON.stringify(s));

@@ -190,7 +190,7 @@ export default function IeltsSpeakingPage() {
     return (
       <div className="result-page">
         <div className="result-header">
-          <button onClick={() => router.push("/speak")} className="back-btn">← Speak</button>
+          <button onClick={() => router.push("/speak")} className="back-btn">← Luyện nói</button>
           <h1>{config.title}</h1>
         </div>
 
@@ -209,8 +209,8 @@ export default function IeltsSpeakingPage() {
 
         <div className="stats-row">
           <span>⏱ {Math.round(feedback.durationSec)}s</span>
-          <span>📝 {Math.round(feedback.wordsPerMinute)} wpm</span>
-          <span>🔤 Filler words: {feedback.fillerCount}</span>
+          <span>{Math.round(feedback.wordsPerMinute)} từ/phút</span>
+          <span>Từ đệm: {feedback.fillerCount}</span>
         </div>
 
         {audioUrl && (
@@ -221,12 +221,12 @@ export default function IeltsSpeakingPage() {
         )}
 
         <section>
-          <h2>✅ Điểm mạnh</h2>
+          <h2>Điểm mạnh</h2>
           <ul>{feedback.strengths.map((s, i) => <li key={i}>{s}</li>)}</ul>
         </section>
 
         <section>
-          <h2>🔧 Cần cải thiện</h2>
+          <h2>Cần cải thiện</h2>
           {feedback.improvements.map((imp, i) => (
             <div key={i} className="improvement">
               <p className="issue">{imp.issue}</p>
@@ -237,18 +237,18 @@ export default function IeltsSpeakingPage() {
         </section>
 
         <section>
-          <h2>📖 Transcript</h2>
+          <h2>Bản ghi lời nói</h2>
           <p className="transcript">{feedback.transcript}</p>
         </section>
 
         <section>
-          <h2>⭐ Phiên bản nâng cấp (band cao hơn)</h2>
+          <h2>Bản nâng cấp, band cao hơn</h2>
           <p className="upgraded">{feedback.upgradedVersion}</p>
         </section>
 
         {feedback.newVocabulary.length > 0 && (
           <section>
-            <h2>💡 Từ vựng nên dùng</h2>
+            <h2>Từ vựng nên dùng</h2>
             <div className="vocab-list">
               {feedback.newVocabulary.map((w) => (
                 <button key={w} onClick={() => handleAddVocab(w)} className="vocab-chip" title="Thêm vào flashcard">
@@ -269,41 +269,33 @@ export default function IeltsSpeakingPage() {
         </button>
 
         <style jsx>{`
-          .result-page { max-width: 680px; margin: 0 auto; padding: 1.5rem; }
+          .result-page { max-width: 48rem; margin: 0 auto; padding: 2rem 1rem 4rem; }
           .result-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
-          .back-btn { background: none; border: none; cursor: pointer; color: #6c757d; }
-          h1 { font-size: 1.1rem; font-weight: 700; margin: 0; }
-          h2 { font-size: 0.9rem; font-weight: 600; text-transform: uppercase; color: #6c757d; margin: 1.25rem 0 0.5rem; }
+          .back-btn { background: none; border: none; cursor: pointer; color: rgb(var(--muted)); }
+          h1 { color: rgb(var(--ink)); letter-spacing: -0.015em; font-size: 1.625rem; font-weight: 600; margin: 0; }
+          h2 { font-size: 1rem; font-weight: 600; color: rgb(var(--ink)); margin: 1.25rem 0 0.5rem; }
           .score-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 1rem; }
-          .score-box { color: #212529; text-align: center; padding: 0.75rem; background: #f8f9fa; border-radius: 10px; }
-          .score-box.overall { background: #d1e7dd; }
-          .score-label { font-size: 0.75rem; color: #6c757d; margin: 0; }
+          .score-box { color: rgb(var(--ink)); text-align: center; padding: 0.75rem; background: rgb(var(--paper)); border-radius: 10px; }
+          .score-box.overall { background: rgb(var(--ok-soft)); }
+          .score-label { font-size: 0.75rem; color: rgb(var(--muted)); margin: 0; }
           .score-val { font-size: 1.5rem; font-weight: 700; margin: 0.25rem 0 0; }
-          .stats-row { display: flex; gap: 1rem; font-size: 0.8rem; color: #6c757d; margin-bottom: 0.5rem; flex-wrap: wrap; }
+          .stats-row { display: flex; gap: 1rem; font-size: 0.8rem; color: rgb(var(--muted)); margin-bottom: 0.5rem; flex-wrap: wrap; }
           ul { padding-left: 1.25rem; }
           li { margin-bottom: 0.35rem; font-size: 0.9rem; }
-          .improvement { color: #212529; background: #f8f9fa; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem; }
+          .improvement { color: rgb(var(--ink)); background: rgb(var(--paper)); border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem; }
           .issue { font-weight: 600; font-size: 0.875rem; margin: 0 0 0.35rem; }
-          .wrong { color: #dc3545; font-size: 0.85rem; margin: 0; }
-          .better { color: #198754; font-size: 0.85rem; margin: 0.25rem 0 0; }
-          .transcript { color: #212529; font-size: 0.875rem; line-height: 1.6; background: #f8f9fa; padding: 0.75rem; border-radius: 8px; }
-          .upgraded { font-size: 0.875rem; line-height: 1.6; background: #e8f0fe; padding: 0.75rem; border-radius: 8px; border-left: 3px solid #0d6efd; }
+          .wrong { color: rgb(var(--margin)); font-size: 0.85rem; margin: 0; }
+          .better { color: rgb(var(--ok)); font-size: 0.85rem; margin: 0.25rem 0 0; }
+          .transcript { color: rgb(var(--ink)); font-size: 0.875rem; line-height: 1.6; background: rgb(var(--paper)); padding: 0.75rem; border-radius: 8px; }
+          .upgraded { font-size: 0.875rem; line-height: 1.6; background: rgb(var(--primary-soft)); padding: 0.75rem; border-radius: 8px; border-left: 3px solid rgb(var(--primary)); }
           .vocab-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-          .vocab-chip { padding: 0.3rem 0.75rem; border: 1.5px solid #0d6efd; border-radius: 16px; background: white; cursor: pointer; font-size: 0.8rem; color: #0d6efd; }
-          .vocab-chip:hover { background: #e8f0fe; }
-          .vocab-hint { font-size: 0.75rem; color: #6c757d; margin-top: 0.35rem; }
+          .vocab-chip { padding: 0.3rem 0.75rem; border: 1.5px solid rgb(var(--primary)); border-radius: 16px; background: rgb(var(--card)); cursor: pointer; font-size: 0.8rem; color: rgb(var(--primary-text)); }
+          .vocab-chip:hover { background: rgb(var(--primary-soft)); }
+          .vocab-hint { font-size: 0.75rem; color: rgb(var(--muted)); margin-top: 0.35rem; }
           .replay-section { margin: 0.75rem 0; }
-          .replay-label { font-size: 0.75rem; text-transform: uppercase; color: #6c757d; margin: 0 0 0.35rem; }
+          .replay-label { font-size: 0.75rem; color: rgb(var(--muted)); margin: 0 0 0.35rem; }
           .replay-audio { width: 100%; border-radius: 8px; }
-          .retry-btn { width: 100%; padding: 0.875rem; background: #0d6efd; color: white; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; margin-top: 1.5rem; }
-          /* dark theme: light surfaces */
-          :global(:root[data-theme="dark"]) .score-box { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
-          :global(:root[data-theme="dark"]) .score-box.overall { background: rgba(34, 197, 94, 0.16); color: #86efac; }
-          :global(:root[data-theme="dark"]) .improvement { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
-          :global(:root[data-theme="dark"]) .transcript { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
-          :global(:root[data-theme="dark"]) .upgraded { background: rgba(59, 130, 246, 0.2); color: #bfdbfe; }
-          :global(:root[data-theme="dark"]) .vocab-chip { background: #3a2a61; color: #f1ecff; }
-          :global(:root[data-theme="dark"]) .vocab-chip:hover { background: rgba(59, 130, 246, 0.2); color: #bfdbfe; }
+          .retry-btn { width: 100%; padding: 0.875rem; background: rgb(var(--primary)); color: white; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; margin-top: 1.5rem; }
         `}</style>
       </div>
     );
@@ -312,10 +304,10 @@ export default function IeltsSpeakingPage() {
   return (
     <div className="speaking-page">
       <div className="speak-header">
-        <button onClick={() => router.push("/speak")} className="back-btn">← Speak</button>
+        <button onClick={() => router.push("/speak")} className="back-btn">← Luyện nói</button>
         <h1>{config.title}</h1>
         <button onClick={() => setTextMode(!textMode)} className="mode-btn">
-          {textMode ? "🎤 Dùng mic" : "⌨️ Nhập text"}
+          {textMode ? "Dùng micro" : "Gõ câu trả lời"}
         </button>
       </div>
 
@@ -328,7 +320,7 @@ export default function IeltsSpeakingPage() {
         <div className="mic-section">
           {phase === "ready" && (
             <button onClick={startPrep} className="big-btn start">
-              {config.prepSec > 0 ? `▶ Bắt đầu (${config.prepSec}s chuẩn bị)` : "🎤 Bắt đầu ghi âm"}
+              {config.prepSec > 0 ? `Bắt đầu (${config.prepSec}s chuẩn bị)` : "Bắt đầu ghi âm"}
             </button>
           )}
           {phase === "prep" && (
@@ -359,37 +351,33 @@ export default function IeltsSpeakingPage() {
             disabled={!textInput.trim() || phase === "processing"}
             className="big-btn start"
           >
-            {phase === "processing" ? "⏳ Đang chấm…" : "📤 Nộp bài"}
+            {phase === "processing" ? "Đang chấm…" : "Nộp bài"}
           </button>
         </div>
       )}
 
       <style jsx>{`
-        .speaking-page { max-width: 640px; margin: 0 auto; padding: 1.5rem; }
+        .speaking-page { max-width: 48rem; margin: 0 auto; padding: 2rem 1rem 4rem; }
         .speak-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; }
-        .back-btn { background: none; border: none; cursor: pointer; color: #6c757d; }
-        h1 { flex: 1; font-size: 1.1rem; font-weight: 700; margin: 0; }
-        .mode-btn { color: #212529; padding: 0.35rem 0.75rem; border: 1.5px solid #dee2e6; border-radius: 16px; background: white; cursor: pointer; font-size: 0.8rem; }
-        .task-card { color: #212529; background: #f8f9fa; border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem; border-left: 3px solid #0d6efd; }
-        .task-label { font-size: 0.75rem; text-transform: uppercase; color: #6c757d; margin: 0 0 0.5rem; }
+        .back-btn { background: none; border: none; cursor: pointer; color: rgb(var(--muted)); }
+        h1 { color: rgb(var(--ink)); letter-spacing: -0.015em; flex: 1; font-size: 1.625rem; font-weight: 600; margin: 0; }
+        .mode-btn { color: rgb(var(--ink)); padding: 0.35rem 0.75rem; border: 1.5px solid rgb(var(--rule)); border-radius: 16px; background: rgb(var(--card)); cursor: pointer; font-size: 0.8rem; }
+        .task-card { color: rgb(var(--ink)); background: rgb(var(--paper)); border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem; border-left: 3px solid rgb(var(--primary)); }
+        .task-label { font-size: 0.75rem; color: rgb(var(--muted)); margin: 0 0 0.5rem; }
         .task-prompt { font-size: 0.95rem; line-height: 1.6; margin: 0; }
         .mic-section, .text-section { text-align: center; }
         .big-btn { display: block; width: 100%; padding: 1rem; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; margin-top: 1rem; }
-        .big-btn.start { background: #0d6efd; color: white; }
-        .big-btn.start:hover:not(:disabled) { background: #0b5ed7; }
-        .big-btn:disabled { background: #adb5bd; cursor: not-allowed; }
+        .big-btn.start { background: rgb(var(--primary)); color: white; }
+        .big-btn.start:hover:not(:disabled) { background: rgb(var(--primary-strong)); }
+        .big-btn:disabled { background: rgb(var(--muted)); cursor: not-allowed; }
         .countdown { padding: 2rem; }
-        .big-number { font-size: 4rem; font-weight: 700; color: #0d6efd; margin: 0.5rem 0; }
+        .big-number { font-size: 4rem; font-weight: 700; color: rgb(var(--primary-text)); margin: 0.5rem 0; }
         .recording-state { padding: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
-        .rec-dot { width: 16px; height: 16px; border-radius: 50%; background: #dc3545; animation: blink 1s infinite; }
+        .rec-dot { width: 16px; height: 16px; border-radius: 50%; background: rgb(var(--margin)); animation: blink 1s infinite; }
         @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
-        .stop-btn { padding: 0.6rem 1.5rem; border: 1.5px solid #dc3545; color: #dc3545; background: white; border-radius: 8px; cursor: pointer; }
-        .processing { color: #6c757d; padding: 2rem; }
-        textarea { width: 100%; padding: 0.75rem; border: 1.5px solid #dee2e6; border-radius: 8px; font-size: 0.9rem; resize: vertical; box-sizing: border-box; }
-        /* dark theme: light surfaces */
-        :global(:root[data-theme="dark"]) .mode-btn { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
-        :global(:root[data-theme="dark"]) .task-card { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
-        :global(:root[data-theme="dark"]) .stop-btn { background: #3a2a61; color: #f1ecff; }
+        .stop-btn { padding: 0.6rem 1.5rem; border: 1.5px solid rgb(var(--margin)); color: rgb(var(--margin)); background: rgb(var(--card)); border-radius: 8px; cursor: pointer; }
+        .processing { color: rgb(var(--muted)); padding: 2rem; }
+        textarea { width: 100%; padding: 0.75rem; border: 1.5px solid rgb(var(--rule)); border-radius: 8px; font-size: 0.9rem; resize: vertical; box-sizing: border-box; }
       `}</style>
     </div>
   );

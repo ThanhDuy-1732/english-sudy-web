@@ -182,7 +182,7 @@ export default function RoleplayPage() {
     return (
       <div className="session-report">
         <h1>Kết thúc phiên</h1>
-        <p className="goal-status">{goalAchieved ? "✅ Đã đạt mục tiêu!" : "⚠️ Chưa đạt mục tiêu."}</p>
+        <p className="goal-status">{goalAchieved ? "Đã đạt mục tiêu hội thoại." : "Chưa đạt mục tiêu hội thoại."}</p>
         <p className="goal">{scenario.goal}</p>
 
         {corrections.length > 0 && (
@@ -211,21 +211,18 @@ export default function RoleplayPage() {
 
         <style jsx>{`
           .session-report { max-width: 640px; margin: 2rem auto; padding: 1.5rem; }
-          h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
-          h2 { font-size: 1rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+          h1 { color: rgb(var(--ink)); letter-spacing: -0.015em; font-weight: 600; font-size: 1.625rem; margin-bottom: 0.5rem; }
+          h2 { font-weight: 600; font-size: 1rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
           .goal-status { font-size: 1.1rem; font-weight: 600; }
-          .goal { color: #6c757d; font-size: 0.9rem; margin-bottom: 1rem; }
+          .goal { color: rgb(var(--muted)); font-size: 0.9rem; margin-bottom: 1rem; }
           .corrections { display: flex; flex-direction: column; gap: 0.75rem; }
-          .correction-item { color: #212529; padding: 0.75rem; background: #f8f9fa; border-radius: 8px; }
-          .wrong { color: #dc3545; margin: 0; }
-          .right { color: #198754; margin: 0.25rem 0 0; }
-          .note { color: #6c757d; font-size: 0.8rem; margin: 0.25rem 0 0; }
+          .correction-item { color: rgb(var(--ink)); padding: 0.75rem; background: rgb(var(--paper)); border-radius: 8px; }
+          .wrong { color: rgb(var(--margin)); margin: 0; }
+          .right { color: rgb(var(--ok)); margin: 0.25rem 0 0; }
+          .note { color: rgb(var(--muted)); font-size: 0.8rem; margin: 0.25rem 0 0; }
           .report-actions { display: flex; gap: 0.75rem; margin-top: 2rem; flex-wrap: wrap; }
-          .report-actions button { color: #212529; padding: 0.6rem 1.25rem; border-radius: 8px; border: 1.5px solid #dee2e6; background: white; cursor: pointer; }
-          .report-actions button:first-child { background: #0d6efd; color: white; border-color: #0d6efd; }
-          /* dark theme: light surfaces */
-          :global(:root[data-theme="dark"]) .correction-item { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
-          :global(:root[data-theme="dark"]) .report-actions button { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
+          .report-actions button { color: rgb(var(--ink)); padding: 0.6rem 1.25rem; border-radius: 8px; border: 1.5px solid rgb(var(--rule)); background: rgb(var(--card)); cursor: pointer; }
+          .report-actions button:first-child { background: rgb(var(--primary)); color: white; border-color: rgb(var(--primary)); }
         `}</style>
       </div>
     );
@@ -234,12 +231,12 @@ export default function RoleplayPage() {
   return (
     <div className="roleplay-page">
       <div className="roleplay-header">
-        <button onClick={() => router.push("/speak")} className="back-btn">← Speak</button>
+        <button onClick={() => router.push("/speak")} className="back-btn">← Luyện nói</button>
         <div className="scenario-info">
           <strong>{scenario.title}</strong>
           <span className="goal-hint">Mục tiêu: {scenario.goal}</span>
         </div>
-        {goalAchieved && <span className="goal-badge">✅ Đạt</span>}
+        {goalAchieved && <span className="goal-badge">Đã đạt mục tiêu</span>}
       </div>
 
       <div className="chat-area">
@@ -259,7 +256,7 @@ export default function RoleplayPage() {
                   className="correction-chip"
                   onClick={() => alert(`✗ ${t.correction!.original}\n✓ ${t.correction!.fixed}\n${t.correction!.note}`)}
                 >
-                  🔧 Xem sửa lỗi
+                  Xem sửa lỗi
                 </button>
               )}
             </div>
@@ -292,39 +289,31 @@ export default function RoleplayPage() {
 
       <style jsx>{`
         .roleplay-page { display: flex; flex-direction: column; height: calc(100vh - 4rem); height: calc(100dvh - 4rem); max-height: calc(100dvh - 4rem); overflow: hidden; }
-        .roleplay-header { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem 1rem; border-bottom: 1px solid #dee2e6; flex-shrink: 0; }
-        .back-btn { background: none; border: none; cursor: pointer; color: #6c757d; font-size: 0.875rem; white-space: nowrap; }
+        .roleplay-header { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem 1rem; border-bottom: 1px solid rgb(var(--rule)); flex-shrink: 0; }
+        .back-btn { background: none; border: none; cursor: pointer; color: rgb(var(--muted)); font-size: 0.875rem; white-space: nowrap; }
         .scenario-info { flex: 1; }
         .scenario-info strong { display: block; font-size: 0.95rem; }
-        .goal-hint { font-size: 0.75rem; color: #6c757d; }
-        .goal-badge { background: #d1e7dd; color: #0a3622; border-radius: 10px; padding: 0.15rem 0.6rem; font-size: 0.8rem; white-space: nowrap; }
+        .goal-hint { font-size: 0.75rem; color: rgb(var(--muted)); }
+        .goal-badge { background: rgb(var(--ok-soft)); color: rgb(var(--ink)); border-radius: 10px; padding: 0.15rem 0.6rem; font-size: 0.8rem; white-space: nowrap; }
         .chat-area { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
-        .intro-message { text-align: center; color: #6c757d; padding: 2rem; background: #f8f9fa; border-radius: 10px; font-size: 0.875rem; }
+        .intro-message { text-align: center; color: rgb(var(--muted)); padding: 2rem; background: rgb(var(--paper)); border-radius: 10px; font-size: 0.875rem; }
         .intro-message p { margin: 0.35rem 0; }
         .turn { display: flex; }
         .turn.user { justify-content: flex-end; }
         .turn.ai { justify-content: flex-start; }
         .bubble { max-width: 70%; padding: 0.75rem 1rem; border-radius: 12px; font-size: 0.9rem; line-height: 1.5; }
-        .turn.user .bubble { background: #0d6efd; color: white; border-bottom-right-radius: 4px; }
-        .turn.ai .bubble { background: #f1f3f5; color: #212529; border-bottom-left-radius: 4px; }
+        .turn.user .bubble { background: rgb(var(--primary)); color: white; border-bottom-right-radius: 4px; }
+        .turn.ai .bubble { background: rgb(var(--rule)); color: rgb(var(--ink)); border-bottom-left-radius: 4px; }
         .bubble p { margin: 0; }
-        .bubble.loading { color: #adb5bd; font-style: italic; }
+        .bubble.loading { color: rgb(var(--muted)); font-style: italic; }
         .correction-chip { display: block; margin-top: 0.35rem; background: none; border: none; color: rgba(255,255,255,0.7); font-size: 0.75rem; cursor: pointer; padding: 0; text-decoration: underline; }
-        .input-area { display: flex; gap: 0.5rem; padding: 0.75rem 1rem; border-top: 1px solid #dee2e6; flex-shrink: 0; }
-        .input-area input { flex: 1; padding: 0.6rem 0.9rem; border: 1.5px solid #dee2e6; border-radius: 20px; font-size: 0.9rem; }
-        .input-area button { padding: 0.6rem 1.1rem; border-radius: 20px; border: none; background: #0d6efd; color: white; cursor: pointer; font-size: 0.875rem; }
-        .input-area button:disabled { background: #adb5bd; cursor: not-allowed; }
-        .end-btn { background: #f8f9fa !important; color: #6c757d !important; border: 1.5px solid #dee2e6 !important; }
-        .end-btn:hover { background: #e9ecef !important; }
-        :global(:root[data-theme="dark"]) .input-area input { background: rgba(255, 255, 255, 0.08); color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
-        :global(:root[data-theme="dark"]) .intro-message { color: #b0b0d1; }
+        .input-area { display: flex; gap: 0.5rem; padding: 0.75rem 1rem; border-top: 1px solid rgb(var(--rule)); flex-shrink: 0; }
+        .input-area input { flex: 1; padding: 0.6rem 0.9rem; border: 1.5px solid rgb(var(--rule)); border-radius: 20px; font-size: 0.9rem; }
+        .input-area button { padding: 0.6rem 1.1rem; border-radius: 20px; border: none; background: rgb(var(--primary)); color: white; cursor: pointer; font-size: 0.875rem; }
+        .input-area button:disabled { background: rgb(var(--muted)); cursor: not-allowed; }
+        .end-btn { background: rgb(var(--paper)) !important; color: rgb(var(--muted)) !important; border: 1.5px solid rgb(var(--rule)) !important; }
+        .end-btn:hover { background: rgb(var(--rule)) !important; }
         .error { padding: 2rem; text-align: center; }
-        /* dark theme: light surfaces */
-        :global(:root[data-theme="dark"]) .goal-badge { background: rgba(34, 197, 94, 0.16); color: #86efac; }
-        :global(:root[data-theme="dark"]) .intro-message { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
-        :global(:root[data-theme="dark"]) .turn.ai .bubble { background: rgba(255, 255, 255, 0.1); color: #f1ecff; }
-        :global(:root[data-theme="dark"]) .end-btn { background: rgba(255, 255, 255, 0.07) !important; color: #f1ecff !important; border-color: rgba(255, 255, 255, 0.22) !important; }
-        :global(:root[data-theme="dark"]) .end-btn:hover { background: rgba(255, 255, 255, 0.12) !important; color: #f1ecff !important; }
       `}</style>
     </div>
   );

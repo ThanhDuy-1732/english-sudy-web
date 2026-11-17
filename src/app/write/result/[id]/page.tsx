@@ -20,11 +20,11 @@ interface WritingFeedback {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  grammar: "#dc3545",
-  vocab: "#6610f2",
-  cohesion: "#0d6efd",
-  task: "#fd7e14",
-  style: "#6c757d",
+  grammar: "rgb(var(--margin))",
+  vocab: "#7a5bd6",
+  cohesion: "rgb(var(--primary))",
+  task: "rgb(var(--warn))",
+  style: "rgb(var(--muted))",
 };
 
 const KIND_TITLES: Record<string, string> = {
@@ -76,7 +76,7 @@ export default function WritingResultPage() {
     for (const ann of feedback.annotations) {
       if (!ann.excerpt) continue;
       const safeExcerpt = escape(ann.excerpt);
-      const color = CATEGORY_COLORS[ann.category] ?? "#6c757d";
+      const color = CATEGORY_COLORS[ann.category] ?? "rgb(var(--muted))";
       if (result.includes(safeExcerpt)) {
         result = result.replace(
           safeExcerpt,
@@ -90,7 +90,7 @@ export default function WritingResultPage() {
   return (
     <div className="result-page">
       <div className="result-header">
-        <button onClick={() => router.push("/write")} className="back-btn">← Write</button>
+        <button onClick={() => router.push("/write")} className="back-btn">← Luyện viết</button>
         <h1>{config.title}</h1>
       </div>
 
@@ -113,7 +113,7 @@ export default function WritingResultPage() {
 
       {/* Next focus */}
       <div className="next-focus">
-        <span>🎯 Cần cải thiện tiếp theo: </span>
+        <span>Nên tập trung tiếp: </span>
         <strong>{feedback.nextFocus}</strong>
       </div>
 
@@ -127,7 +127,7 @@ export default function WritingResultPage() {
         {/* Annotation legend */}
         <div className="annotation-list">
           {feedback.annotations.map((ann, i) => (
-            <div key={i} className="ann-item" style={{ borderLeftColor: CATEGORY_COLORS[ann.category] ?? "#6c757d" }}>
+            <div key={i} className="ann-item" style={{ borderLeftColor: CATEGORY_COLORS[ann.category] ?? "rgb(var(--muted))" }}>
               <p className="ann-excerpt">&ldquo;{ann.excerpt}&rdquo;</p>
               <p className="ann-issue">{ann.issue}</p>
               <p className="ann-suggestion">✓ {ann.suggestion}</p>
@@ -152,39 +152,31 @@ export default function WritingResultPage() {
       </div>
 
       <style jsx>{`
-        .result-page { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        .result-page { max-width: 48rem; margin: 0 auto; padding: 2rem 1rem 4rem; }
         .result-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; }
-        .back-btn { background: none; border: none; cursor: pointer; color: #6c757d; }
-        h1 { font-size: 1.1rem; font-weight: 700; margin: 0; }
-        h2 { font-size: 0.9rem; text-transform: uppercase; color: #6c757d; margin: 1.5rem 0 0.5rem; }
+        .back-btn { background: none; border: none; cursor: pointer; color: rgb(var(--muted)); }
+        h1 { color: rgb(var(--ink)); letter-spacing: -0.015em; font-size: 1.625rem; font-weight: 600; margin: 0; }
+        h2 { font-weight: 600; font-size: 1rem; color: rgb(var(--ink)); margin: 1.5rem 0 0.5rem; }
         .score-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem; margin-bottom: 0.5rem; }
-        .score-box { color: #212529; text-align: center; padding: 0.75rem; background: #f8f9fa; border-radius: 10px; }
-        .score-box.overall { background: #d1e7dd; }
-        .score-label { font-size: 0.7rem; color: #6c757d; margin: 0; text-transform: uppercase; }
+        .score-box { color: rgb(var(--ink)); text-align: center; padding: 0.75rem; background: rgb(var(--paper)); border-radius: 10px; }
+        .score-box.overall { background: rgb(var(--ok-soft)); }
+        .score-label { font-size: 0.7rem; color: rgb(var(--muted)); margin: 0; }
         .score-val { font-size: 1.5rem; font-weight: 700; margin: 0.2rem 0 0; }
-        .word-count { font-size: 0.8rem; color: #6c757d; margin-bottom: 0.75rem; }
-        .next-focus { color: #212529; background: #fff3cd; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.875rem; margin-bottom: 0.5rem; }
-        .annotated-text { color: #212529; font-size: 0.9rem; line-height: 1.7; background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 0.75rem; white-space: pre-wrap; }
+        .word-count { font-size: 0.8rem; color: rgb(var(--muted)); margin-bottom: 0.75rem; }
+        .next-focus { color: rgb(var(--ink)); background: rgb(var(--warn-soft)); border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.875rem; margin-bottom: 0.5rem; }
+        .annotated-text { color: rgb(var(--ink)); font-size: 0.9rem; line-height: 1.7; background: rgb(var(--paper)); padding: 1rem; border-radius: 8px; margin-bottom: 0.75rem; white-space: pre-wrap; }
         .annotation-list { display: flex; flex-direction: column; gap: 0.5rem; }
-        .ann-item { color: #212529; padding: 0.6rem 0.75rem; border-left: 3px solid; background: #f8f9fa; border-radius: 0 6px 6px 0; font-size: 0.85rem; }
-        .ann-excerpt { font-style: italic; color: #495057; margin: 0 0 0.2rem; }
+        .ann-item { color: rgb(var(--ink)); padding: 0.6rem 0.75rem; border-left: 3px solid; background: rgb(var(--paper)); border-radius: 0 6px 6px 0; font-size: 0.85rem; }
+        .ann-excerpt { font-style: italic; color: rgb(var(--muted)); margin: 0 0 0.2rem; }
         .ann-issue { font-weight: 600; margin: 0 0 0.15rem; }
-        .ann-suggestion { color: #198754; margin: 0; }
-        .model-answer { color: #212529; font-size: 0.9rem; line-height: 1.7; background: #e8f0fe; padding: 1rem; border-radius: 8px; border-left: 3px solid #0d6efd; white-space: pre-wrap; }
+        .ann-suggestion { color: rgb(var(--ok)); margin: 0; }
+        .model-answer { color: rgb(var(--ink)); font-size: 0.9rem; line-height: 1.7; background: rgb(var(--primary-soft)); padding: 1rem; border-radius: 8px; border-left: 3px solid rgb(var(--primary)); white-space: pre-wrap; }
         .result-actions { display: flex; gap: 0.75rem; margin-top: 2rem; flex-wrap: wrap; }
-        .result-actions button { color: #212529; padding: 0.6rem 1.25rem; border-radius: 8px; border: 1.5px solid #dee2e6; background: white; cursor: pointer; font-size: 0.9rem; }
-        .result-actions button:first-child { background: #0d6efd; color: white; border-color: #0d6efd; }
+        .result-actions button { color: rgb(var(--ink)); padding: 0.6rem 1.25rem; border-radius: 8px; border: 1.5px solid rgb(var(--rule)); background: rgb(var(--card)); cursor: pointer; font-size: 0.9rem; }
+        .result-actions button:first-child { background: rgb(var(--primary)); color: white; border-color: rgb(var(--primary)); }
         .not-found { padding: 2rem; text-align: center; }
-        .not-found button { background: none; border: none; color: #0d6efd; cursor: pointer; text-decoration: underline; }
+        .not-found button { background: none; border: none; color: rgb(var(--primary-text)); cursor: pointer; text-decoration: underline; }
         @media (max-width: 560px) { .score-grid { grid-template-columns: repeat(3, 1fr); } }
-        /* dark theme: light surfaces */
-        :global(:root[data-theme="dark"]) .score-box { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
-        :global(:root[data-theme="dark"]) .score-box.overall { background: rgba(34, 197, 94, 0.16); color: #86efac; }
-        :global(:root[data-theme="dark"]) .next-focus { background: rgba(234, 179, 8, 0.18); color: #fde68a; }
-        :global(:root[data-theme="dark"]) .annotated-text { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
-        :global(:root[data-theme="dark"]) .ann-item { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
-        :global(:root[data-theme="dark"]) .model-answer { background: rgba(59, 130, 246, 0.2); color: #bfdbfe; }
-        :global(:root[data-theme="dark"]) .result-actions button { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
       `}</style>
     </div>
   );

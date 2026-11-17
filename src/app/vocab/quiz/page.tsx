@@ -115,8 +115,8 @@ export default function VocabQuizPage() {
 
   if (phase === "setup") {
     return (
-      <main className="max-w-md mx-auto p-4">
-        <h1 className="text-xl font-bold mb-6">Quiz Từ vựng</h1>
+      <main className="page">
+        <h1 className="page-title mb-6">Quiz Từ vựng</h1>
         <div className="space-y-4">
           <div>
             <p className="text-sm font-medium mb-2">Chế độ</p>
@@ -143,7 +143,7 @@ export default function VocabQuizPage() {
           <button
             onClick={startQuiz}
             disabled={allWords.length < 4}
-            className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50"
+            className="btn btn-primary w-full"
           >
             {allWords.length < 4 ? "Cần ít nhất 4 từ" : "Bắt đầu"}
           </button>
@@ -156,13 +156,13 @@ export default function VocabQuizPage() {
   if (phase === "done") {
     const correct = results.filter((r) => r.correct).length;
     return (
-      <main className="max-w-md mx-auto p-4 text-center">
-        <h1 className="text-2xl font-bold mb-2">Kết quả</h1>
+      <main className="page">
+        <h1 className="page-title mb-2">Kết quả</h1>
         <p className="text-4xl font-bold text-blue-600 mb-1">{correct}/{results.length}</p>
         <p className="text-gray-500 mb-8">{Math.round((correct / results.length) * 100)}% chính xác</p>
         <div className="flex gap-3 justify-center">
-          <button onClick={() => setPhase("setup")} className="px-6 py-2 bg-blue-600 text-white rounded-lg">Làm lại</button>
-          <Link href="/" className="px-6 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg">Trang chủ</Link>
+          <button onClick={() => setPhase("setup")} className="btn btn-primary">Làm lại</button>
+          <Link href="/" className="btn btn-secondary">Trang chủ</Link>
         </div>
       </main>
     );
@@ -172,7 +172,7 @@ export default function VocabQuizPage() {
   if (!q) return null;
 
   return (
-    <main className="max-w-md mx-auto p-4">
+    <main className="page">
       <div className="flex justify-between text-sm text-gray-500 mb-4">
         <span>{mode === "meaning" ? "Chọn nghĩa đúng" : "Điền từ vào chỗ trống"}</span>
         <span>{currentIdx + 1}/{questions.length}</span>
@@ -210,7 +210,7 @@ export default function VocabQuizPage() {
                 onChange={(e) => setInput(e.target.value)}
                 disabled={selected !== null}
                 onKeyDown={(e) => e.key === "Enter" && selected === null && handleAnswer(input)}
-                className="w-full border rounded-lg px-3 py-2 text-sm dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
+                className="w-full border rounded-lg px-3 py-2 text-sm border-rule"
                 placeholder="Nhập từ..."
                 autoFocus
               />
@@ -225,7 +225,7 @@ export default function VocabQuizPage() {
       )}
 
       {selected !== null && (
-        <button onClick={handleNext} className="mt-6 w-full py-3 bg-blue-600 text-white rounded-lg font-medium">
+        <button onClick={handleNext} className="btn btn-primary mt-6 w-full">
           {currentIdx + 1 >= questions.length ? "Xem kết quả" : "Tiếp theo"}
         </button>
       )}

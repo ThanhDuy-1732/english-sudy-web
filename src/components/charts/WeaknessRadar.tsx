@@ -21,7 +21,7 @@ export default function WeaknessRadar({ attempts }: { attempts: ExamAttempt[] })
   if (data.length === 0) {
     return (
       <section>
-        <h2 className="mb-3 font-semibold text-gray-700">Điểm yếu theo kỹ năng</h2>
+        <h2 className="mb-3 text-base font-semibold text-ink">Điểm yếu theo kỹ năng</h2>
         <p className="py-8 text-center text-sm text-gray-500">Chưa có dữ liệu luyện thi</p>
       </section>
     );
@@ -29,7 +29,7 @@ export default function WeaknessRadar({ attempts }: { attempts: ExamAttempt[] })
 
   return (
     <section aria-labelledby="weakness-radar-title">
-      <h2 id="weakness-radar-title" className="mb-3 font-semibold text-gray-700">
+      <h2 id="weakness-radar-title" className="mb-3 text-base font-semibold text-ink">
         Điểm yếu theo kỹ năng
       </h2>
       <div className="h-[220px] w-full">
@@ -37,7 +37,7 @@ export default function WeaknessRadar({ attempts }: { attempts: ExamAttempt[] })
           <RadarChart data={data}>
             <PolarGrid />
             <PolarAngleAxis dataKey="type" tick={{ fontSize: 10 }} />
-            <Radar dataKey="accuracy" stroke="#fd7e14" fill="#fd7e14" fillOpacity={0.4} />
+            <Radar dataKey="accuracy" stroke="#c8435a" fill="#c8435a" fillOpacity={0.4} />
             <Tooltip formatter={(v) => [`${v}%`, "Accuracy"]} />
           </RadarChart>
         </ResponsiveContainer>

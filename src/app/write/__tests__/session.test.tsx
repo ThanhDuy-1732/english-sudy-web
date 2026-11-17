@@ -25,7 +25,7 @@ test("starts once, cancels on early exit, and finishes after saving feedback", a
   fireEvent.change(screen.getByPlaceholderText("Bắt đầu viết bài của bạn ở đây…"), {
     target: { value: Array(100).fill("word").join(" ") },
   });
-  fireEvent.click(screen.getByRole("button", { name: "📤 Nộp bài" }));
+  fireEvent.click(screen.getByRole("button", { name: "Nộp bài" }));
   await waitFor(() => expect(mockPush).toHaveBeenCalledWith(expect.stringMatching(/^\/write\/result\/[a-f0-9-]+$/)));
   const recordId = JSON.parse(localStorage.getItem("writingSubmissions")!)[0].id;
   expect(JSON.parse(localStorage.getItem("writingSubmissions")!)[0].feedback.overall).toBe(7);

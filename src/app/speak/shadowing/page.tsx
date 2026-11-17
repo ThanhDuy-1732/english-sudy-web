@@ -129,12 +129,12 @@ export default function ShadowingPage() {
   }
 
   const isRecording = recorderRef.current.isRecording();
-  const matchColor = matchPct >= 80 ? "#22c55e" : matchPct >= 60 ? "#f97316" : "#ef4444";
+  const matchColor = matchPct >= 80 ? "rgb(var(--ok))" : matchPct >= 60 ? "rgb(var(--warn))" : "rgb(var(--margin))";
 
   return (
-    <main className="max-w-md mx-auto p-4">
+    <main className="page">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-xl font-bold">Shadowing</h1>
+        <h1 className="page-title">Shadowing</h1>
         <Link href="/speak" className="text-sm text-blue-500">← Quay lại</Link>
       </div>
 
@@ -149,14 +149,14 @@ export default function ShadowingPage() {
           disabled={phase === "processing"}
           className="px-4 py-2 bg-green-100 text-green-800 rounded-lg text-sm font-medium disabled:opacity-40"
         >
-          🔊 Nghe câu mẫu
+          Nghe câu mẫu
         </button>
         {phase === "ready" && (
           <button
             onClick={() => void handleStartRecording()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium"
+            className="btn btn-primary min-h-10 px-4 text-sm"
           >
-            🎤 Ghi âm
+            Ghi âm
           </button>
         )}
         {phase === "recording" && (
@@ -168,7 +168,7 @@ export default function ShadowingPage() {
           </button>
         )}
         {phase === "processing" && (
-          <span className="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm text-gray-500">
+          <span className="btn btn-secondary text-sm">
             Đang xử lý…
           </span>
         )}
@@ -181,7 +181,7 @@ export default function ShadowingPage() {
             <p className="text-sm text-gray-500">Độ tương đồng</p>
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 mb-4">
+          <div className="bg-paper rounded-lg p-3 mb-4">
             <p className="text-xs font-medium text-gray-500 mb-1">Bạn đã nói:</p>
             <p className="text-sm italic">&ldquo;{transcript || "(Không nhận được âm thanh)"}&rdquo;</p>
           </div>
@@ -204,9 +204,9 @@ export default function ShadowingPage() {
 
           <button
             onClick={handleNext}
-            className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium"
+            className="btn btn-primary w-full"
           >
-            Câu tiếp theo →
+            Câu tiếp theo
           </button>
         </div>
       )}

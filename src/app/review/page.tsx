@@ -65,11 +65,10 @@ export default function ReviewPage() {
     const minutes = Math.floor(summary.durationSeconds / 60);
     const seconds = String(summary.durationSeconds % 60).padStart(2, "0");
     return (
-      <main className="bg-[#f7f4ff] px-4 py-16 text-[#2c1f4a] sm:px-6">
+      <main className="page">
         <div className="mx-auto max-w-md text-center">
-          <p className="mb-4 text-5xl" aria-hidden="true">✅</p>
-          <h1 className="mb-6 font-display text-3xl font-bold">Ôn tập xong!</h1>
-          <div className="mb-6 space-y-3 rounded-2xl bg-white p-6 text-left shadow-sm">
+          <h1 className="page-title mb-6">Ôn tập xong!</h1>
+          <div className="mb-6 space-y-3 panel p-6 text-left">
             {([
               ["Tổng số từ", summary.total],
               ["Quên", summary.again],
@@ -81,7 +80,7 @@ export default function ReviewPage() {
               ["Cần ôn tiếp", getWordsForReview().length],
             ] as const).map(([label, value]) => (
               <div className="flex justify-between" key={label}>
-                <span className="text-[#6b6384]">{label}</span>
+                <span className="text-muted">{label}</span>
                 <span className="font-semibold">{value}</span>
               </div>
             ))}
@@ -89,7 +88,7 @@ export default function ReviewPage() {
           <button
             type="button"
             onClick={() => router.push("/")}
-            className="w-full rounded-xl bg-[#7f56d9] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#6941c6]"
+            className="w-full rounded-xl bg-primary px-6 py-3 font-semibold text-white transition-colors hover:bg-primary-strong"
           >
             Xong
           </button>
@@ -100,25 +99,21 @@ export default function ReviewPage() {
 
   if (words.length === 0) {
     return (
-      <main className="bg-[#f7f4ff] px-4 py-16 text-[#2c1f4a] sm:px-6">
+      <main className="page">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-5xl mb-6">🎉</p>
-          <h1 className="font-display text-3xl font-bold mb-3">Hoàn thành rồi!</h1>
-          <p className="text-[#6b6384] text-lg">Không có từ nào cần ôn hôm nay.</p>
+          <h1 className="page-title mb-3">Hoàn thành rồi!</h1>
+          <p className="text-muted text-lg">Không có từ nào cần ôn hôm nay.</p>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="bg-[#f7f4ff] px-4 py-12 text-[#2c1f4a] sm:px-6">
-      <div className="mx-auto max-w-6xl">
+    <main className="page-wide">
+      <div>
         <div className="mb-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#7f56d9]">
-            Spaced repetition
-          </p>
-          <h1 className="mt-2 font-display text-4xl font-bold">Ôn tập hôm nay</h1>
-          <p className="mt-2 text-[#6b6384]">{words.length} từ cần ôn</p>
+          <h1 className="page-title">Ôn tập hôm nay</h1>
+          <p className="page-lead">{words.length} từ cần ôn</p>
         </div>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {words.map((w) => (

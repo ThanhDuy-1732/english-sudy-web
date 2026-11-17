@@ -26,6 +26,23 @@ import BandTimelineChart from "@/components/charts/BandTimelineChart";
 import SkillRadar from "@/components/charts/SkillRadar";
 import { weeklyBands, skillRadar, type WeeklyBand, type SkillRadarPoint } from "@/lib/stats-skills";
 import type { ExamAttempt } from "@/lib/exam/types";
+import Segmented from "@/components/Segmented";
+
+const PANEL = "min-w-0 overflow-hidden rounded-xl border border-rule bg-card p-5 sm:p-6";
+
+/** One row of figures separated by rules, instead of a grid of identical stat cards. */
+function Figures({ items }: { items: [string, string][] }) {
+  return (
+    <dl className="grid grid-cols-2 overflow-hidden rounded-xl border border-rule bg-card sm:grid-cols-[repeat(auto-fit,minmax(9rem,1fr))]">
+      {items.map(([value, label]) => (
+        <div key={label} className="border-rule p-4 [&:not(:last-child)]:border-b sm:border-b-0 sm:[&:not(:last-child)]:border-r sm:p-5">
+          <dt className="text-sm text-muted">{label}</dt>
+          <dd className="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-ink">{value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
 
 export default function StatsPage() {
   const { todaySeconds } = useTimer();
@@ -69,137 +86,84 @@ export default function StatsPage() {
   const todayMinutes = Math.round(todaySeconds / 60);
 
   return (
-    <main className="min-h-full min-w-0 bg-[#f7f4ff] px-4 py-10 text-[#2c1f4a] sm:px-6 lg:py-14">
-      <div className="mx-auto w-full min-w-0 max-w-6xl">
-        <div className="mb-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#7f56d9]">Learning analytics</p>
-          <h1 className="mt-2 font-display text-4xl font-bold">Thống kê học tập</h1>
-          <p className="mt-2 text-sm text-[#6b6384]">Theo dõi nhịp học, chủ đề và tiến bộ mastery của bạn.</p>
-        </div>
+    <main className="mx-auto w-full max-w-6xl px-4 pb-16 pt-8 sm:px-8 lg:pt-12">
+      <h1 className="text-3xl font-semibold tracking-tight text-ink sm:text-4xl">Thống kê học tập</h1>
+      <p className="page-lead">Nhịp học, chủ đề đã học và tiến bộ ở từng kỹ năng.</p>
 
-        <div className="flex gap-2 mb-6">
-          {([["overview", "Tổng quan"], ["weekly", "Tuần này"]] as const).map(([v, l]) => (
-            <button key={v} onClick={() => setActiveTab(v)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium ${activeTab === v ? "bg-[#7f56d9] text-white" : "bg-white text-[#6b6384] shadow-sm"}`}>
-              {l}
-            </button>
-          ))}
-        </div>
+      <div className="mt-6">
+        <Segmented label="Khoảng thời gian" value={activeTab} onChange={setActiveTab}
+          options={[{ value: "overview", label: "Tổng quan" }, { value: "weekly", label: "Tuần này" }]} />
+      </div>
 
-        {activeTab === "weekly" && (
-          <div className="space-y-4 mb-6">
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-              <div className="rounded-2xl bg-white p-5 shadow-sm">
-                <p className="font-display text-3xl font-bold">{streakInfo.currentStreak}</p>
-                <p className="mt-1 text-sm text-[#6b6384]">Streak hiện tại (ngày)</p>
-              </div>
-              <div className="rounded-2xl bg-white p-5 shadow-sm">
-                <p className="font-display text-3xl font-bold">{streakInfo.activeDaysThisWeek}/7</p>
-                <p className="mt-1 text-sm text-[#6b6384]">Ngày học tuần này</p>
-              </div>
-              <div className="rounded-2xl bg-white p-5 shadow-sm">
-                <p className="font-display text-3xl font-bold">{weeklyReport.studyMinutes} phút</p>
-                <p className="mt-1 text-sm text-[#6b6384]">Tổng thời gian tuần</p>
-              </div>
-              <div className="rounded-2xl bg-white p-5 shadow-sm">
-                <p className="font-display text-3xl font-bold">{weeklyReport.sessions}</p>
-                <p className="mt-1 text-sm text-[#6b6384]">Phiên học tuần này</p>
-              </div>
-              <div className="rounded-2xl bg-white p-5 shadow-sm">
-                <p className="font-display text-3xl font-bold">{weeklyReport.wordsLearned}</p>
-                <p className="mt-1 text-sm text-[#6b6384]">Từ mới tuần này</p>
-              </div>
-              <div className="rounded-2xl bg-white p-5 shadow-sm">
-                <p className="font-display text-3xl font-bold">
-                  {weeklyReport.examAccuracy !== null ? `${weeklyReport.examAccuracy}%` : "—"}
-                </p>
-                <p className="mt-1 text-sm text-[#6b6384]">Độ chính xác exam</p>
-              </div>
-            </div>
-            {weeklyReport.srsAccuracy !== null && (
-              <div className="rounded-2xl bg-white p-5 shadow-sm">
-                <p className="text-sm text-[#6b6384] mb-1">SRS accuracy tuần này</p>
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-[#7f56d9] rounded-full" style={{ width: `${weeklyReport.srsAccuracy}%` }} />
-                  </div>
-                  <span className="text-sm font-semibold">{weeklyReport.srsAccuracy}%</span>
+      {activeTab === "weekly" && (
+        <div className="mt-6 space-y-6">
+          <Figures items={[
+            [String(streakInfo.currentStreak), "Chuỗi ngày học"],
+            [`${streakInfo.activeDaysThisWeek}/7`, "Ngày học tuần này"],
+            [`${weeklyReport.studyMinutes} phút`, "Thời gian học"],
+            [String(weeklyReport.sessions), "Phiên học"],
+            [String(weeklyReport.wordsLearned), "Từ mới"],
+            [weeklyReport.examAccuracy !== null ? `${weeklyReport.examAccuracy}%` : "–", "Đúng khi luyện thi"],
+          ]} />
+          {weeklyReport.srsAccuracy !== null && (
+            <section className={PANEL}>
+              <h2 className="text-base font-semibold text-ink">Nhớ từ khi ôn tập</h2>
+              <div className="mt-3 flex items-center gap-3">
+                <div className="h-2 flex-1 overflow-hidden rounded-full bg-rule">
+                  <div className="h-full rounded-full bg-primary" style={{ width: `${weeklyReport.srsAccuracy}%` }} />
                 </div>
+                <span className="text-sm font-semibold tabular-nums text-ink">{weeklyReport.srsAccuracy}%</span>
               </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === "overview" && (<><div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <p className="font-display text-3xl font-bold">{totalWords}</p>
-            <p className="mt-1 text-sm text-[#6b6384]">Từ đã học</p>
-          </div>
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <p className="font-display text-3xl font-bold">{activeDays}</p>
-            <p className="mt-1 text-sm text-[#6b6384]">Ngày học trong 30 ngày</p>
-          </div>
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <p className="font-display text-3xl font-bold">{averageMastery}/5</p>
-            <p className="mt-1 text-sm text-[#6b6384]">Mastery trung bình</p>
-          </div>
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <p className="font-display text-3xl font-bold">{todayMinutes} phút</p>
-            <p className="mt-1 text-sm text-[#6b6384]">Hôm nay</p>
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <section className="min-w-0 overflow-hidden rounded-[28px] bg-white p-5 shadow-sm sm:p-6">
-            <WordsPerDayChart data={wordsPerDay} />
-          </section>
-          <section className="min-w-0 overflow-hidden rounded-[28px] bg-white p-5 shadow-sm sm:p-6">
-            <StudyTimeChart data={studyTimePerDay} />
-          </section>
-          <div className="grid gap-6 lg:grid-cols-2">
-            <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-6">
-              <TopicDistributionChart data={topicDistribution} />
             </section>
-            <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-6">
-              <h2 className="mb-3 font-semibold text-gray-700">Tóm tắt theo chủ đề</h2>
+          )}
+        </div>
+      )}
+
+      {activeTab === "overview" && (
+        <div className="mt-6 space-y-6">
+          <Figures items={[
+            [String(totalWords), "Từ đã học"],
+            [String(activeDays), "Ngày học trong 30 ngày"],
+            [`${averageMastery}/5`, "Mastery trung bình"],
+            [`${todayMinutes} phút`, "Hôm nay"],
+          ]} />
+          <section className={PANEL}><WordsPerDayChart data={wordsPerDay} /></section>
+          <section className={PANEL}><StudyTimeChart data={studyTimePerDay} /></section>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <section className={PANEL}><TopicDistributionChart data={topicDistribution} /></section>
+            <section className={PANEL}>
+              <h2 className="text-base font-semibold text-ink">Tóm tắt theo chủ đề</h2>
               {topicDistribution.length === 0 ? (
-                <p className="py-8 text-center text-sm text-gray-500">Chưa có dữ liệu</p>
+                <p className="py-8 text-center text-sm text-muted">Chưa có từ nào. Lưu từ ở trang Từ mới để thấy thống kê.</p>
               ) : (
-                <ul className="space-y-3">
+                <ul className="mt-3 divide-y divide-rule">
                   {topicDistribution.map((item) => (
-                    <li key={item.topic} className="flex items-center justify-between border-b border-gray-100 pb-2 text-sm last:border-0">
-                      <span className="text-gray-600">{item.topic}</span>
-                      <span className="font-semibold text-[#2c1f4a]">{item.count} từ</span>
+                    <li key={item.topic} className="flex items-center justify-between py-2.5 text-sm">
+                      <span className="text-ink">{item.topic}</span>
+                      <span className="tabular-nums text-muted">{item.count} từ</span>
                     </li>
                   ))}
                 </ul>
               )}
             </section>
           </div>
-          <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-6">
-            <StreakCalendar data={calendarData} />
-          </section>
+          <section className={PANEL}><StreakCalendar data={calendarData} /></section>
           <div className="grid gap-6 lg:grid-cols-2">
-            <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-6">
-              <h2 className="mb-3 font-semibold text-gray-700">Band theo tuần (12 tuần gần nhất)</h2>
+            <section className={PANEL}>
+              <h2 className="mb-3 text-base font-semibold text-ink">Band theo tuần, 12 tuần gần nhất</h2>
               <BandTimelineChart data={bands} />
             </section>
-            <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-6">
-              <h2 className="mb-3 font-semibold text-gray-700">4 kỹ năng</h2>
+            <section className={PANEL}>
+              <h2 className="mb-3 text-base font-semibold text-ink">4 kỹ năng</h2>
               <SkillRadar data={radarData} />
             </section>
           </div>
           <div className="grid gap-6 lg:grid-cols-2">
-            <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-6">
-              <ExamAccuracyChart attempts={examAttempts} />
-            </section>
-            <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-6">
-              <WeaknessRadar attempts={examAttempts} />
-            </section>
+            <section className={PANEL}><ExamAccuracyChart attempts={examAttempts} /></section>
+            <section className={PANEL}><WeaknessRadar attempts={examAttempts} /></section>
           </div>
         </div>
-        </>)}
-      </div>
+      )}
     </main>
   );
 }

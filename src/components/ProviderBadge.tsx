@@ -15,17 +15,17 @@ export function ProviderBadge() {
     <div className="relative flex items-center gap-1">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-[#d9ecff] hover:bg-white/20"
+        title="Mô hình AI đang dùng" className="flex items-center gap-1 whitespace-nowrap rounded-full border border-rule px-2.5 py-1 text-xs font-medium text-muted hover:border-primary hover:text-ink"
         aria-label="Chọn AI provider"
       >
-        ⚡ {current.name}
+        {current.name}
         <span className="opacity-60">▾</span>
       </button>
 
       {open && (
         <>
           <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full z-40 mt-1 min-w-[180px] rounded-lg border border-white/10 bg-[#2c1f4a] canvas-surface shadow-xl">
+          <div className="absolute bottom-full right-0 z-40 mb-1 min-w-[180px] rounded-lg border border-rule bg-card shadow-xl">
             {availableProviders.map((p) => (
               <button
                 key={p.id}
@@ -34,7 +34,7 @@ export function ProviderBadge() {
                   setOpen(false);
                 }}
                 className={`w-full px-4 py-2 text-left text-sm hover:bg-white/10 ${
-                  p.id === currentProvider ? "font-semibold text-white" : "text-[#b0b0d1]"
+                  p.id === currentProvider ? "font-semibold text-white" : "text-muted"
                 }`}
               >
                 {p.id === currentProvider && "✓ "}
@@ -47,7 +47,7 @@ export function ProviderBadge() {
 
       <Link
         href="/settings"
-        className="flex items-center rounded-full p-1 text-[#b0b0d1] hover:text-white"
+        className="flex items-center rounded-full p-1 text-muted hover:text-white"
         title="Cài đặt provider"
         aria-label="Cài đặt provider"
       >

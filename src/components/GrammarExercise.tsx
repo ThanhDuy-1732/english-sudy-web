@@ -40,7 +40,7 @@ export default function GrammarExercise({ exercise }: { exercise: Exercise }) {
   if (exercise.type === "fill") {
     return (
       <div className="mt-3 rounded-lg border border-white/10 bg-white/5 p-4">
-        <p className="mb-3 text-sm text-[#d9ecff]">{exercise.question}</p>
+        <p className="mb-3 text-sm text-ink">{exercise.question}</p>
         <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
           <input
             type="text"
@@ -58,7 +58,7 @@ export default function GrammarExercise({ exercise }: { exercise: Exercise }) {
               type="button"
               onClick={check}
               disabled={!userAnswer.trim()}
-              className="min-h-10 rounded bg-purple-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-500 disabled:opacity-40"
+              className="btn btn-primary min-h-10 px-4 text-sm"
             >
               Kiểm tra
             </button>
@@ -66,7 +66,7 @@ export default function GrammarExercise({ exercise }: { exercise: Exercise }) {
             <button
               type="button"
               onClick={reset}
-              className="min-h-10 rounded bg-white/10 px-3 py-1.5 text-sm font-medium text-[#d9ecff] hover:bg-white/20"
+              className="min-h-10 rounded bg-white/10 px-3 py-1.5 text-sm font-medium text-ink hover:bg-white/20"
             >
               Thử lại
             </button>
@@ -86,7 +86,7 @@ export default function GrammarExercise({ exercise }: { exercise: Exercise }) {
 
   return (
     <div className="mt-3 rounded-lg border border-white/10 bg-white/5 p-4">
-      <p className="mb-3 text-sm text-[#d9ecff]">{exercise.question}</p>
+      <p className="mb-3 text-sm text-ink">{exercise.question}</p>
       <div className="flex flex-col gap-2">
         {exercise.options.map((option) => {
           const isSelected = selectedOption === option;
@@ -107,7 +107,7 @@ export default function GrammarExercise({ exercise }: { exercise: Exercise }) {
                   ? "bg-green-600/30 text-green-300"
                   : showWrong
                     ? "bg-red-600/30 text-red-300"
-                    : "bg-white/10 text-[#d9ecff] hover:bg-white/20"
+                    : "bg-white/10 text-ink hover:bg-white/20"
               }`}
             >
               {option}

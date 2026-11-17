@@ -48,7 +48,7 @@ export default function MockPage() {
   if (!started) {
     return (
       <div className="mock-start">
-        <h1>Mock Test — {kind}</h1>
+        <h1>Thi thử {kind}</h1>
         <p>
           Bài thi rút gọn: {parts.length} parts · {Math.round(timeLimit / 60)} phút
         </p>
@@ -56,7 +56,7 @@ export default function MockPage() {
           ? ["400", "500", "650", "780", "900+"][settings.level - 1]
           : ["4.5", "5.0", "6.0", "7.0", "8.0"][settings.level - 1]})</p>
         <p className="warning">
-          ⚠️ Timer bắt đầu khi bạn làm câu đầu tiên và không thể tạm dừng.
+          Đồng hồ chạy từ câu đầu tiên và không tạm dừng được.
         </p>
         <button onClick={() => {
           sessionIdRef.current = startSession("exam", { mode: "mock" });
@@ -69,17 +69,14 @@ export default function MockPage() {
         </button>
         <style jsx>{`
           .mock-start { max-width: 480px; margin: 4rem auto; text-align: center; padding: 2rem; }
-          h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
-          p { color: #6c757d; margin-bottom: 0.5rem; }
+          h1 { color: rgb(var(--ink)); letter-spacing: -0.015em; font-size: 1.625rem; font-weight: 600; margin-bottom: 1rem; }
+          p { color: rgb(var(--muted)); margin-bottom: 0.5rem; }
           .level-note { font-size: 0.9rem; }
-          .warning { color: #856404; background: #fff3cd; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.875rem; }
+          .warning { color: rgb(var(--ink)); background: rgb(var(--warn-soft)); border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.875rem; }
           .start-btn, .cancel-btn { display: block; width: 100%; padding: 0.875rem; border-radius: 8px; font-size: 1rem; cursor: pointer; border: none; margin-top: 0.75rem; }
-          .start-btn { background: #0d6efd; color: white; }
-          .start-btn:hover { background: #0b5ed7; }
-          .cancel-btn { background: white; border: 1.5px solid #dee2e6 !important; color: #495057; }
-          /* dark theme: light surfaces */
-          :global(:root[data-theme="dark"]) .warning { background: rgba(234, 179, 8, 0.18); color: #fde68a; }
-          :global(:root[data-theme="dark"]) .cancel-btn { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
+          .start-btn { background: rgb(var(--primary)); color: white; }
+          .start-btn:hover { background: rgb(var(--primary-strong)); }
+          .cancel-btn { background: rgb(var(--card)); border: 1.5px solid rgb(var(--rule)) !important; color: rgb(var(--muted)); }
         `}</style>
       </div>
     );
@@ -90,7 +87,7 @@ export default function MockPage() {
     const total = attempt.answers.length;
     return (
       <div className="mock-result">
-        <h1>Kết quả Mock Test</h1>
+        <h1>Kết quả thi thử</h1>
         <p className="raw-score">
           {correct} / {total} câu đúng ({Math.round((correct / total) * 100)}%)
         </p>
@@ -123,18 +120,15 @@ export default function MockPage() {
         </div>
         <style jsx>{`
           .mock-result { max-width: 480px; margin: 3rem auto; text-align: center; padding: 2rem; }
-          h1 { font-size: 1.5rem; margin-bottom: 1rem; }
+          h1 { color: rgb(var(--ink)); letter-spacing: -0.015em; font-weight: 600; font-size: 1.625rem; margin-bottom: 1rem; }
           .raw-score { font-size: 1.1rem; margin-bottom: 1rem; }
-          .score-box { color: #212529; background: #f8f9fa; border-radius: 10px; padding: 1rem; margin-bottom: 1rem; }
+          .score-box { color: rgb(var(--ink)); background: rgb(var(--paper)); border-radius: 10px; padding: 1rem; margin-bottom: 1rem; }
           .score-box p { margin: 0.35rem 0; }
           .total { font-size: 1.25rem; font-weight: 700; margin-top: 0.5rem !important; }
-          .disclaimer { font-size: 0.75rem; color: #6c757d; }
+          .disclaimer { font-size: 0.75rem; color: rgb(var(--muted)); }
           .result-actions { display: flex; gap: 0.75rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap; }
-          .result-actions button { color: #212529; padding: 0.6rem 1.25rem; border-radius: 8px; border: 1.5px solid #dee2e6; background: white; cursor: pointer; }
-          .result-actions button:first-child { background: #0d6efd; color: white; border-color: #0d6efd; }
-          /* dark theme: light surfaces */
-          :global(:root[data-theme="dark"]) .score-box { background: rgba(255, 255, 255, 0.07); color: #f1ecff; }
-          :global(:root[data-theme="dark"]) .result-actions button { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
+          .result-actions button { color: rgb(var(--ink)); padding: 0.6rem 1.25rem; border-radius: 8px; border: 1.5px solid rgb(var(--rule)); background: rgb(var(--card)); cursor: pointer; }
+          .result-actions button:first-child { background: rgb(var(--primary)); color: white; border-color: rgb(var(--primary)); }
         `}</style>
       </div>
     );
@@ -173,10 +167,8 @@ export default function MockPage() {
         }}
       />
       <style jsx>{`
-        .mock-header { color: #212529; display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.5rem; border-bottom: 1px solid #dee2e6; position: sticky; top: 0; background: white; z-index: 10; }
+        .mock-header { color: rgb(var(--ink)); display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.5rem; border-bottom: 1px solid rgb(var(--rule)); position: sticky; top: 0; background: rgb(var(--card)); z-index: 10; }
         .mock-label { font-weight: 700; font-size: 0.95rem; }
-        /* dark theme: light surfaces */
-        :global(:root[data-theme="dark"]) .mock-header { background: #3a2a61; color: #f1ecff; border-color: rgba(255, 255, 255, 0.22); }
       `}</style>
     </div>
   );

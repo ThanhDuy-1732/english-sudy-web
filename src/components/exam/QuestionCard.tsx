@@ -133,13 +133,13 @@ export default function QuestionCard({
           display: flex;
           justify-content: space-between;
           font-size: 0.85rem;
-          color: #666;
+          color: rgb(var(--muted));
           margin-bottom: 0.75rem;
         }
         .passage-context {
-          color: #212529;
-          background: #f8f9fa;
-          border-left: 3px solid #6c757d;
+          color: rgb(var(--ink));
+          background: rgb(var(--paper));
+          border-left: 3px solid rgb(var(--muted));
           padding: 0.75rem 1rem;
           margin-bottom: 1rem;
           font-size: 0.9rem;
@@ -160,31 +160,31 @@ export default function QuestionCard({
           gap: 0.5rem;
         }
         .option-btn {
-          color: #212529;
+          color: rgb(var(--ink));
           text-align: left;
           padding: 0.75rem 1rem;
-          border: 1.5px solid #dee2e6;
+          border: 1.5px solid rgb(var(--rule));
           border-radius: 6px;
-          background: white;
+          background: rgb(var(--card));
           cursor: pointer;
           font-size: 0.95rem;
           transition: all 0.15s;
         }
         .option-btn:hover:not(:disabled) {
-          border-color: #0d6efd;
-          background: #e8f0fe;
+          border-color: rgb(var(--primary));
+          background: rgb(var(--primary-soft));
         }
         .option-btn.selected {
-          border-color: #0d6efd;
-          background: #e8f0fe;
+          border-color: rgb(var(--primary));
+          background: rgb(var(--primary-soft));
         }
         .option-btn.correct {
-          border-color: #198754;
-          background: #d1e7dd;
+          border-color: rgb(var(--ok));
+          background: rgb(var(--ok-soft));
         }
         .option-btn.wrong {
-          border-color: #dc3545;
-          background: #f8d7da;
+          border-color: rgb(var(--margin));
+          background: rgb(var(--margin-soft));
         }
         .completion-input {
           margin-bottom: 1rem;
@@ -192,7 +192,7 @@ export default function QuestionCard({
         .text-input {
           width: 100%;
           padding: 0.6rem 0.9rem;
-          border: 1.5px solid #dee2e6;
+          border: 1.5px solid rgb(var(--rule));
           border-radius: 6px;
           font-size: 0.95rem;
           box-sizing: border-box;
@@ -200,13 +200,13 @@ export default function QuestionCard({
         .result-panel {
           margin-top: 1rem;
           padding: 0.75rem 1rem;
-          background: #d1e7dd;
+          background: rgb(var(--ok-soft));
           border-radius: 6px;
-          border-left: 3px solid #198754;
+          border-left: 3px solid rgb(var(--ok));
         }
         .result-panel.wrong {
-          background: #f8d7da;
-          border-color: #dc3545;
+          background: rgb(var(--margin-soft));
+          border-color: rgb(var(--margin));
         }
         .correct-answer {
           margin: 0 0 0.35rem;
@@ -215,22 +215,14 @@ export default function QuestionCard({
         .explanation {
           margin: 0 0 0.35rem;
           font-size: 0.875rem;
-          color: #333;
+          color: rgb(var(--ink));
         }
         .vocab-note {
           margin: 0;
           font-size: 0.8rem;
-          color: #555;
+          color: rgb(var(--muted));
           font-style: italic;
         }
-        :global(:root[data-theme="dark"]) .question-header { color: #b0b0d1; }
-        :global(:root[data-theme="dark"]) .passage-context { background: #1e2a35; color: #eee; }
-        :global(:root[data-theme="dark"]) .option-btn { background: #1a1a2e; border-color: #444; color: #eee; }
-        :global(:root[data-theme="dark"]) .option-btn:hover:not(:disabled) { border-color: #4d9fff; background: #1a2f50; }
-        :global(:root[data-theme="dark"]) .option-btn.selected { border-color: #4d9fff; background: #1a2f50; }
-        :global(:root[data-theme="dark"]) .result-panel { background: #1a3027; }
-        :global(:root[data-theme="dark"]) .result-panel.wrong { background: #3a1a1e; }
-        :global(:root[data-theme="dark"]) .text-input { background: #1a1a2e; color: #eee; border-color: #444; }
       `}</style>
     </div>
   );

@@ -60,7 +60,7 @@ test("plays the script and completes playback", async () => {
 
   await waitFor(() => expect(screen.getByText("✓ Đã phát xong")).toBeInTheDocument());
   expect(onComplete).toHaveBeenCalledTimes(1);
-  expect(screen.getByLabelText("Phát audio")).toHaveTextContent("🔁 Phát lại");
+  expect(screen.getByLabelText("Phát audio")).toHaveTextContent("Phát lại");
 });
 
 test("stops playback and returns to idle", async () => {
