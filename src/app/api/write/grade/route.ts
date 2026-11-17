@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { callWithFallback } from "@/lib/providers";
 import { callTask } from "@/lib/ai-tasks";
 import { parseAiJson } from "@/lib/ai-json";
 import { buildWritingAnchorBlock } from "@/lib/grading/anchors";
@@ -74,12 +73,7 @@ Return ONLY JSON:
   const { text, providerId } = await callTask({ task: "writing-grade", prompt, temperature: GRADING_OPTS.temperature });
   const parsed = await parseAiJson(text, WritingFeedbackSchema, {
     repair: (err) =>
-      callWithFallback(
-        `${prompt}\n\nSchema error: ${err}\nReturn valid JSON only.`,
-        providerId,
-        undefined,
-        GRADING_OPTS
-      ).then((r) => r.text),
+      callTask({ task: "writing-grade", prompt: `${prompt}\n\nSchema error: ${err}\nReturn valid JSON only.`, provider: providerId, temperature: GRADING_OPTS.temperature }).then((r) => r.text),
   });
 
   return NextResponse.json({ ...parsed, gradedBy: providerId });

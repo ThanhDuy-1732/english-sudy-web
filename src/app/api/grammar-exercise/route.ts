@@ -1,4 +1,4 @@
-import { callWithFallback } from "@/lib/providers";
+import { callTask } from "@/lib/ai-tasks";
 import { NextRequest, NextResponse } from "next/server";
 
 const NO_STORE = { "Cache-Control": "no-store" };
@@ -23,7 +23,7 @@ Return ONLY one of these JSON formats (no markdown, no extra text):
 Fill-in-the-blank: { "type": "fill", "question": "She ___ to school every day.", "answer": "goes" }
 Multiple choice: { "type": "mcq", "question": "Choose the correct form:", "options": ["opt1", "opt2", "opt3", "opt4"], "answer": "correct option" }`;
 
-    const result = await callWithFallback(prompt, provider, disabledProviders);
+    const result = await callTask({ task: "grammar-exercise", prompt, provider, disabledProviders });
     const cleaned = result.text.replace(/```json\n?|```/g, "").trim();
     const exercise = JSON.parse(cleaned);
 

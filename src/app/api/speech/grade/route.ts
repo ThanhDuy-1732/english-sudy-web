@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { callWithFallback } from "@/lib/providers";
 import { callTask } from "@/lib/ai-tasks";
 import { parseAiJson } from "@/lib/ai-json";
 import { buildSpeakingAnchorBlock } from "@/lib/grading/anchors";
@@ -75,12 +74,7 @@ Return ONLY JSON:
 
   const parsed = await parseAiJson(text, FeedbackSchema, {
     repair: (err) =>
-      callWithFallback(
-        `${prompt}\n\nOutput trước bị lỗi schema: ${err}\nTrả lại JSON hợp lệ.`,
-        providerId,
-        undefined,
-        GRADING_OPTS
-      ).then((r) => r.text),
+      callTask({ task: "speaking-grade", prompt: `${prompt}\n\nOutput trước bị lỗi schema: ${err}\nTrả lại JSON hợp lệ.`, provider: providerId, temperature: GRADING_OPTS.temperature }).then((r) => r.text),
   });
 
   return NextResponse.json({

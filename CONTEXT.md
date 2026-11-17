@@ -75,7 +75,11 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 | `/api/vocab/context` | `{ words: string[], format?: "mini_story"\|"dialogue"\|"email"\|"workplace" }` | `{ text }` (từ mục tiêu in **đậm**); 400 nếu `words` rỗng |
 | `/api/admin/metrics` | GET, header `x-admin-secret` = `ADMIN_SECRET` | Metrics AI tổng hợp theo task; 503 nếu chưa set `ADMIN_SECRET`, 401 nếu sai |
 
-Routes gọi AI dùng `callWithFallback` (qua `provider` + `disabledProviders`) hoặc `callTask` (task router, xem mục AI Provider System) — **chỉ 4 route dùng `callTask`**: `generate-words`, `speech/grade`, `write/grade`, `vocab/context`. Các route còn lại gọi `callWithFallback` trực tiếp (không có metrics). Chúng set header `X-Provider-Used`. Lời gọi AI thật nằm ở `src/lib/providers/`.
+Mọi route gọi AI đều đi qua `callTask` (task router, có metrics) — kể cả lần gọi sửa JSON (`repair`). Chúng set header `X-Provider-Used`. Lời gọi AI thật nằm ở `src/lib/providers/`.
+
+**Giới hạn request** (`src/middleware.ts` + `src/lib/api-limits.ts`, áp cho mọi `POST /api/*` trước khi route đọc body): body tối đa theo `content-length` — mặc định 16 KB; `/api/write/grade` và `/api/speak/roleplay` 64 KB, `/api/speech/grade` 32 KB, `/api/exam/generate-item` 8 KB; `/api/speech/transcribe` không giới hạn ở đây (route tự giới hạn 25 MiB) → 413. Mỗi IP (`x-forwarded-for` đầu tiên) tối đa `API_RATE_LIMIT` request/phút (mặc định 60; `0` = tắt) → 429 + `Retry-After`. Bộ đếm in-memory theo instance.
+
+**Security headers** (`next.config.mjs`, mọi đường dẫn): CSP (`default-src 'self'`; script thêm `'unsafe-inline'` cho theme script/Next bootstrap, `'unsafe-eval'` chỉ ở dev, googletagmanager; connect tới `*.googleapis.com`, `*.google-analytics.com`, `*.analytics.google.com` cho Firebase Analytics; `media-src blob:` cho ghi âm; `frame-ancestors 'none'`), `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options: DENY`, `Permissions-Policy` (chỉ `microphone=(self)`), HSTS. Thêm domain mới phía client thì phải thêm vào CSP.
 `GRADING_PROVIDER` env var pins a specific provider for band scoring (stability). `GROQ_API_KEY` + `GROQ_WHISPER_MODEL` env vars for STT.
 
 ---
@@ -287,7 +291,7 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 - `getRegisteredProviders()` — returns all configured providers
 - Active providers: whichever env keys are set in `.env.local`
 
-**Task router** (`src/lib/ai-tasks.ts`): `callTask({ task, prompt, provider?, disabledProviders?, temperature? })` → `{ text, providerId }`. Bọc `callWithFallback`, chọn provider theo `TASK_PROVIDER_MAP` (bảng tĩnh; chỉ `speaking-grade` và `writing-grade` ghim theo `GRADING_PROVIDER`) và ghi metric mỗi lần gọi. `AITaskName`: `word-generation`, `sentence-generation`, `grammar-generation`, `grammar-explanation`, `exam-generation`, `exam-explanation`, `speaking-roleplay`, `speaking-grade`, `writing-grade`, `writing-feedback`, `vocab-context`. Mới 4 route dùng (xem API Routes).
+**Task router** (`src/lib/ai-tasks.ts`): `callTask({ task, prompt, provider?, disabledProviders?, temperature? })` → `{ text, providerId }`. Bọc `callWithFallback`, chọn provider theo `TASK_PROVIDER_MAP` (bảng tĩnh; chỉ `speaking-grade` và `writing-grade` ghim theo `GRADING_PROVIDER`) và ghi metric mỗi lần gọi. `AITaskName` → route: `word-generation` (generate-words), `vocab-batch` (generate-batch), `sentence-generation` (generate-sentence), `vocab-exercise` (generate-synonyms, generate-fillblank), `reading-generation` (generate-reading), `sentence-grade` (grade-sentence), `grammar-generation` (grammar-generate), `grammar-explanation` (grammar-examples), `grammar-exercise`, `exam-generation` (exam/generate-item), `exam-explanation` (exam/explain), `exam-grade` (exam/grade-open), `speaking-roleplay`, `speaking-grade`, `writing-grade`, `vocab-context`; `writing-feedback` chưa dùng.
 - `ai-prompts.ts` — `PROMPTS: Partial<Record<AITaskName, PromptDefinition>>`, `getPrompt(task)`; chưa phủ hết task.
 - `ai-metrics.ts` — `recordMetric`, `getMetrics`, `getAggregatedMetrics`, `clearMetrics`; **in-memory theo server instance**, mất khi cold start. Đọc qua `GET /api/admin/metrics`.
 - `ai-json.ts` — `stripFences`, `parseAiJson(schema, …)` (Zod validate; dùng cho exam item).

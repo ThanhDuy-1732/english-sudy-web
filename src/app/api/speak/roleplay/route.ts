@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { callWithFallback } from "@/lib/providers";
+import { callTask } from "@/lib/ai-tasks";
 import { parseAiJson } from "@/lib/ai-json";
 import { z } from "zod";
 import type { Scenario, ConversationTurn } from "@/lib/speech/types";
@@ -53,13 +53,10 @@ Return ONLY JSON:
   "suggestedReplies": ["option 1", "option 2", "option 3"]
 }`;
 
-  const { text, providerId } = await callWithFallback(prompt);
+  const { text, providerId } = await callTask({ task: "speaking-roleplay", prompt });
   const parsed = await parseAiJson(text, ResponseSchema, {
     repair: (err) =>
-      callWithFallback(
-        `${prompt}\n\nSchema error: ${err}\nReturn valid JSON only.`,
-        providerId
-      ).then((r) => r.text),
+      callTask({ task: "speaking-roleplay", prompt: `${prompt}\n\nSchema error: ${err}\nReturn valid JSON only.`, provider: providerId }).then((r) => r.text),
   });
 
   return NextResponse.json(parsed);

@@ -1,5 +1,5 @@
 import { generateReading } from "@/lib/gemini";
-import { callWithFallback } from "@/lib/providers";
+import { callTask } from "@/lib/ai-tasks";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
   try {
     let resolvedProviderId = "";
     const generateFn = async (prompt: string) => {
-      const result = await callWithFallback(prompt, body.provider, body.disabledProviders);
+      const result = await callTask({ task: "reading-generation", prompt, provider: body.provider, disabledProviders: body.disabledProviders });
       resolvedProviderId = result.providerId;
       return result.text;
     };

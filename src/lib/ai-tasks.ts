@@ -12,7 +12,13 @@ export type AITaskName =
   | "speaking-grade"
   | "writing-grade"
   | "writing-feedback"
-  | "vocab-context";
+  | "vocab-context"
+  | "vocab-batch"
+  | "vocab-exercise"
+  | "reading-generation"
+  | "sentence-grade"
+  | "grammar-exercise"
+  | "exam-grade";
 
 export interface CallTaskOptions {
   task: AITaskName;
@@ -35,6 +41,12 @@ const TASK_PROVIDER_MAP: Record<AITaskName, string> = {
   "writing-grade": process.env.GRADING_PROVIDER ?? "",
   "writing-feedback": "",
   "vocab-context": "",
+  "vocab-batch": "",
+  "vocab-exercise": "",
+  "reading-generation": "",
+  "sentence-grade": "",
+  "grammar-exercise": "",
+  "exam-grade": "",
 };
 
 export function getTaskProviderMap(): Record<AITaskName, string> {

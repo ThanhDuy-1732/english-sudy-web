@@ -1,4 +1,4 @@
-import { callWithFallback } from "@/lib/providers";
+import { callTask } from "@/lib/ai-tasks";
 import { NextRequest, NextResponse } from "next/server";
 
 const NO_STORE = { "Cache-Control": "no-store" };
@@ -36,7 +36,7 @@ Return ONLY a JSON object with this exact structure (no markdown, no extra text)
 }
 Include 3-6 sub-rules covering the key aspects of this topic.`;
 
-    const result = await callWithFallback(prompt, provider, disabledProviders);
+    const result = await callTask({ task: "grammar-generation", prompt, provider, disabledProviders });
     const cleaned = result.text.replace(/```json\n?|```/g, "").trim();
     const topic = JSON.parse(cleaned);
 

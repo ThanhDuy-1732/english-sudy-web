@@ -1,4 +1,4 @@
-import { callWithFallback } from "@/lib/providers";
+import { callTask } from "@/lib/ai-tasks";
 import { NextRequest, NextResponse } from "next/server";
 
 const NO_STORE = { "Cache-Control": "no-store" };
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 Make the sentences clear, natural, and at intermediate level.
 Return ONLY JSON (no markdown, no extra text): { "examples": ["sentence1", "sentence2", "sentence3"] }`;
 
-    const result = await callWithFallback(prompt, provider, disabledProviders);
+    const result = await callTask({ task: "grammar-explanation", prompt, provider, disabledProviders });
     const cleaned = result.text.replace(/```json\n?|```/g, "").trim();
     const data = JSON.parse(cleaned) as { examples: string[] };
 

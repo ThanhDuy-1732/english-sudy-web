@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { callWithFallback } from "@/lib/providers";
+import { callTask } from "@/lib/ai-tasks";
 
 export async function POST(req: NextRequest) {
   const { question, userAnswer, correctAnswer, explanation } = await req.json();
@@ -15,7 +15,7 @@ Give a clear, concise explanation (2-4 sentences) of why the correct answer is r
 
 Return ONLY JSON: {"explanation": "your explanation here"}`;
 
-  const { text } = await callWithFallback(prompt);
+  const { text } = await callTask({ task: "exam-explanation", prompt });
   try {
     const result = JSON.parse(text.replace(/```(?:json)?/gi, "").trim());
     return NextResponse.json(result);

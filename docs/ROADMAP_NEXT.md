@@ -35,12 +35,12 @@ Thứ tự ưu tiên: dọn nợ → an toàn dữ liệu → hạ tầng AI →
 
 ---
 
-## Phase 2 — Hoàn thiện hạ tầng AI & API (2–3 ngày) 🟠
+## Phase 2 — Hoàn thiện hạ tầng AI & API ✅ (xong 2026-11-17)
 
 | # | Việc |
 |---|---|
 | 2.1 | Chuyển 15 route còn dùng `callWithFallback` trực tiếp sang `callTask` → có metrics + prompt registry cho mọi task |
-| 2.2 | Giới hạn kích thước input cho các route AI (zod `.max()` trên chuỗi/mảng) — tránh đốt quota bằng payload lớn |
+| 2.2 | Giới hạn kích thước body cho các route AI (làm ở `middleware.ts` theo `content-length`, theo từng route) — tránh đốt quota bằng payload lớn |
 | 2.3 | Rate limit đơn giản theo IP (in-memory, chấp nhận mất khi cold start) cho route AI |
 | 2.4 | Security headers trong `next.config.mjs` (CSP cơ bản, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` cho microphone) |
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { callWithFallback } from "@/lib/providers";
+import { callTask } from "@/lib/ai-tasks";
 
 export async function POST(req: NextRequest) {
   const { question, userAnswer, correctAnswer } = await req.json();
@@ -14,7 +14,7 @@ Decide if the student's answer is correct. Allow minor spelling mistakes (1-2 ch
 
 Return ONLY JSON: {"correct": true/false, "feedback": "one sentence explanation"}`;
 
-  const { text } = await callWithFallback(prompt);
+  const { text } = await callTask({ task: "exam-grade", prompt });
   try {
     const result = JSON.parse(text.replace(/```(?:json)?/gi, "").trim());
     return NextResponse.json(result);
