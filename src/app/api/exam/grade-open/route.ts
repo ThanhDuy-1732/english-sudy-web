@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callTask } from "@/lib/ai-tasks";
 
+// Vercel: AI providers are tried in turn (25 s each) plus a JSON repair call; 300 s is the Hobby maximum with Fluid compute.
+export const maxDuration = 300;
+
 export async function POST(req: NextRequest) {
   const { question, userAnswer, correctAnswer } = await req.json();
 

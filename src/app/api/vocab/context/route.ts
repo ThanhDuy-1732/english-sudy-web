@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { callTask } from "@/lib/ai-tasks";
 
+// Vercel: AI providers are tried in turn (25 s each) plus a JSON repair call; 300 s is the Hobby maximum with Fluid compute.
+export const maxDuration = 300;
+
 const FORMAT_PROMPTS: Record<string, string> = {
   mini_story: "a short story (3-4 sentences)",
   dialogue: "a short dialogue between two people (4-6 lines)",

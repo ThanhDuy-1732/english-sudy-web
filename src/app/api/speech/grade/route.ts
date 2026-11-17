@@ -4,6 +4,9 @@ import { parseAiJson } from "@/lib/ai-json";
 import { buildSpeakingAnchorBlock } from "@/lib/grading/anchors";
 import { z } from "zod";
 
+// Vercel: AI providers are tried in turn (25 s each) plus a JSON repair call; 300 s is the Hobby maximum with Fluid compute.
+export const maxDuration = 300;
+
 const GRADING_PROVIDER = process.env.GRADING_PROVIDER;
 const GRADING_OPTS = { temperature: 0.2 } as const;
 

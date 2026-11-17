@@ -5,6 +5,9 @@ import { buildItemPrompt } from "@/lib/exam/prompts";
 import { parseAiJson } from "@/lib/ai-json";
 import type { ExamKind, ExamPart } from "@/lib/exam/types";
 
+// Vercel: AI providers are tried in turn (25 s each) plus a JSON repair call; 300 s is the Hobby maximum with Fluid compute.
+export const maxDuration = 300;
+
 export async function POST(req: NextRequest) {
   const {
     kind,

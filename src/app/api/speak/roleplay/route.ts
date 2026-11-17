@@ -4,6 +4,9 @@ import { parseAiJson } from "@/lib/ai-json";
 import { z } from "zod";
 import type { Scenario, ConversationTurn } from "@/lib/speech/types";
 
+// Vercel: AI providers are tried in turn (25 s each) plus a JSON repair call; 300 s is the Hobby maximum with Fluid compute.
+export const maxDuration = 300;
+
 const ResponseSchema = z.object({
   reply: z.string().min(1),
   correction: z
