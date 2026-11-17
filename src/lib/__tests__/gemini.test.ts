@@ -32,6 +32,45 @@ test("generateWords throws on malformed JSON", async () => {
   await expect(generateWords("TOEIC", mockFn)).rejects.toThrow("Gemini returned invalid JSON");
 });
 
+test("generateWords asks the model to avoid excluded words", async () => {
+  mockFn.mockResolvedValue(JSON.stringify([{ word: "launch", meaning: "ra mắt" }]));
+  await generateWords("TOEIC", mockFn, { exclude: ["negotiate", "invoice"] });
+  expect(mockFn.mock.calls[0][0]).toContain("negotiate, invoice");
+});
+
+test("generateWords drops excluded words and asks once for replacements", async () => {
+  mockFn
+    .mockResolvedValueOnce(
+      JSON.stringify([
+        { word: "Negotiate", meaning: "đàm phán" },
+        { word: "invoice", meaning: "hoá đơn" },
+        { word: "launch", meaning: "ra mắt" },
+      ])
+    )
+    .mockResolvedValueOnce(JSON.stringify([{ word: "deadline", meaning: "hạn chót" }]));
+
+  const words = await generateWords("TOEIC", mockFn, { exclude: ["negotiate"], count: 3 });
+
+  expect(words.map((w) => w.word)).toEqual(["invoice", "launch", "deadline"]);
+  expect(mockFn).toHaveBeenCalledTimes(2);
+  expect(mockFn.mock.calls[1][0]).toContain("negotiate");
+});
+
+test("generateWords keeps the first batch when the replacement call fails", async () => {
+  mockFn
+    .mockResolvedValueOnce(
+      JSON.stringify([
+        { word: "negotiate", meaning: "đàm phán" },
+        { word: "invoice", meaning: "hoá đơn" },
+      ])
+    )
+    .mockResolvedValueOnce("not json");
+
+  const words = await generateWords("TOEIC", mockFn, { exclude: ["negotiate"], count: 3 });
+
+  expect(words.map((w) => w.word)).toEqual(["invoice"]);
+});
+
 // generateSentence
 test("generateSentence returns trimmed text", async () => {
   mockFn.mockResolvedValue("  We need to negotiate.  ");

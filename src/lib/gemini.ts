@@ -20,17 +20,71 @@ function stripJsonCodeFence(text: string) {
   return text.trim().replace(/^```[a-z]*\n?/i, "").replace(/\n?```$/i, "");
 }
 
+export interface GenerateWordsOptions {
+  exclude?: string[];
+  count?: number;
+}
+
 export async function generateWords(
   topic: string,
-  generateContentFn: GenerateFn
+  generateContentFn: GenerateFn,
+  options: GenerateWordsOptions = {}
 ): Promise<GeneratedWord[]> {
-  const prompt = `Generate 5 English vocabulary words for the topic "${topic}". For each word, provide the Vietnamese meaning. Return ONLY a JSON array with no markdown: [{"word": "...", "meaning": "..."}]`;
-  const text = stripJsonCodeFence(await generateContentFn(prompt));
-  try {
-    return JSON.parse(text) as GeneratedWord[];
-  } catch {
-    throw new Error(`Gemini returned invalid JSON: ${text.slice(0, 100)}`);
+  const count = options.count ?? 5;
+  const excluded = (options.exclude ?? []).map((word) => word.trim()).filter(Boolean);
+  const blocked = new Set(excluded.map((word) => word.toLowerCase()));
+  const requested: string[] = [];
+
+  // The model returns the topic's most obvious words every time unless the prompt
+  // carries what the learner has already seen; temperature alone does not help.
+  const buildPrompt = (missing: number) => {
+    const avoid = [...excluded, ...requested];
+    const avoidLine = avoid.length
+      ? `\nDo NOT use any of these words, they were already shown to the learner: ${avoid.join(", ")}. Pick different words.`
+      : "";
+    return `Generate ${missing} English vocabulary words for the topic "${topic}". For each word, provide the Vietnamese meaning.${avoidLine}\nReturn ONLY a JSON array with no markdown: [{"word": "...", "meaning": "..."}]`;
+  };
+
+  const ask = async (missing: number): Promise<GeneratedWord[]> => {
+    const text = stripJsonCodeFence(await generateContentFn(buildPrompt(missing)));
+    try {
+      return JSON.parse(text) as GeneratedWord[];
+    } catch {
+      throw new Error(`Gemini returned invalid JSON: ${text.slice(0, 100)}`);
+    }
+  };
+
+  const collected: GeneratedWord[] = [];
+  let dropped = 0;
+
+  for (const entry of await ask(count)) {
+    const word = typeof entry?.word === "string" ? entry.word.trim() : "";
+    if (!word || blocked.has(word.toLowerCase())) {
+      dropped += 1;
+      continue;
+    }
+    blocked.add(word.toLowerCase());
+    requested.push(word);
+    collected.push({ ...entry, word });
   }
+
+  // One replacement call only; a bad batch still returns what the first call gave us.
+  if (dropped > 0 && collected.length < count) {
+    try {
+      for (const entry of await ask(count - collected.length)) {
+        const word = typeof entry?.word === "string" ? entry.word.trim() : "";
+        if (!word || blocked.has(word.toLowerCase())) continue;
+        blocked.add(word.toLowerCase());
+        requested.push(word);
+        collected.push({ ...entry, word });
+        if (collected.length >= count) break;
+      }
+    } catch {
+      // keep the first batch
+    }
+  }
+
+  return collected.slice(0, count);
 }
 
 export async function generateSentence(

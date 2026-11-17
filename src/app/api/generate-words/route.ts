@@ -6,10 +6,31 @@ import { NextRequest, NextResponse } from "next/server";
 export const maxDuration = 300;
 
 const NO_STORE = { "Cache-Control": "no-store" };
+const MAX_EXCLUDE = 60;
+
+// Words the learner already saw for this topic; capped and de-duplicated because
+// they go straight into the prompt.
+function sanitizeExclude(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set<string>();
+  const words: string[] = [];
+  for (const item of value) {
+    if (typeof item !== "string") continue;
+    const word = item.trim();
+    if (!word || word.length > 80) continue;
+    const key = word.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    words.push(word);
+    if (words.length >= MAX_EXCLUDE) break;
+  }
+  return words;
+}
 
 export async function POST(req: NextRequest) {
-  const { topic, provider, disabledProviders } = (await req.json()) as {
+  const { topic, exclude, provider, disabledProviders } = (await req.json()) as {
     topic?: string;
+    exclude?: unknown;
     provider?: string;
     disabledProviders?: string[];
   };
@@ -26,7 +47,7 @@ export async function POST(req: NextRequest) {
       return result.text;
     };
 
-    const words = await generateWords(topic, generateFn);
+    const words = await generateWords(topic, generateFn, { exclude: sanitizeExclude(exclude) });
     return NextResponse.json(words, {
       headers: { ...NO_STORE, "X-Provider-Used": resolvedProviderId },
     });

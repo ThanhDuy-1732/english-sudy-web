@@ -31,6 +31,9 @@ export default function HomePage() {
   const { fetchWithProvider } = useApiFetch();
   const [topic, setTopic] = useState("Daily Communication");
   const [words, setWords] = useState<Word[]>([]);
+  // Words already shown for this topic in this visit; sent back so the AI returns
+  // different ones instead of the topic's same five default words.
+  const [seenWords, setSeenWords] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [flippedCount, setFlippedCount] = useState(0);
@@ -56,7 +59,7 @@ export default function HomePage() {
     setReadingData(null);
 
     try {
-      const res = await fetchWithProvider("/api/generate-words", { topic });
+      const res = await fetchWithProvider("/api/generate-words", { topic, exclude: seenWords });
 
       if (!res.ok) {
         throw new Error("Không thể sinh từ mới lúc này.");
@@ -64,6 +67,9 @@ export default function HomePage() {
 
       const data = (await res.json()) as Word[];
       setWords(data);
+      setSeenWords((prev) =>
+        Array.from(new Set([...prev, ...data.map((word) => word.word)])).slice(-40)
+      );
     } catch {
       setError("Không thể sinh từ mới lúc này. Vui lòng thử lại.");
     } finally {
@@ -74,6 +80,7 @@ export default function HomePage() {
   function handleTopicChange(nextTopic: string) {
     setTopic(nextTopic);
     setWords([]);
+    setSeenWords([]);
     setError(null);
     setFlippedCount(0);
     setQuizOpen(false);

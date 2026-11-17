@@ -32,6 +32,28 @@ test("returns word list for valid topic", async () => {
   expect(data).toEqual([{ word: "negotiate", meaning: "đàm phán" }]);
 });
 
+test("forwards sanitized exclude list to generateWords", async () => {
+  const req = new NextRequest("http://localhost/api/generate-words", {
+    method: "POST",
+    body: JSON.stringify({ topic: "TOEIC", exclude: ["negotiate", "negotiate", 42, " invoice "] }),
+    headers: { "Content-Type": "application/json" },
+  });
+  await POST(req);
+  expect(mockGenerateWords).toHaveBeenCalledWith("TOEIC", expect.any(Function), {
+    exclude: ["negotiate", "invoice"],
+  });
+});
+
+test("ignores a non-array exclude value", async () => {
+  const req = new NextRequest("http://localhost/api/generate-words", {
+    method: "POST",
+    body: JSON.stringify({ topic: "TOEIC", exclude: "negotiate" }),
+    headers: { "Content-Type": "application/json" },
+  });
+  await POST(req);
+  expect(mockGenerateWords).toHaveBeenCalledWith("TOEIC", expect.any(Function), { exclude: [] });
+});
+
 test("returns 400 when topic is missing", async () => {
   const req = new NextRequest("http://localhost/api/generate-words", {
     method: "POST",

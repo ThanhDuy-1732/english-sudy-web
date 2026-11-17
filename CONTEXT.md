@@ -53,7 +53,7 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 
 | Route | Body | Response |
 |---|---|---|
-| `/api/generate-words` | `{ topic, provider?, disabledProviders? }` | `{ word, meaning }[]` |
+| `/api/generate-words` | `{ topic, exclude?: string[], provider?, disabledProviders? }` | `{ word, meaning }[]` |
 | `/api/generate-sentence` | `{ word, provider?, disabledProviders? }` | `{ sentence }` |
 | `/api/generate-synonyms` | `{ word, provider?, disabledProviders? }` | `{ synonyms: string[], antonyms: string[] }` |
 | `/api/generate-batch` | `{ words, provider?, disabledProviders? }` | batch sentences+synonyms |
@@ -76,6 +76,8 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 | `/api/admin/metrics` | GET, header `x-admin-secret` = `ADMIN_SECRET` | Metrics AI tổng hợp theo task; 503 nếu chưa set `ADMIN_SECRET`, 401 nếu sai |
 
 Mọi route gọi AI đều đi qua `callTask` (task router, có metrics) — kể cả lần gọi sửa JSON (`repair`). Chúng set header `X-Provider-Used`. Lời gọi AI thật nằm ở `src/lib/providers/`.
+
+`/api/generate-words` nhận thêm `exclude` — các từ đã hiện cho người học cùng chủ đề (tối đa 60, khử trùng, client giữ trong bộ nhớ của trang). Prompt yêu cầu model tránh chúng; kết quả bị lọc lại và gọi bổ sung một lần nếu model vẫn trả từ trùng.
 
 **Vercel `maxDuration`**: mọi route gọi AI export `maxDuration = 300` (mức tối đa của gói Hobby khi bật Fluid compute; chuỗi fallback có thể tốn nhiều lần 25 s); `/api/speech/transcribe` giữ `60`. Nếu project tắt Fluid compute, Hobby chỉ cho tối đa 60 s và cần giảm số này.
 
