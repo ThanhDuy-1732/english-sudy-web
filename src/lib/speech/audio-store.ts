@@ -19,6 +19,13 @@ export function loadAudio(id: string): Promise<Blob | undefined> {
   return get<Blob>(`audio:${id}`);
 }
 
+export async function deleteAudio(ids: string[]): Promise<void> {
+  if (ids.length === 0) return;
+  const drop = new Set(ids);
+  await Promise.all(ids.map((id) => del(`audio:${id}`)));
+  await set(INDEX_KEY, (await getIndex()).filter((id) => !drop.has(id)));
+}
+
 export async function clearAllAudio(): Promise<void> {
   const index = await getIndex();
   await Promise.all(index.map((id) => del(`audio:${id}`)));

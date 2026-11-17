@@ -1,5 +1,6 @@
 "use client";
 
+import RetentionNotice from "@/components/RetentionNotice";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getSessions, type LearningActivityType, type LearningSession } from "@/lib/sessions";
@@ -66,7 +67,8 @@ export default function ActivityPage() {
   return (
     <main className="page">
       <div className="mx-auto max-w-2xl">
-        <h1 className="page-title mb-8">Hoạt động</h1>
+        <h1 className="page-title">Hoạt động</h1>
+        <RetentionNotice className="mb-8 mt-4" />
         <div className="space-y-6">
           {groups.map(([date, sessions]) => (
             <section key={date} className="panel p-5">

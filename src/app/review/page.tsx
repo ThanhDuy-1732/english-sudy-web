@@ -1,5 +1,6 @@
 "use client";
 
+import RetentionNotice from "@/components/RetentionNotice";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { getWordsForReview, type LearnedWord } from "@/lib/storage";
@@ -103,6 +104,7 @@ export default function ReviewPage() {
         <div className="mx-auto max-w-2xl text-center">
           <h1 className="page-title mb-3">Hoàn thành rồi!</h1>
           <p className="text-muted text-lg">Không có từ nào cần ôn hôm nay.</p>
+          <RetentionNotice className="mt-8 text-left" />
         </div>
       </main>
     );
@@ -114,6 +116,7 @@ export default function ReviewPage() {
         <div className="mb-8">
           <h1 className="page-title">Ôn tập hôm nay</h1>
           <p className="page-lead">{words.length} từ cần ôn</p>
+          <RetentionNotice className="mt-4 max-w-2xl" />
         </div>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {words.map((w) => (

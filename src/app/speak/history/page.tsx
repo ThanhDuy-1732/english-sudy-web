@@ -1,5 +1,6 @@
 "use client";
 
+import RetentionNotice from "@/components/RetentionNotice";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { getSpeaking, type SpeakingRecord } from "@/lib/speech/speaking-storage";
@@ -68,9 +69,10 @@ export default function SpeakingHistoryPage() {
   return (
     <main className="page">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="page-title">Lịch sử Speaking</h1>
-        <Link href="/speak" className="text-sm text-blue-500">← Quay lại</Link>
+        <h1 className="page-title">Bài nói đã làm</h1>
+        <Link href="/speak" className="text-sm font-medium text-primary hover:underline">← Luyện nói</Link>
       </div>
+      <RetentionNotice className="mb-6" />
 
       {records.length === 0 && (
         <p className="text-gray-500 text-center py-12">Chưa có bài nói nào.</p>

@@ -41,7 +41,7 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 | `/vocab/context` | `src/app/vocab/context/page.tsx` | Luyện từ trong ngữ cảnh (story/dialogue/email/workplace) qua `/api/vocab/context` |
 | `/grammar/quiz` | `src/app/grammar/quiz/page.tsx` | Quiz ngữ pháp nhiều câu; ghi `grammarAttempts`, lỗi → `unifiedMistakes`, session; ưu tiên sub-rule yếu/bookmark |
 | `/speak/shadowing` | `src/app/speak/shadowing/page.tsx` | Nghe–nhắc lại: ghi âm → Whisper → lưu `SpeakingRecord` (mode `shadowing`); transcribe lỗi thì huỷ session, và session cũ luôn bị huỷ trước khi tạo session mới |
-| `/speak/history` | `src/app/speak/history/page.tsx` | Lịch sử speaking + nghe lại audio (IndexedDB) |
+| `/speak/history` | `src/app/speak/history/page.tsx` | "Bài nói đã làm": lịch sử speaking + nghe lại audio (IndexedDB); bản ghi âm cũ hơn 90 ngày bị xoá |
 | `/write/history` | `src/app/write/history/page.tsx` | Lịch sử bài viết; mở rewrite |
 | `/write/rewrite/[id]` | `src/app/write/rewrite/[id]/page.tsx` | Viết lại đoạn sai; chấm qua `/api/exam/grade-open`; lỗi → `unifiedMistakes` |
 
@@ -262,6 +262,7 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 | `speakingSessions` | `SpeakingRecord[]` | IELTS speaking session history; newest-first, max 200 |
 | `writingTaskDraft:<taskId>` | `{content: string, deadline: number}` | Local unfinished writing task; saved synchronously on edits/start, restored on mount (even past its deadline), cleared after successful grading and local result save or by "Làm lại từ đầu" |
 | `lastBackupAt` | ISO string | Lần xuất file sao lưu gần nhất (nhắc sao lưu sau 7 ngày) |
+| `retentionRanOn` | `YYYY-MM-DD` | Ngày local đã chạy dọn dữ liệu 90 ngày; không đưa vào file sao lưu |
 | `backupReminderSnoozedUntil` | ISO string | Ẩn banner nhắc sao lưu tới mốc này; không đưa vào file sao lưu |
 | `pwaInstallDismissed` | `"1"` | User hid the install guidance banner (`ServiceWorkerRegistration`) |
 | `writingSubmissions` | `WritingRecord[]` | IELTS/TOEIC writing submission history; newest-first, max 100 |
@@ -382,7 +383,7 @@ interface DailyStudyTime { date: string; minutes: number; }
 
 Không dùng Supabase hay backend nào. Toàn bộ dữ liệu nằm trong localStorage của trình duyệt.
 
-- `exportData()` → JSON string `{ app: "english-study", version: 1, exportedAt, data: { key: value } }`, giữ nguyên raw string của từng key. Bỏ qua key runtime (`syncKey`, `syncFailedQueue`, `backupReminderSnoozedUntil`).
+- `exportData()` → JSON string `{ app: "english-study", version: 1, exportedAt, data: { key: value } }`, giữ nguyên raw string của từng key. Bỏ qua key runtime (`syncKey`, `syncFailedQueue`, `backupReminderSnoozedUntil`, `retentionRanOn`).
 - `importData(json)` → validate `app`/`version`/`data`, ghi đè từng key có trong file; key không có trong file được giữ nguyên. Trả `{ imported, skipped }`.
 - `clearAllData()` → xoá mọi key của app (trừ key runtime), trả số key đã xoá.
 - `backupFileName(date?)` → `english-study-backup-YYYY-MM-DD.json`.
@@ -394,6 +395,10 @@ Không dùng Supabase hay backend nào. Toàn bộ dữ liệu nằm trong local
 - `exam_items`: đề sinh ra chỉ lưu local trong `examBank`; không còn kho đề dùng chung trên server.
 
 ---
+
+## Data retention (`src/lib/retention.ts`)
+
+`RETENTION_DAYS` = 90. `pruneOldData(now)` xoá: `learningSessions` có `startedAt` cũ hơn 90 ngày; item trong `examBank` có `createdAt` cũ hơn 90 ngày (trừ item gắn với lỗi exam chưa resolve, để "làm lại" vẫn chạy; bank key rỗng thì bỏ); và bản ghi âm của `speakingSessions` cũ hơn 90 ngày (bỏ `audioId` khỏi bản ghi, giữ điểm và transcript; blob xoá bằng `deleteAudio(ids)` trong `audio-store.ts`). Giữ nguyên: từ đã lưu, sổ lỗi, điểm, bài viết, `examAttempts`, `studyTime`. `runRetention()` chạy tối đa 1 lần/ngày (key `retentionRanOn`), gọi từ `DataRetention` trong `layout.tsx` sau 2 giây. Hệ quả: `/activity`, streak dài nhất và các thống kê đọc `learningSessions` chỉ còn 90 ngày gần nhất. `RetentionNotice` báo việc này ở `/review`, `/history`, `/activity`, `/speak/history`.
 
 ## Key Constraints
 
@@ -439,6 +444,7 @@ Không dùng Supabase hay backend nào. Toàn bộ dữ liệu nằm trong local
 | `ExamTimer` (prop `enabled`; mock timer starts via `ExamRunner.onRunning`, not while items load) · `ListeningPlayer` · `PassageReader` · `QuestionCard` | Thành phần của exam engine. Trang động (`[id]`/`[part]`) là client component đọc tham số bằng `useParams()` (countdown, phát TTS, đoạn đọc, thẻ câu hỏi) |
 | `exam/ReportQuestionModal` | Báo câu hỏi lỗi (lý do + ghi chú) → chỉ lưu local vào `reportedQuestions` (max 200); **không** set `flagged` ở `exam_items` và không sync |
 | `BackupReminder` | Banner nhắc xuất file sao lưu (≥7 ngày, có dữ liệu học); "Để mai" ẩn 1 ngày |
+| `DataRetention` · `RetentionNotice` | Chạy `runRetention()` mỗi ngày (không render gì) · dòng thông báo xoá dữ liệu sau 90 ngày |
 | `LinkList` | Titled list of destinations in one bordered card (rows divided by rules, chevron); used by `/exam`, `/speak`, `/write` |
 | `Segmented` | Single-choice segmented control (`role=radiogroup`); used by `/exam` (kỳ thi, trình độ), `/stats` tabs, `/today` minutes, `/settings` tabs, `/mistakes` + `/exam/mistakes` + `/history` filters |
 | `ImportWords` · `QuizCard` | Bulk import từ; thẻ quiz dùng chung |

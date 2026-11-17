@@ -1,5 +1,6 @@
 "use client";
 
+import RetentionNotice from "@/components/RetentionNotice";
 import { useEffect, useState } from "react";
 import Segmented from "@/components/Segmented";
 import {
@@ -41,6 +42,7 @@ export default function HistoryPage() {
         <div>
           <h1 className="page-title">Từ đã học</h1>
           <p className="page-lead">Theo dõi vốn từ và chọn nhóm cần ôn lại.</p>
+          <RetentionNotice className="mt-4 max-w-2xl" />
         </div>
         <div className="grid grid-cols-2 gap-3 sm:min-w-64">
           <div className="panel p-4">

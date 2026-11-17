@@ -5,7 +5,7 @@ export const BACKUP_APP = "english-study";
 export const BACKUP_VERSION = 1;
 
 // Runtime-only keys that must never leave the device.
-const EXCLUDED_KEYS = new Set(["syncKey", "syncFailedQueue", "backupReminderSnoozedUntil"]);
+const EXCLUDED_KEYS = new Set(["syncKey", "syncFailedQueue", "backupReminderSnoozedUntil", "retentionRanOn"]);
 
 export interface BackupFile {
   app: string;
