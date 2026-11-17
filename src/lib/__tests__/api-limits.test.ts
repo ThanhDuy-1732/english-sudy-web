@@ -9,6 +9,12 @@ test("rejects bodies over the route's limit and lets audio uploads through", () 
   expect(checkApiRequest({ path: "/api/speech/transcribe", ip: "a", contentLength: String(20 * 1024 * 1024) })).toEqual({ ok: true });
 });
 
+test("refuses bodies without a Content-Length, except audio uploads", () => {
+  expect(checkApiRequest({ path: "/api/generate-words", ip: "a", contentLength: null })).toMatchObject({ ok: false, status: 411 });
+  expect(checkApiRequest({ path: "/api/generate-words", ip: "a", contentLength: "abc" })).toMatchObject({ ok: false, status: 411 });
+  expect(checkApiRequest({ path: "/api/speech/transcribe", ip: "a", contentLength: null })).toEqual({ ok: true });
+});
+
 test("limits each IP to RATE_LIMIT requests per window", () => {
   const now = 1_000_000;
   for (let i = 0; i < RATE_LIMIT; i++) expect(checkApiRequest({ path: "/api/generate-words", ip: "a", contentLength: "10", now })).toEqual({ ok: true });
@@ -17,7 +23,15 @@ test("limits each IP to RATE_LIMIT requests per window", () => {
   expect(checkApiRequest({ path: "/api/generate-words", ip: "a", contentLength: "10", now: now + RATE_WINDOW_MS })).toEqual({ ok: true });
 });
 
-test("reads the first forwarded address", () => {
-  expect(clientIp(new Headers({ "x-forwarded-for": "1.2.3.4, 10.0.0.1" }))).toBe("1.2.3.4");
+test("does not trust the client-controlled left-most forwarded address", () => {
+  expect(clientIp(new Headers({ "x-forwarded-for": "6.6.6.6, 1.2.3.4" }))).toBe("1.2.3.4");
+  expect(clientIp(new Headers({ "x-forwarded-for": "6.6.6.6, 1.2.3.4", "x-vercel-forwarded-for": "9.9.9.9" }))).toBe("9.9.9.9");
   expect(clientIp(new Headers())).toBe("local");
+});
+
+test("pruning many clients keeps the counters of active ones", () => {
+  const now = 5_000_000;
+  for (let i = 0; i < RATE_LIMIT; i++) checkApiRequest({ path: "/api/x", ip: "busy", contentLength: "1", now });
+  for (let i = 0; i < 1001; i++) checkApiRequest({ path: "/api/x", ip: `old-${i}`, contentLength: "1", now: now - RATE_WINDOW_MS });
+  expect(checkApiRequest({ path: "/api/x", ip: "busy", contentLength: "1", now })).toMatchObject({ status: 429 });
 });

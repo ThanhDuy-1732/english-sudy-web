@@ -21,19 +21,32 @@ export const RATE_WINDOW_MS = 60_000; // per minute, per client IP
 // ponytail: in-memory per server instance (resets on cold start, not shared between instances); fine for two users.
 const hits = new Map<string, number[]>();
 
+/**
+ * Client address for rate limiting. The left-most X-Forwarded-For entry is whatever the client sent, so it is never
+ * trusted: prefer the platform's own header, else the right-most entry (appended by the proxy in front of the app).
+ * ponytail: behind several proxies the right-most entry is the inner proxy; set the platform header then.
+ */
 export function clientIp(headers: Headers): string {
-  return headers.get("x-forwarded-for")?.split(",")[0]?.trim() || headers.get("x-real-ip") || "local";
+  const platform = headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim();
+  if (platform) return platform;
+  const forwarded = headers.get("x-forwarded-for")?.split(",").map((part) => part.trim()).filter(Boolean);
+  return forwarded?.at(-1) || headers.get("x-real-ip") || "local";
 }
 
-export type LimitResult = { ok: true } | { ok: false; status: 413 | 429; error: string; retryAfterSec?: number };
+export type LimitResult = { ok: true } | { ok: false; status: 411 | 413 | 429; error: string; retryAfterSec?: number };
 
 export function checkApiRequest(input: { path: string; ip: string; contentLength: string | null; now?: number }): LimitResult {
   const now = input.now ?? Date.now();
 
   if (!NO_BODY_LIMIT.has(input.path)) {
     const limit = BODY_LIMITS[input.path] ?? DEFAULT_BODY_LIMIT;
+    // Without a Content-Length the size can't be checked before the route reads the body, so refuse it.
+    // Browsers always send one for fetch() with a string or FormData body.
     const length = Number(input.contentLength);
-    if (input.contentLength !== null && Number.isFinite(length) && length > limit) {
+    if (input.contentLength === null || !Number.isFinite(length)) {
+      return { ok: false, status: 411, error: "Thiếu độ dài nội dung (Content-Length)." };
+    }
+    if (length > limit) {
       return { ok: false, status: 413, error: `Nội dung gửi lên quá dài (tối đa ${Math.round(limit / KB)} KB).` };
     }
   }
@@ -46,7 +59,10 @@ export function checkApiRequest(input: { path: string; ip: string; contentLength
   }
   recent.push(now);
   hits.set(input.ip, recent);
-  if (hits.size > 1000) hits.clear(); // bound memory if many IPs pass through
+  if (hits.size > 1000) {
+    // Bound memory: drop clients with no request in the current window; active counters are kept.
+    for (const [ip, times] of hits) if (now - times[times.length - 1] >= RATE_WINDOW_MS) hits.delete(ip);
+  }
   return { ok: true };
 }
 
