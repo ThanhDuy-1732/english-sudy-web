@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { startSession, finishSession, cancelSession } from "@/lib/sessions";
 import { saveWriting } from "@/lib/write/writing-storage";
 import type { WritingKind } from "@/lib/write/writing-storage";
@@ -93,8 +93,8 @@ const TASK_CONFIGS: Record<string, TaskConfig> = {
   },
 };
 
-export default function WritingTaskPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function WritingTaskPage() {
+  const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const config = TASK_CONFIGS[id] ?? TASK_CONFIGS["task2-opinion"];
 

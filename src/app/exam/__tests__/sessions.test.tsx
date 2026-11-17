@@ -4,7 +4,7 @@ import MockPage from "../mock/page";
 import { getSessions } from "@/lib/sessions";
 
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ push: jest.fn() }),
+  useRouter: () => ({ push: jest.fn() }), useParams: () => ({ part: "RC5" }),
   useSearchParams: () => ({ get: () => null }),
 }));
 jest.mock("@/components/exam/ExamTimer", () => () => null);
@@ -17,7 +17,7 @@ jest.mock("@/components/exam/ExamRunner", () => function ExamRunnerStub({ onComp
 beforeEach(() => localStorage.clear());
 
 test("drill records results and keeps the finished session", () => {
-  const { unmount } = render(<DrillPage params={{ part: "RC5" }} />);
+  const { unmount } = render(<DrillPage />);
   expect(getSessions()[0]).toMatchObject({ type: "exam", metadata: { part: "RC5" } });
   fireEvent.click(screen.getByRole("button", { name: "Complete exam" }));
   expect(getSessions()[0]).toMatchObject({ totalItems: 2, correctItems: 1 });

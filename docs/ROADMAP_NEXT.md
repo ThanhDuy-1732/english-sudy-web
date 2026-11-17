@@ -6,15 +6,15 @@ Thứ tự ưu tiên: dọn nợ → an toàn dữ liệu → hạ tầng AI →
 
 ---
 
-## Phase 0 — Dọn nợ & bảo mật (1–2 ngày) 🔴
+## Phase 0 — Dọn nợ & bảo mật ✅ (xong 2026-11-17)
 
 | # | Việc | Lý do |
 |---|---|---|
 | 0.1 | Merge `phase-6-exam-engine` → `main` | 72 commit chưa lên main; nhánh càng sống lâu càng khó merge |
-| 0.2 | Nâng `next` (audit báo **critical**, dải 9.3.4 – 16.3.0-preview), `npm audit fix` cho `nanoid`, nâng `firebase` để có `@grpc/grpc-js` mới | Lỗ hổng trong dependency production |
+| 0.2 | Nâng `next` lên 15.5.29 + React 19 (đủ vá, không cần 16); override `@grpc/grpc-js`, `nanoid`, `postcss`. Trước đó: (audit báo **critical**, dải 9.3.4 – 16.3.0-preview), `npm audit fix` cho `nanoid`, nâng `firebase` để có `@grpc/grpc-js` mới | Lỗ hổng trong dependency production |
 | 0.3 | Xoá phần Supabase còn sót: thư mục `supabase/`, `e2e/sync.e2e.js`, các mục sync trong `docs/APP_OVERVIEW.md` (đoạn "Supabase multi-device sync", Batch 6) | Không còn backend, test sync sẽ fail/vô nghĩa |
 | 0.4 | Thêm lại script `e2e:pwa` vào `package.json` (README có nhắc nhưng script không còn) | Bộ test PWA không chạy được bằng lệnh đã ghi trong tài liệu |
-| 0.5 | Xoá code chết: `exam/AnswerSheet.tsx` (chỉ còn tự tham chiếu), `src/lib/gemini.ts` + test của nó, `updateWordReview` legacy nếu không còn ai gọi | Bớt code phải bảo trì |
+| 0.5 | Xoá code chết: `exam/AnswerSheet.tsx`, `updateWordReview` legacy. (`src/lib/gemini.ts` vẫn được `grade-sentence`/`generate-reading` dùng → giữ) | Bớt code phải bảo trì |
 | 0.6 | Cập nhật `APP_OVERVIEW.md` (số test, bỏ sync) | Tài liệu đang nói sai |
 
 **Xong khi:** `main` có toàn bộ code, `npm audit --omit=dev` không còn high/critical, `npm test && npm run lint && npm run build && npm run e2e` đều pass.

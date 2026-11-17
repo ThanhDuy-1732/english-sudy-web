@@ -54,19 +54,6 @@ export function deleteLearnedWord(word: string): void {
   localStorage.setItem(KEY, JSON.stringify(words));
 }
 
-export function updateWordReview(word: string, remembered: boolean): void {
-  const words = getLearnedWords().map((w) => {
-    if (w.word !== word) return w;
-    const newInterval = remembered ? Math.min((w.reviewInterval ?? 1) * 2, 30) : 1;
-    const newMastery = remembered
-      ? Math.min((w.mastery ?? 0) + 1, 5)
-      : Math.max((w.mastery ?? 0) - 1, 0);
-    const nextReviewAt = new Date(Date.now() + newInterval * 86400000).toISOString();
-    return touch({ ...w, reviewInterval: newInterval, mastery: newMastery, nextReviewAt });
-  });
-  localStorage.setItem(KEY, JSON.stringify(words));
-}
-
 /**
  * SM-2 variant — quality: 0=forgot, 3=hard, 4=good, 5=easy.
  * Updates mastery stars from repetitions for display consistency.

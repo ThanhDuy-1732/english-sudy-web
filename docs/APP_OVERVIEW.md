@@ -4,13 +4,13 @@
 > **Chi tiết kỹ thuật** (data model, localStorage key, backup JSON, route body/response, component map) nằm trong [`CONTEXT.md`](../CONTEXT.md) — không lặp lại ở đây để tránh lệch.
 > Mục đích: dùng làm đầu vào cho phân tích định hướng phát triển.
 >
-> Cập nhật lần cuối: 2026-10-01 · Nhánh `phase-6-exam-engine` · Batch 1–8 đã code xong · 399 tests / 75 suites pass
+> Cập nhật lần cuối: 2026-11-17 · Nhánh `main` · Batch 1–8 đã code xong · 427 tests / 82 suites pass
 
 ---
 
 ## 1. Ứng dụng là gì
 
-PWA học tiếng Anh cá nhân (1 người dùng, nhiều thiết bị), nhắm tới giao tiếp + TOEIC + IELTS. Không có tài khoản — danh tính là `syncKey` (UUID). Không có backend riêng: mọi lời gọi AI đi qua Next.js API routes server-side.
+PWA học tiếng Anh cá nhân (1 người dùng, nhiều thiết bị), nhắm tới giao tiếp + TOEIC + IELTS. Không có tài khoản, không đồng bộ — dữ liệu ở localStorage, chuyển máy bằng file backup JSON. Không có backend riêng: mọi lời gọi AI đi qua Next.js API routes server-side.
 
 Năng lực hiện có:
 
@@ -30,7 +30,7 @@ Năng lực hiện có:
 
 ## 2. Tech stack
 
-Next.js 14 App Router · TypeScript · Tailwind · Jest + Testing Library · `localStorage` (nguồn chính) + IndexedDB (audio) + file JSON (backup) · Firebase **chỉ hosting** · PWA (`public/sw.js`) · AI: OpenCode Go, Gemini, Groq (+ Whisper STT), OpenRouter, Mistral, Cohere với fallback chain.
+Next.js 15 App Router · React 19 · TypeScript · Tailwind · Jest + Testing Library · `localStorage` (nguồn chính) + IndexedDB (audio) + file JSON (backup) · Firebase **chỉ hosting** · PWA (`public/sw.js`) · AI: OpenCode Go, Gemini, Groq (+ Whisper STT), OpenRouter, Mistral, Cohere với fallback chain.
 
 ---
 
@@ -40,7 +40,6 @@ Next.js 14 App Router · TypeScript · Tailwind · Jest + Testing Library · `lo
 Browser
 ├── Client pages/components   ← đọc/ghi localStorage, IndexedDB
 ├── Context: ProviderContext (provider AI đang chọn), TimerContext (đồng hồ học toàn app)
-├── SyncInit / SyncInitializer ← initSync() + drain hàng đợi offline khi online lại
 └── fetch → API routes (server-side only)
               └── callTask(task, prompt) → callWithFallback → provider
                     ├── ai-prompts  (prompt registry theo task)
@@ -84,7 +83,7 @@ Tính toán mastery/plan là **deterministic, không gọi AI**; AI chỉ dùng 
 |---|---|
 | `/exam` | Dashboard: TOEIC/IELTS, level, drill/mock |
 | `/exam/drill/[part]` | RC5/RC6/RC7/LC2/LC3/LC4/READ_P3/LISTEN_S1; chọn đề thích ứng theo tag yếu; giải thích AI; phím 1–4 + Enter (tắt được trong profile); nút báo câu hỏi lỗi |
-| `/exam/mock` | Mock rút gọn + countdown + AnswerSheet |
+| `/exam/mock` | Mock rút gọn + countdown |
 | `/exam/mistakes` | Sổ lỗi exam, là view lọc `source = exam:*` trên `unifiedMistakes` (dùng chung trạng thái resolve với `/mistakes`) |
 
 ### Speaking / Writing
@@ -108,7 +107,7 @@ Tính toán mastery/plan là **deterministic, không gọi AI**; AI chỉ dùng 
 | `/stats` | Tile tổng quan, streak, mastery timeline, báo cáo tuần, words/day, study time, topic, exam accuracy, weakness radar, band timeline, skill radar, heatmap |
 | `/diary` | Heatmap 26 tuần + drawer theo ngày |
 | `/activity` | Các `LearningSession` theo ngày |
-| `/settings` | Tab AI Providers (test latency, bật/tắt) · Voice (+ xoá audio) · Sync (nhập key, `SyncStatusBadge`) · theme sáng/tối |
+| `/settings` | Tab AI Providers (test latency, bật/tắt) · Voice (+ xoá audio) · Dữ liệu (xuất/nhập/xoá backup JSON) · theme sáng/tối |
 
 ### Khả năng khám phá (đã kiểm tra bằng grep `href`)
 Navbar chỉ link tới: `/`, `/review`, `/diary`, `/activity`, `/grammar`, `/exam`, `/speak`, `/write`, `/today`, `/history`, `/settings`.
@@ -137,7 +136,7 @@ Navbar chỉ link tới: `/`, `/review`, `/diary`, `/activity`, `/grammar`, `/ex
 
 ## 7. Hiện trạng & nợ kỹ thuật (trung thực)
 
-**Trạng thái repo**: nhánh `phase-6-exam-engine` (~115 commit). Đã commit: migration đổi tên, `mastery-all.ts`, hợp nhất sổ lỗi vào `unifiedMistakes`, sync request hardening, docs/kế hoạch. Còn thay đổi chưa commit: PWA (`sw.js`, `AppNavigation`, `docs/pwa.md`), timer/`useCountdown`, recorder và các sửa speaking/writing. Chưa merge vào `main`.
+**Trạng thái repo**: toàn bộ Phase 6/7 và Batch 1–8 đã merge vào `main` (2026-11-17). Kế hoạch tiếp theo: `docs/ROADMAP_NEXT.md`.
 
 | Mức | Vấn đề |
 |---|---|
@@ -145,11 +144,10 @@ Navbar chỉ link tới: `/`, `/review`, `/diary`, `/activity`, `/grammar`, `/ex
 | ⚠️ | **Trang mồ côi** (mục 4): `/path`, `/library`, `/stats`, `/vocab/context`, `/import` không có điểm vào UI. |
 | ⚠️ | **"Báo câu hỏi lỗi" chưa có tác dụng ngược**: chỉ lưu `reportedQuestions` local; không đánh dấu `flagged` trên `exam_items` dùng chung nên đề xấu vẫn được pull về. |
 | ⚠️ | LWW chưa áp cho speaking/writing/grammar topics/settings (các bảng này vẫn upsert kiểu cũ). |
-| ⚠️ | Bảo mật sync: `syncKey` hoạt động như bearer secret; alias `"thankz"` → UUID cố định trong code. Không có đăng nhập. |
 | ⚠️ | Metrics AI mất khi cold start; task→provider map tĩnh; prompt registry chưa phủ hết task. |
 | ⚠️ | Phím tắt mới có ở `ExamRunner`; flashcard (space/Enter) chưa có. |
 | ⚠️ | Điều hướng > 182 ngày trong DayDrawer hiện 0 phút (ít gặp). |
-| ℹ️ | `src/lib/gemini.ts` là wrapper legacy chỉ còn test dùng; `updateWordReview` (kiểu cũ) còn giữ để tương thích. |
+| ℹ️ | `src/lib/gemini.ts` chứa prompt cũ, vẫn dùng bởi `grade-sentence` và `generate-reading`. |
 
 ---
 
@@ -161,7 +159,7 @@ Navbar chỉ link tới: `/`, `/review`, `/diary`, `/activity`, `/grammar`, `/ex
 - **Batch 3 — Exam intelligence**: drill thích ứng, tag accuracy, báo cáo câu hỏi, phân tích theo category
 - **Batch 4 — Speaking/Writing loop**: history, rewrite, shadowing
 - **Batch 5 — Vocabulary & insights**: streak, mastery timeline, quiz từ, luyện ngữ cảnh, báo cáo tuần
-- **Batch 6 — Reliability**: hàng đợi offline, drain khi reconnect, `SyncStatusBadge`
+- **Batch 6 — Reliability**: hàng đợi offline (đã gỡ cùng Supabase)
 - **Batch 7 — Personalization/UX**: learning profile, `/path`, tìm kiếm `/library`, phím tắt exam, dark mode
 - **Batch 8 — AI infra** (một phần: 4/21 route đã migrate sang `callTask`): task router, metrics, prompt registry; gate `/api/admin/metrics` bằng `ADMIN_SECRET`
 - Trước đó: SM-2, LWW (words/exam), Phase 6 exam engine, Phase 7 speaking/writing, audio replay, grading calibration.
@@ -174,9 +172,8 @@ Navbar chỉ link tới: `/`, `/review`, `/diary`, `/activity`, `/grammar`, `/ex
 - Đưa các trang mồ côi vào navigation
 - Persist metrics AI; map task→provider theo settings
 - Mở rộng prompt registry cho mọi task
-- Xác thực thật (thay `syncKey`) nếu có nhu cầu chia sẻ/đa người dùng
+- Xác thực + đồng bộ thật nếu có nhu cầu chia sẻ/đa người dùng
 - Làm cho "báo câu hỏi lỗi" thực sự flag đề
-- Dọn nợ: commit phần PWA/timer/speaking còn dang dở, merge nhánh
 
 ---
 
@@ -184,7 +181,7 @@ Navbar chỉ link tới: `/`, `/review`, `/diary`, `/activity`, `/grammar`, `/ex
 
 ```bash
 npm run dev      # http://localhost:3000
-npm test         # 399 tests, 75 suites (đã chạy 2026-10-01: all pass)
+npm test         # 427 tests, 82 suites (đã chạy 2026-11-17: all pass)
 npm run build
 npm run lint
 ```

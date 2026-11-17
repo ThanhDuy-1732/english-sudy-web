@@ -1,7 +1,6 @@
 import {
   getLearnedWords,
   saveLearnedWord,
-  updateWordReview,
   getWordsForReview,
   type LearnedWord,
 } from "../storage";
@@ -33,36 +32,6 @@ test("saveLearnedWord sets defaults for new spaced repetition fields", () => {
   const [saved] = getLearnedWords();
   expect(saved.reviewInterval).toBe(1);
   expect(saved.mastery).toBe(0);
-});
-
-test("updateWordReview remembered=true doubles interval and increments mastery", () => {
-  saveLearnedWord(baseWord);
-  updateWordReview("negotiate", true);
-  const [updated] = getLearnedWords();
-  expect(updated.reviewInterval).toBe(2);
-  expect(updated.mastery).toBe(1);
-});
-
-test("updateWordReview remembered=false resets interval to 1 and decrements mastery", () => {
-  saveLearnedWord({ ...baseWord, reviewInterval: 8, mastery: 3 });
-  updateWordReview("negotiate", false);
-  const [updated] = getLearnedWords();
-  expect(updated.reviewInterval).toBe(1);
-  expect(updated.mastery).toBe(2);
-});
-
-test("updateWordReview caps reviewInterval at 30", () => {
-  saveLearnedWord({ ...baseWord, reviewInterval: 16, mastery: 4 });
-  updateWordReview("negotiate", true);
-  const [updated] = getLearnedWords();
-  expect(updated.reviewInterval).toBe(30);
-});
-
-test("updateWordReview caps mastery at 5", () => {
-  saveLearnedWord({ ...baseWord, mastery: 5 });
-  updateWordReview("negotiate", true);
-  const [updated] = getLearnedWords();
-  expect(updated.mastery).toBe(5);
 });
 
 test("getWordsForReview returns words where nextReviewAt <= now", () => {

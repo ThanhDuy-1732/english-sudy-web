@@ -3,7 +3,7 @@ import WritingTaskPage from "../task/[id]/page";
 import { getSessions } from "@/lib/sessions";
 
 const mockPush = jest.fn();
-jest.mock("next/navigation", () => ({ useRouter: () => ({ push: mockPush }) }));
+jest.mock("next/navigation", () => ({ useRouter: () => ({ push: mockPush }), useParams: () => ({ id: "toeic-email" }) }));
 
 beforeEach(() => {
   localStorage.clear();
@@ -12,15 +12,15 @@ beforeEach(() => {
 });
 
 test("starts once, cancels on early exit, and finishes after saving feedback", async () => {
-  const early = render(<WritingTaskPage params={{ id: "toeic-email" }} />);
+  const early = render(<WritingTaskPage />);
   expect(getSessions()[0]).toMatchObject({ type: "writing", metadata: { taskId: "toeic-email" } });
-  early.rerender(<WritingTaskPage params={{ id: "toeic-email" }} />);
+  early.rerender(<WritingTaskPage />);
   expect(getSessions()).toHaveLength(1);
   early.unmount();
   expect(getSessions()).toEqual([]);
 
   global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ overall: 7, bands: { task: 7, coherence: 7, lexical: 7, grammar: 7 }, annotations: [], modelAnswer: "Example", nextFocus: "Grammar", wordCount: 100 }) });
-  const completed = render(<WritingTaskPage params={{ id: "toeic-email" }} />);
+  const completed = render(<WritingTaskPage />);
   fireEvent.click(screen.getByRole("button", { name: /Bắt đầu viết/ }));
   fireEvent.change(screen.getByPlaceholderText("Bắt đầu viết bài của bạn ở đây…"), {
     target: { value: Array(100).fill("word").join(" ") },
@@ -38,11 +38,11 @@ test("starts once, cancels on early exit, and finishes after saving feedback", a
 });
 
 test("restores an unfinished essay after remount", () => {
-  const view = render(<WritingTaskPage params={{ id: "toeic-email" }} />);
+  const view = render(<WritingTaskPage />);
   fireEvent.click(screen.getByRole("button", { name: /Bắt đầu viết/ }));
   fireEvent.change(screen.getByPlaceholderText("Bắt đầu viết bài của bạn ở đây…"), { target: { value: "Dear team, please review the new deadline." } });
   view.unmount();
-  render(<WritingTaskPage params={{ id: "toeic-email" }} />);
+  render(<WritingTaskPage />);
   expect(screen.getByPlaceholderText("Bắt đầu viết bài của bạn ở đây…")).toHaveValue("Dear team, please review the new deadline.");
 });
 
@@ -51,7 +51,7 @@ test("an expired draft shows time is up and can be discarded to start over", () 
     "writingTaskDraft:toeic-email",
     JSON.stringify({ content: "Old draft from yesterday", deadline: Date.now() - 60_000 })
   );
-  render(<WritingTaskPage params={{ id: "toeic-email" }} />);
+  render(<WritingTaskPage />);
   expect(screen.getByPlaceholderText("Bắt đầu viết bài của bạn ở đây…")).toHaveValue("Old draft from yesterday");
   expect(screen.getByText(/Đã hết giờ/)).toBeInTheDocument();
 

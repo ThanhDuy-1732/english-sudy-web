@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { createRecorder, audioFilename } from "@/lib/speech/recorder";
 import { useCountdown } from "@/lib/useCountdown";
 import { saveLearnedWord } from "@/lib/storage";
@@ -32,8 +32,8 @@ const PART_CONFIG: Record<string, { title: string; prepSec: number; speakSec: nu
   },
 };
 
-export default function IeltsSpeakingPage({ params }: { params: { part: string } }) {
-  const { part } = params;
+export default function IeltsSpeakingPage() {
+  const { part } = useParams<{ part: string }>();
   const router = useRouter();
   const config = PART_CONFIG[part] ?? PART_CONFIG.p1;
 

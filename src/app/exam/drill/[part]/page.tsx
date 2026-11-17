@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import ExamRunner from "@/components/exam/ExamRunner";
 import { getExamSettings, getExamBank, bankKey } from "@/lib/exam/exam-storage";
 import { getTagAccuracies } from "@/lib/exam/exam-tags";
@@ -24,8 +24,8 @@ const PART_KIND: Record<string, ExamKind> = {
   READ_P3: "IELTS", LISTEN_S1: "IELTS",
 };
 
-export default function DrillPage({ params }: { params: { part: string } }) {
-  const { part } = params;
+export default function DrillPage() {
+  const { part } = useParams<{ part: string }>();
   const router = useRouter();
   const searchParams = useSearchParams();
   const settings = getExamSettings();

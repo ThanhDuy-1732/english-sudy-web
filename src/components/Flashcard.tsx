@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { saveLearnedWord, updateWordReview, updateWordReviewSm2, getLearnedWords } from "@/lib/storage";
+import { saveLearnedWord, updateWordReviewSm2, getLearnedWords } from "@/lib/storage";
 import { useApiFetch } from "@/lib/useApiFetch";
 import PronunciationButton from "./PronunciationButton";
 import WritingChallenge from "./WritingChallenge";

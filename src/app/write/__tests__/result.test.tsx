@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import WritingResultPage from "../result/[id]/page";
 
 const push = jest.fn();
-jest.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
+jest.mock("next/navigation", () => ({ useRouter: () => ({ push }), useParams: () => ({ id: "r1" }) }));
 
 const record = (kind: string) => ({
   id: "r1",
@@ -32,20 +32,20 @@ test.each([
   ["toeic_email", "TOEIC Writing – Business Email"],
 ])("shows a readable title for %s instead of the raw kind", (kind, title) => {
   localStorage.setItem("writingSubmissions", JSON.stringify([record(kind)]));
-  render(<WritingResultPage params={{ id: "r1" }} />);
+  render(<WritingResultPage />);
   expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(title);
   expect(screen.queryByText(kind)).not.toBeInTheDocument();
 });
 
 test("Viết lại goes back to the task the record came from, or to the task list for older records", () => {
   localStorage.setItem("writingSubmissions", JSON.stringify([{ ...record("ielts_task1"), taskId: "task1-line" }]));
-  const view = render(<WritingResultPage params={{ id: "r1" }} />);
+  const view = render(<WritingResultPage />);
   fireEvent.click(screen.getByRole("button", { name: "Viết lại" }));
   expect(push).toHaveBeenCalledWith("/write/task/task1-line");
   view.unmount();
 
   localStorage.setItem("writingSubmissions", JSON.stringify([record("ielts_task1")]));
-  render(<WritingResultPage params={{ id: "r1" }} />);
+  render(<WritingResultPage />);
   fireEvent.click(screen.getByRole("button", { name: "Viết lại" }));
   expect(push).toHaveBeenLastCalledWith("/write");
 });

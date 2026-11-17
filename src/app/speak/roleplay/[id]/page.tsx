@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import type { Scenario, ConversationTurn } from "@/lib/speech/types";
 import { saveLearnedWord } from "@/lib/storage";
 import { startSession, finishSession, cancelSession } from "@/lib/sessions";
@@ -70,8 +70,8 @@ const SCENARIOS: Record<string, Scenario> = {
   },
 };
 
-export default function RoleplayPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function RoleplayPage() {
+  const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const scenario = SCENARIOS[id];
 

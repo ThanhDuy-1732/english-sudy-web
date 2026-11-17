@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { saveLearnedWord } from "@/lib/storage";
 import { getWriting } from "@/lib/write/writing-storage";
 
@@ -33,8 +33,8 @@ const KIND_TITLES: Record<string, string> = {
   toeic_email: "TOEIC Writing – Business Email",
 };
 
-export default function WritingResultPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function WritingResultPage() {
+  const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [data, setData] = useState<{
     feedback: WritingFeedback;

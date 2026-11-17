@@ -34,4 +34,5 @@ firebase-debug.log
 
 # local API keys
 /docs/key/api-key.md
-.vercel
+/supabase/
+.claude/

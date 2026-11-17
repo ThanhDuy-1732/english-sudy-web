@@ -1,6 +1,0 @@
-CREATE TABLE IF NOT EXISTS user_settings (
-  sync_key       UUID NOT NULL PRIMARY KEY,
-  voice_settings JSONB DEFAULT NULL
-);
-
-ALTER TABLE user_settings DISABLE ROW LEVEL SECURITY;

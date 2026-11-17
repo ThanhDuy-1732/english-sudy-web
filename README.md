@@ -14,8 +14,8 @@ English Study là website tự học tiếng Anh cá nhân, tập trung vào vi�
 
 ## Công nghệ sử dụng
 
-- Next.js 14 với App Router
-- React 18
+- Next.js 15 với App Router
+- React 19
 - TypeScript
 - Tailwind CSS
 - Google Generative AI SDK

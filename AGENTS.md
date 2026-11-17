@@ -4,7 +4,7 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## Codebase Reference
 
-**Read `CONTEXT.md` at the start of every session.** It contains the full reference for pages, API routes, data models, localStorage keys, provider system, Supabase sync, components, and key constraints — so you don't need to re-read the source files.
+**Read `CONTEXT.md` at the start of every session.** It contains the full reference for pages, API routes, data models, localStorage keys, provider system, data backup, components, and key constraints — so you don't need to re-read the source files.
 
 **When you add or significantly change any of the following, update `CONTEXT.md` before finishing:**
 - A page (`src/app/*/page.tsx`)
@@ -12,7 +12,6 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 - A component (`src/components/*.tsx`)
 - A data model or localStorage key (`src/lib/storage.ts`, `src/lib/*.ts`)
 - The provider system (`src/lib/providers/`)
-- Supabase tables (`supabase/migrations/`)
 - Context providers (`src/contexts/`)
 
 ## Commands

@@ -6,7 +6,7 @@ Quick reference for Claude. Do not repeat what's already in CLAUDE.md.
 
 ## Tech Stack
 
-Next.js 14 App Router · TypeScript · Tailwind CSS · Jest (jsdom) · localStorage + JSON backup · Firebase (hosting only) · PWA (service worker in `public/sw.js`)
+Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) · localStorage + JSON backup · Firebase (hosting only) · PWA (service worker in `public/sw.js`)
 
 ---
 
@@ -105,7 +105,7 @@ interface LearnedWord {
   repetitions?: number;        // SM-2 repetition count
 }
 ```
-SRS uses SM-2 algorithm (`src/lib/srs.ts`). Use `updateWordReviewSm2(word, quality: 0|3|4|5)` for new reviews. Old `updateWordReview(word, remembered)` still works for backward compat.
+SRS uses SM-2 algorithm (`src/lib/srs.ts`). Use `updateWordReviewSm2(word, quality: 0|3|4|5)` for new reviews.
 
 ### DailyChallenge (`src/lib/daily-challenge.ts`)
 ```ts
@@ -369,7 +369,6 @@ interface DailyStudyTime { date: string; minutes: number; }
 
 - `getWordsForReview()` — returns words where `nextReviewAt <= now`
 - `updateWordReviewSm2(word, quality: 0|3|4|5)` — **đường chính**, dùng SM-2 trong `src/lib/srs.ts` (EF ≥ 1.3; quality < 3 → interval 1; `nextReviewAt = now + interval * 86400000`), cập nhật `updatedAt`.
-- `updateWordReview(word, remembered)` — **legacy**, giữ để tương thích: remembered → `interval = min(interval*2, 30)`, `mastery+1`; quên → `interval = 1`, `mastery-1`.
 
 ---
 
@@ -428,7 +427,7 @@ Không dùng Supabase hay backend nào. Toàn bộ dữ liệu nằm trong local
 | `DayDrawer` | Slide-in right drawer for /diary; shows daily word list (expandable) + study minutes + prev/next nav |
 | `AppNavigation` | Compact mobile menu and desktop links, shared timer and due badges; includes Settings on all viewports |
 | `ServiceWorkerRegistration` | Production worker registration; installs through `beforeinstallprompt` when available, native installation instructions otherwise (dismissible with ✕, remembered in `pwaInstallDismissed`); standalone detection and optional persistent storage request; offline notice; waiting-worker update button posts `SKIP_WAITING`, reloads only after user action |
-| `exam/AnswerSheet` · `ExamTimer` (prop `enabled`; mock timer starts via `ExamRunner.onRunning`, not while items load) · `ListeningPlayer` · `PassageReader` · `QuestionCard` | Thành phần của exam engine (grid câu hỏi, countdown, phát TTS, đoạn đọc, thẻ câu hỏi) |
+| `ExamTimer` (prop `enabled`; mock timer starts via `ExamRunner.onRunning`, not while items load) · `ListeningPlayer` · `PassageReader` · `QuestionCard` | Thành phần của exam engine. Trang động (`[id]`/`[part]`) là client component đọc tham số bằng `useParams()` (countdown, phát TTS, đoạn đọc, thẻ câu hỏi) |
 | `exam/ReportQuestionModal` | Báo câu hỏi lỗi (lý do + ghi chú) → chỉ lưu local vào `reportedQuestions` (max 200); **không** set `flagged` ở `exam_items` và không sync |
 | `ImportWords` · `QuizCard` | Bulk import từ; thẻ quiz dùng chung |
 
@@ -490,4 +489,4 @@ Jest + `@testing-library/react`. Config: `jest.config.ts` + `jest.setup.ts`. Tes
 
 ## E2E tests
 
-`e2e/` holds a browser suite (Node test runner + puppeteer-core, `npm run e2e`, needs `npm run dev` and Chrome). Run it after UI, theming, storage or AI-error-handling changes; see `e2e/README.md`. Jest ignores it (files are named `*.e2e.js`). `pwa.e2e.js` needs a production server (see README); `npm run e2e` skips it; run `npm run e2e:pwa`.
+`e2e/` holds a browser suite (Node test runner + puppeteer-core, `npm run e2e`, needs `npm run dev` and Chrome). Run it after UI, theming, storage or AI-error-handling changes; see `e2e/README.md`. Jest ignores it (files are named `*.e2e.js`). `pwa.e2e.js` needs a production server (see README); `npm run e2e` skips it; run `npm run build && npx next start -p 3100`, then `npm run e2e:pwa`.
