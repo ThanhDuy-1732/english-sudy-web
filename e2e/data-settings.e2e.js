@@ -61,7 +61,7 @@ scenario("speaking and writing histories", async ({ browser, check }) => {
   check("detail and rewrite links", links.includes("/write/result/w1") && links.includes("/write/rewrite/w1"), links.join(" "));
 });
 
-scenario("settings: providers, voice, sync and profile", async ({ browser, check }) => {
+scenario("settings: providers, voice, data and profile", async ({ browser, check }) => {
   const sent = [];
   const page = await newPage(browser, { intercept: (req) => {
     const u = req.url();
@@ -70,7 +70,8 @@ scenario("settings: providers, voice, sync and profile", async ({ browser, check
     return false; } });
   await goto(page, "/settings");
   let t = await bodyText(page);
-  check("all providers are listed", ["Gemini Flash", "Groq", "OpenRouter", "Mistral", "Cohere", "HuggingFace"].every((n) => t.includes(n)));
+  const names = await page.evaluate(() => fetch("/api/providers").then((r) => r.json()).then((ps) => ps.map((p) => p.name)));
+  check("all configured providers are listed", names.length > 0 && names.every((n) => t.includes(n)), names.join(", "));
   await page.evaluate(() => [...document.querySelectorAll("main button")].filter((b) => b.innerText.trim() === "Test").slice(0, 2).forEach((b) => b.click())); await sleep(900);
   t = await bodyText(page);
   check("test button shows latency or the failure reason", /321ms/.test(t) && /model not found/.test(t));
@@ -83,8 +84,8 @@ scenario("settings: providers, voice, sync and profile", async ({ browser, check
   check("speech rate persists", /1\.5/.test((await page.evaluate(() => localStorage.getItem("voiceSettings"))) || ""));
   await page.evaluate(() => [...document.querySelectorAll("main button")].find((b) => /Reset/.test(b.innerText))?.click()); await sleep(400);
   check("reset restores the default rate", !/1\.5/.test((await page.evaluate(() => localStorage.getItem("voiceSettings"))) || ""));
-  await clickIn(page, "main", "Sync"); await sleep(400);
-  check("sync tab shows a masked key", /[0-9a-f]{8}•+/.test(await bodyText(page)));
+  await clickIn(page, "main", "Dữ liệu"); await sleep(400);
+  check("data tab offers backup export", /Xuất/.test(await bodyText(page)));
   await clickIn(page, "main", "Hồ sơ"); await sleep(400);
   for (const l of ["TOEIC", "Trung cấp", "45 phút"]) await clickIn(page, "main", l);
   await sleep(400);
