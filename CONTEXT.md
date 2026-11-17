@@ -257,6 +257,8 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 | `lastWritingAt` | ISO string | Để /today nhắc luyện viết sau 5 ngày |
 | `speakingSessions` | `SpeakingRecord[]` | IELTS speaking session history; newest-first, max 200 |
 | `writingTaskDraft:<taskId>` | `{content: string, deadline: number}` | Local unfinished writing task; saved synchronously on edits/start, restored on mount (even past its deadline), cleared after successful grading and local result save or by "Làm lại từ đầu" |
+| `lastBackupAt` | ISO string | Lần xuất file sao lưu gần nhất (nhắc sao lưu sau 7 ngày) |
+| `backupReminderSnoozedUntil` | ISO string | Ẩn banner nhắc sao lưu tới mốc này; không đưa vào file sao lưu |
 | `pwaInstallDismissed` | `"1"` | User hid the install guidance banner (`ServiceWorkerRegistration`) |
 | `writingSubmissions` | `WritingRecord[]` | IELTS/TOEIC writing submission history; newest-first, max 100 |
 | `unifiedMistakes` | `UnifiedMistake[]` | Sổ lỗi hợp nhất 6 kỹ năng, max 1000 |
@@ -376,11 +378,14 @@ interface DailyStudyTime { date: string; minutes: number; }
 
 Không dùng Supabase hay backend nào. Toàn bộ dữ liệu nằm trong localStorage của trình duyệt.
 
-- `exportData()` → JSON string `{ app: "english-study", version: 1, exportedAt, data: { key: value } }`, giữ nguyên raw string của từng key. Bỏ qua key runtime (`syncKey`, `syncFailedQueue`).
+- `exportData()` → JSON string `{ app: "english-study", version: 1, exportedAt, data: { key: value } }`, giữ nguyên raw string của từng key. Bỏ qua key runtime (`syncKey`, `syncFailedQueue`, `backupReminderSnoozedUntil`).
 - `importData(json)` → validate `app`/`version`/`data`, ghi đè từng key có trong file; key không có trong file được giữ nguyên. Trả `{ imported, skipped }`.
 - `clearAllData()` → xoá mọi key của app (trừ key runtime), trả số key đã xoá.
 - `backupFileName(date?)` → `english-study-backup-YYYY-MM-DD.json`.
-- UI: Settings → tab **Dữ liệu** (`src/app/settings/page.tsx`) — xuất file, nhập file (confirm rồi reload), xoá toàn bộ (confirm 2 bước).
+- `mergeData(json)` → **nhập gộp**: không ghi đè cả key. Danh sách bản ghi gộp theo từng mục (định danh: `id`; `learnedWords` theo `word`, `dailyChallenge` theo `date`, `reportedQuestions` theo `questionId`, `grammarBookmarks` theo `topicId:subRuleId`, `masteryTimeline` theo `date:skill`, `examTagAccuracies` theo `tag`), bản có mốc thời gian mới hơn (`updatedAt` → `finishedAt` → `createdAt` → `learnedAt` → `startedAt` → `reportedAt` → `at`) thắng, hoà thì giữ bản trên máy. `examTagAccuracies` lấy bản có `total` lớn hơn, `dailyChallenge` ưu tiên `completed`. Mảng chuỗi (`customTopics`) hợp nhất; `studyTime` lấy số giây lớn hơn mỗi ngày; `examBank` gộp theo từng bank key; `lastSpeakingAt`/`lastWritingAt`/`lastBackupAt` lấy mốc sau. `learningSessions`, `examAttempts`, `speakingSessions`, `writingSubmissions` sắp lại mới nhất trước. Cài đặt, hồ sơ, cache giữ giá trị trên máy, chỉ điền key còn thiếu. Giới hạn: không có tombstone nên từ đã xoá trên máy sẽ quay lại nếu file còn.
+- `downloadBackup(json)` tải file và ghi `lastBackupAt`; `markBackedUp()`, `needsBackup()` (có dữ liệu học và chưa sao lưu trong `BACKUP_REMIND_DAYS` = 7 ngày). `storageUsage()` → byte ước tính của localStorage (2 byte/ký tự), key lớn nhất trước; `LOCAL_STORAGE_LIMIT` = 5 MB.
+- UI: Settings → tab **Dữ liệu** (`src/app/settings/page.tsx`) — xuất file, nhập file chọn **Gộp từ file** (`mergeData`) hoặc **Thay thế bằng file** (`importData`, có confirm) rồi reload, **Dung lượng** (thanh % trên ~5 MB, cảnh báo ≥80%, 3 mục lớn nhất), xoá toàn bộ (confirm 2 bước).
+- `BackupReminder` (trong `layout.tsx`, đầu vùng nội dung): banner nhắc sao lưu khi `needsBackup()`; "Xuất file sao lưu" tải ngay, "Để mai" ghi `backupReminderSnoozedUntil` (+1 ngày).
 - Không đồng bộ tự động giữa các thiết bị; chuyển máy bằng xuất/nhập file.
 - `exam_items`: đề sinh ra chỉ lưu local trong `examBank`; không còn kho đề dùng chung trên server.
 
@@ -429,6 +434,7 @@ Không dùng Supabase hay backend nào. Toàn bộ dữ liệu nằm trong local
 | `ServiceWorkerRegistration` | Production worker registration; installs through `beforeinstallprompt` when available, native installation instructions otherwise (dismissible with ✕, remembered in `pwaInstallDismissed`); standalone detection and optional persistent storage request; offline notice; waiting-worker update button posts `SKIP_WAITING`, reloads only after user action |
 | `ExamTimer` (prop `enabled`; mock timer starts via `ExamRunner.onRunning`, not while items load) · `ListeningPlayer` · `PassageReader` · `QuestionCard` | Thành phần của exam engine. Trang động (`[id]`/`[part]`) là client component đọc tham số bằng `useParams()` (countdown, phát TTS, đoạn đọc, thẻ câu hỏi) |
 | `exam/ReportQuestionModal` | Báo câu hỏi lỗi (lý do + ghi chú) → chỉ lưu local vào `reportedQuestions` (max 200); **không** set `flagged` ở `exam_items` và không sync |
+| `BackupReminder` | Banner nhắc xuất file sao lưu (≥7 ngày, có dữ liệu học); "Để mai" ẩn 1 ngày |
 | `LinkList` | Titled list of destinations in one bordered card (rows divided by rules, chevron); used by `/exam`, `/speak`, `/write` |
 | `Segmented` | Single-choice segmented control (`role=radiogroup`); used by `/exam` (kỳ thi, trình độ), `/stats` tabs, `/today` minutes, `/settings` tabs, `/mistakes` + `/exam/mistakes` + `/history` filters |
 | `ImportWords` · `QuizCard` | Bulk import từ; thẻ quiz dùng chung |

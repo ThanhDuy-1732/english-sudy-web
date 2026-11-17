@@ -21,7 +21,7 @@ Thứ tự ưu tiên: dọn nợ → an toàn dữ liệu → hạ tầng AI →
 
 ---
 
-## Phase 1 — An toàn dữ liệu (2–3 ngày) 🔴
+## Phase 1 — An toàn dữ liệu ✅ (xong 2026-11-17)
 
 Đã bỏ sync, nên rủi ro lớn nhất bây giờ là **mất dữ liệu** (xoá cache trình duyệt, iOS dọn storage, đổi máy).
 

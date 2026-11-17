@@ -5,6 +5,9 @@ import {
   clearAllData,
   exportData,
   importData,
+  markBackedUp,
+  mergeData,
+  needsBackup,
   parseBackup,
 } from "../data-transfer";
 
@@ -128,5 +131,55 @@ describe("clearAllData", () => {
 describe("backupFileName", () => {
   it("includes the export date", () => {
     expect(backupFileName(new Date(2026, 10, 13))).toBe("english-study-backup-2026-11-13.json");
+  });
+});
+
+describe("mergeData", () => {
+  const word = (w: string, updatedAt: string, meaning = "old") => ({ word: w, meaning, example: "", topic: "TOEIC", learnedAt: "2026-11-01T00:00:00.000Z", updatedAt });
+
+  it("keeps words from both devices and lets the newer edit win", () => {
+    localStorage.setItem("learnedWords", JSON.stringify([word("alpha", "2026-11-10T00:00:00.000Z", "local"), word("beta", "2026-11-12T00:00:00.000Z", "local")]));
+    mergeData(makeBackup({ learnedWords: JSON.stringify([word("alpha", "2026-11-11T00:00:00.000Z", "file"), word("beta", "2026-11-01T00:00:00.000Z", "file"), word("gamma", "2026-11-05T00:00:00.000Z", "file")]) }));
+    const merged = JSON.parse(localStorage.getItem("learnedWords")!);
+    expect(merged.map((w: { word: string; meaning: string }) => `${w.word}:${w.meaning}`)).toEqual(["alpha:file", "beta:local", "gamma:file"]);
+  });
+
+  it("unions sessions newest-first, takes the larger study time per day and keeps local settings", () => {
+    localStorage.setItem("learningSessions", JSON.stringify([{ id: "a", startedAt: "2026-11-10T00:00:00.000Z" }]));
+    localStorage.setItem("studyTime", JSON.stringify({ "2026-11-10": 600, "2026-11-11": 100 }));
+    localStorage.setItem("theme", "dark");
+    const result = mergeData(makeBackup({
+      learningSessions: JSON.stringify([{ id: "b", startedAt: "2026-11-12T00:00:00.000Z" }, { id: "a", startedAt: "2026-11-10T00:00:00.000Z" }]),
+      studyTime: JSON.stringify({ "2026-11-10": 300, "2026-11-11": 900 }),
+      theme: "light",
+      customTopics: JSON.stringify(["Travel"]),
+    }));
+    expect(JSON.parse(localStorage.getItem("learningSessions")!).map((x: { id: string }) => x.id)).toEqual(["b", "a"]);
+    expect(JSON.parse(localStorage.getItem("studyTime")!)).toEqual({ "2026-11-10": 600, "2026-11-11": 900 });
+    expect(localStorage.getItem("theme")).toBe("dark");
+    expect(localStorage.getItem("customTopics")).toBe('["Travel"]');
+    expect(result).toEqual({ imported: 3, skipped: 0 });
+  });
+
+  it("merges exam banks per key and ignores malformed values", () => {
+    localStorage.setItem("examBank", JSON.stringify({ "TOEIC:RC5:3": [{ id: "q1" }] }));
+    localStorage.setItem("unifiedMistakes", "not json");
+    mergeData(makeBackup({ examBank: JSON.stringify({ "TOEIC:RC5:3": [{ id: "q1" }, { id: "q2" }], "IELTS:READ_P3:2": [{ id: "r1" }] }), unifiedMistakes: "[]" }));
+    expect(JSON.parse(localStorage.getItem("examBank")!)).toEqual({ "TOEIC:RC5:3": [{ id: "q1" }, { id: "q2" }], "IELTS:READ_P3:2": [{ id: "r1" }] });
+    expect(localStorage.getItem("unifiedMistakes")).toBe("not json");
+  });
+});
+
+describe("backup reminder", () => {
+  const now = new Date("2026-11-17T12:00:00.000Z");
+
+  it("asks for a backup only when there is learning data and the last one is older than 7 days", () => {
+    expect(needsBackup(now)).toBe(false);
+    localStorage.setItem("learnedWords", '[{"word":"hello"}]');
+    expect(needsBackup(now)).toBe(true);
+    markBackedUp(new Date("2026-11-12T12:00:00.000Z"));
+    expect(needsBackup(now)).toBe(false);
+    markBackedUp(new Date("2026-11-09T12:00:00.000Z"));
+    expect(needsBackup(now)).toBe(true);
   });
 });

@@ -8,7 +8,7 @@ import VoiceSettingsTab from "@/components/VoiceSettingsTab";
 import { useProvider } from "@/contexts/ProviderContext";
 import { getProfile, saveProfile, type LearningProfile, type LearningGoal } from "@/lib/profile";
 import { clearAllAudio, getAudioCount } from "@/lib/speech/audio-store";
-import { backupFileName, clearAllData, exportData, importData } from "@/lib/data-transfer";
+import { LOCAL_STORAGE_LIMIT, clearAllData, downloadBackup, exportData, importData, mergeData, storageUsage } from "@/lib/data-transfer";
 
 const ALL_PROVIDERS = [
   { id: "gemini", name: "Gemini Flash", model: "gemini-flash-latest", envKey: "GEMINI_API_KEY" },
@@ -47,29 +47,24 @@ export default function SettingsPage() {
 
   function handleExport() {
     try {
-      const blob = new Blob([exportData()], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = backupFileName();
-      link.click();
-      URL.revokeObjectURL(url);
+      downloadBackup(exportData());
       setDataMessage({ kind: "ok", text: "Đã xuất file sao lưu." });
     } catch {
       setDataMessage({ kind: "error", text: "Không thể xuất dữ liệu." });
     }
   }
 
-  async function handleImportFile(event: ChangeEvent<HTMLInputElement>) {
+  async function handleImportFile(event: ChangeEvent<HTMLInputElement>, mode: "merge" | "replace") {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
-    if (!window.confirm("Nhập dữ liệu sẽ ghi đè các mục trùng trong trình duyệt này. Tiếp tục?")) {
+    if (mode === "replace" && !window.confirm("Thay thế sẽ ghi đè từ vựng, lỗi sai, bài làm… trên máy này bằng dữ liệu trong file. Tiếp tục?")) {
       return;
     }
     try {
-      const result = importData(await file.text());
-      setDataMessage({ kind: "ok", text: `Đã nhập ${result.imported} mục. Đang tải lại…` });
+      const text = await file.text();
+      const result = mode === "merge" ? mergeData(text) : importData(text);
+      setDataMessage({ kind: "ok", text: `${mode === "merge" ? "Đã gộp" : "Đã thay thế"} ${result.imported} mục. Đang tải lại…` });
       setTimeout(() => window.location.reload(), 800);
     } catch (error) {
       setDataMessage({
@@ -221,72 +216,54 @@ export default function SettingsPage() {
 
       {activeTab === "data" && (
         <div>
-          <h2 className="mb-2 text-lg font-semibold text-ink">Dữ liệu</h2>
-          <p className="mb-6 text-sm text-muted">
-            Dữ liệu được lưu trong trình duyệt này. Xuất file JSON để backup hoặc chuyển sang thiết
-            bị khác; nhập lại file đó trên thiết bị mới.
+          <p className="mb-6 text-sm leading-6 text-muted">
+            Dữ liệu học chỉ nằm trong trình duyệt này. Xoá dữ liệu trình duyệt hay đổi máy là mất, nên hãy xuất file sao lưu thường xuyên.
           </p>
 
-          <div className="space-y-6 rounded-xl border border-white/10 p-6">
-            <div>
-              <p className="mb-2 text-sm font-medium text-ink">Xuất dữ liệu</p>
-              <p className="mb-3 text-xs text-muted">
-                Tải toàn bộ từ vựng, lỗi sai, đề thi, bài nói, bài viết và cài đặt thành một file
-                JSON.
-              </p>
-              <button
-                type="button"
-                onClick={handleExport}
-                className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-ink hover:bg-white/20"
-              >
-                ⬇️ Xuất file sao lưu
-              </button>
-            </div>
+          <div className="panel divide-y divide-rule">
+            <section className="p-5 sm:p-6">
+              <h2 className="section-title">Xuất dữ liệu</h2>
+              <p className="mt-1 text-sm text-muted">Tải toàn bộ từ vựng, lỗi sai, đề thi, bài nói, bài viết và cài đặt thành một file JSON.</p>
+              <button type="button" onClick={handleExport} className="btn btn-primary mt-4">Xuất file sao lưu</button>
+            </section>
 
-            <div>
-              <p className="mb-2 text-sm font-medium text-ink">Nhập dữ liệu</p>
-              <p className="mb-3 text-xs text-muted">
-                Chọn file đã xuất trước đó. Các mục trùng sẽ bị ghi đè bằng dữ liệu trong file.
+            <section className="p-5 sm:p-6">
+              <h2 className="section-title">Nhập dữ liệu</h2>
+              <p className="mt-1 text-sm text-muted">
+                Chọn file đã xuất trước đó. <strong className="font-medium text-ink">Gộp</strong> giữ dữ liệu trên máy này và thêm những gì có trong file; mục nào sửa ở cả hai nơi thì lấy bản mới hơn. <strong className="font-medium text-ink">Thay thế</strong> ghi đè bằng dữ liệu trong file.
               </p>
-              <label className="inline-block cursor-pointer rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-ink hover:bg-white/20">
-                ⬆️ Chọn file JSON
-                <input
-                  type="file"
-                  accept="application/json,.json"
-                  onChange={handleImportFile}
-                  className="hidden"
-                />
-              </label>
-            </div>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <label className="btn btn-primary cursor-pointer">
+                  Gộp từ file
+                  <input type="file" accept="application/json,.json" onChange={(event) => void handleImportFile(event, "merge")} className="sr-only" />
+                </label>
+                <label className="btn btn-secondary cursor-pointer">
+                  Thay thế bằng file
+                  <input type="file" accept="application/json,.json" onChange={(event) => void handleImportFile(event, "replace")} className="sr-only" />
+                </label>
+              </div>
+            </section>
 
-            <div>
-              <p className="mb-2 text-sm font-medium text-ink">Xoá toàn bộ dữ liệu</p>
-              <p className="mb-3 text-xs text-muted">
-                Chỉ xoá dữ liệu của app trên trình duyệt này. Nên xuất file sao lưu trước.
-              </p>
+            <StorageUsage />
+
+            <section className="p-5 sm:p-6">
+              <h2 className="section-title">Xoá toàn bộ dữ liệu</h2>
+              <p className="mt-1 text-sm text-muted">Chỉ xoá dữ liệu của app trên trình duyệt này. Nên xuất file sao lưu trước.</p>
               <button
                 type="button"
                 onClick={handleClearAll}
-                className={`rounded-lg px-4 py-2 text-sm font-medium ${
-                  confirmClear
-                    ? "bg-red-500/80 text-white hover:bg-red-500"
-                    : "bg-white/10 text-ink hover:bg-white/20"
-                }`}
+                className={`btn mt-4 ${confirmClear ? "bg-margin text-white" : "btn-secondary text-margin"}`}
               >
                 {confirmClear ? "Bấm lần nữa để xoá toàn bộ" : "Xoá dữ liệu"}
               </button>
-            </div>
-
-            {dataMessage && (
-              <p
-                className={`text-sm font-medium ${
-                  dataMessage.kind === "ok" ? "text-green-400" : "text-red-400"
-                }`}
-              >
-                {dataMessage.text}
-              </p>
-            )}
+            </section>
           </div>
+
+          {dataMessage && (
+            <p role="status" className={`mt-4 text-sm font-medium ${dataMessage.kind === "ok" ? "text-ok" : "text-margin"}`}>
+              {dataMessage.text}
+            </p>
+          )}
         </div>
       )}
 
@@ -300,6 +277,66 @@ export default function SettingsPage() {
         </div>
       )}
     </main>
+  );
+}
+
+// Friendly names for the keys that usually take the most space.
+const STORAGE_NAMES: Record<string, string> = {
+  examBank: "Đề thi đã tạo",
+  learnedWords: "Từ vựng",
+  writingSubmissions: "Bài viết",
+  speakingSessions: "Bài nói",
+  unifiedMistakes: "Sổ lỗi",
+  learningSessions: "Lịch sử học",
+  examAttempts: "Bài thi đã làm",
+  grammarAttempts: "Bài ngữ pháp",
+  dailyPlan: "Kế hoạch hôm nay",
+  studyTime: "Thời gian học",
+  masteryTimeline: "Tiến độ kỹ năng",
+  skillMasteryCache: "Điểm kỹ năng",
+  grammarTopics: "Chủ đề ngữ pháp tự tạo",
+  examTagAccuracies: "Độ chính xác theo dạng câu",
+  dailyChallenge: "Thử thách hằng ngày",
+  reportedQuestions: "Câu hỏi đã báo lỗi",
+};
+
+function formatBytes(bytes: number) {
+  return bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function StorageUsage() {
+  const [usage, setUsage] = useState<ReturnType<typeof storageUsage> | null>(null);
+  useEffect(() => setUsage(storageUsage()), []);
+  if (!usage) return null;
+  const percent = Math.min(100, Math.round((usage.bytes / LOCAL_STORAGE_LIMIT) * 100));
+  const high = percent >= 80;
+  const top = usage.keys.slice(0, 3);
+
+  return (
+    <section className="p-5 sm:p-6">
+      <h2 className="section-title">Dung lượng</h2>
+      <p className="mt-1 text-sm text-muted">
+        Đang dùng <span className="font-semibold tabular-nums text-ink">{formatBytes(usage.bytes)}</span> trên khoảng 5 MB trình duyệt cho phép.
+      </p>
+      <div className="mt-3 h-2 overflow-hidden rounded-full bg-rule" role="progressbar" aria-label="Dung lượng đã dùng" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}>
+        <div className={`h-full rounded-full ${high ? "bg-margin" : "bg-primary"}`} style={{ width: `${Math.max(percent, 1)}%` }} />
+      </div>
+      {high && (
+        <p role="alert" className="mt-3 rounded-lg bg-margin-soft px-3 py-2 text-sm text-ink">
+          Sắp đầy ({percent}%). Khi đầy, app không lưu thêm được từ hay bài làm mới. Hãy xuất file sao lưu; đề thi đã tạo chiếm nhiều chỗ nhất và sẽ được tạo lại khi cần.
+        </p>
+      )}
+      {top.length > 0 && (
+        <ul className="mt-3 space-y-1 text-sm text-muted">
+          {top.map((k) => (
+            <li key={k.key} className="flex justify-between gap-4">
+              <span>{STORAGE_NAMES[k.key] ?? "Cài đặt và dữ liệu khác"}</span>
+              <span className="tabular-nums">{formatBytes(k.bytes)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
 

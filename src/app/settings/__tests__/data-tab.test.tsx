@@ -3,7 +3,7 @@ import SettingsPage from "../page";
 import { clearAllData, exportData } from "@/lib/data-transfer";
 
 jest.mock("@/lib/data-transfer", () => ({
-  backupFileName: () => "english-study-backup-2026-11-13.json",
+  ...jest.requireActual("@/lib/data-transfer"),
   clearAllData: jest.fn(() => 3),
   exportData: jest.fn(() => '{"app":"english-study"}'),
   importData: jest.fn(),
@@ -39,16 +39,19 @@ test("data tab exposes export, import and clear actions", async () => {
   expect(screen.getByText("Xuất dữ liệu")).toBeInTheDocument();
   expect(screen.getByText("Nhập dữ liệu")).toBeInTheDocument();
   expect(screen.getByText("Xoá toàn bộ dữ liệu")).toBeInTheDocument();
-  expect(screen.getByText("⬆️ Chọn file JSON")).toBeInTheDocument();
+  expect(screen.getByText("Gộp từ file")).toBeInTheDocument();
+  expect(screen.getByText("Thay thế bằng file")).toBeInTheDocument();
+  expect(screen.getByText("Dung lượng")).toBeInTheDocument();
 });
 
 test("export button downloads the JSON produced by exportData", async () => {
   await renderDataTab();
-  fireEvent.click(screen.getByText("⬇️ Xuất file sao lưu"));
+  fireEvent.click(screen.getByText("Xuất file sao lưu"));
 
   expect(exportDataMock).toHaveBeenCalledTimes(1);
   expect(URL.createObjectURL).toHaveBeenCalled();
   expect(screen.getByText("Đã xuất file sao lưu.")).toBeInTheDocument();
+  expect(localStorage.getItem("lastBackupAt")).not.toBeNull();
 });
 
 test("clear requires a second click before wiping data", async () => {
