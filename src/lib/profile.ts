@@ -11,6 +11,8 @@ export interface LearningProfile {
   targetIeltsScore?: number;
   targetDate?: string;
   shortcutsEnabled: boolean;
+  /** Daily study reminder time "HH:MM" (in-app banner after this time, and the .ics calendar event). */
+  reminderTime: string;
 }
 
 const DEFAULTS: LearningProfile = {
@@ -18,6 +20,7 @@ const DEFAULTS: LearningProfile = {
   currentLevel: 2,
   dailyStudyMinutes: 30,
   shortcutsEnabled: true,
+  reminderTime: "20:00",
 };
 
 export function getProfile(): LearningProfile {

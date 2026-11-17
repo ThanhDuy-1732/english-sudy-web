@@ -1,6 +1,7 @@
 "use client";
 
 import Segmented from "@/components/Segmented";
+import { buildReminderIcs } from "@/lib/reminders";
 
 import { useEffect, useState, type ChangeEvent } from "react";
 import { getThemePref, setThemePref, type ThemePref } from "@/lib/theme";
@@ -340,13 +341,19 @@ function StorageUsage() {
   );
 }
 
+function downloadReminder(time: string) {
+  const ics = buildReminderIcs(time, `${window.location.origin}/today`);
+  const url = URL.createObjectURL(new Blob([ics], { type: "text/calendar;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "english-study-nhac-hoc.ics";
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 function ProfileSettings() {
-  const [profile, setProfile] = useState<LearningProfile>(() => {
-    if (typeof window === "undefined") return {
-      goal: "mixed", currentLevel: 2, dailyStudyMinutes: 30, shortcutsEnabled: true,
-    };
-    return getProfile();
-  });
+  // getProfile() returns the defaults during server rendering.
+  const [profile, setProfile] = useState<LearningProfile>(getProfile);
 
   function update(partial: Partial<LearningProfile>) {
     const updated = { ...profile, ...partial };
@@ -422,6 +429,20 @@ function ProfileSettings() {
             className="field mt-1 block w-full max-w-xs text-sm" />
         </div>
       )}
+
+      <div>
+        <label htmlFor="reminder-time" className="text-sm font-medium text-ink">Nhắc học hằng ngày</label>
+        <p className="mt-0.5 text-sm text-muted">Sau giờ này, nếu hôm nay chưa học, app hiện lời nhắc khi bạn mở. Tải file lịch để điện thoại tự nhắc cả khi không mở app.</p>
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          <input id="reminder-time" type="time" value={profile.reminderTime}
+            onChange={(e) => e.target.value && update({ reminderTime: e.target.value })}
+            className="field w-36 text-sm" />
+          <button type="button" onClick={() => downloadReminder(profile.reminderTime)} className="btn btn-secondary text-sm">
+            Tải file lịch nhắc học (.ics)
+          </button>
+        </div>
+        <p className="mt-2 text-xs text-muted">Mở file vừa tải để thêm vào Lịch (iPhone) hoặc Google Calendar. Đổi giờ thì tải lại file và xoá sự kiện cũ.</p>
+      </div>
 
       <div className="flex items-center justify-between max-w-xs">
         <p className="text-sm text-ink">Phím tắt bàn phím</p>

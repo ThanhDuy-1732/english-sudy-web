@@ -10,7 +10,11 @@ export interface LearnedWord {
   mastery?: number;
   synonyms?: string[];
   antonyms?: string[];
-  // SM-2 fields (added by migrateToSm2 in srs.ts)
+  // FSRS memory state (src/lib/srs.ts)
+  stability?: number;          // days until recall drops to 90%
+  difficulty?: number;         // 1–10
+  lastReviewedAt?: string;     // ISO
+  // Legacy SM-2 fields, read once to convert old cards to FSRS
   easiness?: number;
   repetitions?: number;
 }
@@ -55,34 +59,23 @@ export function deleteLearnedWord(word: string): void {
 }
 
 /**
- * SM-2 variant — quality: 0=forgot, 3=hard, 4=good, 5=easy.
- * Updates mastery stars from repetitions for display consistency.
+ * Records a review with FSRS. quality: 0 = Quên, 3 = Khó, 4 = Được, 5 = Dễ.
+ * Cards scheduled by the old SM-2 code are converted on their first FSRS review.
  */
-export function updateWordReviewSm2(
-  word: string,
-  quality: 0 | 1 | 2 | 3 | 4 | 5
-): void {
-  // Lazy import to keep storage.ts free of circular deps
-  const { sm2, migrateToSm2, repetitionsToMastery } = require("./srs") as typeof import("./srs");
+export function reviewWord(word: string, quality: 0 | 3 | 4 | 5, now = new Date()): void {
+  // Lazy import keeps storage.ts free of a circular import with srs.ts (which imports the LearnedWord type).
+  const { fsrs, fsrsStateOf, stabilityToMastery } = require("./srs") as typeof import("./srs");
   const words = getLearnedWords().map((w) => {
     if (w.word !== word) return w;
-    const migrated = migrateToSm2(w);
-    const next = sm2(
-      {
-        easiness: (migrated as any).easiness ?? 2.5,
-        interval: migrated.reviewInterval ?? 1,
-        repetitions: (migrated as any).repetitions ?? 0,
-        nextReviewAt: migrated.nextReviewAt ?? new Date().toISOString(),
-      },
-      quality
-    );
+    const next = fsrs(fsrsStateOf(w), quality, now);
     return touch({
-      ...migrated,
-      easiness: next.easiness,
-      repetitions: next.repetitions,
-      reviewInterval: next.interval,
+      ...w,
+      stability: next.stability,
+      difficulty: next.difficulty,
+      lastReviewedAt: next.lastReviewedAt,
+      reviewInterval: next.intervalDays,
       nextReviewAt: next.nextReviewAt,
-      mastery: repetitionsToMastery(next.repetitions),
+      mastery: stabilityToMastery(next.stability),
     });
   });
   localStorage.setItem(KEY, JSON.stringify(words));

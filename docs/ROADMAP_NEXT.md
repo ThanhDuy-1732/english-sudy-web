@@ -63,7 +63,7 @@ Bỏ qua: persist metrics (không có backend; `/api/admin/metrics` in-memory l�
 
 ---
 
-## Phase 4 — Tuỳ chọn / khi có nhu cầu ⚪
+## Phase 4 — Tuỳ chọn / khi có nhu cầu ⚪ (FSRS và nhắc học xong 2026-11-17; Anki và auth/sync chưa làm theo lựa chọn)
 
 - **FSRS thay SM-2**: chỉ làm khi đủ dữ liệu review để thấy SM-2 lên lịch sai.
 - **Import Anki** (`.txt` trước, `.apkg` sau — `.apkg` là SQLite, cần thêm dependency).

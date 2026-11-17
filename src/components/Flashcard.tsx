@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { getProfile } from "@/lib/profile";
-import { saveLearnedWord, updateWordReviewSm2, getLearnedWords } from "@/lib/storage";
+import { saveLearnedWord, reviewWord, getLearnedWords } from "@/lib/storage";
 import { useApiFetch } from "@/lib/useApiFetch";
 import PronunciationButton from "./PronunciationButton";
 import WritingChallenge from "./WritingChallenge";
@@ -139,7 +139,7 @@ export default function Flashcard({
   }
 
   function grade(quality: 0 | 3 | 4 | 5) {
-    updateWordReviewSm2(word, quality);
+    reviewWord(word, quality);
     onReviewed?.(quality);
   }
 

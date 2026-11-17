@@ -2,6 +2,7 @@ import {
   getLearnedWords,
   saveLearnedWord,
   getWordsForReview,
+  reviewWord,
   type LearnedWord,
 } from "../storage";
 
@@ -49,4 +50,16 @@ test("getWordsForReview returns words where nextReviewAt <= now", () => {
   saveLearnedWord(futureWord);
   const review = getWordsForReview();
   expect(review.map((w) => w.word)).toEqual(["due"]);
+});
+
+test("reviewWord schedules with FSRS and stores the memory state", () => {
+  saveLearnedWord(baseWord);
+  const now = new Date("2026-07-16T12:00:00.000Z");
+  reviewWord("negotiate", 4, now);
+  const [updated] = getLearnedWords();
+  expect(updated.nextReviewAt).toBe("2026-07-20T12:00:00.000Z");
+  expect(updated.reviewInterval).toBe(4);
+  expect(updated.stability).toBeCloseTo(3.7145, 4);
+  expect(updated.lastReviewedAt).toBe(now.toISOString());
+  expect(updated.mastery).toBe(2);
 });

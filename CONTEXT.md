@@ -100,16 +100,18 @@ interface LearnedWord {
   learnedAt: string;           // ISO, set once on first save
   updatedAt?: string;          // ISO, set on every user-initiated mutation (LWW key)
   nextReviewAt?: string;       // ISO, defaults to +1 day
-  reviewInterval?: number;     // days (SM-2: interval field)
-  mastery?: number;            // 0–5 stars (derived from repetitions)
+  reviewInterval?: number;     // days until the next review
+  mastery?: number;            // 0–5 stars (stabilityToMastery: <1, <3, <7, <21, <60 days, else 5)
   synonyms?: string[];
   antonyms?: string[];
-  // SM-2 fields (added by migrateToSm2):
-  easiness?: number;           // EF, floor 1.3
-  repetitions?: number;        // SM-2 repetition count
+  stability?: number;          // FSRS: days until recall drops to 90%
+  difficulty?: number;         // FSRS: 1–10
+  lastReviewedAt?: string;     // FSRS: ISO
+  easiness?: number;           // legacy SM-2, read once to convert
+  repetitions?: number;        // legacy SM-2
 }
 ```
-SRS uses SM-2 algorithm (`src/lib/srs.ts`). Use `updateWordReviewSm2(word, quality: 0|3|4|5)` for new reviews.
+SRS uses **FSRS-4.5** (`src/lib/srs.ts`, default weights, target retention 90%, max interval 365 days). Use `reviewWord(word, quality: 0|3|4|5)` (Quên/Khó/Được/Dễ → Again/Hard/Good/Easy).
 
 ### DailyChallenge (`src/lib/daily-challenge.ts`)
 ```ts
@@ -214,7 +216,8 @@ interface LearningProfile {
   currentLevel: 1|2|3|4|5;          // default 2
   dailyStudyMinutes: number;        // default 30
   targetToeicScore?: number; targetIeltsScore?: number; targetDate?: string;
-  shortcutsEnabled: boolean;        // default true; tắt phím tắt ExamRunner
+  shortcutsEnabled: boolean;        // default true; tắt phím tắt ExamRunner và flashcard
+  reminderTime: string;             // "HH:MM", default "20:00"; giờ nhắc học (banner + .ics)
 }
 ```
 `getProfile()` (merge defaults, SSR-safe), `saveProfile`, `updateProfile(partial)`. Local key `learningProfile`.
@@ -262,6 +265,7 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 | `speakingSessions` | `SpeakingRecord[]` | IELTS speaking session history; newest-first, max 200 |
 | `writingTaskDraft:<taskId>` | `{content: string, deadline: number}` | Local unfinished writing task; saved synchronously on edits/start, restored on mount (even past its deadline), cleared after successful grading and local result save or by "Làm lại từ đầu" |
 | `lastBackupAt` | ISO string | Lần xuất file sao lưu gần nhất (nhắc sao lưu sau 7 ngày) |
+| `studyReminderSnoozedOn` | `YYYY-MM-DD` | Ngày đã bấm "Để mai" ở banner nhắc học; không đưa vào file sao lưu |
 | `retentionRanOn` | `YYYY-MM-DD` | Ngày local đã chạy dọn dữ liệu 90 ngày; không đưa vào file sao lưu |
 | `backupReminderSnoozedUntil` | ISO string | Ẩn banner nhắc sao lưu tới mốc này; không đưa vào file sao lưu |
 | `pwaInstallDismissed` | `"1"` | User hid the install guidance banner (`ServiceWorkerRegistration`) |
@@ -324,7 +328,7 @@ Registry order: `opencode` đứng đầu khi `OPENCODE_API_KEY` có mặt, nên
 
 On first flip: fetches sentence + synonyms in parallel. Saved state is lazy (only after flip). Pronunciation button (`PronunciationButton`) floats on front face.
 
-In **review mode** (`isReviewMode=true`): shows 4 SM-2 quality buttons — Quên (0), Khó (3), Được (4), Dễ (5) — instead of save. Prop `shortcuts` (set on the first card of `/review`, outlined in blue): Space/Enter flips, 1–4 grade; ignored while typing or when a button/link has focus; off when `learningProfile.shortcutsEnabled` is false. Updates SM-2 fields via `updateWordReviewSm2(word, quality)` and passes the quality to `onReviewed` for session tracking. `/review` cancels unfinished sessions on exit; its summary reports counts, accuracy (Được + Dễ), duration, and remaining due words.
+In **review mode** (`isReviewMode=true`): shows 4 review grade buttons — Quên (0), Khó (3), Được (4), Dễ (5) — instead of save. Prop `shortcuts` (set on the first card of `/review`, outlined in blue): Space/Enter flips, 1–4 grade; ignored while typing or when a button/link has focus; off when `learningProfile.shortcutsEnabled` is false. Updates SM-2 fields via `updateWordReviewSm2(word, quality)` and passes the quality to `onReviewed` for session tracking. `/review` cancels unfinished sessions on exit; its summary reports counts, accuracy (Được + Dễ), duration, and remaining due words.
 
 ---
 
@@ -375,7 +379,8 @@ interface DailyStudyTime { date: string; minutes: number; }
 ## Spaced Repetition (`src/lib/storage.ts`)
 
 - `getWordsForReview()` — returns words where `nextReviewAt <= now`
-- `updateWordReviewSm2(word, quality: 0|3|4|5)` — **đường chính**, dùng SM-2 trong `src/lib/srs.ts` (EF ≥ 1.3; quality < 3 → interval 1; `nextReviewAt = now + interval * 86400000`), cập nhật `updatedAt`.
+- `reviewWord(word, quality: 0|3|4|5, now?)` — FSRS trong `src/lib/srs.ts`: `fsrs(prevState | undefined, quality)` → `{ stability, difficulty, lastReviewedAt, intervalDays, nextReviewAt }`. Quên → ôn lại sau 1 ngày; còn lại interval = ngày tới khi khả năng nhớ còn 90% (= stability). Lưu `stability`, `difficulty`, `lastReviewedAt`, `reviewInterval`, `nextReviewAt`, `mastery`, `updatedAt`.
+- Thẻ cũ lên lịch bằng SM-2 được chuyển khi ôn lần đầu (`fsrsStateOf`): stability = `reviewInterval`, difficulty = `10 − (easiness − 1.3) × 5` (EF 2.5 → 4), `lastReviewedAt` = `nextReviewAt − interval`. Thẻ chưa ôn lần nào được coi là mới.
 
 ---
 
@@ -383,7 +388,7 @@ interface DailyStudyTime { date: string; minutes: number; }
 
 Không dùng Supabase hay backend nào. Toàn bộ dữ liệu nằm trong localStorage của trình duyệt.
 
-- `exportData()` → JSON string `{ app: "english-study", version: 1, exportedAt, data: { key: value } }`, giữ nguyên raw string của từng key. Bỏ qua key runtime (`syncKey`, `syncFailedQueue`, `backupReminderSnoozedUntil`, `retentionRanOn`).
+- `exportData()` → JSON string `{ app: "english-study", version: 1, exportedAt, data: { key: value } }`, giữ nguyên raw string của từng key. Bỏ qua key runtime (`syncKey`, `syncFailedQueue`, `backupReminderSnoozedUntil`, `retentionRanOn`, `studyReminderSnoozedOn`).
 - `importData(json)` → validate `app`/`version`/`data`, ghi đè từng key có trong file; key không có trong file được giữ nguyên. Trả `{ imported, skipped }`.
 - `clearAllData()` → xoá mọi key của app (trừ key runtime), trả số key đã xoá.
 - `backupFileName(date?)` → `english-study-backup-YYYY-MM-DD.json`.
@@ -395,6 +400,10 @@ Không dùng Supabase hay backend nào. Toàn bộ dữ liệu nằm trong local
 - `exam_items`: đề sinh ra chỉ lưu local trong `examBank`; không còn kho đề dùng chung trên server.
 
 ---
+
+## Study reminders (`src/lib/reminders.ts`)
+
+Không cần server. `studyNudge(reminderTime, now?)` trả `{ dueWords, streak }` khi: có từ đã lưu, chưa có phiên học **hoàn thành** hôm nay (theo `learningSessions`, không dùng `studyTime` vì timer chạy cả khi chỉ mở app), đã qua giờ `learningProfile.reminderTime` (mặc định `"20:00"`), và chưa bấm "Để mai" hôm nay (key `studyReminderSnoozedOn`). `StudyReminder` (trong `layout.tsx`, trên `BackupReminder`) hiện banner với nút "Ôn tập ngay" / "Xem kế hoạch hôm nay" và "Để mai". `buildReminderIcs(time, appUrl)` tạo sự kiện lịch lặp hằng ngày (giờ local, bắt đầu từ ngày mai, có `VALARM`), tải từ Cài đặt → Hồ sơ → "Tải file lịch nhắc học (.ics)".
 
 ## Data retention (`src/lib/retention.ts`)
 
@@ -425,6 +434,7 @@ Không dùng Supabase hay backend nào. Toàn bộ dữ liệu nằm trong local
 | `GrammarContent` | Displays grammar rules, formulas, static/AI examples, and exercise buttons |
 | `GrammarExercise` | Inline fill-in-the-blank or MCQ answer checking |
 | `PronunciationButton` | Web Speech API TTS button |
+| `StudyReminder` | Banner nhắc học khi đã qua giờ nhắc mà hôm nay chưa hoàn thành phiên học nào; "Để mai" ẩn tới mai |
 | `StreakCalendar` | 26-week calendar heatmap |
 | `VoiceSettingsTab` | Voice picker + sliders |
 | `FirebaseInitializer` | Initializes Firebase analytics in the browser when config is available |

@@ -2,7 +2,7 @@ import { goalProgress } from "../goal-progress";
 import type { ExamAttempt } from "../exam/types";
 import type { LearningProfile } from "../profile";
 
-const profile: LearningProfile = { goal: "toeic", currentLevel: 3, dailyStudyMinutes: 30, shortcutsEnabled: true, targetToeicScore: 750, targetDate: "2026-12-31" };
+const profile: LearningProfile = { goal: "toeic", currentLevel: 3, dailyStudyMinutes: 30, shortcutsEnabled: true, reminderTime: "20:00", targetToeicScore: 750, targetDate: "2026-12-31" };
 const attempt = (over: Partial<ExamAttempt>): ExamAttempt => ({ id: "a", kind: "TOEIC", mode: "mock", parts: [], startedAt: "2026-11-10T00:00:00.000Z", answers: [], ...over } as ExamAttempt);
 
 test("compares the latest TOEIC mock with the target and counts days to the exam", () => {

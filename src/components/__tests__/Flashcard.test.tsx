@@ -14,7 +14,7 @@ global.fetch = jest.fn().mockImplementation((input: string) =>
 
 jest.mock("@/lib/storage", () => ({
   saveLearnedWord: jest.fn().mockReturnValue(true),
-  updateWordReviewSm2: jest.fn(),
+  reviewWord: jest.fn(),
   getLearnedWords: jest.fn().mockReturnValue([
     {
       word: "greet",
