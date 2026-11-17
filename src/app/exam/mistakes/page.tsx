@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Segmented from "@/components/Segmented";
 import { getExamMistakes, resolveMistake, type ExamMistake } from "@/lib/mistakes";
 import { runMistakeMigration } from "@/lib/mistake-migration";
-import { saveLearnedWord } from "@/lib/storage";
+import MistakeWords from "@/components/MistakeWords";
 import type { QuestionType } from "@/lib/exam/types";
 
 const TYPE_LABELS: Partial<Record<QuestionType, string>> = {
@@ -38,19 +38,6 @@ export default function MistakesPage() {
     setMistakes(getExamMistakes());
   }
 
-  function handleAddToSRS(mistake: ExamMistake, word: string) {
-    saveLearnedWord({
-      word,
-      meaning: "",
-      example: mistake.exam.prompt,
-      topic: `exam:${mistake.exam.part}`,
-      learnedAt: new Date().toISOString(),
-      mastery: 0,
-      nextReviewAt: new Date(Date.now() + 86400000).toISOString(),
-      reviewInterval: 1,
-    });
-    alert(`Đã thêm "${word}" vào flashcard!`);
-  }
 
   return (
     <div className="mistakes-page">
@@ -96,6 +83,7 @@ export default function MistakesPage() {
               </div>
 
               <p className="explanation">{m.explanation}</p>
+              <MistakeWords mistake={m} />
 
               <div className="mistake-actions">
                 <button

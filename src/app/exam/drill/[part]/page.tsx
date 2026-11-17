@@ -15,13 +15,19 @@ const PART_LABELS: Record<string, string> = {
   LC2: "TOEIC Part 2 – Question-Response",
   LC3: "TOEIC Part 3 – Conversations",
   LC4: "TOEIC Part 4 – Short Talks",
-  READ_P3: "IELTS Reading – Academic",
+  READ_P1: "IELTS Reading – Passage 1",
+  READ_P2: "IELTS Reading – Passage 2",
+  READ_P3: "IELTS Reading – Passage 3",
   LISTEN_S1: "IELTS Listening – Section 1",
+  LISTEN_S2: "IELTS Listening – Section 2",
+  LISTEN_S3: "IELTS Listening – Section 3",
+  LISTEN_S4: "IELTS Listening – Section 4",
 };
 
 const PART_KIND: Record<string, ExamKind> = {
   RC5: "TOEIC", RC6: "TOEIC", RC7: "TOEIC", LC2: "TOEIC", LC3: "TOEIC", LC4: "TOEIC",
-  READ_P3: "IELTS", LISTEN_S1: "IELTS",
+  READ_P1: "IELTS", READ_P2: "IELTS", READ_P3: "IELTS",
+  LISTEN_S1: "IELTS", LISTEN_S2: "IELTS", LISTEN_S3: "IELTS", LISTEN_S4: "IELTS",
 };
 
 export default function DrillPage() {

@@ -24,8 +24,17 @@ const PARTS: Record<ExamKind, { skill: string; items: { part: string; name: stri
     ] },
   ],
   IELTS: [
-    { skill: "Nghe", items: [{ part: "LISTEN_S1", name: "Listening, Section 1", desc: "Hội thoại đời thường, điền thông tin" }] },
-    { skill: "Đọc", items: [{ part: "READ_P3", name: "Reading, Academic", desc: "Bài đọc học thuật, nhiều dạng câu hỏi" }] },
+    { skill: "Nghe", items: [
+      { part: "LISTEN_S1", name: "Listening, Section 1", desc: "Hội thoại đời thường, điền thông tin vào form" },
+      { part: "LISTEN_S2", name: "Listening, Section 2", desc: "Một người nói về chủ đề đời sống, trắc nghiệm và điền ghi chú" },
+      { part: "LISTEN_S3", name: "Listening, Section 3", desc: "Sinh viên và giảng viên thảo luận, trắc nghiệm" },
+      { part: "LISTEN_S4", name: "Listening, Section 4", desc: "Bài giảng học thuật, điền ghi chú" },
+    ] },
+    { skill: "Đọc", items: [
+      { part: "READ_P1", name: "Reading, Passage 1", desc: "Bài đọc dễ nhất: True/False/Not Given và điền câu" },
+      { part: "READ_P2", name: "Reading, Passage 2", desc: "Chọn tiêu đề cho từng đoạn và trắc nghiệm" },
+      { part: "READ_P3", name: "Reading, Passage 3", desc: "Bài đọc học thuật khó nhất, nhiều dạng câu hỏi" },
+    ] },
   ],
 };
 

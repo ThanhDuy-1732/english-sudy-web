@@ -76,8 +76,11 @@ const TYPE_TO_PART: Partial<Record<QuestionType, string>> = {
   conversation: "LC3",
   short_talk: "LC4",
   question_response: "LC2",
-  true_false_ng: "READ_P3",
-  sentence_completion: "READ_P3",
+  true_false_ng: "READ_P1",
+  sentence_completion: "READ_P1",
+  matching_headings: "READ_P2",
+  mcq: "LISTEN_S3",
+  summary_completion: "LISTEN_S4",
   form_completion: "LISTEN_S1",
 };
 

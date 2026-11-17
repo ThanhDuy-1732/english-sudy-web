@@ -3,6 +3,7 @@ import {
   bankKey,
   getExamBank,
   addItemToBank,
+  removeItemFromBank,
   getItemsFromBank,
   getAttempts,
   saveAttempt,
@@ -151,5 +152,14 @@ describe("exam settings", () => {
     expect(s.level).toBe(5);
     expect(s.primaryExam).toBe("IELTS");
     expect(s.listeningRate).toBe(1.0); // default preserved
+  });
+});
+
+describe("removeItemFromBank", () => {
+  it("drops a reported item so later drills no longer pick it", () => {
+    addItemToBank(makeItem({ id: "keep" }));
+    addItemToBank(makeItem({ id: "bad" }));
+    removeItemFromBank("bad");
+    expect(Object.values(getExamBank()).flat().map((i) => i.id)).toEqual(["keep"]);
   });
 });

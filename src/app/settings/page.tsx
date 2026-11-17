@@ -399,7 +399,7 @@ function ProfileSettings() {
           <input type="number" min={10} max={990} step={5}
             value={profile.targetToeicScore ?? ""}
             onChange={(e) => update({ targetToeicScore: Number(e.target.value) })}
-            className="mt-1 w-full max-w-xs rounded-lg bg-white/10 px-3 py-2 text-sm text-ink border border-white/20" />
+            className="field mt-1 block w-full max-w-xs text-sm" />
         </div>
       )}
 
@@ -409,7 +409,17 @@ function ProfileSettings() {
           <input type="number" min={1} max={9} step={0.5}
             value={profile.targetIeltsScore ?? ""}
             onChange={(e) => update({ targetIeltsScore: Number(e.target.value) })}
-            className="mt-1 w-full max-w-xs rounded-lg bg-white/10 px-3 py-2 text-sm text-ink border border-white/20" />
+            className="field mt-1 block w-full max-w-xs text-sm" />
+        </div>
+      )}
+
+      {(profile.goal === "toeic" || profile.goal === "ielts") && (
+        <div>
+          <label htmlFor="target-date" className="text-sm font-medium text-ink">Ngày thi</label>
+          <input id="target-date" type="date"
+            value={profile.targetDate ?? ""}
+            onChange={(e) => update({ targetDate: e.target.value || undefined })}
+            className="field mt-1 block w-full max-w-xs text-sm" />
         </div>
       )}
 

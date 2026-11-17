@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { removeItemFromBank } from "@/lib/exam/exam-storage";
 
 const REPORT_REASONS = [
   "Đáp án sai",
@@ -42,6 +43,12 @@ export default function ReportQuestionModal({ questionId, itemId, onClose }: Pro
 
   function handleSubmit() {
     saveReport({ questionId, itemId, reason, note: note.trim(), reportedAt: new Date().toISOString() });
+    // A reported question should not come back in later drills.
+    try {
+      removeItemFromBank(itemId);
+    } catch {
+      // Storage blocked: the report is still recorded.
+    }
     setSubmitted(true);
   }
 
@@ -50,7 +57,7 @@ export default function ReportQuestionModal({ questionId, itemId, onClose }: Pro
       <div className="report-modal" onClick={(e) => e.stopPropagation()}>
         {submitted ? (
           <>
-            <p className="report-thanks">Đã ghi nhận câu hỏi lỗi.</p>
+            <p className="report-thanks">Đã ghi nhận câu hỏi lỗi. Câu này sẽ không xuất hiện lại khi luyện.</p>
             <button onClick={onClose} className="report-close-btn">Đóng</button>
           </>
         ) : (

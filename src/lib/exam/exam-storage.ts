@@ -61,6 +61,20 @@ export function getItemsFromBank(
   return bank[bankKey(kind, part, level)] ?? [];
 }
 
+/** Drops an item from every bank key, e.g. after the learner reports one of its questions as wrong. */
+export function removeItemFromBank(itemId: string) {
+  const bank = getExamBank();
+  let changed = false;
+  for (const key of Object.keys(bank)) {
+    const kept = bank[key].filter((item) => item.id !== itemId);
+    if (kept.length !== bank[key].length) {
+      bank[key] = kept;
+      changed = true;
+    }
+  }
+  if (changed) lsSet(BANK_KEY, bank);
+}
+
 export function addItemToBank(item: ExamItem) {
   const bank = getExamBank();
   const k = bankKey(item.kind, item.part as ExamPart, item.level);

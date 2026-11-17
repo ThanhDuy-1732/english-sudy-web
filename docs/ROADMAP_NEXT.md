@@ -48,7 +48,7 @@ Bỏ qua: persist metrics (không có backend; `/api/admin/metrics` in-memory l�
 
 ---
 
-## Phase 3 — Vòng học thích ứng (1–2 tuần) 🟡
+## Phase 3 — Vòng học thích ứng ✅ (xong 2026-11-17)
 
 Đúng hướng `DEVELOPMENT_DIRECTION.md`: dùng dữ liệu sẵn có thay vì thêm module mới.
 

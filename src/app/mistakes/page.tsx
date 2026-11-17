@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Segmented from "@/components/Segmented";
+import MistakeWords from "@/components/MistakeWords";
 import {
   getMistakes,
   resolveMistake,
@@ -77,11 +78,12 @@ export default function MistakesPage() {
               {" → "}
               <span className="font-medium text-green-600">{m.correctAnswer}</span>
             </div>
-            <p className="text-xs text-gray-500 mb-3">{m.explanation}</p>
+            <p className="text-xs text-gray-500">{m.explanation}</p>
+            <MistakeWords mistake={m} />
             {m.status !== "resolved" && (
               <button
                 onClick={() => handleResolve(m.id)}
-                className="text-xs px-2 py-1 bg-green-50 text-green-700 rounded hover:bg-green-100"
+                className="mt-3 rounded bg-ok-soft px-2 py-1 text-xs text-ink hover:bg-ok/20"
               >
                 Đánh dấu đã hiểu
               </button>

@@ -3,7 +3,7 @@
 import { useReducer, useCallback, useEffect, useRef, useState } from "react";
 import type { ExamItem, ExamQuestion, AnswerRecord, ExamAttempt, ExamPart, ExamKind } from "@/lib/exam/types";
 import { saveAttempt, addMistake, addItemToBank, getItemsFromBank } from "@/lib/exam/exam-storage";
-import { computeScore, isCompletionCorrect } from "@/lib/exam/scoring";
+import { computeScore, isCompletionCorrect, withJudgementOptions } from "@/lib/exam/scoring";
 import { recordTagResult } from "@/lib/exam/exam-tags";
 import { getProfile } from "@/lib/profile";
 import { useTimer } from "@/contexts/TimerContext";
@@ -111,8 +111,8 @@ export default function ExamRunner({
 
   const [state, dispatch] = useReducer(reducer, {
     phase: preloadedItems ? "ready" : "loading",
-    items: preloadedItems ?? [],
-    flatQuestions: preloadedItems ? flatten(preloadedItems) : [],
+    items: preloadedItems?.map(withJudgementOptions) ?? [],
+    flatQuestions: preloadedItems ? flatten(preloadedItems.map(withJudgementOptions)) : [],
     cursor: 0,
     answers: {},
     flags: new Set<string>(),
@@ -156,7 +156,7 @@ export default function ExamRunner({
       }
       if (cancelled) return;
       if (fetched.length > 0) {
-        dispatch({ type: "LOAD_ITEMS", items: fetched });
+        dispatch({ type: "LOAD_ITEMS", items: fetched.map(withJudgementOptions) });
       } else {
         dispatch({ type: "LOADING_ERROR" });
       }

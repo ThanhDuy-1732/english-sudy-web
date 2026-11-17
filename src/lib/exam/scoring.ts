@@ -57,6 +57,27 @@ export function isCompletionCorrect(user: string, q: ExamQuestion): boolean {
   return accepted.includes(normalize(user));
 }
 
+/**
+ * True/False/Not Given (and Yes/No/Not Given) questions are answered by choosing, not typing:
+ * give them their three options and spell the answer exactly like one of them.
+ */
+const JUDGEMENT_OPTIONS: Record<string, string[]> = {
+  true_false_ng: ["True", "False", "Not Given"],
+  yes_no_ng: ["Yes", "No", "Not Given"],
+};
+
+export function withJudgementOptions<T extends { questions: ExamQuestion[] }>(item: T): T {
+  return {
+    ...item,
+    questions: item.questions.map((q) => {
+      const options = JUDGEMENT_OPTIONS[q.type];
+      if (!options || q.options?.length) return q;
+      const answer = options.find((o) => normalize(o) === normalize(q.answer)) ?? q.answer;
+      return { ...q, options, answer };
+    }),
+  };
+}
+
 // ─── Score computation ────────────────────────────────────────────────────────
 const LC_PARTS = new Set(["LC1", "LC2", "LC3", "LC4", "LISTEN_S1", "LISTEN_S2", "LISTEN_S3", "LISTEN_S4"]);
 const RC_PARTS = new Set(["RC5", "RC6", "RC7", "READ_P1", "READ_P2", "READ_P3"]);

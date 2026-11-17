@@ -1,4 +1,4 @@
-import { toeicScaled, ieltsBand, isCompletionCorrect, computeScore } from "../scoring";
+import { toeicScaled, ieltsBand, isCompletionCorrect, computeScore, withJudgementOptions } from "../scoring";
 import type { AnswerRecord, ExamPart, ExamQuestion, QuestionType } from "../types";
 
 describe("toeicScaled", () => {
@@ -235,5 +235,16 @@ describe("scoring edge cases", () => {
     };
     expect(isCompletionCorrect("the award", q)).toBe(true);
     expect(isCompletionCorrect("award", q)).toBe(true);
+  });
+});
+
+describe("withJudgementOptions", () => {
+  it("turns True/False/Not Given questions into three choices with a matching answer", () => {
+    const item = withJudgementOptions({ questions: [
+      { id: "q1", type: "true_false_ng", prompt: "s", answer: "not given", explanation: "" },
+      { id: "q2", type: "mcq", prompt: "s", options: ["a", "b"], answer: "a", explanation: "" },
+    ] });
+    expect(item.questions[0]).toMatchObject({ options: ["True", "False", "Not Given"], answer: "Not Given" });
+    expect(item.questions[1].options).toEqual(["a", "b"]);
   });
 });

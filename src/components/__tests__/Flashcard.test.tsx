@@ -14,6 +14,7 @@ global.fetch = jest.fn().mockImplementation((input: string) =>
 
 jest.mock("@/lib/storage", () => ({
   saveLearnedWord: jest.fn().mockReturnValue(true),
+  updateWordReviewSm2: jest.fn(),
   getLearnedWords: jest.fn().mockReturnValue([
     {
       word: "greet",
@@ -143,4 +144,15 @@ test("keeps flip and save actions as separate accessible buttons", async () => {
   expect(screen.getByRole("button", { name: "Lật lại" })).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Lật lại" }));
   expect(screen.getByRole("button", { name: "Xem nghĩa của greet" })).toBeInTheDocument();
+});
+
+test("review shortcuts: Space flips the active card and 3 grades it 'Được'", async () => {
+  const onReviewed = jest.fn();
+  render(<Flashcard word="greet" meaning="chào hỏi" topic="TOEIC" initialExample="I greet them." initialSynonymData={{ synonyms: [], antonyms: [] }} isReviewMode onReviewed={onReviewed} shortcuts />);
+  fireEvent.keyDown(window, { key: "3" });
+  expect(onReviewed).not.toHaveBeenCalled();
+  fireEvent.keyDown(window, { key: " " });
+  await waitFor(() => expect(screen.getByRole("button", { name: "Lật lại" })).toBeInTheDocument());
+  fireEvent.keyDown(window, { key: "3" });
+  expect(onReviewed).toHaveBeenCalledWith(4);
 });

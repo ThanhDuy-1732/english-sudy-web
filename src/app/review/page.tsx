@@ -1,5 +1,6 @@
 "use client";
 
+import { getProfile } from "@/lib/profile";
 import RetentionNotice from "@/components/RetentionNotice";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -23,6 +24,8 @@ export default function ReviewPage() {
   const sessionIdRef = useRef<string | null>(null);
   const startTimeRef = useRef(0);
   const countsRef = useRef({ again: 0, hard: 0, good: 0, easy: 0, total: 0 });
+  const [shortcutsOn, setShortcutsOn] = useState(false);
+  useEffect(() => setShortcutsOn(getProfile().shortcutsEnabled), []);
 
   useEffect(() => {
     const due = getWordsForReview();
@@ -116,11 +119,17 @@ export default function ReviewPage() {
         <div className="mb-8">
           <h1 className="page-title">Ôn tập hôm nay</h1>
           <p className="page-lead">{words.length} từ cần ôn</p>
+          {shortcutsOn && (
+            <p className="mt-3 hidden text-sm text-muted sm:block">
+              Phím tắt cho thẻ đang viền xanh: <kbd className="rounded border border-rule bg-card px-1.5">Space</kbd> lật thẻ, <kbd className="rounded border border-rule bg-card px-1.5">1</kbd> Quên, <kbd className="rounded border border-rule bg-card px-1.5">2</kbd> Khó, <kbd className="rounded border border-rule bg-card px-1.5">3</kbd> Được, <kbd className="rounded border border-rule bg-card px-1.5">4</kbd> Dễ.
+            </p>
+          )}
           <RetentionNotice className="mt-4 max-w-2xl" />
         </div>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {words.map((w) => (
+          {words.map((w, index) => (
             <Flashcard
+              shortcuts={index === 0}
               key={w.word}
               word={w.word}
               meaning={w.meaning}

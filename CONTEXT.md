@@ -24,7 +24,7 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 | `/import` | `src/app/import/page.tsx` | Bulk import words |
 | `/settings` | `src/app/settings/page.tsx` | 4 tabs (`Segmented`): Mô hình AI · Giọng đọc · Dữ liệu · Hồ sơ. Mô hình AI is a list (one row per provider: model id, `role=switch` toggle, Test, "Dùng mô hình này trước") that fits phones |
 | `/exam` | `src/app/exam/page.tsx` | Exam dashboard — chọn TOEIC/IELTS, level, drill/mock |
-| `/exam/drill/[part]` | `src/app/exam/drill/[part]/page.tsx` | Luyện 1 part (RC5/RC6/RC7/LC2/LC3/LC4/READ_P3/LISTEN_S1); records an exam session with part metadata and result totals |
+| `/exam/drill/[part]` | `src/app/exam/drill/[part]/page.tsx` | Luyện 1 part (TOEIC RC5/RC6/RC7/LC2/LC3/LC4; IELTS READ_P1/READ_P2/READ_P3, LISTEN_S1–S4; prompt từng part trong `lib/exam/prompts.ts`); records an exam session with part metadata and result totals |
 | `/exam/mock` | `src/app/exam/mock/page.tsx` | Full mock test rút gọn với countdown timer; records an exam session with mock metadata and result totals |
 | `/exam/mistakes` | `src/app/exam/mistakes/page.tsx` | Sổ lỗi exam: `getExamMistakes()` (unified, `source` `exam:*`), filter, resolve dùng chung với `/mistakes`, badge "sai N lần", drill lại; chạy `runMistakeMigration()` khi tải |
 | `/speak` | `src/app/speak/page.tsx` | Chọn scenario giao tiếp hoặc IELTS Speaking part |
@@ -33,7 +33,7 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 | `/write` | `src/app/write/page.tsx` | Chọn dạng bài viết IELTS/TOEIC |
 | `/write/task/[id]` | `src/app/write/task/[id]/page.tsx` | Editor + wall-clock timer + word count + per-task local draft recovery (a draft past its deadline is still restored, shows "Đã hết giờ" and a "Làm lại từ đầu" button that discards it; submitting stays allowed); validates HTTP/feedback before saving; opens result by persisted record UUID; writing session ends after grading result is saved, cancels on early exit |
 | `/write/result/[id]` | `src/app/write/result/[id]/page.tsx` | Kết quả chấm — annotated essay + model answer; reads saved record by UUID (survives PWA restart), with sessionStorage fallback for legacy task-ID URLs; title is derived from `kind` (IELTS Task 1 / IELTS Task 2 / TOEIC Writing – Business Email) |
-| `/today` | `src/app/today/page.tsx` | Kế hoạch học tự động từ `generatePlan` (SRS debt, điểm yếu exam, lỗi chưa xử lý, grammar mastery, nhắc speaking/writing) |
+| `/today` | `src/app/today/page.tsx` | Kế hoạch học tự động từ `generatePlan` (SRS debt, điểm yếu exam, lỗi chưa xử lý, grammar mastery, nhắc speaking/writing). Khung **mục tiêu** (`goalProgress` trong `lib/goal-progress.ts`) khi hồ sơ có goal TOEIC/IELTS: điểm mục tiêu, điểm thi thử gần nhất (chỉ tính bài `mock`; IELTS = trung bình band Listening/Reading làm tròn 0.5), còn thiếu bao nhiêu, còn bao nhiêu ngày tới `targetDate` |
 | `/path` | `src/app/path/page.tsx` | Lộ trình: learning profile + mastery 6 kỹ năng (`recomputeMastery()`) + top nhóm lỗi; link tới quiz/mistakes |
 | `/mistakes` | `src/app/mistakes/page.tsx` | Sổ lỗi hợp nhất (`unifiedMistakes`) — lọc theo skill/status, đổi status, resolve |
 | `/library` | `src/app/library/page.tsx` | Tìm kiếm xuyên từ vựng / lỗi / speaking / writing |
@@ -324,7 +324,7 @@ Registry order: `opencode` đứng đầu khi `OPENCODE_API_KEY` có mặt, nên
 
 On first flip: fetches sentence + synonyms in parallel. Saved state is lazy (only after flip). Pronunciation button (`PronunciationButton`) floats on front face.
 
-In **review mode** (`isReviewMode=true`): shows 4 SM-2 quality buttons — Quên (0), Khó (3), Được (4), Dễ (5) — instead of save. Updates SM-2 fields via `updateWordReviewSm2(word, quality)` and passes the quality to `onReviewed` for session tracking. `/review` cancels unfinished sessions on exit; its summary reports counts, accuracy (Được + Dễ), duration, and remaining due words.
+In **review mode** (`isReviewMode=true`): shows 4 SM-2 quality buttons — Quên (0), Khó (3), Được (4), Dễ (5) — instead of save. Prop `shortcuts` (set on the first card of `/review`, outlined in blue): Space/Enter flips, 1–4 grade; ignored while typing or when a button/link has focus; off when `learningProfile.shortcutsEnabled` is false. Updates SM-2 fields via `updateWordReviewSm2(word, quality)` and passes the quality to `onReviewed` for session tracking. `/review` cancels unfinished sessions on exit; its summary reports counts, accuracy (Được + Dễ), duration, and remaining due words.
 
 ---
 
@@ -435,14 +435,15 @@ Không dùng Supabase hay backend nào. Toàn bộ dữ liệu nằm trong local
 | `charts/WeaknessRadar` | Radar chart — exam accuracy % grouped by QuestionType |
 | `charts/BandTimelineChart` | Line chart — weekly speaking/writing/listening/reading band scores (last 12 weeks) |
 | `charts/SkillRadar` | Radar chart — L/R/S/W skill accuracy % from recent sessions |
-| `ExamRunner` | Stateful exam engine — phases: `loading → ready → running → reviewing → done` (+ `error`); falls back to the local bank when offline/API fails (without a topic filter), or displays an error rather than leaving a loading spinner; accepts `forceComplete` prop to transition directly to reviewing on timer expiry (mock mode); dispatches `LOADING_ERROR` when all API fetches fail |
+| `ExamRunner` | Items are passed through `withJudgementOptions` (`lib/exam/scoring.ts`) on load, so True/False/Not Given and Yes/No/Not Given questions get three choice buttons with a canonical answer. Stateful exam engine — phases: `loading → ready → running → reviewing → done` (+ `error`); falls back to the local bank when offline/API fails (without a topic filter), or displays an error rather than leaving a loading spinner; accepts `forceComplete` prop to transition directly to reviewing on timer expiry (mock mode); dispatches `LOADING_ERROR` when all API fetches fail |
 | `DueBadge` | Client component — live SRS-due word count badge next to "Ôn tập" nav link, updates every 60 s |
 | `DiaryCalendar` | Interactive 26-week heatmap calendar for /diary; purple color levels 0–3; click cell opens DayDrawer |
 | `DayDrawer` | Slide-in right drawer for /diary; shows daily word list (expandable) + study minutes + prev/next nav |
 | `AppNavigation` | Desktop grouped sidebar; phone top bar + bottom tab bar with "Thêm" sheet; timer, provider badge, due badge (marker yellow) |
 | `ServiceWorkerRegistration` | Production worker registration; installs through `beforeinstallprompt` when available, native installation instructions otherwise (dismissible with ✕, remembered in `pwaInstallDismissed`); standalone detection and optional persistent storage request; offline notice; waiting-worker update button posts `SKIP_WAITING`, reloads only after user action |
 | `ExamTimer` (prop `enabled`; mock timer starts via `ExamRunner.onRunning`, not while items load) · `ListeningPlayer` · `PassageReader` · `QuestionCard` | Thành phần của exam engine. Trang động (`[id]`/`[part]`) là client component đọc tham số bằng `useParams()` (countdown, phát TTS, đoạn đọc, thẻ câu hỏi) |
-| `exam/ReportQuestionModal` | Báo câu hỏi lỗi (lý do + ghi chú) → chỉ lưu local vào `reportedQuestions` (max 200); **không** set `flagged` ở `exam_items` và không sync |
+| `exam/ReportQuestionModal` | Báo câu hỏi lỗi (lý do + ghi chú) → lưu `reportedQuestions` (max 200) và `removeItemFromBank(itemId)` để câu đó không ra lại khi luyện |
+| `MistakeWords` | Nút "+ từ" thêm vào ôn tập trên `/mistakes` và `/exam/mistakes` (`lib/mistake-words.ts`: từ khoá của câu exam trong `examBank`, nếu không thì đáp án đúng khi là từ/cụm ≤3 từ; bỏ từ đã học; nghĩa = phần giải thích) |
 | `BackupReminder` | Banner nhắc xuất file sao lưu (≥7 ngày, có dữ liệu học); "Để mai" ẩn 1 ngày |
 | `DataRetention` · `RetentionNotice` | Chạy `runRetention()` mỗi ngày (không render gì) · dòng thông báo xoá dữ liệu sau 90 ngày |
 | `LinkList` | Titled list of destinations in one bordered card (rows divided by rules, chevron); used by `/exam`, `/speak`, `/write` |
