@@ -38,7 +38,7 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 | `/mistakes` | `src/app/mistakes/page.tsx` | Sổ lỗi hợp nhất (`unifiedMistakes`) — lọc theo skill/status, đổi status, resolve |
 | `/library` | `src/app/library/page.tsx` | Tìm kiếm xuyên từ vựng / lỗi / speaking / writing |
 | `/vocab/quiz` | `src/app/vocab/quiz/page.tsx` | Quiz điền từ trên từ đã học (`/api/generate-fillblank`); ghi session |
-| `/vocab/context` | `src/app/vocab/context/page.tsx` | Luyện từ trong ngữ cảnh (story/dialogue/email/workplace) qua `/api/vocab/context` |
+| `/vocab/context` | `src/app/vocab/context/page.tsx` | Luyện từ trong ngữ cảnh (story/dialogue/email/workplace) qua `/api/vocab/context`; chọn từ đã lưu hoặc tự nhập từ (`parseWordInput`, tối đa 20, chỉ dùng cho lần tạo) |
 | `/grammar/quiz` | `src/app/grammar/quiz/page.tsx` | Quiz ngữ pháp nhiều câu; ghi `grammarAttempts`, lỗi → `unifiedMistakes`, session; ưu tiên sub-rule yếu/bookmark |
 | `/speak/shadowing` | `src/app/speak/shadowing/page.tsx` | Nghe–nhắc lại: ghi âm → Whisper → lưu `SpeakingRecord` (mode `shadowing`); transcribe lỗi thì huỷ session, và session cũ luôn bị huỷ trước khi tạo session mới |
 | `/speak/history` | `src/app/speak/history/page.tsx` | "Bài nói đã làm": lịch sử speaking + nghe lại audio (IndexedDB); bản ghi âm cũ hơn 90 ngày bị xoá |

@@ -92,3 +92,24 @@ scenario("grammar page: bookmarking a rule", async ({ browser, check }) => {
   check("the rule is stored as a bookmark", /present-simple/.test((await page.evaluate(() => localStorage.getItem("grammarBookmarks"))) || ""));
   check("the button reflects the saved state", /Đã lưu/.test(await bodyText(page)));
 });
+
+scenario("context practice accepts words typed by the learner", async ({ browser, check }) => {
+  const bodies = [];
+  const page = await newPage(browser, {
+    intercept: (req) => {
+      if (req.url().endsWith("/api/vocab/context")) {
+        bodies.push(JSON.parse(req.postData() || "{}"));
+        return json(req, { text: "**invoice** and **deadline** are due." });
+      }
+      return aiMocks(req, json);
+    },
+  });
+  await goto(page, "/vocab/context");
+  await page.type("#custom-word", "invoice, deadline");
+  await page.keyboard.press("Enter");
+  check("both typed words are selected", /Đã chọn: 2 từ/.test(await bodyText(page)));
+
+  await clickText(page, "Tạo nội dung");
+  check("request carries the typed words", JSON.stringify(bodies.at(-1)?.words) === JSON.stringify(["invoice", "deadline"]), JSON.stringify(bodies.at(-1)?.words));
+  check("result renders with the words", /invoice/.test(await bodyText(page)) && /deadline/.test(await bodyText(page)));
+});

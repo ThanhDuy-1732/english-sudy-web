@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { getLearnedWords } from "@/lib/storage";
+import { MAX_CUSTOM_WORDS, parseWordInput } from "@/lib/word-input";
 
 type Format = "mini_story" | "dialogue" | "email" | "workplace";
 
@@ -20,6 +21,8 @@ export default function ContextPracticePage() {
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [customWords, setCustomWords] = useState<string[]>([]);
+  const [draft, setDraft] = useState("");
 
   useEffect(() => {
     setAllWords(getLearnedWords().map((w) => w.word));
@@ -33,6 +36,49 @@ export default function ContextPracticePage() {
       if (next.has(word)) next.delete(word); else next.add(word);
       return next;
     });
+  }
+
+  /**
+   * Adds typed words to the selection. A word that is already in the saved list
+   * reuses that spelling instead of creating a second chip that differs only by case.
+   */
+  function addCustomWords() {
+    const parsed = parseWordInput(draft);
+    if (parsed.length === 0) return;
+
+    const known = new Map<string, string>();
+    for (const word of allWords) known.set(word.toLowerCase(), word);
+    for (const word of customWords) known.set(word.toLowerCase(), word);
+
+    const picked: string[] = [];
+    const extras: string[] = [];
+    for (const word of parsed) {
+      const key = word.toLowerCase();
+      const existing = known.get(key);
+      if (existing) {
+        picked.push(existing);
+        continue;
+      }
+      known.set(key, word);
+      extras.push(word);
+    }
+
+    const room = Math.max(0, MAX_CUSTOM_WORDS - customWords.length);
+    const accepted = extras.slice(0, room);
+    if (accepted.length > 0) setCustomWords((prev) => [...prev, ...accepted]);
+    if (picked.length + accepted.length > 0) {
+      setSelected((prev) => new Set([...prev, ...picked, ...accepted]));
+    }
+    setDraft("");
+  }
+
+  function clearCustomWords() {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      for (const word of customWords) next.delete(word);
+      return next;
+    });
+    setCustomWords([]);
   }
 
   async function generate() {
@@ -56,7 +102,7 @@ export default function ContextPracticePage() {
     const parts = text.split(/(\*\*[^*]+\*\*)/g);
     return parts.map((p, i) =>
       p.startsWith("**") && p.endsWith("**")
-        ? <strong key={i} className="rounded bg-marker/50 px-0.5 text-ink">{p.slice(2, -2)}</strong>
+        ? <strong key={i} className="rounded-xl bg-marker/50 px-0.5 text-ink">{p.slice(2, -2)}</strong>
         : p
     );
   }
@@ -66,7 +112,52 @@ export default function ContextPracticePage() {
       <Link href="/" className="back-link">← Từ mới</Link>
       <h1 className="page-title mb-4">Luyện từ trong ngữ cảnh</h1>
 
-      <p className="page-lead mb-4">Chọn 2–8 từ, sau đó tạo nội dung chứa các từ đó.</p>
+      <p className="page-lead mb-4">Chọn ít nhất 2 từ — từ đã lưu hoặc tự thêm — rồi tạo nội dung chứa các từ đó.</p>
+
+      <section aria-label="Thêm từ của bạn" className="panel mb-4 p-4">
+        <label htmlFor="custom-word" className="mb-2 block text-sm font-medium text-ink">
+          Thêm từ của bạn
+        </label>
+        <div className="flex flex-wrap gap-2">
+          <input
+            id="custom-word"
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                addCustomWords();
+              }
+            }}
+            className="field min-w-0 flex-1"
+            placeholder="Ví dụ: invoice, deadline"
+            autoComplete="off"
+          />
+          <button type="button" className="btn btn-secondary" onClick={addCustomWords} disabled={!draft.trim()}>
+            Thêm
+          </button>
+        </div>
+        <p className="mt-2 text-xs text-muted">Cách nhau bằng dấu phẩy. Từ tự thêm chỉ dùng cho lần tạo này.</p>
+
+        {customWords.length > 0 && (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {customWords.map((word) => (
+              <button
+                key={word}
+                type="button"
+                onClick={() => toggle(word)}
+                aria-pressed={selected.has(word)}
+                className={`chip font-en ${selected.has(word) ? "chip-on" : ""}`}
+              >
+                {word}
+              </button>
+            ))}
+            <button type="button" onClick={clearCustomWords} className="text-xs text-muted underline">
+              Xoá từ tự thêm
+            </button>
+          </div>
+        )}
+      </section>
 
       <input
         value={search}
@@ -78,7 +169,7 @@ export default function ContextPracticePage() {
       <div className="panel mb-4 flex max-h-56 flex-wrap gap-2 overflow-y-auto p-3">
         {filtered.length === 0 && (
           <p className="w-full py-2 text-center text-sm text-muted">
-            {allWords.length === 0 ? "Chưa có từ nào." : "Không tìm thấy từ."}
+            {allWords.length === 0 ? "Chưa có từ nào đã lưu. Bạn vẫn có thể thêm từ ở trên." : "Không tìm thấy từ."}
           </p>
         )}
         {filtered.map((w) => (
