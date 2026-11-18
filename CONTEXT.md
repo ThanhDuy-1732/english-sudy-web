@@ -512,7 +512,7 @@ Không cần server. `studyNudge(reminderTime, now?)` trả `{ dueWords, streak 
 
 ### `WordJobContext` (`src/contexts/WordJobContext.tsx`)
 
-Mount trong `ProviderContextProvider` (cần `useApiFetch`) và ngoài `TimerContextProvider`. `useWordJob()` trả `{ job, count, wordsPerMinute, isOwner, startJob, pauseJob, resumeJob, cancelJob }`. Vòng lặp chạy qua `runWordJob`; `fetchBatch` gọi `/api/generate-words` với `exclude`/`count`/`knownCount` và `AbortController`. Job dở của lần mở trước trở về `paused` (khoá cũ) để người dùng bấm "Chạy tiếp"; tab khác thấy heartbeat mới thì chỉ hiển thị tiến trình.
+Mount trong `ProviderContextProvider` (cần `useApiFetch`) và ngoài `TimerContextProvider`. `useWordJob()` trả `{ job, count, wordsPerMinute, isOwner, startJob, pauseJob, resumeJob, cancelJob }`. Vòng lặp chạy qua `runWordJob`; `fetchBatch` gọi `/api/generate-words` với `exclude`/`count`/`knownCount` và `AbortController`. Job dở của lần mở trước trở về `paused` (khoá cũ, hoặc khoá của chính tab sau reload — `tabId` giữ trong `sessionStorage`) để người dùng bấm "Chạy tiếp"; tab khác thấy heartbeat mới thì chỉ hiển thị tiến trình.
 
 ### `TimerContext` (`src/contexts/TimerContext.tsx`)
 

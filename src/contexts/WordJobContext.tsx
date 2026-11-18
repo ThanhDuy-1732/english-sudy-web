@@ -45,13 +45,26 @@ function newTabId(): string {
   return globalThis.crypto?.randomUUID?.() ?? `tab_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 }
 
+/** Per-tab id that survives a reload (sessionStorage), so a reloaded tab recognises its own lock. */
+function tabIdForThisTab(): string {
+  try {
+    const existing = sessionStorage.getItem("wordJobTabId");
+    if (existing) return existing;
+    const id = newTabId();
+    sessionStorage.setItem("wordJobTabId", id);
+    return id;
+  } catch {
+    return newTabId();
+  }
+}
+
 export function WordJobProvider({ children }: { children: ReactNode }) {
   const { fetchWithProvider } = useApiFetch();
   const [job, setJob] = useState<WordJob | null>(null);
   const [count, setCount] = useState(0);
   const [wordsPerMinute, setWordsPerMinute] = useState(0);
 
-  const tabId = useRef(newTabId());
+  const tabId = useRef(tabIdForThisTab());
   const runToken = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -225,12 +238,14 @@ export function WordJobProvider({ children }: { children: ReactNode }) {
     setWordsPerMinute(0);
   }, [stopRun]);
 
-  // Restore a job left behind by a previous visit: a live lock belongs to another tab,
-  // a stale one means the tab that ran it is gone, so it comes back paused.
+  // Restore a job left behind by a previous visit. A live lock owned by another tab
+  // means that tab is still running it; our own lock (same tab, page reloaded) or a
+  // stale one means the loop is gone, so it comes back paused.
   useEffect(() => {
     const existing = getJob();
     if (!existing) return;
-    if (existing.status === "running" && isLockStale(existing.lock)) {
+    const mine = existing.lock?.tabId === tabId.current;
+    if (existing.status === "running" && (mine || isLockStale(existing.lock))) {
       const next: WordJob = {
         ...existing,
         status: "paused",
