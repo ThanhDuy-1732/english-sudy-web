@@ -47,11 +47,21 @@ export default function ExamPage() {
   // Storage is read after mount so the first client render matches the server HTML.
   const [settings, setSettings] = useState<ExamSettings>(DEFAULT_SETTINGS);
   const [lastAttempt, setLastAttempt] = useState<ExamAttempt | undefined>();
+  const [partAccuracy, setPartAccuracy] = useState<Record<string, { correct: number; total: number }>>({});
   const [unresolvedCount, setUnresolvedCount] = useState(0);
 
   useEffect(() => {
     setSettings(getExamSettings());
-    setLastAttempt(getAttempts()[0]);
+    const attempts = getAttempts();
+    setLastAttempt(attempts[0]);
+    // Accuracy per part over every saved attempt, for the skill grove.
+    const byPart: Record<string, { correct: number; total: number }> = {};
+    for (const answer of attempts.flatMap((a) => a.answers ?? [])) {
+      const entry = (byPart[answer.part] ??= { correct: 0, total: 0 });
+      entry.total++;
+      if (answer.correct) entry.correct++;
+    }
+    setPartAccuracy(byPart);
     runMistakeMigration();
     setUnresolvedCount(getUnresolvedExamMistakes().length);
   }, []);
@@ -96,12 +106,14 @@ export default function ExamPage() {
         </p>
       )}
 
-      <section aria-labelledby="mock-title" className="mt-8 flex flex-col gap-4 rounded-xl border border-rule bg-card p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+      <SkillGrove parts={PARTS[kind].flatMap((group) => group.items)} accuracy={partAccuracy} />
+
+      <section aria-labelledby="mock-title" className="panel mt-6 flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
         <div>
           <h2 id="mock-title" className="text-base font-semibold text-ink">Thi thử rút gọn</h2>
           <p className="mt-0.5 text-sm text-muted">Các part đã học gộp trong một bài, có đồng hồ đếm ngược và điểm ước lượng.</p>
         </div>
-        <Link href="/exam/mock" className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-primary px-5 font-semibold text-white transition-colors hover:bg-primary-strong">
+        <Link href="/exam/mock" className="btn btn-primary shrink-0">
           Làm bài thi thử
         </Link>
       </section>
@@ -119,5 +131,40 @@ export default function ExamPage() {
         }]} />
       </div>
     </main>
+  );
+}
+
+/**
+ * The skill grove: one tree per part, its height the share of correct answers. Coral below 60%, sun below 80%,
+ * leaf green from 80%; a grey stump for parts not practised yet.
+ */
+function SkillGrove({ parts, accuracy }: { parts: { part: string; name: string }[]; accuracy: Record<string, { correct: number; total: number }> }) {
+  const practised = parts.some(({ part }) => (accuracy[part]?.total ?? 0) > 0);
+  return (
+    <section aria-labelledby="grove-title" className="panel mt-6 p-5 sm:p-6">
+      <h2 id="grove-title" className="section-title">Rừng kỹ năng</h2>
+      <p className="text-sm text-muted">Mỗi part là một cây. Cây càng cao, bạn làm đúng càng nhiều.</p>
+      <ul className={`mt-4 flex ${practised ? "h-52" : "h-24"} items-end gap-2 border-b-[6px] border-soil px-1 sm:gap-3`}>
+        {parts.map(({ part, name }) => {
+          const stat = accuracy[part];
+          const pct = stat && stat.total > 0 ? Math.round((stat.correct / stat.total) * 100) : null;
+          const color = pct === null ? "bg-rule" : pct < 60 ? "bg-margin" : pct < 80 ? "bg-marker" : "bg-primary";
+          const label = name.split(",")[0];
+          return (
+            <li key={part} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end" title={`${name}: ${pct === null ? "chưa làm" : `${pct}% đúng`}`}>
+              <span
+                className={`flex w-full max-w-[3.25rem] justify-center rounded-t-[1.6rem] rounded-b-2xl pt-1.5 font-display text-sm font-bold ${color} ${pct !== null && pct >= 60 && pct < 80 ? "text-deep" : "text-white"}`}
+                style={{ height: `${pct === null ? 18 : Math.max(22, pct)}%` }}
+              >
+                {pct === null ? "" : `${pct}%`}
+              </span>
+              <span aria-hidden="true" className="h-3 w-2 bg-soil" />
+              <span className="sr-only">{name}: {pct === null ? "chưa làm" : `${pct}% đúng`}</span>
+              <span aria-hidden="true" className="mt-1 block w-full truncate text-center text-[11px] text-muted">{label}</span>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }

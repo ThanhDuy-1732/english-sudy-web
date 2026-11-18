@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { getProfile } from "@/lib/profile";
-import { saveLearnedWord, reviewWord, getLearnedWords } from "@/lib/storage";
+import { saveLearnedWord, reviewWord, getLearnedWords, type LearnedWord } from "@/lib/storage";
+import { fsrs, fsrsStateOf, stabilityToMastery } from "@/lib/srs";
+import Plant, { STAGE_NAMES, growthStage } from "./Plant";
 import { useApiFetch } from "@/lib/useApiFetch";
 import PronunciationButton from "./PronunciationButton";
 import WritingChallenge from "./WritingChallenge";
@@ -22,7 +24,11 @@ interface FlashcardProps {
   onFlip?: () => void;
   /** Keyboard shortcuts for the active review card: Space/Enter flips, 1–4 grade (Quên, Khó, Được, Dễ). */
   shortcuts?: boolean;
+  /** The saved word, in review mode: shows its growth stage and previews each grade (next stage, days until next review). */
+  learned?: LearnedWord;
 }
+
+const TOPIC_LABELS: Record<string, string> = { "Daily Communication": "Giao tiếp hằng ngày" };
 
 export default function Flashcard({
   word,
@@ -34,7 +40,15 @@ export default function Flashcard({
   onReviewed,
   onFlip,
   shortcuts = false,
+  learned,
 }: FlashcardProps) {
+  const stage = growthStage(learned?.mastery);
+  // What each grade would do, computed with the same FSRS step the review uses.
+  const preview = (quality: 0 | 3 | 4 | 5) => {
+    if (!learned) return null;
+    const next = fsrs(fsrsStateOf(learned), quality);
+    return { stage: STAGE_NAMES[growthStage(stabilityToMastery(next.stability))], days: next.intervalDays };
+  };
   const { fetchWithProvider } = useApiFetch();
   const [flipped, setFlipped] = useState(false);
   const hasFlippedOnce = useRef(false);
@@ -171,10 +185,10 @@ export default function Flashcard({
   }, [shortcuts, flipped]);
 
   return (
-    <div className={`relative [perspective:1000px] ${isReviewMode ? "h-[26rem] sm:h-96" : "h-80 sm:h-72"} ${shortcuts ? "rounded-xl ring-2 ring-primary/60 ring-offset-2 ring-offset-paper" : ""}`}>
-      {/* Pronunciation button floats on front face — positioned outside the front button to avoid nesting <button> */}
+    <div className={`relative [perspective:1000px] ${isReviewMode ? "h-[28rem] sm:h-[26rem]" : "h-80"} ${shortcuts ? "rounded-2xl ring-2 ring-primary/60 ring-offset-4 ring-offset-paper" : ""}`}>
+      {/* Pronunciation button floats on the front face, outside the front <button> to avoid nesting buttons */}
       {!flipped && !loading && (
-        <div className="absolute right-2 top-1.5 z-10">
+        <div className="absolute bottom-4 right-4 z-10">
           <PronunciationButton word={word} />
         </div>
       )}
@@ -193,13 +207,14 @@ export default function Flashcard({
           tabIndex={flipped ? -1 : 0}
           onClick={handleFlip}
           disabled={loading}
-          className="index-card absolute inset-0 flex h-full w-full flex-col rounded-xl border border-rule px-5 pb-5 text-left shadow-[0_1px_2px_rgb(22_35_63/0.06)] transition-[border-color,box-shadow] [backface-visibility:hidden] hover:border-primary/50 hover:shadow-[0_6px_20px_rgb(22_35_63/0.08)] disabled:cursor-wait"
+          className="postcard absolute inset-0 flex h-full w-full flex-col px-5 pb-5 pt-4 text-left transition-transform [backface-visibility:hidden] hover:-translate-y-0.5 disabled:cursor-wait"
         >
-          <span className="flex h-14 shrink-0 items-center pr-12 text-sm text-muted">{topic === "Daily Communication" ? "Giao tiếp hằng ngày" : topic}</span>
-          <span className="break-words pt-[1.5px] font-en text-[2rem] font-medium leading-[3.5rem] text-ink [overflow-wrap:anywhere]">
-            {loading ? <span className="text-xl text-muted">Đang tạo câu ví dụ...</span> : word}
+          <span className="pr-20 text-sm text-muted">{TOPIC_LABELS[topic] ?? topic}</span>
+          <span className="stamp absolute right-3 top-3 h-[5.25rem] w-[4.5rem]"><span><Plant stage={stage} size={40} />{STAGE_NAMES[stage].toLowerCase()}</span></span>
+          <span className="mt-auto break-words font-en text-[2.5rem] font-semibold leading-tight tracking-tight text-ink [overflow-wrap:anywhere]">
+            {loading ? <span className="text-xl font-normal text-muted">Đang tạo câu ví dụ...</span> : word}
           </span>
-          {!loading && <span className="text-sm leading-7 text-muted">Chạm để xem nghĩa</span>}
+          {!loading && <span className="mb-auto mt-1 text-sm font-medium text-primary-text">Chạm để lật thẻ</span>}
           {error && (
             <span className="mt-3 text-center text-sm text-red-700" role="alert">
               {error}
@@ -210,18 +225,19 @@ export default function Flashcard({
         {/* Back face */}
         <div
           aria-hidden={!flipped}
-          className="index-card absolute inset-0 flex flex-col overflow-y-auto rounded-xl border border-rule px-5 pb-4 text-left shadow-[0_1px_2px_rgb(22_35_63/0.06)] [backface-visibility:hidden] [transform:rotateY(180deg)]"
+          className="postcard absolute inset-0 flex flex-col gap-2 overflow-y-auto px-4 pb-4 pt-3 text-left [backface-visibility:hidden] [transform:rotateY(180deg)]"
         >
-          <div className="flex h-14 shrink-0 items-center"><div role="group" aria-label="Cách học thẻ này" className="flex w-full gap-0.5 rounded-lg bg-paper p-0.5" onClick={(event) => event.stopPropagation()}>
+          <div className="flex shrink-0 items-center"><div role="group" aria-label="Cách học thẻ này" className="flex w-full gap-0.5 rounded-full bg-paper p-1" onClick={(event) => event.stopPropagation()}>
             {(["study", "write", "fill", "dictation"] as CardMode[]).map((cardMode) => (
-              <button key={cardMode} type="button" onClick={() => selectMode(cardMode)} aria-pressed={mode === cardMode} className={`min-h-9 flex-1 rounded-md px-1 text-xs font-medium transition-colors ${mode === cardMode ? "bg-card text-ink shadow-sm" : "text-muted hover:text-ink"}`}>
+              <button key={cardMode} type="button" onClick={() => selectMode(cardMode)} aria-pressed={mode === cardMode} className={`min-h-9 flex-1 rounded-full px-1 text-xs font-medium transition-colors ${mode === cardMode ? "bg-card text-ink shadow-sm" : "text-muted hover:text-ink"}`}>
                 {cardMode === "study" ? "Nghĩa" : cardMode === "write" ? "Viết câu" : cardMode === "fill" ? "Điền từ" : "Nghe"}
               </button>
             ))}
           </div></div>
-          {mode === "study" && <div className="pt-[1.5px]">
-            <p className="break-words leading-7 [overflow-wrap:anywhere]"><span className="font-en text-lg font-medium text-ink">{word}</span> <span className="font-semibold text-primary">{meaning}</span></p>
-            {example && <p className="break-words font-en text-[15px] italic leading-7 text-ink [overflow-wrap:anywhere]">{example}</p>}
+          {mode === "study" && <div className="px-1">
+            <p className="break-words font-en text-2xl font-semibold leading-tight text-ink [overflow-wrap:anywhere]">{word}</p>
+            <p className="mt-1 break-words text-lg font-semibold text-primary-text [overflow-wrap:anywhere]">{meaning}</p>
+            {example && <p className="mt-1 break-words font-en text-[15px] italic leading-relaxed text-ink [overflow-wrap:anywhere]">{example}</p>}
             {synonymData && <div className="text-sm leading-7 text-muted">{synonymData.synonyms.length > 0 && <p><span className="font-medium text-ink">Đồng nghĩa</span>{" "}<span className="font-en">{synonymData.synonyms.join(", ")}</span></p>}{synonymData.antonyms.length > 0 && <p><span className="font-medium text-ink">Trái nghĩa</span>{" "}<span className="font-en">{synonymData.antonyms.join(", ")}</span></p>}</div>}
           </div>}
           {mode === "write" && <WritingChallenge word={word} />}
@@ -232,7 +248,7 @@ export default function Flashcard({
               type="button"
               tabIndex={flipped ? 0 : -1}
               onClick={handleFlip}
-              className="inline-flex min-h-11 items-center rounded-lg px-3 py-2 text-sm font-medium text-muted transition-colors hover:text-ink"
+              className="inline-flex min-h-11 items-center rounded-full px-3 py-2 text-sm font-medium text-muted transition-colors hover:text-ink"
             >
               Lật lại
             </button>
@@ -242,14 +258,14 @@ export default function Flashcard({
                 tabIndex={flipped ? 0 : -1}
                 onClick={handleSave}
                 disabled={saved || !example}
-                className="inline-flex min-h-11 items-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-strong disabled:bg-rule disabled:text-muted"
+                className="inline-flex min-h-11 items-center rounded-full bg-primary px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-strong disabled:bg-rule disabled:text-muted"
               >
-                {saved ? "Đã lưu" : "Lưu để ôn"}
+                {saved ? "Đã gieo" : "Gieo vào vườn"}
               </button>
             )}
           </div>
           {isReviewMode && (
-            <div className="flex w-full flex-wrap gap-2">
+            <div className="grid w-full grid-cols-4 gap-1.5">
               {(
                 [
                   { label: "Quên", key: "1", quality: 0, cls: "bg-margin-soft text-ink hover:bg-margin/20" },
@@ -266,10 +282,17 @@ export default function Flashcard({
                     e.stopPropagation();
                     grade(quality);
                   }}
-                  className={`min-h-11 flex-1 rounded-lg px-3 py-2 text-sm font-medium ${cls}`}
+                  className={`flex min-h-14 flex-col items-center justify-center rounded-2xl px-1 py-1.5 text-sm font-semibold leading-tight ${cls}`}
                 >
-                  {label}
-                  {shortcuts && <kbd aria-hidden="true" className="ml-1.5 hidden rounded border border-ink/20 px-1 text-[11px] font-normal text-muted sm:inline">{key}</kbd>}
+                  <span>
+                    {label}
+                    {shortcuts && <kbd aria-hidden="true" className="ml-1 hidden rounded border border-ink/20 px-1 text-[10px] font-normal text-muted sm:inline">{key}</kbd>}
+                  </span>
+                  {preview(quality) && (
+                    <span aria-hidden="true" className="mt-0.5 text-[11px] font-normal text-muted">
+                      {preview(quality)!.stage.toLowerCase()}, {preview(quality)!.days === 1 ? "mai" : `${preview(quality)!.days} ngày`}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>

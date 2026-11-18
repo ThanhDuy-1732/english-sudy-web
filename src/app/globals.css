@@ -3,53 +3,55 @@
 @tailwind utilities;
 
 /*
- * Design tokens — "sổ tay thẻ từ" (index-card notebook).
+ * Design tokens — "Vườn bưu thiếp": each word is a postcard, your memory is a garden.
  * RGB triplets so Tailwind can add alpha: bg-primary/10. <html data-theme> is always the resolved theme (lib/theme.ts).
- *   paper   page background          card    raised surfaces (cards, sheets)
- *   ink     main text                muted   secondary text
- *   rule    lines, borders           primary ballpoint blue: actions, links, focus
- *   marker  highlighter: only for what needs you now (due words, today)
- *   margin  index-card red line; also errors / mistakes        ok / warn  correct answers, warnings
- * Each status colour has a -soft background tint.
+ *   paper   page background (morning mist)   card    raised surfaces
+ *   ink     main text (forest)               muted   secondary text
+ *   rule    lines, borders                   primary leaf green: actions, links, growth
+ *   marker  sunshine: what needs you today (due words, today's plan)
+ *   margin  coral: mistakes (and flowers)     ok / warn  correct answers, warnings
+ * Each status colour has a -soft background tint. The airmail red/blue stripe is used on postcards only (.postcard).
  */
 :root,
 :root[data-theme="light"] {
-  --paper: 244 247 252;
+  --paper: 238 246 240;
   --card: 255 255 255;
-  --ink: 22 35 63;
-  --muted: 82 96 124;
-  --rule: 212 221 238;
-  --primary: 45 85 214;
-  --primary-strong: 31 64 176;
-  --primary-soft: 226 233 252;
-  --primary-text: 45 85 214;
-  --marker: 247 226 92;
-  --margin: 214 64 76;
-  --margin-soft: 252 232 234;
-  --ok: 27 128 84;
-  --ok-soft: 222 242 232;
-  --warn: 150 92 6;
-  --warn-soft: 253 242 208;
+  --ink: 23 51 42;
+  --muted: 88 108 99;
+  --rule: 214 230 220;
+  --primary: 31 138 80;
+  --primary-strong: 20 107 60;
+  --primary-soft: 217 242 225;
+  --primary-text: 20 107 60;
+  --marker: 255 201 60;
+  --margin: 214 69 52;
+  --margin-soft: 255 227 222;
+  --ok: 22 128 76;
+  --ok-soft: 217 242 225;
+  --warn: 150 100 0;
+  --warn-soft: 255 242 201;
+  --soil: 107 79 58;
   color-scheme: light;
 }
 
 :root[data-theme="dark"] {
-  --paper: 14 24 43;
-  --card: 23 36 62;
-  --ink: 228 234 246;
-  --muted: 156 170 198;
-  --rule: 44 61 98;
-  --primary: 61 99 224;
-  --primary-strong: 84 122 240;
-  --primary-soft: 33 52 98;
-  --primary-text: 146 172 255;
-  --marker: 240 214 78;
-  --margin: 255 122 132;
-  --margin-soft: 72 32 44;
-  --ok: 110 214 158;
-  --ok-soft: 22 60 46;
-  --warn: 240 192 84;
-  --warn-soft: 68 54 20;
+  --paper: 14 31 25;
+  --card: 23 48 42;
+  --ink: 227 241 232;
+  --muted: 157 183 170;
+  --rule: 40 74 63;
+  --primary: 31 138 80;
+  --primary-strong: 40 160 96;
+  --primary-soft: 31 69 53;
+  --primary-text: 143 224 176;
+  --marker: 255 201 60;
+  --margin: 255 128 112;
+  --margin-soft: 66 34 31;
+  --ok: 143 224 176;
+  --ok-soft: 24 64 48;
+  --warn: 255 210 100;
+  --warn-soft: 59 52 23;
+  --soil: 92 66 48;
   color-scheme: dark;
 }
 
@@ -79,14 +81,8 @@
   /* Phones: the bottom tab bar sits over the content, so the page reserves its height. */
   @media (max-width: 1023px) {
     .app-content {
-      padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+      padding-bottom: calc(6.5rem + env(safe-area-inset-bottom));
     }
-  }
-
-  .app-tabbar {
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
   }
 
   .more-sheet {
@@ -99,7 +95,7 @@
 
   @media (max-width: 1023px) {
     .pwa-status {
-      bottom: calc(4rem + env(safe-area-inset-bottom)) !important;
+      bottom: calc(5.75rem + env(safe-area-inset-bottom)) !important;
     }
   }
 
@@ -138,7 +134,7 @@
 
   ::selection {
     background: rgb(var(--marker));
-    color: #16233f;
+    color: #17332a;
   }
 
   :focus-visible {
@@ -162,7 +158,7 @@
   }
 
   .page-title {
-    @apply text-3xl font-semibold tracking-tight text-ink sm:text-4xl;
+    @apply font-display text-[2rem] font-extrabold leading-tight text-ink sm:text-[2.6rem];
   }
 
   .page-lead {
@@ -170,15 +166,15 @@
   }
 
   .section-title {
-    @apply text-base font-semibold text-ink;
+    @apply font-display text-lg font-bold text-ink;
   }
 
   .panel {
-    @apply rounded-xl border border-rule bg-card;
+    @apply rounded-3xl border border-rule bg-card;
   }
 
   .btn {
-    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 text-[15px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 text-[15px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   /* color is set directly: @apply text-white would also pull in the light-theme .text-white re-map below. */
@@ -197,22 +193,45 @@
   }
 
   .field {
-    @apply min-h-11 rounded-lg border border-rule bg-card px-3 py-2 text-ink placeholder:text-muted focus:border-primary focus:outline-none;
+    @apply min-h-11 rounded-2xl border border-rule bg-card px-4 py-2 text-ink placeholder:text-muted focus:border-primary focus:outline-none;
   }
 
   /*
-   * The ruled index card: a 3.5rem header, a red line, then blue rules every 1.75rem.
-   * Content below the header uses leading-7 (1.75rem) with no vertical gaps so each line of text sits on a rule.
-   * The flashcard is the one place the app spends its boldness.
+   * The postcard: a word card with the airmail red/blue border. It keeps light paper in both themes (a real card on a
+   * dark desk), so the light ink tokens are restored inside it and every token class reads correctly on it.
+   * The airmail stripe appears on postcards only.
    */
-  .index-card {
-    background-color: rgb(var(--card));
-    background-image:
-      linear-gradient(rgb(var(--margin) / 0.7), rgb(var(--margin) / 0.7)),
-      repeating-linear-gradient(to bottom, transparent 0 calc(1.75rem - 1px), rgb(var(--primary) / 0.16) calc(1.75rem - 1px) 1.75rem);
-    background-size: 100% 1.5px, 100% 100%;
-    background-position: 0 3.5rem, 0 calc(3.5rem + 1.5px);
-    background-repeat: no-repeat;
+  .postcard {
+    --paper: 238 246 240;
+    --card: 255 255 255;
+    --ink: 23 51 42;
+    --muted: 88 108 99;
+    --rule: 214 230 220;
+    --primary-soft: 217 242 225;
+    --primary-text: 20 107 60;
+    --margin: 214 69 52;
+    --margin-soft: 255 227 222;
+    --ok-soft: 217 242 225;
+    --warn-soft: 255 242 201;
+    color: rgb(var(--ink));
+    border: 8px solid transparent;
+    border-radius: 14px;
+    background:
+      linear-gradient(#fffefb, #fffefb) padding-box,
+      repeating-linear-gradient(135deg, #e0383f 0 14px, #fff 14px 22px, #1f4fd1 22px 36px, #fff 36px 44px) border-box;
+    background-color: #fffefb; /* hidden under the stripe; gives contrast tools a real background */
+    box-shadow: 0 18px 30px -18px rgb(23 51 42 / 0.45);
+  }
+
+  /* Stamp with a perforated edge: holes only in the outer band, the inside stays solid. */
+  .stamp {
+    padding: 5px;
+    background: radial-gradient(circle, transparent 2.4px, #fff 2.9px) -4px -4px / 8px 8px;
+    filter: drop-shadow(0 1px 1.5px rgb(23 51 42 / 0.2));
+  }
+
+  .stamp > * {
+    @apply flex h-full flex-col items-center justify-center border-[1.5px] border-primary bg-white text-center text-[10.5px] font-semibold leading-tight text-primary-text;
   }
 
   /* Highlighter stroke behind a number or short label that needs attention now. */
@@ -378,7 +397,7 @@
 /* Deliberately light controls stay light in the dark theme. */
 :root[data-theme="dark"] .keep-light {
   background-color: #fff;
-  color: #16233f;
+  color: #17332a;
 }
 
 :root[data-theme="dark"] .keep-light:hover:not(:disabled) {

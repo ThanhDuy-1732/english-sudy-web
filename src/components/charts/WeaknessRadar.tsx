@@ -37,7 +37,7 @@ export default function WeaknessRadar({ attempts }: { attempts: ExamAttempt[] })
           <RadarChart data={data}>
             <PolarGrid />
             <PolarAngleAxis dataKey="type" tick={{ fontSize: 10 }} />
-            <Radar dataKey="accuracy" stroke="#c8435a" fill="#c8435a" fillOpacity={0.4} />
+            <Radar dataKey="accuracy" stroke="#e0533f" fill="#e0533f" fillOpacity={0.4} />
             <Tooltip formatter={(v) => [`${v}%`, "Accuracy"]} />
           </RadarChart>
         </ResponsiveContainer>

@@ -1,8 +1,8 @@
 export type ThemePref = "system" | "light" | "dark";
 
 export const THEME_KEY = "theme";
-const DARK_COLOR = "#0e182b";
-const LIGHT_COLOR = "#f4f7fc";
+const DARK_COLOR = "#0e1f19";
+const LIGHT_COLOR = "#eef6f0";
 
 /**
  * Inline <head> script (runs before first paint, so there is no flash). It is the single implementation of theming:

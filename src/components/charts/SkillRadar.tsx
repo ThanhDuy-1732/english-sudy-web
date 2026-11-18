@@ -16,7 +16,7 @@ export default function SkillRadar({ data }: { data: SkillRadarPoint[] }) {
         <PolarGrid />
         <PolarAngleAxis dataKey="label" tick={{ fontSize: 12 }} />
         <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10 }} />
-        <Radar name="Skill" dataKey="value" stroke="#4a6fe3" fill="#4a6fe3" fillOpacity={0.3} />
+        <Radar name="Skill" dataKey="value" stroke="#2e9e5b" fill="#2e9e5b" fillOpacity={0.3} />
         <Tooltip formatter={(v) => (typeof v === "number" ? `${v.toFixed(0)}%` : v)} />
       </RadarChart>
     </ResponsiveContainer>

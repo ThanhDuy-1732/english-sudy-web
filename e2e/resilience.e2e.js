@@ -9,8 +9,8 @@ const flip = async (p) => { await p.click('button[aria-label^="Xem nghĩa của"
 
 // api: endpoint to break; expect: text the user must see; setup/steps run after the page loads.
 const CASES = [
-  { name: "generate words", api: "/api/generate-words", url: "/", expect: /Không thể sinh từ mới/, run: (p) => clickText(p, "Sinh từ mới") },
-  { name: "flashcard example", api: "/api/generate-sentence", url: "/", expect: /Không thể tạo câu ví dụ/, run: async (p) => { await clickText(p, "Sinh từ mới"); await sleep(900); await p.evaluate(() => document.querySelector('button[aria-label^="Xem nghĩa của"]')?.click()); } },
+  { name: "generate words", api: "/api/generate-words", url: "/", expect: /Không thể sinh từ mới/, run: (p) => clickText(p, "Gieo 5 từ mới") },
+  { name: "flashcard example", api: "/api/generate-sentence", url: "/", expect: /Không thể tạo câu ví dụ/, run: async (p) => { await clickText(p, "Gieo 5 từ mới"); await sleep(900); await p.evaluate(() => document.querySelector('button[aria-label^="Xem nghĩa của"]')?.click()); } },
   { name: "review write-sentence grading", api: "/api/grade-sentence", url: "/review", expect: /Không thể chấm/, run: async (p) => { await flip(p); await face(p, "[...f.querySelectorAll('button')].find(b=>b.innerText.trim()==='Viết câu')?.click()"); await sleep(400); await face(p, "f.querySelector('textarea').focus()"); await p.keyboard.type("I greet my teacher."); await face(p, "[...f.querySelectorAll('button')].find(b=>b.innerText.trim()==='Chấm điểm')?.click()"); } },
   { name: "review fill-blank", api: "/api/generate-fillblank", url: "/review", expect: /Không thể tạo bài điền từ/, run: async (p) => { await flip(p); await face(p, "[...f.querySelectorAll('button')].find(b=>b.innerText.trim()==='Điền từ')?.click()"); } },
   { name: "vocab in context", api: "/api/vocab/context", url: "/vocab/context", expect: /(Không thể|thử lại)/i, run: async (p) => { await p.evaluate(() => [...document.querySelectorAll("main button")].filter((b) => ["greet", "clarify"].includes(b.innerText.trim())).forEach((b) => b.click())); await sleep(300); await clickContains(p, "Tạo nội dung"); } },
@@ -91,7 +91,7 @@ scenario("AI and stored content is rendered as text, never executed", async ({ b
     const r = await page.evaluate(() => ({ xss: window.__xss || 0, attrs: document.querySelectorAll("[onerror],[onload]").length, scripts: [...document.querySelectorAll("script")].filter((s) => /__xss/.test(s.textContent)).length, img: document.querySelectorAll('img[src="x"]').length }));
     check(label, !r.xss && !r.attrs && !r.scripts && !r.img, JSON.stringify(r));
   };
-  await visit("home: generate, flip, reading", "/", async () => { await clickText(page, "Sinh từ mới"); await sleep(1200); await page.evaluate(() => document.querySelectorAll('button[aria-label^="Xem nghĩa của"]').forEach((b) => b.click())); await sleep(2000); });
+  await visit("home: generate, flip, reading", "/", async () => { await clickText(page, "Gieo 5 từ mới"); await sleep(1200); await page.evaluate(() => document.querySelectorAll('button[aria-label^="Xem nghĩa của"]').forEach((b) => b.click())); await sleep(2000); });
   await visit("review", "/review", async () => { await flip(page); });
   await visit("history", "/history");
   await visit("library (stored payload)", "/library", async () => { await page.type("main input", "greet"); });

@@ -289,7 +289,7 @@ export default function RoleplayPage() {
 
       <style jsx>{`
         /* The page scrolls; the message box sticks to the bottom, above the phone tab bar (4.5rem) or at the bottom on desktop. */
-        .roleplay-page { display: flex; flex-direction: column; max-width: 48rem; margin: 0 auto; min-height: calc(100dvh - 8.5rem - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
+        .roleplay-page { display: flex; flex-direction: column; max-width: 48rem; margin: 0 auto; min-height: calc(100dvh - 10.5rem - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
         @media (min-width: 1024px) { .roleplay-page { min-height: 100dvh; } }
         .roleplay-header { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1rem 0.75rem; border-bottom: 1px solid rgb(var(--rule)); flex-shrink: 0; }
         .end-btn { flex-shrink: 0; min-height: 40px; padding: 0.4rem 0.9rem; border-radius: 999px; border: 1.5px solid rgb(var(--rule)); background: rgb(var(--card)); color: rgb(var(--ink)); font-size: 0.85rem; cursor: pointer; white-space: nowrap; }
@@ -312,7 +312,7 @@ export default function RoleplayPage() {
         .bubble p { margin: 0; }
         .bubble.loading { color: rgb(var(--muted)); font-style: italic; }
         .correction-chip { display: block; margin-top: 0.35rem; background: none; border: none; color: rgba(255,255,255,0.7); font-size: 0.75rem; cursor: pointer; padding: 0; text-decoration: underline; }
-        .input-area { position: sticky; bottom: calc(4.5rem + env(safe-area-inset-bottom)); z-index: 10; display: flex; gap: 0.5rem; padding: 0.75rem 1rem; border-top: 1px solid rgb(var(--rule)); background: rgb(var(--paper)); flex-shrink: 0; }
+        .input-area { position: sticky; bottom: calc(5.75rem + env(safe-area-inset-bottom)); z-index: 10; display: flex; gap: 0.5rem; padding: 0.75rem 1rem; border-top: 1px solid rgb(var(--rule)); background: rgb(var(--paper)); flex-shrink: 0; }
         @media (min-width: 1024px) { .input-area { bottom: 0; } }
         .input-area input { flex: 1; min-width: 0; min-height: 44px; background: rgb(var(--card)); color: rgb(var(--ink)); padding: 0.6rem 0.9rem; border: 1.5px solid rgb(var(--rule)); border-radius: 20px; font-size: 0.9rem; }
         .input-area button { padding: 0.6rem 1.1rem; border-radius: 20px; border: none; background: rgb(var(--primary)); color: white; cursor: pointer; font-size: 0.875rem; }

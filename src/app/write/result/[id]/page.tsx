@@ -21,7 +21,7 @@ interface WritingFeedback {
 
 const CATEGORY_COLORS: Record<string, string> = {
   grammar: "rgb(var(--margin))",
-  vocab: "#7a5bd6",
+  vocab: "#8a6fd1",
   cohesion: "rgb(var(--primary))",
   task: "rgb(var(--warn))",
   style: "rgb(var(--muted))",
