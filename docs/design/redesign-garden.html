@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Study — đề xuất giao diện "Vườn từ"</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Lexend:wght@300;400;500;600&display=swap&subset=vietnamese" rel="stylesheet">
+<style>
+  /* ── Tokens ─────────────────────────────────────────────────────────── */
+  :root {
+    --bg: #eef6f0;        /* morning mist over the garden */
+    --card: #ffffff;
+    --ink: #17332a;       /* forest */
+    --muted: #5b6f66;
+    --rule: #d6e6dc;
+    --leaf: #1f8a50;      /* actions, growth */
+    --leaf-dark: #146b3c;
+    --sprout: #d9f2e1;
+    --sun: #ffc93c;       /* today: water these */
+    --sun-soft: #fff2c9;
+    --coral: #f25f4c;     /* mistakes, flowers */
+    --coral-soft: #ffe3de;
+    --soil: #6b4f3a;
+    --soil-light: #f3e7da;
+    --night: #0e1f19;
+    --display: "Baloo 2", system-ui, sans-serif;
+    --ui: "Lexend", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e2ece5; color: var(--ink); font: 300 16px/1.6 var(--ui); -webkit-font-smoothing: antialiased; }
+  h1, h2, h3, p { margin: 0; }
+  b, strong { font-weight: 600; }
+  button { font: inherit; color: inherit; }
+
+  /* ── Proposal chrome ────────────────────────────────────────────────── */
+  .doc { max-width: 1320px; margin: 0 auto; padding: 56px 32px 96px; }
+  .doc-intro { display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: start; }
+  .doc h1 { font: 800 56px/1 var(--display); letter-spacing: -0.01em; color: var(--leaf-dark); }
+  .doc .lead { margin-top: 16px; font-size: 18px; color: var(--muted); max-width: 58ch; }
+  .doc h2.section { margin: 88px 0 8px; font: 700 32px/1.15 var(--display); }
+  .doc p.section-note { color: var(--muted); max-width: 70ch; margin-bottom: 28px; }
+  .swatches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .swatch { background: var(--card); border-radius: 18px; overflow: hidden; }
+  .swatch i { display: block; height: 60px; }
+  .swatch div { padding: 10px 12px; font-size: 13px; }
+  .swatch b { display: block; }
+  .swatch span { color: var(--muted); }
+  .type-specimen { margin-top: 18px; background: var(--card); border-radius: 18px; padding: 20px 22px; display: grid; gap: 8px; }
+  .type-specimen .d { font: 700 36px/1.1 var(--display); }
+  .type-specimen small { color: var(--muted); font-size: 12px; }
+  .principles { margin-top: 28px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .principles div { background: var(--card); border-radius: 18px; padding: 16px 18px; font-size: 14px; color: var(--muted); }
+  .principles b { display: block; color: var(--ink); font-size: 15px; margin-bottom: 4px; }
+  .stages-legend { margin-top: 18px; background: var(--card); border-radius: 18px; padding: 16px 18px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; text-align: center; font-size: 12.5px; color: var(--muted); }
+  .stages-legend svg { width: 44px; height: 44px; display: block; margin: 0 auto 2px; }
+  .row { display: flex; gap: 32px; align-items: flex-start; flex-wrap: wrap; }
+  .caption { margin-top: 12px; font-size: 13px; color: var(--muted); max-width: 390px; }
+
+  .browser { width: 1180px; background: var(--bg); border-radius: 18px; overflow: hidden; box-shadow: 0 30px 60px -30px rgba(23,51,42,.45), 0 0 0 1px rgba(23,51,42,.08); }
+  .browser-bar { height: 36px; background: #d6e3da; display: flex; align-items: center; gap: 7px; padding: 0 14px; }
+  .browser-bar i { width: 11px; height: 11px; border-radius: 50%; background: #b9c9be; }
+  .phone { width: 390px; height: 844px; background: var(--bg); border-radius: 46px; overflow: hidden; position: relative; box-shadow: 0 30px 60px -30px rgba(23,51,42,.5), 0 0 0 10px #1d2a24, 0 0 0 11px #3d4d45; flex-shrink: 0; }
+  .phone .status { height: 44px; display: flex; justify-content: space-between; align-items: center; padding: 0 28px; font-size: 14px; font-weight: 500; }
+
+  /* ── App shell ──────────────────────────────────────────────────────── */
+  .app { display: grid; grid-template-columns: 228px 1fr; min-height: 780px; }
+  .side { background: var(--card); padding: 22px 14px; display: flex; flex-direction: column; border-right: 1px solid var(--rule); }
+  .brand { display: flex; align-items: center; gap: 8px; font: 800 22px/1 var(--display); color: var(--leaf-dark); padding: 4px 10px 20px; }
+  .brand svg { width: 30px; height: 30px; }
+  .nav-group { margin-top: 12px; }
+  .nav-group p { font-size: 12.5px; color: var(--muted); padding: 0 12px 4px; }
+  .nav a { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-radius: 14px; color: var(--ink); text-decoration: none; font-size: 14.5px; font-weight: 400; }
+  .nav a.on { background: var(--sprout); color: var(--leaf-dark); font-weight: 600; }
+  .nav .due { background: var(--sun); color: var(--ink); font-size: 11px; font-weight: 600; border-radius: 99px; padding: 0 8px; }
+  .side-foot { margin-top: auto; padding: 14px 12px 4px; border-top: 1px solid var(--rule); font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; }
+  .main { padding: 32px 40px 40px; }
+
+  .ph-top { display: flex; justify-content: space-between; align-items: center; padding: 4px 20px 8px; }
+  .ph-top .brand { padding: 0; font-size: 20px; }
+  .ph-body { padding: 4px 20px 110px; }
+  .tabbar { position: absolute; left: 12px; right: 12px; bottom: 22px; height: 66px; background: var(--card); border-radius: 24px; box-shadow: 0 10px 30px -12px rgba(23,51,42,.35); display: grid; grid-template-columns: repeat(5, 1fr); padding: 8px 4px; }
+  .tab { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; color: var(--muted); position: relative; border-radius: 16px; }
+  .tab svg { width: 22px; height: 22px; }
+  .tab.on { color: var(--leaf-dark); font-weight: 600; background: var(--sprout); }
+  .tab .due { position: absolute; top: -2px; right: 12px; background: var(--sun); color: var(--ink); font-size: 10px; font-weight: 600; border-radius: 99px; padding: 0 5px; }
+
+  /* ── Pieces ─────────────────────────────────────────────────────────── */
+  .date { font-size: 14px; color: var(--muted); }
+  .title { font: 800 44px/1.05 var(--display); letter-spacing: -0.01em; }
+  .title.sm { font-size: 32px; }
+  .lead-in { color: var(--muted); margin-top: 6px; max-width: 56ch; }
+  .btn { white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 20px; border-radius: 99px; border: 0; font-weight: 500; font-size: 15px; cursor: pointer; }
+  .btn.primary { background: var(--leaf); color: #fff; }
+  .btn.ghost { background: var(--card); border: 1.5px solid var(--rule); }
+  .btn.sun { background: var(--sun); color: var(--ink); font-weight: 600; }
+  .panel { background: var(--card); border-radius: 24px; padding: 20px 22px; }
+
+  /* The garden bed: the one bold element */
+  .bed { position: relative; border-radius: 28px; padding: 22px 24px 20px; background: linear-gradient(180deg, #e9f6ec 0%, #d4ecd9 100%); overflow: hidden; }
+  .bed-head { display: flex; justify-content: space-between; align-items: flex-end; }
+  .bed-head h2 { font: 700 22px/1.2 var(--display); }
+  .bed-head p { font-size: 13.5px; color: var(--muted); }
+  .bed-head > p { white-space: nowrap; }
+  .plants { margin-top: 14px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px 8px; }
+  .plant { position: relative; height: 122px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+  .plant svg { width: 100%; max-width: 78px; aspect-ratio: 1; height: auto; display: block; position: relative; z-index: 1; }
+  /* soil mound under each plant, the word written on it */
+  .plant span { position: relative; z-index: 1; margin-top: -6px; width: 100%; white-space: nowrap; text-align: center; font-size: 11.5px; font-weight: 500; letter-spacing: -0.01em; color: #fff; background: var(--soil); border-radius: 99px 99px 14px 14px; padding: 3px 2px 2px; }
+  .plant.thirsty span { background: var(--soil); box-shadow: 0 0 0 2.5px var(--sun); }
+  .plant.thirsty::after { content: ""; position: absolute; top: 18px; left: calc(50% + 22px); z-index: 2; width: 14px; height: 18px; background: var(--sun); border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%; transform: rotate(180deg); box-shadow: 0 0 0 2.5px #fff; }
+  .bed-foot { margin-top: 16px; display: flex; gap: 12px; align-items: center; color: var(--muted); font-size: 14px; }
+  .bed-foot .btn.sun { min-height: 42px; }
+
+  .can { display: flex; gap: 14px; align-items: center; }
+  .can svg { width: 64px; height: 64px; flex-shrink: 0; }
+  .can b { font: 800 34px/1 var(--display); display: block; }
+
+  .tasks { display: grid; gap: 10px; }
+  .task { display: flex; gap: 14px; align-items: center; background: var(--card); border-radius: 20px; padding: 14px 16px; }
+  .task .tick { width: 28px; height: 28px; border-radius: 50%; border: 2.5px solid var(--rule); flex-shrink: 0; display: grid; place-items: center; }
+  .task.done .tick { background: var(--leaf); border-color: var(--leaf); color: #fff; }
+  .task.done h3 { text-decoration: line-through; color: var(--muted); }
+  .task h3 { font-size: 16px; font-weight: 500; }
+  .task p { font-size: 13.5px; color: var(--muted); }
+  .task .min { margin-left: auto; text-align: right; font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+  .task .min b { display: block; font: 700 20px/1 var(--display); color: var(--ink); }
+
+  .goal-tree { display: flex; gap: 14px; align-items: flex-end; }
+  .goal-tree .meter { width: 34px; height: 130px; background: var(--sprout); border-radius: 99px; position: relative; overflow: hidden; flex-shrink: 0; }
+  .goal-tree .meter i { position: absolute; left: 0; right: 0; bottom: 0; height: 83%; background: linear-gradient(180deg, #43b874, var(--leaf)); border-radius: 99px; }
+  .goal-tree .meter::after { content: ""; position: absolute; left: 4px; right: 4px; top: 6px; height: 3px; background: var(--coral); border-radius: 3px; }
+
+  /* Word card */
+  .wcard { background: var(--card); border-radius: 28px; padding: 22px 22px 20px; position: relative; overflow: hidden; }
+  .wcard .stage { position: absolute; right: 16px; top: 14px; width: 74px; text-align: center; font-size: 11.5px; color: var(--muted); }
+  .wcard .stage svg { width: 64px; height: 64px; }
+  .wcard .topic { display: inline-block; font-size: 12.5px; font-weight: 500; background: var(--sprout); color: var(--leaf-dark); border-radius: 99px; padding: 2px 10px; }
+  .wcard .word { font: 800 46px/1 var(--display); margin-top: 26px; letter-spacing: -0.01em; }
+  .wcard .ipa { color: var(--muted); font-size: 15px; margin-top: 4px; }
+  .wcard .meaning { font-size: 20px; font-weight: 500; color: var(--leaf-dark); margin-top: 16px; }
+  .wcard .example { margin-top: 8px; background: var(--bg); border-radius: 16px; padding: 10px 14px; font-size: 15px; }
+  .wcard .example em { font-style: normal; font-weight: 600; color: var(--leaf-dark); }
+
+  .grade { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 14px; }
+  .grade button { min-height: 64px; border-radius: 20px; border: 0; font-weight: 600; font-size: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.25; }
+  .grade button small { font-size: 11.5px; font-weight: 400; color: var(--muted); }
+  .g0 { background: var(--coral-soft); } .g1 { background: var(--sun-soft); } .g2 { background: var(--sprout); } .g3 { background: #cdeedd; }
+
+  .chip { display: inline-flex; align-items: center; padding: 7px 14px; border-radius: 99px; background: var(--card); font-size: 14px; }
+  .chip.on { background: var(--ink); color: #fff; font-weight: 500; }
+
+  /* Skill trees (exam parts): height is accuracy */
+  .grove { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; align-items: end; height: 210px; padding: 0 4px; border-bottom: 6px solid #7a5a43; }
+  .tree { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .tree .crown { width: 46px; border-radius: 24px 24px 18px 18px; position: relative; display: grid; place-items: start center; padding-top: 6px; font: 700 14px/1 var(--display); color: #fff; }
+  .tree .trunk { width: 8px; height: 18px; background: #7a5a43; }
+  .tree p { font-size: 11px; color: var(--muted); text-align: center; margin-top: 6px; line-height: 1.25; }
+
+  /* Narrow windows: stack the intro and scale the frames down instead of squeezing them. */
+  @media (max-width: 1240px) {
+    .doc { padding: 32px 20px 64px; }
+    .doc-intro { grid-template-columns: 1fr; gap: 28px; }
+    .principles { grid-template-columns: 1fr; }
+    .browser { zoom: 0.8; }
+    .row { gap: 20px; }
+  }
+  @media (max-width: 1000px) { .browser { zoom: 0.62; } }
+  @media (max-width: 820px) { .browser { zoom: 0.56; } }
+  @media (max-width: 680px) { .browser { zoom: 0.44; } }
+  @media (max-width: 900px) { .doc h1 { font-size: 44px; } .phone { zoom: 0.78; } }
+
+  /* Dark phone */
+  .phone.dark { --bg: #0e1f19; --card: #17302a; --ink: #e3f1e8; --muted: #9db7aa; --rule: #284a3f; --sprout: #1f4535; --leaf-dark: #8fe0b0; --sun-soft: #3b3417; --coral-soft: #42221f; color: var(--ink); }
+  .phone.dark .grove { border-bottom-color: #3f2e22; }
+  .phone.dark .chip.on { background: var(--ink); color: var(--bg); }
+</style>
+</head>
+<body>
+<!-- Growth stages, reused everywhere: seed → sprout → leaves → bush → bud → flower (FSRS stability 0–5 stars) -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="s0" viewBox="0 0 64 64"><ellipse cx="32" cy="54" rx="9" ry="6" fill="#8a6a4f"/><ellipse cx="32" cy="51" rx="5" ry="3.6" fill="#c79b6a"/></symbol>
+    <symbol id="s1" viewBox="0 0 64 64"><path d="M32 56V42" stroke="#2e9e5b" stroke-width="3.5" stroke-linecap="round"/><path d="M32 44c-7 0-11-4-11-10 7 0 11 4 11 10z" fill="#54c27f"/><ellipse cx="32" cy="57" rx="9" ry="3" fill="#8a6a4f"/></symbol>
+    <symbol id="s2" viewBox="0 0 64 64"><path d="M32 57V32" stroke="#2e9e5b" stroke-width="3.5" stroke-linecap="round"/><path d="M32 42c-9 0-14-5-14-13 9 0 14 5 14 13z" fill="#54c27f"/><path d="M32 36c8 0 13-5 13-12-8 0-13 5-13 12z" fill="#3eaf6c"/><ellipse cx="32" cy="58" rx="10" ry="3" fill="#8a6a4f"/></symbol>
+    <symbol id="s3" viewBox="0 0 64 64"><path d="M32 58V30" stroke="#24834b" stroke-width="4" stroke-linecap="round"/><circle cx="24" cy="34" r="11" fill="#3eaf6c"/><circle cx="40" cy="32" r="12" fill="#54c27f"/><circle cx="32" cy="22" r="12" fill="#2e9e5b"/><ellipse cx="32" cy="59" rx="11" ry="3" fill="#8a6a4f"/></symbol>
+    <symbol id="s4" viewBox="0 0 64 64"><path d="M32 58V24" stroke="#24834b" stroke-width="4" stroke-linecap="round"/><path d="M32 44c-10 0-15-5-15-13 10 0 15 5 15 13z" fill="#54c27f"/><path d="M32 38c9 0 14-5 14-12-9 0-14 5-14 12z" fill="#3eaf6c"/><path d="M32 8c-6 6-6 14 0 18 6-4 6-12 0-18z" fill="#f25f4c"/><ellipse cx="32" cy="59" rx="11" ry="3" fill="#8a6a4f"/></symbol>
+    <symbol id="s5" viewBox="0 0 64 64"><path d="M32 58V28" stroke="#24834b" stroke-width="4" stroke-linecap="round"/><path d="M32 46c-10 0-15-5-15-13 10 0 15 5 15 13z" fill="#54c27f"/><path d="M32 40c9 0 14-5 14-12-9 0-14 5-14 12z" fill="#3eaf6c"/><g fill="#f25f4c"><circle cx="32" cy="9" r="7"/><circle cx="41" cy="16" r="7"/><circle cx="38" cy="26" r="7"/><circle cx="26" cy="26" r="7"/><circle cx="23" cy="16" r="7"/></g><circle cx="32" cy="18" r="5.5" fill="#ffc93c"/><ellipse cx="32" cy="59" rx="11" ry="3" fill="#8a6a4f"/></symbol>
+    <symbol id="can" viewBox="0 0 64 64"><path d="M14 26h28v22a6 6 0 0 1-6 6H20a6 6 0 0 1-6-6z" fill="#1f8a50"/><path d="M42 32l14-10 3 4-14 12z" fill="#1f8a50"/><path d="M20 26c0-8 4-12 8-12s8 4 8 12" fill="none" stroke="#146b3c" stroke-width="4"/><g fill="#ffc93c"><circle cx="58" cy="34" r="2.5"/><circle cx="60" cy="42" r="2.5"/><circle cx="55" cy="40" r="2"/></g></symbol>
+  </defs>
+</svg>
+
+<div class="doc">
+
+  <!-- ── Concept ─────────────────────────────────────────────────────── -->
+  <section class="doc-intro">
+    <div>
+      <h1>Vườn từ</h1>
+      <p class="lead">Mỗi từ bạn học là một cái cây. Cây lớn lên mỗi lần bạn nhớ đúng, và héo đi nếu để quá lâu không ôn. Mở app mỗi sáng là ra vườn: xem cây nào khát nước (từ đến hạn), tưới xong rồi gieo thêm hạt mới.</p>
+      <div class="principles">
+        <div><b>Tiến bộ nhìn thấy được</b>Sáu giai đoạn cây khớp đúng 0–5 sao thành thạo mà FSRS đã tính. Không thêm điểm số giả.</div>
+        <div><b>Luống vườn là điểm nhấn</b>Chỉ trang Hôm nay có luống vườn đầy đủ. Các trang khác dùng lại hình cây nhỏ, nền phẳng và yên.</div>
+        <div><b>Màu có nghĩa</b>Xanh lá là hành động và lớn lên, vàng nắng là việc hôm nay, san hô là lỗi sai và là hoa của từ đã thuộc.</div>
+      </div>
+      <div class="stages-legend">
+        <div><svg><use href="#s0"/></svg>Hạt<br>mới học</div>
+        <div><svg><use href="#s1"/></svg>Mầm<br>~1 ngày</div>
+        <div><svg><use href="#s2"/></svg>Lá<br>~3 ngày</div>
+        <div><svg><use href="#s3"/></svg>Bụi<br>~1 tuần</div>
+        <div><svg><use href="#s4"/></svg>Nụ<br>~3 tuần</div>
+        <div><svg><use href="#s5"/></svg>Hoa<br>2 tháng+</div>
+      </div>
+    </div>
+    <div>
+      <div class="swatches">
+        <div class="swatch"><i style="background:#17332a"></i><div><b>Xanh rừng</b><span>#17332A · chữ</span></div></div>
+        <div class="swatch"><i style="background:#1f8a50"></i><div><b>Lá</b><span>#1F8A50 · nút, tiến bộ</span></div></div>
+        <div class="swatch"><i style="background:#ffc93c"></i><div><b>Nắng</b><span>#FFC93C · việc hôm nay</span></div></div>
+        <div class="swatch"><i style="background:#f25f4c"></i><div><b>San hô</b><span>#F25F4C · lỗi, hoa</span></div></div>
+        <div class="swatch"><i style="background:#a57c5a"></i><div><b>Đất</b><span>#A57C5A · luống vườn</span></div></div>
+        <div class="swatch"><i style="background:#eef6f0"></i><div><b>Sương sớm</b><span>#EEF6F0 · nền trang</span></div></div>
+      </div>
+      <div class="type-specimen">
+        <small>Baloo 2 — tiêu đề và từ tiếng Anh</small>
+        <div class="d">Vườn hôm nay · flourish</div>
+        <small>Lexend — giao diện, dễ đọc</small>
+        <div>12 cây đang khát nước. Tưới xong là cây lớn thêm một bậc.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Screen 1: Hôm nay (desktop) ─────────────────────────────────── -->
+  <h2 class="section">Hôm nay, trên máy tính</h2>
+  <p class="section-note">Luống vườn là 12 từ gần đây nhất. Cây có giọt nắng là từ đến hạn ôn. Bên phải: bình tưới (chuỗi ngày học), việc cần làm hôm nay và cây mục tiêu TOEIC.</p>
+  <div class="browser">
+    <div class="browser-bar"><i></i><i></i><i></i></div>
+    <div class="app">
+      <aside class="side">
+        <div class="brand"><svg><use href="#s3"/></svg>English Study</div>
+        <nav class="nav">
+          <a class="on" href="#">Hôm nay</a>
+          <a href="#">Ôn tập <span class="due">12</span></a>
+          <div class="nav-group"><p>Học</p><a href="#">Từ mới</a><a href="#">Từ trong ngữ cảnh</a><a href="#">Ngữ pháp</a></div>
+          <div class="nav-group"><p>Luyện</p><a href="#">Luyện thi</a><a href="#">Nói</a><a href="#">Viết</a><a href="#">Sổ lỗi</a></div>
+          <div class="nav-group"><p>Tiến độ</p><a href="#">Lộ trình</a><a href="#">Thống kê</a><a href="#">Nhật ký</a></div>
+        </nav>
+        <div class="side-foot"><span>⏱ 18 phút</span><span>Cài đặt</span></div>
+      </aside>
+      <main class="main">
+        <p class="date">Thứ Tư, 18 tháng 11</p>
+        <h1 class="title" style="margin-top:2px">Vườn hôm nay</h1>
+        <p class="lead-in">12 cây khát nước, 3 việc nhỏ, khoảng 21 phút.</p>
+
+        <div style="display:grid; grid-template-columns: 1.55fr 1fr; gap:22px; margin-top:22px; align-items:start">
+          <div style="display:grid; gap:18px">
+            <section class="bed" aria-label="Luống vườn">
+              <div class="bed-head">
+                <div><h2>Luống từ của bạn</h2><p>12 từ gần nhất. Cây càng lớn, bạn nhớ càng lâu; viền vàng là cây cần tưới.</p></div>
+                <p>142 từ trong vườn</p>
+              </div>
+              <div class="plants">
+                <div class="plant thirsty"><svg><use href="#s1"/></svg><span>itinerary</span></div>
+                <div class="plant"><svg><use href="#s3"/></svg><span>commute</span></div>
+                <div class="plant thirsty"><svg><use href="#s0"/></svg><span>layover</span></div>
+                <div class="plant"><svg><use href="#s5"/></svg><span>polite</span></div>
+                <div class="plant"><svg><use href="#s4"/></svg><span>greeting</span></div>
+                <div class="plant thirsty"><svg><use href="#s2"/></svg><span>reluctant</span></div>
+                <div class="plant"><svg><use href="#s3"/></svg><span>deadline</span></div>
+                <div class="plant"><svg><use href="#s5"/></svg><span>invoice</span></div>
+                <div class="plant thirsty"><svg><use href="#s1"/></svg><span>thrive</span></div>
+                <div class="plant"><svg><use href="#s2"/></svg><span>negotiate</span></div>
+                <div class="plant"><svg><use href="#s4"/></svg><span>attend</span></div>
+                <div class="plant thirsty"><svg><use href="#s2"/></svg><span>clarify</span></div>
+              </div>
+              <div class="bed-foot"><button class="btn sun">Tưới 12 cây, khoảng 5 phút</button><span>Ôn đúng hạn để cây không héo.</span></div>
+            </section>
+            <div class="tasks">
+              <div class="task"><div class="tick"></div><div><h3>Luyện Part 5: Điền từ vào câu</h3><p>Đúng 54% trong 14 ngày qua, thấp nhất.</p></div><div class="min"><b>10</b>phút</div></div>
+              <div class="task"><div class="tick"></div><div><h3>Hội thoại: Đặt phòng khách sạn</h3><p>3 ngày chưa luyện nói.</p></div><div class="min"><b>6</b>phút</div></div>
+              <div class="task done"><div class="tick">✓</div><div><h3>Gieo 5 từ mới chủ đề Du lịch</h3><p>Lúc 7:40 sáng nay.</p></div><div class="min"><b>5</b>phút</div></div>
+            </div>
+          </div>
+          <div style="display:grid; gap:18px">
+            <div class="panel can"><svg><use href="#can"/></svg><div><b>4 ngày</b><span style="color:var(--muted); font-size:14px">tưới vườn liên tục. Kỷ lục của bạn: 11 ngày.</span></div></div>
+            <div class="panel">
+              <h3 style="font-size:16px; font-weight:600">Cây mục tiêu TOEIC 750</h3>
+              <div class="goal-tree" style="margin-top:14px">
+                <div class="meter"><i></i></div>
+                <div>
+                  <p style="font:800 40px/1 var(--display)">620</p>
+                  <p style="color:var(--muted); font-size:14px">điểm ước lượng, thi thử 12/11</p>
+                  <p style="margin-top:12px; font-size:14px">Còn <b>130 điểm</b> và <b>43 ngày</b>. Vạch đỏ là mục tiêu.</p>
+                </div>
+              </div>
+            </div>
+            <div class="panel" style="background:var(--sun-soft)">
+              <h3 style="font-size:16px; font-weight:600">Gieo hạt mới</h3>
+              <p style="font-size:14px; color:var(--muted); margin-top:2px">Vườn còn chỗ cho 5 từ hôm nay.</p>
+              <button class="btn primary" style="margin-top:12px">Gieo 5 từ mới</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ── Screen 2: phones ────────────────────────────────────────────── -->
+  <h2 class="section">Học và ôn trên điện thoại</h2>
+  <p class="section-note">Mỗi thẻ từ cho thấy cây của từ đó đang ở giai đoạn nào. Khi ôn, dưới mỗi nút ghi cây sẽ thành gì và bao giờ cần tưới lại.</p>
+  <div class="row">
+    <div>
+      <div class="phone">
+        <div class="status"><span>9:41</span><span>●●● 5G</span></div>
+        <div class="ph-top"><div class="brand"><svg><use href="#s3"/></svg>English Study</div><span style="font-size:14px;color:var(--muted)">⏱ 18:02</span></div>
+        <div class="ph-body">
+          <h1 class="title sm">Gieo từ mới</h1>
+          <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap"><span class="chip on">Du lịch</span><span class="chip">Giao tiếp</span><span class="chip">TOEIC</span><span class="chip">+ Chủ đề</span></div>
+          <div class="wcard" style="margin-top:18px">
+            <span class="topic">Du lịch · 2 / 5</span>
+            <div class="stage"><svg><use href="#s0"/></svg>hạt mới</div>
+            <div class="word">itinerary</div>
+            <div class="ipa">/aɪˈtɪn.ə.rer.i/ · danh từ</div>
+            <div class="meaning">lịch trình chuyến đi</div>
+            <div class="example">“Our <em>itinerary</em> includes two days in Hội An.”</div>
+            <div style="display:flex; gap:8px; margin-top:16px"><button class="btn primary" style="flex:1">Gieo vào vườn</button><button class="btn ghost">🔊</button></div>
+          </div>
+          <div style="display:flex; gap:6px; justify-content:center; margin-top:16px"><i style="width:26px;height:8px;border-radius:9px;background:var(--leaf)"></i><i style="width:26px;height:8px;border-radius:9px;background:var(--leaf)"></i><i style="width:26px;height:8px;border-radius:9px;background:var(--rule)"></i><i style="width:26px;height:8px;border-radius:9px;background:var(--rule)"></i><i style="width:26px;height:8px;border-radius:9px;background:var(--rule)"></i></div>
+          <p style="text-align:center; font-size:13px; color:var(--muted); margin-top:8px">Vuốt sang để xem từ tiếp theo</p>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>Hôm nay</div>
+          <div class="tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20v-8M12 13c-4 0-6-2-6-6 4 0 6 2 6 6zM12 11c3 0 5-2 5-5-3 0-5 2-5 5z"/></svg>Từ mới</div>
+          <div class="tab"><span class="due">12</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 11h11v6a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3zM15 13l5-4"/></svg>Tưới</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 13 2 2 4-4"/><rect x="5" y="5" width="14" height="15" rx="2"/></svg>Luyện thi</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18" cy="12" r="1.4"/></svg>Thêm</div>
+        </div>
+      </div>
+      <p class="caption">Từ mới: thẻ hiện nghĩa ngay, cây bắt đầu từ hạt. "Gieo vào vườn" là lưu để ôn.</p>
+    </div>
+
+    <div>
+      <div class="phone">
+        <div class="status"><span>9:41</span><span>●●● 5G</span></div>
+        <div class="ph-top"><div class="brand"><svg><use href="#s3"/></svg>English Study</div><span style="font-size:14px;color:var(--muted)">⏱ 18:30</span></div>
+        <div class="ph-body">
+          <p class="date">Tưới vườn · còn 11 cây</p>
+          <h1 class="title sm">Bạn nhớ từ này không?</h1>
+          <div class="wcard" style="margin-top:14px">
+            <span class="topic">Du lịch</span>
+            <div class="stage"><svg><use href="#s2"/></svg>đang ở: lá</div>
+            <div class="word">itinerary</div>
+            <div class="meaning">lịch trình chuyến đi</div>
+            <div class="example">“Our <em>itinerary</em> includes two days in Hội An.”</div>
+          </div>
+          <div class="grade">
+            <button class="g0">Quên<small>về mầm<br>ôn mai</small></button>
+            <button class="g1">Khó<small>giữ lá<br>3 ngày</small></button>
+            <button class="g2">Được<small>thành bụi<br>9 ngày</small></button>
+            <button class="g3">Dễ<small>ra nụ<br>21 ngày</small></button>
+          </div>
+          <div class="panel" style="margin-top:14px; padding:14px 16px; display:flex; align-items:center; gap:12px">
+            <div style="flex:1"><div style="display:flex; justify-content:space-between; font-size:14px"><b>Đã tưới</b><span style="color:var(--muted)">1 / 12</span></div><div style="height:8px; background:var(--sprout); border-radius:9px; margin-top:8px"><div style="width:8%; height:100%; background:var(--leaf); border-radius:9px"></div></div></div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>Hôm nay</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20v-8M12 13c-4 0-6-2-6-6 4 0 6 2 6 6zM12 11c3 0 5-2 5-5-3 0-5 2-5 5z"/></svg>Từ mới</div>
+          <div class="tab on"><span class="due">11</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 11h11v6a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3zM15 13l5-4"/></svg>Tưới</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 13 2 2 4-4"/><rect x="5" y="5" width="14" height="15" rx="2"/></svg>Luyện thi</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18" cy="12" r="1.4"/></svg>Thêm</div>
+        </div>
+      </div>
+      <p class="caption">Ôn tập ("Tưới vườn"): mỗi nút nói rõ cây sẽ thành gì và khi nào ôn lại, theo lịch FSRS.</p>
+    </div>
+
+    <div>
+      <div class="phone dark">
+        <div class="status"><span>9:41</span><span>●●● 5G</span></div>
+        <div class="ph-top"><div class="brand" style="color:var(--leaf-dark)"><svg><use href="#s3"/></svg>English Study</div><span style="font-size:14px;color:var(--muted)">⏱ 21:14</span></div>
+        <div class="ph-body">
+          <p class="date">Luyện thi · TOEIC, trình độ 3</p>
+          <h1 class="title sm">Rừng kỹ năng</h1>
+          <p class="lead-in" style="font-size:14.5px">Mỗi part là một cây. Cây càng cao, bạn làm đúng càng nhiều.</p>
+          <div class="panel" style="margin-top:14px; padding:16px 14px 12px">
+            <div class="grove">
+              <div class="tree"><div class="crown" style="height:72px; background:#f25f4c">48%</div><div class="trunk"></div><p>P2<br>Hỏi đáp</p></div>
+              <div class="tree"><div class="crown" style="height:104px; background:#e0a92a">67%</div><div class="trunk"></div><p>P3<br>Hội thoại</p></div>
+              <div class="tree"><div class="crown" style="height:142px; background:#2e9e5b">84%</div><div class="trunk"></div><p>P4<br>Bài nói</p></div>
+              <div class="tree"><div class="crown" style="height:84px; background:#f25f4c">54%</div><div class="trunk"></div><p>P5<br>Điền từ</p></div>
+              <div class="tree"><div class="crown" style="height:26px; background:#4b6d60">–</div><div class="trunk"></div><p>P6<br>chưa làm</p></div>
+              <div class="tree"><div class="crown" style="height:136px; background:#2e9e5b">81%</div><div class="trunk"></div><p>P7<br>Đọc hiểu</p></div>
+            </div>
+          </div>
+          <div class="panel" style="margin-top:12px; padding:14px 16px; display:flex; justify-content:space-between; align-items:center; gap:10px">
+            <div><b style="font-size:15px">Thi thử rút gọn</b><p style="font-size:13px; color:var(--muted)">6 part, 45 phút</p></div>
+            <button class="btn primary">Làm bài</button>
+          </div>
+          <div class="panel" style="margin-top:12px; padding:14px 16px">
+            <b style="font-size:15px">Nên luyện tiếp</b>
+            <p style="font-size:13.5px; color:var(--muted)">Part 2 thấp nhất. 10 câu, khoảng 8 phút.</p>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>Hôm nay</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20v-8M12 13c-4 0-6-2-6-6 4 0 6 2 6 6zM12 11c3 0 5-2 5-5-3 0-5 2-5 5z"/></svg>Từ mới</div>
+          <div class="tab"><span class="due">11</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 11h11v6a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3zM15 13l5-4"/></svg>Tưới</div>
+          <div class="tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 13 2 2 4-4"/><rect x="5" y="5" width="14" height="15" rx="2"/></svg>Luyện thi</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18" cy="12" r="1.4"/></svg>Thêm</div>
+        </div>
+      </div>
+      <p class="caption">Luyện thi ở giao diện tối ("vườn đêm"): chiều cao cây là tỉ lệ đúng, màu đỏ là part đang yếu.</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

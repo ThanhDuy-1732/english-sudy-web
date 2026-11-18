@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Study — đề xuất giao diện "Bưu thiếp"</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Patrick+Hand&display=swap&subset=vietnamese" rel="stylesheet">
+<style>
+  /* ── Tokens ─────────────────────────────────────────────────────────── */
+  :root {
+    --paper: #f3f6fb;      /* airmail paper */
+    --card: #ffffff;
+    --ink: #14223d;        /* navy ink */
+    --muted: #586480;
+    --rule: #dbe2ee;
+    --blue: #1f4fd1;       /* airmail blue: actions */
+    --blue-soft: #e4ebfc;
+    --red: #e0383f;        /* airmail red: mistakes, the stripe */
+    --red-soft: #fde7e8;
+    --mustard: #f3b21b;    /* stamp: what needs you today */
+    --mustard-soft: #fdf1d2;
+    --mint: #16916a;       /* correct, done */
+    --mint-soft: #ddf3ea;
+    --night: #0f1830;
+    --ui: "Be Vietnam Pro", system-ui, sans-serif;
+    --display: "Fraunces", Georgia, serif;
+    --hand: "Patrick Hand", "Be Vietnam Pro", cursive;
+    --stripe: repeating-linear-gradient(135deg, var(--red) 0 14px, #fff 14px 22px, var(--blue) 22px 36px, #fff 36px 44px);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e6eaf2; color: var(--ink); font: 16px/1.55 var(--ui); -webkit-font-smoothing: antialiased; }
+  h1, h2, h3, p { margin: 0; }
+  button { font: inherit; color: inherit; }
+
+  /* ── Proposal page chrome (not part of the app) ─────────────────────── */
+  .doc { max-width: 1320px; margin: 0 auto; padding: 56px 32px 96px; }
+  .doc-intro { display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: start; }
+  .doc h1 { font: 700 48px/1.05 var(--display); letter-spacing: -0.02em; font-variation-settings: "opsz" 144; }
+  .doc .lead { margin-top: 16px; font-size: 18px; color: var(--muted); max-width: 58ch; }
+  .doc h2.section { margin: 88px 0 8px; font: 600 30px/1.2 var(--display); letter-spacing: -0.01em; }
+  .doc p.section-note { color: var(--muted); max-width: 70ch; margin-bottom: 28px; }
+  .swatches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .swatch { background: var(--card); border-radius: 14px; overflow: hidden; border: 1px solid var(--rule); }
+  .swatch i { display: block; height: 64px; }
+  .swatch div { padding: 10px 12px; font-size: 13px; }
+  .swatch b { display: block; font-weight: 600; }
+  .swatch span { color: var(--muted); }
+  .type-specimen { margin-top: 20px; background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 20px 22px; display: grid; gap: 10px; }
+  .type-specimen .d { font: 600 34px/1.1 var(--display); letter-spacing: -0.01em; }
+  .type-specimen .u { font: 500 16px/1.5 var(--ui); }
+  .type-specimen .h { font: 24px/1.2 var(--hand); color: var(--blue); }
+  .type-specimen small { color: var(--muted); font-size: 12px; }
+  .principles { margin-top: 28px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .principles div { background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 16px 18px; font-size: 14px; color: var(--muted); }
+  .principles b { display: block; color: var(--ink); font-size: 15px; margin-bottom: 4px; }
+  .row { display: flex; gap: 32px; align-items: flex-start; flex-wrap: wrap; }
+  .caption { margin-top: 12px; font-size: 13px; color: var(--muted); max-width: 390px; }
+
+  /* Device frames */
+  .browser { width: 1180px; background: var(--paper); border-radius: 14px; overflow: hidden; box-shadow: 0 30px 60px -30px rgba(20,34,61,.45), 0 0 0 1px rgba(20,34,61,.08); }
+  .browser-bar { height: 36px; background: #dfe5ef; display: flex; align-items: center; gap: 7px; padding: 0 14px; }
+  .browser-bar i { width: 11px; height: 11px; border-radius: 50%; background: #c3cbd9; }
+  .phone { width: 390px; height: 844px; background: var(--paper); border-radius: 46px; overflow: hidden; position: relative; box-shadow: 0 30px 60px -30px rgba(20,34,61,.5), 0 0 0 10px #1b2338, 0 0 0 11px #3a445e; flex-shrink: 0; }
+  .phone .status { height: 44px; display: flex; justify-content: space-between; align-items: center; padding: 0 28px; font-size: 14px; font-weight: 600; }
+
+  /* ── App shell ──────────────────────────────────────────────────────── */
+  .app { display: grid; grid-template-columns: 236px 1fr; min-height: 760px; }
+  .side { background: var(--night); color: #dfe6f5; padding: 22px 16px; position: relative; display: flex; flex-direction: column; }
+  .side::after { content: ""; position: absolute; top: 0; right: 0; width: 6px; height: 100%; background: var(--stripe); }
+  .brand { font: 700 23px/1 var(--display); color: #fff; letter-spacing: -0.01em; padding: 6px 10px 22px; }
+  .brand small { display: block; font: 400 13px/1.4 var(--hand); color: var(--mustard); margin-top: 6px; letter-spacing: 0; }
+  .nav-group { margin-top: 14px; }
+  .nav-group p { font-size: 12.5px; color: #8d9bbb; padding: 0 10px 6px; }
+  .nav a { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 10px; color: #dfe6f5; text-decoration: none; font-size: 14.5px; }
+  .nav a.on { background: var(--mustard); color: var(--ink); font-weight: 600; }
+  .nav a .due { background: var(--red); color: #fff; font-size: 11px; font-weight: 700; border-radius: 99px; padding: 1px 7px; }
+  .nav a.on .due { background: var(--ink); }
+  .side-foot { margin-top: auto; padding: 14px 10px 4px; border-top: 1px solid rgba(255,255,255,.12); font-size: 13px; color: #9fb0d3; display: flex; justify-content: space-between; }
+  .main { padding: 34px 44px 44px; }
+
+  /* Phone shell */
+  .ph-top { display: flex; justify-content: space-between; align-items: center; padding: 6px 20px 10px; }
+  .ph-top .brand { color: var(--ink); font-size: 20px; padding: 0; }
+  .ph-body { padding: 4px 20px 110px; height: calc(844px - 44px - 50px); overflow: hidden; }
+  .tabbar { position: absolute; left: 0; right: 0; bottom: 0; height: 86px; background: #fff; border-top: 1px solid var(--rule); display: grid; grid-template-columns: repeat(5, 1fr); padding: 8px 6px 26px; }
+  .tabbar::before { content: ""; position: absolute; top: -4px; left: 0; right: 0; height: 4px; background: var(--stripe); }
+  .tab { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 11px; color: var(--muted); position: relative; }
+  .tab svg { width: 22px; height: 22px; }
+  .tab.on { color: var(--blue); font-weight: 600; }
+  .tab .due { position: absolute; top: -4px; right: 14px; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; border-radius: 99px; padding: 0 5px; }
+
+  /* ── Shared pieces ──────────────────────────────────────────────────── */
+  .date { font-size: 14px; color: var(--muted); }
+  .title { font: 700 40px/1.08 var(--display); letter-spacing: -0.02em; font-variation-settings: "opsz" 144; }
+  .title.sm { font-size: 30px; }
+  .lead-in { color: var(--muted); margin-top: 8px; max-width: 56ch; }
+  .btn { white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 12px; border: 0; font-weight: 600; font-size: 15px; cursor: pointer; }
+  .btn.primary { background: var(--blue); color: #fff; box-shadow: 0 3px 0 #163a9e; }
+  .btn.ghost { background: #fff; border: 1.5px solid var(--rule); }
+  .btn.mustard { background: var(--mustard); color: var(--ink); box-shadow: 0 3px 0 #c88c00; }
+
+  /* Postmark: round stamp with the streak */
+  .postmark { width: 128px; height: 128px; border-radius: 50%; border: 3px solid var(--red); color: var(--red); display: grid; place-items: center; text-align: center; transform: rotate(-12deg); position: relative; flex-shrink: 0; }
+  .postmark::before { content: ""; position: absolute; inset: 7px; border-radius: 50%; border: 1.5px solid var(--red); }
+  .postmark b { display: block; font: 700 40px/1 var(--ui); letter-spacing: -0.02em; }
+  .postmark span { font-size: 12.5px; font-weight: 600; }
+  .postmark i { position: absolute; left: 88%; width: 120px; top: 50%; height: 26px; transform: translateY(-50%); background: repeating-linear-gradient(0deg, transparent 0 5px, var(--red) 5px 7px); opacity: .5; z-index: -1; -webkit-mask: linear-gradient(90deg, #000 60%, transparent); mask: linear-gradient(90deg, #000 60%, transparent); }
+
+  /* Stamp: perforated edge */
+  /* Perforations live in the 6px outer band only; the inner frame has a solid fill so text is never punched. */
+  .stamp { --c: var(--blue); --fill: var(--card); padding: 6px; position: relative; background: radial-gradient(circle, transparent 2.6px, var(--fill) 3.1px) -4.5px -4.5px / 9px 9px; filter: drop-shadow(0 1px 1.5px rgba(20,34,61,.18)); }
+  .stamp-in { background: var(--fill); border: 1.5px solid var(--c); height: 100%; padding: 10px 12px; display: flex; flex-direction: column; }
+
+  /* Ticket: today's plan item */
+  .ticket { display: grid; grid-template-columns: 92px 1fr auto; align-items: center; background: var(--card); border-radius: 14px; position: relative; border: 1px solid var(--rule); }
+  .ticket + .ticket { margin-top: 12px; }
+  .ticket .stub { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 2px dashed var(--rule); padding: 14px 6px; }
+  .ticket .stub b { font: 700 28px/1 var(--display); }
+  .ticket .stub span { font-size: 12px; color: var(--muted); }
+  .ticket .body { padding: 14px 18px; }
+  .ticket .body h3 { font-size: 17px; font-weight: 600; }
+  .ticket .body p { font-size: 14px; color: var(--muted); }
+  .ticket .go { margin-right: 16px; }
+  .ticket .kind { display: inline-block; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 1px 8px; margin-bottom: 4px; }
+  .ticket.done { opacity: .55; }
+  .ticket.done .body h3 { text-decoration: line-through; }
+  .ticket::before, .ticket::after { content: ""; position: absolute; left: 83px; width: 18px; height: 18px; background: var(--paper); border-radius: 50%; border: 1px solid var(--rule); }
+  .ticket::before { top: -10px; } .ticket::after { bottom: -10px; }
+
+  /* Postcard: the flashcard */
+  .postcard { background: #fff; padding: 9px; border-radius: 6px; background-image: var(--stripe); box-shadow: 0 18px 30px -18px rgba(20,34,61,.45); }
+  .postcard-in { background: #fffefb; border-radius: 2px; padding: 18px 20px 20px; position: relative; min-height: 236px; display: flex; flex-direction: column; }
+  .postcard .pc-stamp { position: absolute; top: 14px; right: 14px; width: 70px; height: 84px; }
+  .postcard .pc-stamp .stamp-in { align-items: center; justify-content: center; text-align: center; padding: 4px; font-size: 11px; line-height: 1.2; font-weight: 600; color: var(--c); }
+  .postcard .pc-stamp .stamp-in b { font: 700 22px/1 var(--display); display: block; margin-bottom: 4px; }
+  .postcard .topic { font-size: 13px; color: var(--muted); }
+  .postcard .word { font: 600 44px/1.05 var(--display); letter-spacing: -0.02em; margin-top: auto; font-variation-settings: "opsz" 144; }
+  .postcard .ipa { color: var(--muted); font-size: 15px; margin-top: 4px; }
+  .postcard .hint { margin-top: 14px; font-size: 13.5px; color: var(--blue); font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .postcard.back .postcard-in { display: grid; grid-template-columns: 1fr 1px 0.9fr; gap: 16px; }
+  .postcard.back .split { background: var(--rule); }
+  .postcard .meaning { font: 30px/1.15 var(--hand); color: var(--blue); }
+  .postcard .example { font: italic 400 16px/1.6 var(--display); margin-top: 10px; }
+  .postcard .addr { display: flex; flex-direction: column; justify-content: flex-end; gap: 0; }
+  .postcard .addr p { font: 19px/30px var(--hand); color: var(--ink); border-bottom: 1px solid var(--rule); }
+  .postcard .addr p.k { font: 12px/1.6 var(--ui); color: var(--muted); border: 0; }
+
+  .grade { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 16px; }
+  .grade button { min-height: 56px; border-radius: 12px; border: 0; font-weight: 600; font-size: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2; }
+  .grade button small { font-size: 11.5px; font-weight: 500; opacity: .8; }
+  .g0 { background: var(--red-soft); } .g1 { background: var(--mustard-soft); } .g2 { background: var(--blue-soft); } .g3 { background: var(--mint-soft); }
+
+  /* Route: progress to the exam target */
+  .route { background: var(--card); border: 1px solid var(--rule); border-radius: 18px; padding: 20px 22px; }
+  .route h3 { font-size: 15px; font-weight: 600; }
+  .route-line { position: relative; height: 54px; margin: 18px 6px 4px; }
+  .route-line svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .route-labels { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .route-labels b { color: var(--ink); font: 700 20px/1 var(--display); display: block; }
+
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 99px; background: #fff; border: 1.5px solid var(--rule); font-size: 14px; font-weight: 500; }
+  .chip.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+  /* Narrow windows (e.g. a side panel): stack the intro and scale the device frames down instead of squeezing them. */
+  @media (max-width: 1240px) {
+    .doc { padding: 32px 20px 64px; }
+    .doc-intro { grid-template-columns: 1fr; gap: 28px; }
+    .principles { grid-template-columns: 1fr; }
+    .browser { zoom: 0.8; }
+    .row { gap: 20px; }
+  }
+  @media (max-width: 1000px) { .browser { zoom: 0.62; } }
+  @media (max-width: 820px) { .browser { zoom: 0.56; } }
+  @media (max-width: 680px) { .browser { zoom: 0.44; } }
+  @media (max-width: 900px) {
+    .doc h1 { font-size: 38px; }
+    .phone { zoom: 0.78; }
+    .row > div { flex: 0 0 auto; }
+  }
+
+  /* Dark phone */
+  .phone.dark { --paper: #0f1830; --card: #18233f; --ink: #e6ecf8; --muted: #9aa8c6; --rule: #2a3a62; --blue: #6e93ff; --blue-soft: #1f2e58; --red-soft: #3f1d2a; --mustard-soft: #3d331a; --mint-soft: #153a32; color: var(--ink); }
+  .phone.dark .tabbar { background: #121d38; }
+  .phone.dark .postcard-in { background: #fdfbf5; color: #14223d; }
+  .phone.dark .postcard .meaning { color: #1f4fd1; }
+  .phone.dark .postcard .addr p { color: #14223d; border-color: #dbe2ee; }
+  .phone.dark .btn.ghost { background: var(--card); }
+  .phone.dark .chip { background: var(--card); }
+  .phone.dark .chip.on { background: var(--ink); color: var(--paper); }
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <!-- ── Concept ─────────────────────────────────────────────────────── -->
+  <section class="doc-intro">
+    <div>
+      <h1>Bưu thiếp</h1>
+      <p class="lead">Học tiếng Anh để đi làm (TOEIC) hay đi du học (IELTS) đều là một chuyến đi. Giao diện mượn đồ vật của bưu điện: mỗi từ là một tấm bưu thiếp có viền thư máy bay, chuỗi ngày học là con dấu bưu điện, kế hoạch hôm nay là những tấm vé, các part luyện thi là một bộ tem để sưu tầm.</p>
+      <div class="principles">
+        <div><b>Một điểm nhấn duy nhất</b>Viền sọc đỏ–xanh thư máy bay chỉ xuất hiện ở bưu thiếp, mép thanh điều hướng và thanh tab. Mọi thứ khác giữ yên.</div>
+        <div><b>Màu có nghĩa</b>Xanh là hành động, đỏ là lỗi sai và việc quá hạn, vàng tem là việc cần làm hôm nay, xanh bạc hà là làm đúng.</div>
+        <div><b>Chữ phân vai</b>Tiếng Anh in Fraunces. Giao diện tiếng Việt in Be Vietnam Pro. Nghĩa của từ viết tay bằng Patrick Hand, như ghi chú trên bưu thiếp.</div>
+      </div>
+    </div>
+    <div>
+      <div class="swatches">
+        <div class="swatch"><i style="background:#14223d"></i><div><b>Mực navy</b><span>#14223D · chữ, thanh bên</span></div></div>
+        <div class="swatch"><i style="background:#1f4fd1"></i><div><b>Xanh thư máy bay</b><span>#1F4FD1 · nút, link</span></div></div>
+        <div class="swatch"><i style="background:#e0383f"></i><div><b>Đỏ thư máy bay</b><span>#E0383F · lỗi, đến hạn</span></div></div>
+        <div class="swatch"><i style="background:#f3b21b"></i><div><b>Vàng tem</b><span>#F3B21B · việc hôm nay</span></div></div>
+        <div class="swatch"><i style="background:#16916a"></i><div><b>Bạc hà</b><span>#16916A · đúng, xong</span></div></div>
+        <div class="swatch"><i style="background:#f3f6fb"></i><div><b>Giấy thư</b><span>#F3F6FB · nền trang</span></div></div>
+      </div>
+      <div class="type-specimen">
+        <small>Fraunces — tiêu đề và từ tiếng Anh</small>
+        <div class="d">Hôm nay học gì? itinerary</div>
+        <small>Be Vietnam Pro — giao diện</small>
+        <div class="u">Có 12 từ đến hạn ôn. Kế hoạch xếp việc quan trọng nhất lên trước.</div>
+        <small>Patrick Hand — nghĩa viết tay</small>
+        <div class="h">lịch trình chuyến đi</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Screen 1: Hôm nay (desktop) ─────────────────────────────────── -->
+  <h2 class="section">Hôm nay, trên máy tính</h2>
+  <p class="section-note">Trang mở app mỗi ngày. Con dấu bưu điện cho biết chuỗi ngày học; kế hoạch là các tấm vé theo thứ tự nên làm; tuyến bay cho biết còn cách điểm mục tiêu bao xa.</p>
+  <div class="browser">
+    <div class="browser-bar"><i></i><i></i><i></i></div>
+    <div class="app">
+      <aside class="side">
+        <div class="brand">English Study<small>chuyến đi thứ 24 ngày</small></div>
+        <nav class="nav">
+          <a class="on" href="#">Hôm nay</a>
+          <a href="#">Ôn tập <span class="due">12</span></a>
+          <div class="nav-group"><p>Học</p><a href="#">Từ mới</a><a href="#">Từ trong ngữ cảnh</a><a href="#">Ngữ pháp</a></div>
+          <div class="nav-group"><p>Luyện</p><a href="#">Luyện thi</a><a href="#">Nói</a><a href="#">Viết</a><a href="#">Sổ lỗi <span class="due">3</span></a></div>
+          <div class="nav-group"><p>Tiến độ</p><a href="#">Lộ trình</a><a href="#">Thống kê</a><a href="#">Nhật ký</a></div>
+        </nav>
+        <div class="side-foot"><span>⏱ 18 phút</span><span>Cài đặt</span></div>
+      </aside>
+      <main class="main">
+        <div style="display:flex; justify-content:space-between; gap:32px; align-items:flex-start">
+          <div>
+            <p class="date">Thứ Tư, 18 tháng 11</p>
+            <h1 class="title" style="margin-top:6px">Hôm nay học gì?</h1>
+            <p class="lead-in">3 việc, khoảng 21 phút. Làm từ trên xuống: ôn từ đến hạn trước, rồi luyện phần đang yếu.</p>
+          </div>
+          <div class="postmark" style="margin:6px 120px 0 0"><i></i><div><b>4</b><span>ngày liên tiếp</span></div></div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1.45fr 1fr; gap:28px; margin-top:30px; align-items:start">
+          <div>
+            <div class="ticket">
+              <div class="stub"><b>5</b><span>phút</span></div>
+              <div class="body"><span class="kind" style="background:var(--red-soft)">Ôn tập</span><h3>Ôn 12 từ đến hạn</h3><p>8 từ quá hạn từ hôm qua: itinerary, reluctant, thrive…</p></div>
+              <button class="btn primary go">Bắt đầu</button>
+            </div>
+            <div class="ticket">
+              <div class="stub"><b>10</b><span>phút</span></div>
+              <div class="body"><span class="kind" style="background:var(--blue-soft)">Luyện thi</span><h3>Part 5, Incomplete Sentences</h3><p>Đúng 54% trong 14 ngày qua, thấp nhất trong các dạng.</p></div>
+              <button class="btn ghost go">Bắt đầu</button>
+            </div>
+            <div class="ticket">
+              <div class="stub"><b>6</b><span>phút</span></div>
+              <div class="body"><span class="kind" style="background:var(--mint-soft)">Nói</span><h3>Hội thoại: Đặt phòng khách sạn</h3><p>3 ngày chưa luyện nói.</p></div>
+              <button class="btn ghost go">Bắt đầu</button>
+            </div>
+            <div class="ticket done" style="margin-top:12px">
+              <div class="stub"><b>✓</b><span>xong</span></div>
+              <div class="body"><h3>Học 5 từ mới chủ đề Travel</h3><p>Lúc 7:40 sáng nay.</p></div>
+              <span></span>
+            </div>
+          </div>
+          <div style="display:grid; gap:18px">
+            <div class="route">
+              <h3>Đường tới TOEIC 750</h3>
+              <div class="route-line">
+                <svg viewBox="0 0 300 54" preserveAspectRatio="none">
+                  <path d="M6 44 C 90 44, 150 6, 294 10" fill="none" stroke="var(--rule)" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round"/>
+                  <path d="M6 44 C 90 44, 150 6, 200 9" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round"/>
+                  <circle cx="6" cy="44" r="5" fill="var(--blue)"/>
+                  <circle cx="294" cy="10" r="6" fill="#fff" stroke="var(--red)" stroke-width="3"/>
+                  <g transform="translate(200 9) rotate(-6)"><path d="M-9 0 L9 0 M2 -6 L9 0 L2 6" stroke="var(--blue)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+                </svg>
+              </div>
+              <div class="route-labels"><div><b>620</b>thi thử 12/11</div><div style="text-align:center"><b>130</b>điểm nữa</div><div style="text-align:right"><b>43</b>ngày tới kỳ thi</div></div>
+            </div>
+            <div class="route" style="display:flex; gap:16px; align-items:center">
+              <div class="stamp" style="--c:var(--mustard); width:86px; height:100px"><div class="stamp-in" style="align-items:center;justify-content:center;text-align:center"><b style="font:700 30px/1 var(--display)">12</b><span style="font-size:11px;font-weight:600">từ đến hạn</span></div></div>
+              <div><h3>Ôn trước 9 giờ tối</h3><p style="font-size:14px;color:var(--muted)">Thẻ nào ôn đúng hạn sẽ được hẹn lại xa hơn, có khi tới vài tháng.</p></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ── Screen 2: postcards (phone) ─────────────────────────────────── -->
+  <h2 class="section">Thẻ từ là bưu thiếp, trên điện thoại</h2>
+  <p class="section-note">Mặt trước: từ tiếng Anh thật to, tem góc phải cho biết chủ đề. Lật lại: nghĩa viết tay bên trái, câu ví dụ và các luyện tập bên phải như phần ghi địa chỉ. Ôn tập dùng 4 nút to, có ghi lần ôn kế tiếp.</p>
+  <div class="row">
+    <div>
+      <div class="phone">
+        <div class="status"><span>9:41</span><span>●●● 5G</span></div>
+        <div class="ph-top"><div class="brand">English Study</div><span style="font-size:14px;color:var(--muted)">⏱ 18:02</span></div>
+        <div class="ph-body">
+          <h1 class="title sm">Từ mới</h1>
+          <div style="display:flex; gap:8px; margin-top:14px; flex-wrap:wrap"><span class="chip on">Du lịch</span><span class="chip">Giao tiếp</span><span class="chip">TOEIC</span><span class="chip">+ Chủ đề</span></div>
+          <div class="postcard" style="margin-top:20px">
+            <div class="postcard-in">
+              <div class="stamp pc-stamp" style="--c:var(--red)"><div class="stamp-in"><b>✈</b>Du lịch</div></div>
+              <span class="topic">Thẻ 2 / 5</span>
+              <div class="word" style="margin-top:58px">itinerary</div>
+              <div class="ipa">/aɪˈtɪn.ə.rer.i/ · danh từ</div>
+              <div class="hint">Chạm để lật thẻ</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:6px; justify-content:center; margin-top:18px"><i style="width:22px;height:6px;border-radius:9px;background:var(--blue)"></i><i style="width:22px;height:6px;border-radius:9px;background:var(--blue)"></i><i style="width:22px;height:6px;border-radius:9px;background:var(--rule)"></i><i style="width:22px;height:6px;border-radius:9px;background:var(--rule)"></i><i style="width:22px;height:6px;border-radius:9px;background:var(--rule)"></i></div>
+          <button class="btn mustard" style="width:100%; margin-top:20px">Sinh 5 từ mới</button>
+          <h3 style="font-size:15px; margin-top:26px">Đã lưu hôm nay</h3>
+          <div style="display:grid; gap:8px; margin-top:10px">
+            <div style="display:flex; justify-content:space-between; background:var(--card); border:1px solid var(--rule); border-radius:12px; padding:10px 14px"><span><b style="font:600 17px var(--display)">commute</b> <span style="font:17px var(--hand); color:var(--blue)">đi làm hằng ngày</span></span><span style="font-size:12px;color:var(--muted)">ôn 19/11</span></div>
+            <div style="display:flex; justify-content:space-between; background:var(--card); border:1px solid var(--rule); border-radius:12px; padding:10px 14px"><span><b style="font:600 17px var(--display)">layover</b> <span style="font:17px var(--hand); color:var(--blue)">chặng quá cảnh</span></span><span style="font-size:12px;color:var(--muted)">ôn 19/11</span></div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>Hôm nay</div>
+          <div class="tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 9.5h16"/></svg>Từ mới</div>
+          <div class="tab"><span class="due">12</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4.5h-4.5"/></svg>Ôn tập</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 13 2 2 4-4"/><rect x="5" y="5" width="14" height="15" rx="1"/></svg>Luyện thi</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18" cy="12" r="1.4"/></svg>Thêm</div>
+        </div>
+      </div>
+      <p class="caption">Mặt trước. Nút chính màu vàng tem chỉ dùng cho việc nên làm ngay trên màn hình đó.</p>
+    </div>
+
+    <div>
+      <div class="phone">
+        <div class="status"><span>9:41</span><span>●●● 5G</span></div>
+        <div class="ph-top"><div class="brand">English Study</div><span style="font-size:14px;color:var(--muted)">⏱ 18:30</span></div>
+        <div class="ph-body">
+          <p class="date">Ôn tập · còn 11 từ</p>
+          <h1 class="title sm" style="margin-top:4px">Bạn nhớ từ này không?</h1>
+          <div class="postcard back" style="margin-top:18px">
+            <div class="postcard-in" style="grid-template-columns:1fr; gap:10px">
+              <div>
+                <div style="font:600 30px/1.1 var(--display)">itinerary</div>
+                <div class="meaning" style="margin-top:6px">lịch trình chuyến đi</div>
+                <div class="example">“Our itinerary includes two days in Hội An.”</div>
+              </div>
+              <div class="addr" style="margin-top:6px">
+                <p class="k">Đồng nghĩa</p><p>schedule, route</p>
+                <p class="k" style="margin-top:6px">Lần ôn trước</p><p>“Được”, 6 ngày trước</p>
+              </div>
+            </div>
+          </div>
+          <div class="grade">
+            <button class="g0">Quên<small>mai</small></button>
+            <button class="g1">Khó<small>3 ngày</small></button>
+            <button class="g2">Được<small>9 ngày</small></button>
+            <button class="g3">Dễ<small>21 ngày</small></button>
+          </div>
+          <div style="margin-top:22px; background:var(--card); border:1px solid var(--rule); border-radius:14px; padding:14px 16px">
+            <div style="display:flex; justify-content:space-between; font-size:14px"><span style="font-weight:600">Phiên ôn này</span><span style="color:var(--muted)">1 / 12 thẻ</span></div>
+            <div style="height:6px; background:var(--rule); border-radius:9px; margin-top:10px; overflow:hidden"><div style="width:8%; height:100%; background:var(--blue)"></div></div>
+            <p style="font-size:13px; color:var(--muted); margin-top:10px">Phím tắt trên máy tính: Space lật thẻ, 1–4 để chấm.</p>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>Hôm nay</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 9.5h16"/></svg>Từ mới</div>
+          <div class="tab on"><span class="due">11</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4.5h-4.5"/></svg>Ôn tập</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 13 2 2 4-4"/><rect x="5" y="5" width="14" height="15" rx="1"/></svg>Luyện thi</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18" cy="12" r="1.4"/></svg>Thêm</div>
+        </div>
+      </div>
+      <p class="caption">Ôn tập: mỗi lần một thẻ, ngón cái bấm được cả 4 nút. Dưới mỗi nút là ngày ôn lại theo FSRS.</p>
+    </div>
+
+    <div>
+      <div class="phone dark">
+        <div class="status"><span>9:41</span><span>●●● 5G</span></div>
+        <div class="ph-top"><div class="brand" style="color:var(--ink)">English Study</div><span style="font-size:14px;color:var(--muted)">⏱ 21:14</span></div>
+        <div class="ph-body">
+          <p class="date">Luyện thi · TOEIC, trình độ 3</p>
+          <h1 class="title sm" style="margin-top:4px">Bộ tem của bạn</h1>
+          <p class="lead-in" style="font-size:14.5px">Mỗi part là một con tem. Màu đậm khi bạn làm đúng từ 80% trở lên.</p>
+          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:16px">
+            <div class="stamp" style="--c:var(--red); height:118px"><div class="stamp-in"><b style="font:700 22px/1 var(--display)">P2</b><span style="font-size:11px;color:var(--muted);margin-top:auto">Hỏi – đáp</span><span style="font-weight:700;font-size:15px">48%</span></div></div>
+            <div class="stamp" style="--c:var(--mustard); height:118px"><div class="stamp-in"><b style="font:700 22px/1 var(--display)">P3</b><span style="font-size:11px;color:var(--muted);margin-top:auto">Hội thoại</span><span style="font-weight:700;font-size:15px">67%</span></div></div>
+            <div class="stamp" style="--c:var(--mint); height:118px; --fill:#153a32"><div class="stamp-in"><b style="font:700 22px/1 var(--display)">P4</b><span style="font-size:11px;color:var(--muted);margin-top:auto">Bài nói ngắn</span><span style="font-weight:700;font-size:15px">84%</span></div></div>
+            <div class="stamp" style="--c:var(--red); height:118px"><div class="stamp-in"><b style="font:700 22px/1 var(--display)">P5</b><span style="font-size:11px;color:var(--muted);margin-top:auto">Điền từ vào câu</span><span style="font-weight:700;font-size:15px">54%</span></div></div>
+            <div class="stamp" style="--c:var(--blue); height:118px"><div class="stamp-in"><b style="font:700 22px/1 var(--display)">P6</b><span style="font-size:11px;color:var(--muted);margin-top:auto">Điền đoạn văn</span><span style="font-weight:700;font-size:15px;color:var(--muted)">chưa làm</span></div></div>
+            <div class="stamp" style="--c:var(--mint); height:118px; --fill:#153a32"><div class="stamp-in"><b style="font:700 22px/1 var(--display)">P7</b><span style="font-size:11px;color:var(--muted);margin-top:auto">Đọc hiểu</span><span style="font-weight:700;font-size:15px">81%</span></div></div>
+          </div>
+          <div class="route" style="margin-top:16px; padding:16px 18px; display:flex; justify-content:space-between; align-items:center; gap:12px">
+            <div><h3>Thi thử rút gọn</h3><p style="font-size:13px;color:var(--muted)">6 part, 45 phút, có điểm ước lượng</p></div>
+            <button class="btn primary" style="background:#3d63e0; box-shadow:0 3px 0 #213c99">Làm bài</button>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>Hôm nay</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 9.5h16"/></svg>Từ mới</div>
+          <div class="tab"><span class="due">11</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4.5h-4.5"/></svg>Ôn tập</div>
+          <div class="tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 13 2 2 4-4"/><rect x="5" y="5" width="14" height="15" rx="1"/></svg>Luyện thi</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18" cy="12" r="1.4"/></svg>Thêm</div>
+        </div>
+      </div>
+      <p class="caption">Luyện thi, giao diện tối. Bưu thiếp giữ nền giấy sáng ở cả hai giao diện, như một tấm thiệp thật đặt trên bàn tối.</p>
+    </div>
+  </div>
+
+  <!-- ── Screen 3: flashcard back on desktop ─────────────────────────── -->
+  <h2 class="section">Mặt sau bưu thiếp, trên máy tính</h2>
+  <p class="section-note">Khi màn hình rộng, mặt sau chia đôi đúng như một tấm bưu thiếp: bên trái là nghĩa và câu ví dụ, bên phải là phần "địa chỉ" với từ đồng nghĩa và các bài luyện.</p>
+  <div style="max-width:760px">
+    <div class="postcard back">
+      <div class="postcard-in" style="min-height:280px; padding:24px 26px">
+        <div>
+          <div style="font:600 40px/1.05 var(--display); letter-spacing:-0.02em">reluctant</div>
+          <div class="meaning" style="margin-top:8px">miễn cưỡng, không muốn</div>
+          <div class="example">“She was reluctant to change the itinerary at the last minute.”</div>
+          <div style="display:flex; gap:8px; margin-top:18px; flex-wrap:wrap"><span class="chip on">Nghĩa</span><span class="chip">Viết câu</span><span class="chip">Điền từ</span><span class="chip">Nghe chép</span></div>
+        </div>
+        <div class="split"></div>
+        <div class="addr">
+          <div class="stamp" style="--c:var(--blue); width:70px; height:84px; align-self:flex-end; margin-bottom:auto"><div class="stamp-in" style="align-items:center;justify-content:center;text-align:center;font-size:11px;font-weight:600;color:var(--blue)"><b style="font:700 22px/1 var(--display);display:block;margin-bottom:4px">B2</b>TOEIC</div></div>
+          <p class="k">Đồng nghĩa</p><p>unwilling, hesitant</p>
+          <p class="k" style="margin-top:6px">Trái nghĩa</p><p>eager</p>
+          <div style="display:flex; gap:10px; margin-top:16px"><button class="btn primary">Lưu để ôn</button><button class="btn ghost">Lật lại</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
