@@ -28,6 +28,7 @@ import { weeklyBands, skillRadar, type WeeklyBand, type SkillRadarPoint } from "
 import type { ExamAttempt } from "@/lib/exam/types";
 import Segmented from "@/components/Segmented";
 import StageCensus from "@/components/StageCensus";
+import { topicLabel } from "@/lib/topics";
 
 const PANEL = "panel min-w-0 overflow-hidden p-5 sm:p-6";
 
@@ -138,7 +139,7 @@ export default function StatsPage() {
           <section className={PANEL}><WordsPerDayChart data={wordsPerDay} /></section>
           <section className={PANEL}><StudyTimeChart data={studyTimePerDay} /></section>
           <div className="grid gap-6 lg:grid-cols-2">
-            <section className={PANEL}><TopicDistributionChart data={topicDistribution} /></section>
+            <section className={PANEL}><TopicDistributionChart data={topicDistribution.map((item) => ({ ...item, topic: topicLabel(item.topic) }))} /></section>
             <section className={PANEL}>
               <h2 className="text-base font-semibold text-ink">Tóm tắt theo chủ đề</h2>
               {topicDistribution.length === 0 ? (
@@ -147,7 +148,7 @@ export default function StatsPage() {
                 <ul className="mt-3 divide-y divide-rule">
                   {topicDistribution.map((item) => (
                     <li key={item.topic} className="flex items-center justify-between py-2.5 text-sm">
-                      <span className="text-ink">{item.topic}</span>
+                      <span className="text-ink">{topicLabel(item.topic)}</span>
                       <span className="tabular-nums text-muted">{item.count} từ</span>
                     </li>
                   ))}

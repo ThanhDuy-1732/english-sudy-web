@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { localDateKey } from "@/lib/date";
 import FlashcardGrid from "@/components/FlashcardGrid";
 import TopicSelector from "@/components/TopicSelector";
+import { topicLabel } from "@/lib/topics";
 import QuizMode from "@/components/QuizMode";
 import ReadingMode from "@/components/ReadingMode";
 import { getDailyChallenge, getStreak, setDailyComplete } from "@/lib/daily-challenge";
@@ -145,7 +146,7 @@ export default function HomePage() {
     <main className="mx-auto w-full max-w-6xl px-4 pb-16 pt-8 sm:px-8 lg:pt-12">
       <header className="max-w-2xl">
         <h1 className="page-title">Gieo từ mới</h1>
-        <p className="page-lead">Chọn chủ đề và gieo 5 từ. Lật từng bưu thiếp để xem nghĩa và câu ví dụ, rồi gieo những từ muốn giữ vào vườn để ôn.</p>
+        <p className="page-lead">Chọn một chủ đề, hoặc Ngẫu nhiên để trộn từ nhiều chủ đề, rồi gieo 5 từ. Lật từng bưu thiếp để xem nghĩa và câu ví dụ, rồi gieo những từ muốn giữ vào vườn để ôn.</p>
       </header>
 
       <section aria-label="Chọn chủ đề" className="mt-8 flex flex-col items-start gap-4">
@@ -201,7 +202,7 @@ export default function HomePage() {
         {!loading && words.length === 0 && (
           <div className="postcard relative max-w-xl px-6 pb-7 pt-5">
             <span className="stamp absolute right-4 top-4 h-[5.25rem] w-[4.5rem]"><span><Plant stage={0} size={40} />hạt</span></span>
-            <p className="pr-20 text-sm text-muted">{topic === "Daily Communication" ? "Giao tiếp hằng ngày" : topic}</p>
+            <p className="pr-20 text-sm text-muted">{topicLabel(topic)}</p>
             <p className="mt-10 font-en text-2xl font-semibold text-ink">Chưa có bưu thiếp nào.</p>
             <p className="mt-2 text-base leading-7 text-muted">Bấm <strong className="font-semibold text-ink">Gieo 5 từ mới</strong> để nhận 5 từ cho chủ đề này. Mỗi bưu thiếp có nghĩa tiếng Việt, câu ví dụ, và bài luyện viết câu, điền từ, nghe chép.</p>
           </div>

@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { deleteCustomTopic, getCustomTopics, saveCustomTopic } from "@/lib/custom-topics";
+import { DEFAULT_TOPICS, RANDOM_TOPIC, topicLabel } from "@/lib/topics";
 
-const TOPICS = ["Daily Communication", "TOEIC"];
-// The topic string goes to the AI as-is; the chip shows a Vietnamese name.
-const TOPIC_LABELS: Record<string, string> = { "Daily Communication": "Giao tiếp hằng ngày" };
+const TOPICS = DEFAULT_TOPICS;
 const CHIP = "min-h-11 text-sm font-medium transition-colors";
 const ON = "bg-ink text-paper";
 const OFF = "border border-rule bg-card text-ink hover:border-primary";
@@ -39,6 +38,18 @@ export default function TopicSelector({ value, onChange }: TopicSelectorProps) {
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-3">
       <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => onChange(RANDOM_TOPIC)}
+          aria-pressed={value === RANDOM_TOPIC}
+          className={`${CHIP} inline-flex items-center gap-1.5 rounded-full px-4 ${value === RANDOM_TOPIC ? ON : OFF}`}
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
+            <rect x="4" y="4" width="16" height="16" rx="4" />
+            <g fill="currentColor" stroke="none"><circle cx="9" cy="9" r="1.4" /><circle cx="15" cy="15" r="1.4" /><circle cx="15" cy="9" r="1.4" /><circle cx="9" cy="15" r="1.4" /></g>
+          </svg>
+          {topicLabel(RANDOM_TOPIC)}
+        </button>
         {TOPICS.map((topic) => (
           <button
             type="button"
@@ -47,7 +58,7 @@ export default function TopicSelector({ value, onChange }: TopicSelectorProps) {
             aria-pressed={value === topic}
             className={`${CHIP} rounded-full px-4 ${value === topic ? ON : OFF}`}
           >
-            {TOPIC_LABELS[topic] ?? topic}
+            {topicLabel(topic)}
           </button>
         ))}
         {customTopics.map((topic) => (

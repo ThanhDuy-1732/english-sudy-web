@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Segmented from "@/components/Segmented";
 import Plant, { STAGE_NAMES, growthStage } from "@/components/Plant";
 import StageCensus from "@/components/StageCensus";
+import { topicLabel } from "@/lib/topics";
 import {
   deleteLearnedWord,
   getLearnedWords,
@@ -61,7 +62,7 @@ export default function HistoryPage() {
       </section>
 
       <div className="mb-6 flex flex-wrap items-center gap-3">
-        <Segmented label="Chủ đề" value={filter} onChange={setFilter} options={topics.map((topic) => ({ value: topic, label: topic }))} />
+        <Segmented label="Chủ đề" value={filter} onChange={setFilter} options={topics.map((topic) => ({ value: topic, label: topicLabel(topic) }))} />
         <button
           type="button"
           onClick={() => setMasteryFilter((current) => (current === "all" ? "weak" : "all"))}
@@ -95,7 +96,7 @@ export default function HistoryPage() {
                   <p className="mt-1 break-words font-en text-sm italic text-ink/80 [overflow-wrap:anywhere]">{entry.example}</p>
                   <p className="mt-1.5 flex flex-wrap items-center gap-2 break-words text-xs text-muted [overflow-wrap:anywhere]">
                     {due && <span className="rounded-full bg-marker px-2 py-0.5 font-semibold text-deep">Cần tưới</span>}
-                    {entry.topic} · {new Date(entry.learnedAt).toLocaleDateString("vi-VN")}
+                    {topicLabel(entry.topic)} · {new Date(entry.learnedAt).toLocaleDateString("vi-VN")}
                   </p>
                 </div>
                 <button

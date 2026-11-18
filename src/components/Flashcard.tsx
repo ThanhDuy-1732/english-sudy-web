@@ -1,5 +1,6 @@
 "use client";
 
+import { topicLabel } from "@/lib/topics";
 import { useEffect, useRef, useState } from "react";
 import { getProfile } from "@/lib/profile";
 import { saveLearnedWord, reviewWord, getLearnedWords, type LearnedWord } from "@/lib/storage";
@@ -28,7 +29,6 @@ interface FlashcardProps {
   learned?: LearnedWord;
 }
 
-const TOPIC_LABELS: Record<string, string> = { "Daily Communication": "Giao tiếp hằng ngày" };
 
 export default function Flashcard({
   word,
@@ -209,7 +209,7 @@ export default function Flashcard({
           disabled={loading}
           className="postcard absolute inset-0 flex h-full w-full flex-col px-5 pb-5 pt-4 text-left transition-transform [backface-visibility:hidden] hover:-translate-y-0.5 disabled:cursor-wait"
         >
-          <span className="pr-20 text-sm text-muted">{TOPIC_LABELS[topic] ?? topic}</span>
+          <span className="pr-20 text-sm text-muted">{topicLabel(topic)}</span>
           <span className="stamp absolute right-3 top-3 h-[5.25rem] w-[4.5rem]"><span><Plant stage={stage} size={40} />{STAGE_NAMES[stage].toLowerCase()}</span></span>
           <span className="mt-auto break-words font-en text-[2.5rem] font-semibold leading-tight tracking-tight text-ink [overflow-wrap:anywhere]">
             {loading ? <span className="text-xl font-normal text-muted">Đang tạo câu ví dụ...</span> : word}

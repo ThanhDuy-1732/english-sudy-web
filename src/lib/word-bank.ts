@@ -1,5 +1,6 @@
 import { readStored } from "./safe-json";
 import { getLearnedWords } from "./storage";
+import { RANDOM_TOPIC } from "./topics";
 
 export interface BankWord {
   word: string;
@@ -129,8 +130,9 @@ export function countBank(topic?: string): number {
  * avoided immediately), then a random slice of older bank words and learned words.
  */
 export function pickExcludeSample(topic: string, max = DEFAULT_EXCLUDE_MAX): string[] {
+  // Random has no theme of its own, so every topic's words count as already seen.
   const topicWords = getBank()
-    .filter((entry) => entry.topic === topic)
+    .filter((entry) => topic === RANDOM_TOPIC || entry.topic === topic)
     .map((entry) => entry.word);
   const recentCount = Math.min(RECENT_EXCLUDE_COUNT, topicWords.length);
   const recent = topicWords.slice(topicWords.length - recentCount);

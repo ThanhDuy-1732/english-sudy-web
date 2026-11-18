@@ -129,3 +129,9 @@ test("không crash khi learnedWords có phần tử thiếu word", () => {
   expect(addBankWords([bankWord("gamma")]).added).toBe(1);
   expect(pickExcludeSample("TOEIC", 10)).toEqual(expect.arrayContaining(["beta"]));
 });
+
+test("pickExcludeSample cho chủ đề ngẫu nhiên lấy từ mọi chủ đề", () => {
+  localStorage.setItem("wordBank", JSON.stringify([bankWord("invoice", "TOEIC"), bankWord("greet", "Daily Communication"), bankWord("umbrella", "Random")]));
+  expect(pickExcludeSample("Random").sort()).toEqual(["greet", "invoice", "umbrella"]);
+  expect(pickExcludeSample("TOEIC")).toEqual(["invoice"]);
+});

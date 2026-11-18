@@ -36,7 +36,7 @@ test("renders long saved content with an accessible delete action", async () => 
 
   await waitFor(() => expect(screen.getByText(longWord)).toBeInTheDocument());
   expect(screen.getByRole("button", { name: `Xóa ${longWord}` })).toBeInTheDocument();
-  expect(screen.getByRole("radio", { name: "Daily Communication" })).toHaveAttribute(
+  expect(screen.getByRole("radio", { name: "Giao tiếp hằng ngày" })).toHaveAttribute(
     "aria-checked",
     "false",
   );

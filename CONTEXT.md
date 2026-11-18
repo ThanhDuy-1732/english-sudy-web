@@ -365,6 +365,10 @@ In **review mode** (`isReviewMode=true`): shows 4 review grade buttons — Quên
 
 ---
 
+## Topics (`src/lib/topics.ts`)
+
+`RANDOM_TOPIC = "Random"` is the "Ngẫu nhiên" chip in `TopicSelector`: no theme, the AI picks useful words across many everyday areas (`generateWords` swaps the topic phrase for that instruction). It is stored in the word bank like any topic, and `pickExcludeSample("Random")` excludes words from every topic. `DEFAULT_TOPICS` and `topicLabel(topic)` (Vietnamese label) are used by `TopicSelector`, `Flashcard`, `/`, `/history`, `/stats`.
+
 ## Custom Topics (`src/lib/custom-topics.ts`)
 
 - `getCustomTopics()` — reads `localStorage["customTopics"]`

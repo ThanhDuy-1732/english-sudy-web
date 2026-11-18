@@ -1,4 +1,5 @@
 // src/lib/gemini.ts
+import { RANDOM_TOPIC } from "./topics";
 export interface GeneratedWord {
   word: string;
   meaning: string;
@@ -48,7 +49,11 @@ export async function generateWords(
     const avoidLine = avoid.length
       ? `\nDo NOT use any of these words, they were already shown to the learner: ${avoid.join(", ")}. Pick different words.`
       : "";
-    return `Generate ${missing} English vocabulary words for the topic "${topic}". For each word, provide the Vietnamese meaning.${knownLine}${avoidLine}\nReturn ONLY a JSON array with no markdown: [{"word": "...", "meaning": "..."}]`;
+    const subject =
+      topic === RANDOM_TOPIC
+        ? `useful English vocabulary words picked at random from many different everyday topics (each word from a different area of life; mix nouns, verbs and adjectives; no shared theme)`
+        : `English vocabulary words for the topic "${topic}"`;
+    return `Generate ${missing} ${subject}. For each word, provide the Vietnamese meaning.${knownLine}${avoidLine}\nReturn ONLY a JSON array with no markdown: [{"word": "...", "meaning": "..."}]`;
   };
 
   const ask = async (missing: number): Promise<GeneratedWord[]> => {

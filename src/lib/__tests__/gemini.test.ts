@@ -134,3 +134,11 @@ test("generateReading returns passage and questions", async () => {
   mockFn.mockResolvedValue(JSON.stringify(payload));
   expect(await generateReading(["negotiate"], mockFn)).toEqual(payload);
 });
+
+test("generateWords with the random topic asks for a mix of everyday topics, not a 'Random' theme", async () => {
+  mockFn.mockResolvedValue(JSON.stringify([{ word: "umbrella", meaning: "cái ô" }]));
+  await generateWords("Random", mockFn);
+  const prompt = mockFn.mock.calls[0][0];
+  expect(prompt).toContain("many different everyday topics");
+  expect(prompt).not.toContain('topic "Random"');
+});
