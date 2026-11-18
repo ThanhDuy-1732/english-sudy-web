@@ -23,8 +23,8 @@ function buildPath(): PathItem[] {
   const items: PathItem[] = [];
   let rank = 1;
 
-  // Weakest skills from mastery
-  const sorted = [...mastery].sort((a, b) => a.overallMastery - b.overallMastery);
+  // Weakest skills from mastery; a skill at 80% or more is not suggested as needing work.
+  const sorted = mastery.filter((s) => s.overallMastery < 80).sort((a, b) => a.overallMastery - b.overallMastery);
   for (const skill of sorted.slice(0, 2)) {
     items.push({
       rank: rank++,

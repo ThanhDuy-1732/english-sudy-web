@@ -255,12 +255,12 @@ export default function RoleplayPage() {
             <div className="bubble">
               <p>{t.text}</p>
               {t.correction && (
-                <button
-                  className="correction-chip"
-                  onClick={() => alert(`✗ ${t.correction!.original}\n✓ ${t.correction!.fixed}\n${t.correction!.note}`)}
-                >
-                  Xem sửa lỗi
-                </button>
+                <details className="correction">
+                  <summary>Xem sửa lỗi</summary>
+                  <p className="fix-line"><span aria-hidden="true">✗ </span><span className="sr-only">Câu của bạn: </span><s>{t.correction.original}</s></p>
+                  <p className="fix-line"><span aria-hidden="true">✓ </span><span className="sr-only">Nên viết: </span><strong>{t.correction.fixed}</strong></p>
+                  {t.correction.note && <p className="fix-note">{t.correction.note}</p>}
+                </details>
               )}
             </div>
           </div>
@@ -311,7 +311,14 @@ export default function RoleplayPage() {
         .turn.ai .bubble { background: rgb(var(--rule)); color: rgb(var(--ink)); border-bottom-left-radius: 4px; }
         .bubble p { margin: 0; }
         .bubble.loading { color: rgb(var(--muted)); font-style: italic; }
-        .correction-chip { display: block; margin-top: 0.35rem; background: none; border: none; color: rgba(255,255,255,0.7); font-size: 0.75rem; cursor: pointer; padding: 0; text-decoration: underline; }
+        .correction { margin-top: 0.5rem; }
+        .correction summary { display: inline-flex; align-items: center; min-height: 32px; cursor: pointer; color: rgb(var(--primary-text)); font-size: 0.8rem; font-weight: 600; text-decoration: underline; list-style: none; }
+        .correction summary::-webkit-details-marker { display: none; }
+        .correction[open] summary { text-decoration: none; }
+        .fix-line, .fix-note { margin: 0.35rem 0 0; padding: 0.4rem 0.6rem; border-radius: 8px; background: rgb(var(--card)); font-size: 0.85rem; }
+        .fix-line s { color: rgb(var(--margin)); }
+        .fix-line strong { color: rgb(var(--ok)); }
+        .fix-note { background: none; padding: 0.25rem 0 0; color: rgb(var(--muted)); }
         .input-area { position: sticky; bottom: calc(5.75rem + env(safe-area-inset-bottom)); z-index: 10; display: flex; gap: 0.5rem; padding: 0.75rem 1rem; border-top: 1px solid rgb(var(--rule)); background: rgb(var(--paper)); flex-shrink: 0; }
         @media (min-width: 1024px) { .input-area { bottom: 0; } }
         .input-area input { flex: 1; min-width: 0; min-height: 44px; background: rgb(var(--card)); color: rgb(var(--ink)); padding: 0.6rem 0.9rem; border: 1.5px solid rgb(var(--rule)); border-radius: 20px; font-size: 0.9rem; }
