@@ -42,14 +42,14 @@ test("renders long saved content with an accessible delete action", async () => 
   );
 });
 
-test("shows mastery stars and filters weak words", async () => {
+test("shows growth stage and filters weak words", async () => {
   localStorage.setItem("learnedWords", JSON.stringify([
     { word: "weak", meaning: "yếu", example: "A sentence.", topic: "TOEIC", learnedAt: "2026-07-16T00:00:00.000Z", mastery: 1 },
     { word: "strong", meaning: "mạnh", example: "Another sentence.", topic: "TOEIC", learnedAt: "2026-07-16T00:00:00.000Z", mastery: 4 },
   ]));
   render(<HistoryPage />);
   await waitFor(() => expect(screen.getByText("weak")).toBeInTheDocument());
-  expect(screen.getByLabelText("Mastery 1 trên 5 sao")).toBeInTheDocument();
+  expect(screen.getByLabelText("Giai đoạn Mầm (1/5)")).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Chỉ từ chưa thuộc" }));
   expect(screen.getByText("weak")).toBeInTheDocument();
   expect(screen.queryByText("strong")).not.toBeInTheDocument();

@@ -87,7 +87,7 @@ export default function VoiceSettingsTab() {
             id="voice-select"
             value={settings.voiceURI ?? ""}
             onChange={(event) => update({ voiceURI: event.target.value || null })}
-            className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-white/30 focus:outline-none"
+            className="flex-1 rounded-lg border border-rule bg-ink/5 px-3 py-2 text-sm text-ink focus:border-rule focus:outline-none"
           >
             <option value="">Mặc định hệ thống</option>
             {voices.map((voice) => (
@@ -99,7 +99,7 @@ export default function VoiceSettingsTab() {
           <button
             type="button"
             onClick={handleTest}
-            className="shrink-0 rounded-lg bg-white/10 px-3 py-2 text-sm font-medium text-ink hover:bg-white/20"
+            className="shrink-0 rounded-lg bg-ink/5 px-3 py-2 text-sm font-medium text-ink hover:bg-ink/5"
           >
             Thử nghe
           </button>
@@ -127,7 +127,7 @@ export default function VoiceSettingsTab() {
       <button
         type="button"
         onClick={handleReset}
-        className="rounded-lg border border-white/10 px-4 py-2 text-sm text-muted hover:bg-white/5"
+        className="rounded-lg border border-rule px-4 py-2 text-sm text-muted hover:bg-ink/5"
       >
         Reset về mặc định
       </button>

@@ -32,7 +32,7 @@ function SetCountdownModal({ onClose }: { onClose: () => void }) {
   return (
     <ModalPortal>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" role="dialog" aria-modal="true" aria-label="Đặt thời gian học">
-        <div className="w-[calc(100vw-2rem)] max-w-[20rem] rounded-2xl border border-white/10 bg-paper canvas-surface p-6 shadow-xl">
+        <div className="w-[calc(100vw-2rem)] max-w-[20rem] rounded-2xl border border-rule bg-paper canvas-surface p-6 shadow-xl">
           <h2 className="mb-4 text-lg font-semibold text-ink">Đặt thời gian học</h2>
           <div className="mb-4 flex gap-2">
             {[10, 25, 45].map((preset) => (
@@ -41,7 +41,7 @@ function SetCountdownModal({ onClose }: { onClose: () => void }) {
                 type="button"
                 onClick={() => setMinutes(preset)}
                 className={`flex-1 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
-                  minutes === preset ? "bg-primary text-white" : "bg-white/10 text-ink hover:bg-white/15"
+                  minutes === preset ? "bg-primary text-white" : "bg-ink/5 text-ink hover:bg-ink/5"
                 }`}
               >
                 {preset} phút
@@ -56,11 +56,11 @@ function SetCountdownModal({ onClose }: { onClose: () => void }) {
               max="180"
               value={minutes}
               onChange={(event) => setMinutes(Math.max(1, Number(event.target.value)))}
-              className="mt-1 w-full rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-white focus:border-primary focus:outline-none"
+              className="mt-1 w-full rounded-xl border border-rule bg-ink/5 px-4 py-2 text-ink focus:border-primary focus:outline-none"
             />
           </label>
           <div className="flex gap-2">
-            <button type="button" onClick={onClose} className="flex-1 rounded-xl bg-white/10 py-2 text-sm text-ink hover:bg-white/15">
+            <button type="button" onClick={onClose} className="flex-1 rounded-xl bg-ink/5 py-2 text-sm text-ink hover:bg-ink/5">
               Hủy
             </button>
             <button type="button" onClick={handleStart} className="flex-1 rounded-xl bg-primary py-2 text-sm font-semibold text-white hover:bg-primary-strong">
@@ -81,13 +81,13 @@ function TimeUpModal() {
   return (
     <ModalPortal>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" role="dialog" aria-modal="true" aria-label="Hết giờ">
-        <div className="w-[calc(100vw-2rem)] max-w-[20rem] rounded-2xl border border-white/10 bg-paper canvas-surface p-6 text-center shadow-xl">
+        <div className="w-[calc(100vw-2rem)] max-w-[20rem] rounded-2xl border border-rule bg-paper canvas-surface p-6 text-center shadow-xl">
           <h2 className="mb-2 text-lg font-semibold text-ink">Hết giờ rồi!</h2>
           <p className="mb-6 text-sm text-muted">
-            Bạn đã học <strong className="text-white">{studiedMinutes} phút</strong> hôm nay.
+            Bạn đã học <strong className="text-ink">{studiedMinutes} phút</strong> hôm nay.
           </p>
           <div className="flex gap-2">
-            <button type="button" onClick={clearTimeUp} className="flex-1 rounded-xl bg-white/10 py-2 text-sm text-ink hover:bg-white/15">
+            <button type="button" onClick={clearTimeUp} className="flex-1 rounded-xl bg-ink/5 py-2 text-sm text-ink hover:bg-ink/5">
               Nghỉ thôi
             </button>
             {targetMinutes > 0 && (

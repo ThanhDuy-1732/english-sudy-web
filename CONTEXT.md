@@ -427,6 +427,7 @@ Không cần server. `studyNudge(reminderTime, now?)` trả `{ dueWords, streak 
 
 | Component | Purpose |
 |---|---|
+| `StageCensus` | Row of 6 plants with the number of saved words at each stage (`/history`, `/stats`) |
 | `Plant` | SVG of a word's growth stage 0–5 (Hạt, Mầm, Lá, Bụi, Nụ, Hoa = mastery stars); exports `STAGE_NAMES`, `growthStage(mastery)` |
 | `GardenBed` | `/today`: the 12 most recently saved words as plants on soil labels; due words are thirsty (yellow drop and rim); "Tưới N cây" links to `/review` |
 | `FlashcardGrid` | Renders word grid, passes `onFlip` counter up |
@@ -516,7 +517,7 @@ Jest + `@testing-library/react`. Config: `jest.config.ts` + `jest.setup.ts`. Tes
 - **Type** (`layout.tsx`, next/font with the vietnamese subset): `font-sans` = Lexend (UI), `font-display` = Baloo 2 (headings, brand), `font-en` = Fraunces — set English study content (words, example sentences, formulas, passages) in `font-en`.
 - `.postcard`: airmail-striped border around an always-light card (light tokens forced inside, also in dark mode). `.stamp`: perforated stamp box for a `Plant`. `.marker-stroke`: highlighter behind a short number.
 - Phone chrome: floating rounded tab bar (`bottom-3`, sprout/watering-can icons), `.app-content` bottom padding 6.5rem, `.pwa-status` above it. Theme colours #eef6f0 / #0e1f19 (`lib/theme.ts`, `manifest.ts`).
-- `data-theme` is the resolved theme; `dark:` follows it (`darkMode: ["selector", '[data-theme="dark"]']`). Older pages written for a dark canvas (`text-white`, `white/NN`) or light cards (`bg-white`, grey ink, `*-50/100` tints) are re-mapped by the two blocks at the end of `globals.css`. styled-jsx uses `rgb(var(--token))` and `:global(:root[data-theme="dark"]) .x`.
+- `data-theme` is the resolved theme; `dark:` follows it. The old class re-map blocks were removed: use tokens only (no `bg-white`, `text-gray-*`, `text-white` on transparent backgrounds). `.chip`/`.chip-on` = pill toggles, `.choice` + `-right`/`-wrong`/`-dim` = quiz answers. `/history` is "Vườn từ" (plants per word, stage census, "Cần tưới"); `/path` is a stepping-stone path.
 - `dark-surface` keeps light text on deliberately dark elements in light theme; `keep-light` keeps a light button in dark theme.
 - Rule when adding UI: text/background must read in **both** themes (contrast ≥3; `e2e/contrast.e2e.js`).
 - Limits: `apple-mobile-web-app-status-bar-style` and manifest `theme_color` are static (#0e182b).

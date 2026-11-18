@@ -71,7 +71,7 @@ export default function GrammarPage() {
         <select
           value={selectedId}
           onChange={(event) => setSelectedId(event.target.value)}
-          className="min-h-11 w-full rounded-lg bg-white/10 px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-purple-400"
+          className="min-h-11 w-full rounded-lg bg-ink/5 px-3 py-2.5 text-sm text-ink focus:outline-none focus:ring-1 focus:ring-purple-400"
         >
           {allTopics.map((topic) => (
             <option key={topic.id} value={topic.id}>
@@ -82,7 +82,7 @@ export default function GrammarPage() {
       </div>
 
       {error && (
-        <p className="mb-4 rounded-lg border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+        <p className="mb-4 rounded-lg border border-margin/30 bg-margin-soft px-4 py-3 text-sm text-margin">
           {error}
         </p>
       )}
@@ -105,7 +105,7 @@ export default function GrammarPage() {
       </div>
 
       <div className="mt-6 md:hidden">
-        <div className="rounded-lg border border-white/10 bg-white/5 p-4">
+        <div className="rounded-lg border border-rule bg-ink/5 p-4">
           <p className="mb-2 text-sm font-medium text-ink">Thêm chủ đề ngữ pháp</p>
           <form
             onSubmit={(event) => {
@@ -123,7 +123,7 @@ export default function GrammarPage() {
               type="text"
               placeholder="Nhập chủ đề mới..."
               disabled={isAdding}
-              className="min-h-11 min-w-0 flex-1 rounded-lg bg-white/10 px-3 py-2 text-sm text-white placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-purple-400 disabled:opacity-60"
+              className="min-h-11 min-w-0 flex-1 rounded-lg bg-ink/5 px-3 py-2 text-sm text-ink placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-purple-400 disabled:opacity-60"
             />
             <button
               type="submit"

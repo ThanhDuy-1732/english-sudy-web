@@ -33,8 +33,8 @@ export function ProviderBadge() {
                   setProvider(p.id);
                   setOpen(false);
                 }}
-                className={`w-full px-4 py-2 text-left text-sm hover:bg-white/10 ${
-                  p.id === currentProvider ? "font-semibold text-white" : "text-muted"
+                className={`w-full px-4 py-2 text-left text-sm hover:bg-ink/5 ${
+                  p.id === currentProvider ? "font-semibold text-ink" : "text-muted"
                 }`}
               >
                 {p.id === currentProvider && "✓ "}
@@ -47,7 +47,7 @@ export function ProviderBadge() {
 
       <Link
         href="/settings"
-        className="flex items-center rounded-full p-1 text-muted hover:text-white"
+        className="flex items-center rounded-full p-1 text-muted hover:text-ink"
         title="Cài đặt provider"
         aria-label="Cài đặt provider"
       >

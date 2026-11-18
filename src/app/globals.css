@@ -177,7 +177,6 @@
     @apply inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 text-[15px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50;
   }
 
-  /* color is set directly: @apply text-white would also pull in the light-theme .text-white re-map below. */
   .btn-primary {
     @apply bg-primary enabled:hover:bg-primary-strong [&:is(a)]:hover:bg-primary-strong;
     color: #fff;
@@ -194,6 +193,28 @@
 
   .field {
     @apply min-h-11 rounded-2xl border border-rule bg-card px-4 py-2 text-ink placeholder:text-muted focus:border-primary focus:outline-none;
+  }
+
+  /* Pill toggle for quiz/setup options; .chip-on marks the chosen one. */
+  .chip {
+    @apply inline-flex min-h-11 items-center justify-center rounded-full border border-rule bg-card px-4 text-sm font-medium text-ink transition-colors hover:border-primary;
+  }
+  .chip-on {
+    @apply border-primary bg-primary font-semibold text-white hover:border-primary;
+  }
+
+  /* Answer option in a quiz. After answering: .choice-right (green), .choice-wrong (coral), .choice-dim (the rest). */
+  .choice {
+    @apply flex min-h-12 w-full items-center rounded-2xl border border-rule bg-card px-4 py-3 text-left text-ink transition-colors hover:border-primary;
+  }
+  .choice-right {
+    @apply border-ok bg-ok-soft font-medium text-ink hover:border-ok;
+  }
+  .choice-wrong {
+    @apply border-margin bg-margin-soft text-ink hover:border-margin;
+  }
+  .choice-dim {
+    @apply opacity-50 hover:border-rule;
   }
 
   /*
@@ -264,155 +285,16 @@
   color: rgb(var(--primary-text));
 }
 
-/*
- * Older pages were written for a dark canvas (text-white, white/NN overlays) or for light cards (bg-white, grey ink).
- * The two blocks below re-map those generic classes so both kinds of page read correctly in both themes.
- */
-:root[data-theme="light"] .text-white:not([class*="bg-"]) {
-  color: rgb(var(--ink));
-}
-
-:root[data-theme="light"] [class*="border-white/"] {
-  border-color: rgb(var(--rule));
-}
-
-:root[data-theme="light"] [class*="bg-white/"] {
-  background-color: rgb(var(--ink) / 0.05);
-}
-
-:root[data-theme="light"] [class*="hover:bg-white/"]:hover {
-  background-color: rgb(var(--ink) / 0.09);
-}
-
-:root[data-theme="light"] :is(.text-gray-300, .text-gray-400) {
-  color: rgb(var(--muted));
-}
-
-:root[data-theme="light"] :is(.text-red-300, .text-red-400) {
-  color: #b91c1c;
-}
-
-:root[data-theme="light"] :is(.text-green-300, .text-green-400, .text-green-500) {
-  color: #15803d;
-}
-
-:root[data-theme="light"] :is(.text-blue-300, .text-blue-400, .text-purple-300, .text-purple-400) {
-  color: rgb(var(--primary-text));
-}
-
-:root[data-theme="light"] :is(.text-yellow-300, .text-yellow-400, .text-yellow-500, .text-orange-300, .text-orange-400, .text-orange-500) {
-  color: #a16207;
-}
-
-:root[data-theme="light"] :is(.text-white[class*="bg-white/"], .text-white[class*="bg-purple-600/"]) {
-  color: rgb(var(--ink));
-}
-
-:root[data-theme="light"] [class*="text-white/"] {
-  color: rgb(var(--ink) / 0.62);
-}
-
-:root[data-theme="light"] [class*="placeholder-white/"]::placeholder {
-  color: rgb(var(--ink) / 0.5);
-}
-
-:root[data-theme="light"] :is(.recharts-cartesian-axis-tick-value, .recharts-polar-angle-axis-tick-value, .recharts-polar-radius-axis-tick-value) {
+/* Recharts draws its own text and grid: follow the tokens. */
+:is(.recharts-cartesian-axis-tick-value, .recharts-polar-angle-axis-tick-value, .recharts-polar-radius-axis-tick-value) {
   fill: rgb(var(--muted)) !important;
 }
 
-/* Deliberately dark elements keep light text in the light theme. */
-:root[data-theme="light"] .dark-surface,
-:root[data-theme="light"] .dark-surface .text-white {
-  color: #fff;
-}
-
-:root[data-theme="dark"] .bg-white {
-  background-color: rgb(var(--card));
-}
-
-:root[data-theme="dark"] .bg-white:not([class*="text-"]) {
-  color: rgb(var(--ink));
-}
-
-:root[data-theme="dark"] :is(.text-gray-500, .text-gray-600) {
-  color: rgb(var(--muted));
-}
-
-:root[data-theme="dark"] :is(.text-gray-700, .text-gray-800, .text-gray-900) {
-  color: rgb(var(--ink));
-}
-
-:root[data-theme="dark"] :is(.bg-gray-50, .bg-gray-100) {
-  background-color: rgb(255 255 255 / 0.06);
-}
-
-:root[data-theme="dark"] :is(.border-gray-100, .border-gray-200, .border-gray-300) {
-  border-color: rgb(var(--rule));
-}
-
-:root[data-theme="dark"] :is(.bg-green-50, .bg-green-100) {
-  background-color: rgba(34, 197, 94, 0.16);
-}
-
-:root[data-theme="dark"] :is(.bg-red-50, .bg-red-100) {
-  background-color: rgba(239, 68, 68, 0.16);
-}
-
-:root[data-theme="dark"] :is(.bg-yellow-50, .bg-yellow-100, .bg-amber-50) {
-  background-color: rgba(234, 179, 8, 0.16);
-}
-
-:root[data-theme="dark"] :is(.bg-blue-50, .bg-blue-100, .bg-purple-50, .bg-purple-100) {
-  background-color: rgb(var(--primary-soft));
-}
-
-:root[data-theme="dark"] :is(.bg-orange-50, .bg-orange-100) {
-  background-color: rgba(249, 115, 22, 0.18);
-}
-
-:root[data-theme="dark"] :is(.text-green-600, .text-green-700, .text-green-800) {
-  color: #86efac;
-}
-
-:root[data-theme="dark"] :is(.text-red-500, .text-red-600, .text-red-700, .text-red-800) {
-  color: #fca5a5;
-}
-
-:root[data-theme="dark"] :is(.text-yellow-700, .text-yellow-800, .text-amber-700) {
-  color: #fde047;
-}
-
-:root[data-theme="dark"] :is(.text-blue-500, .text-blue-600, .text-blue-700, .text-blue-800, .text-purple-600, .text-purple-700) {
-  color: rgb(var(--primary-text));
-}
-
-:root[data-theme="dark"] :is(.text-orange-700, .text-orange-800) {
-  color: #fdba74;
-}
-
-:root[data-theme="dark"] .text-pink-700 {
-  color: #f9a8d4;
-}
-
-/* Deliberately light controls stay light in the dark theme. */
-:root[data-theme="dark"] .keep-light {
-  background-color: #fff;
-  color: #17332a;
-}
-
-:root[data-theme="dark"] .keep-light:hover:not(:disabled) {
-  background-color: rgb(var(--marker));
-}
-
-:root[data-theme="dark"] .recharts-legend-item-text {
+.recharts-legend-item-text {
   color: rgb(var(--ink)) !important;
 }
 
-:root[data-theme="dark"] :is(.recharts-cartesian-axis-tick-value, .recharts-polar-angle-axis-tick-value, .recharts-polar-radius-axis-tick-value) {
-  fill: rgb(var(--muted)) !important;
-}
-
-:root[data-theme="dark"] .recharts-cartesian-grid line {
+.recharts-cartesian-grid line {
   stroke: rgb(var(--rule));
 }
 

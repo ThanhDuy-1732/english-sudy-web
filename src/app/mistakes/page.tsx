@@ -58,24 +58,24 @@ export default function MistakesPage() {
       </div>
 
       {filtered.length === 0 && (
-        <p className="text-gray-500 text-center py-12">Không có lỗi nào.</p>
+        <p className="text-muted text-center py-12">Không có lỗi nào.</p>
       )}
 
       <ul className="space-y-3">
         {filtered.map((m) => (
           <li key={m.id} className="border rounded-lg p-4 border-rule">
             <div className="flex justify-between items-start mb-1">
-              <span className="text-xs font-medium text-blue-500">
+              <span className="text-xs font-medium text-primary-text">
                 {SKILL_LABELS[m.skill]} · {questionTypeLabel(m.category)}
               </span>
-              <span className="text-xs text-gray-400">{m.occurrenceCount}×</span>
+              <span className="text-xs text-muted">{m.occurrenceCount}×</span>
             </div>
             <div className="text-sm mb-1">
-              <span className="line-through text-red-500">{m.userAnswer}</span>
+              <span className="line-through text-margin">{m.userAnswer}</span>
               {" → "}
-              <span className="font-medium text-green-600">{m.correctAnswer}</span>
+              <span className="font-medium text-ok">{m.correctAnswer}</span>
             </div>
-            <p className="text-xs text-gray-500">{m.explanation}</p>
+            <p className="text-xs text-muted">{m.explanation}</p>
             <MistakeWords mistake={m} />
             {m.status !== "resolved" && (
               <button

@@ -56,7 +56,7 @@ export default function ContextPracticePage() {
     const parts = text.split(/(\*\*[^*]+\*\*)/g);
     return parts.map((p, i) =>
       p.startsWith("**") && p.endsWith("**")
-        ? <strong key={i} className="text-blue-600">{p.slice(2, -2)}</strong>
+        ? <strong key={i} className="rounded bg-marker/50 px-0.5 text-ink">{p.slice(2, -2)}</strong>
         : p
     );
   }
@@ -66,35 +66,35 @@ export default function ContextPracticePage() {
       <Link href="/" className="back-link">← Từ mới</Link>
       <h1 className="page-title mb-4">Luyện từ trong ngữ cảnh</h1>
 
-      <p className="text-sm text-gray-500 mb-4">Chọn 2–8 từ, sau đó tạo nội dung chứa các từ đó.</p>
+      <p className="page-lead mb-4">Chọn 2–8 từ, sau đó tạo nội dung chứa các từ đó.</p>
 
       <input
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="w-full border rounded-lg px-3 py-2 text-sm mb-3 border-rule"
+        className="field mb-3 w-full"
         placeholder="Tìm từ..."
       />
 
-      <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto mb-4 border rounded-lg p-3 border-rule">
+      <div className="panel mb-4 flex max-h-56 flex-wrap gap-2 overflow-y-auto p-3">
         {filtered.length === 0 && (
-          <p className="text-sm text-gray-400 w-full text-center py-2">
+          <p className="w-full py-2 text-center text-sm text-muted">
             {allWords.length === 0 ? "Chưa có từ nào." : "Không tìm thấy từ."}
           </p>
         )}
         {filtered.map((w) => (
           <button key={w} onClick={() => toggle(w)}
-            className={`px-2 py-1 rounded text-sm ${selected.has(w) ? "bg-blue-600 text-white" : "bg-gray-100 dark:bg-gray-800"}`}>
+            aria-pressed={selected.has(w)} className={`chip font-en ${selected.has(w) ? "chip-on" : ""}`}>
             {w}
           </button>
         ))}
       </div>
 
-      <p className="text-xs text-gray-400 mb-3">Đã chọn: {selected.size} từ</p>
+      <p className="mb-3 text-sm text-muted">Đã chọn: {selected.size} từ</p>
 
       <div className="flex gap-2 mb-4 flex-wrap">
         {(Object.keys(FORMAT_LABELS) as Format[]).map((f) => (
           <button key={f} onClick={() => setFormat(f)}
-            className={`px-3 py-1.5 rounded text-sm ${format === f ? "bg-purple-600 text-white" : "bg-gray-100 dark:bg-gray-800"}`}>
+            aria-pressed={format === f} className={`chip ${format === f ? "chip-on" : ""}`}>
             {FORMAT_LABELS[f]}
           </button>
         ))}
@@ -109,7 +109,7 @@ export default function ContextPracticePage() {
       </button>
 
       {result && (
-        <div className="bg-paper rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap">
+        <div className="postcard whitespace-pre-wrap px-6 py-6 font-en text-lg leading-relaxed">
           {renderWithBold(result)}
         </div>
       )}

@@ -22,7 +22,7 @@ export default function WeaknessRadar({ attempts }: { attempts: ExamAttempt[] })
     return (
       <section>
         <h2 className="mb-3 text-base font-semibold text-ink">Điểm yếu theo kỹ năng</h2>
-        <p className="py-8 text-center text-sm text-gray-500">Chưa có dữ liệu luyện thi</p>
+        <p className="py-8 text-center text-sm text-muted">Chưa có dữ liệu luyện thi</p>
       </section>
     );
   }

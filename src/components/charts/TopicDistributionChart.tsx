@@ -8,7 +8,7 @@ const COLORS = ["#2e9e5b", "#2f8fb5", "#d99a00", "#e0533f", "#8a6fd1", "#6b7d74"
 export default function TopicDistributionChart({ data }: { data: { topic: string; count: number }[] }) {
   return <section aria-labelledby="topic-distribution-title">
     <h2 id="topic-distribution-title" className="mb-3 text-base font-semibold text-ink">Phân bổ theo chủ đề</h2>
-    {data.length === 0 ? <p className="py-8 text-center text-sm text-gray-500">Chưa có dữ liệu</p> : <div className="h-[220px] w-full" role="img" aria-label="Biểu đồ phân bổ từ theo chủ đề">
+    {data.length === 0 ? <p className="py-8 text-center text-sm text-muted">Chưa có dữ liệu</p> : <div className="h-[220px] w-full" role="img" aria-label="Biểu đồ phân bổ từ theo chủ đề">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie data={data} dataKey="count" nameKey="topic" cx="50%" cy="45%" innerRadius={48} outerRadius={78} paddingAngle={2}>

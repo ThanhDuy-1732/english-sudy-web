@@ -183,28 +183,28 @@ export default function GrammarQuizPage() {
         <h1 className="page-title mb-6">Quiz Ngữ pháp</h1>
         <div className="space-y-4">
           <div>
-            <p className="text-sm font-medium mb-2">Số câu</p>
+            <p className="mb-2 text-sm font-medium text-muted">Số câu</p>
             <div className="flex gap-2">
               {([5, 10, 20] as const).map((n) => (
                 <button key={n} onClick={() => setCount(n)}
-                  className={`px-4 py-2 rounded ${count === n ? "bg-blue-600 text-white" : "bg-gray-100 dark:bg-gray-800"}`}>
+                  aria-pressed={count === n} className={`chip min-w-14 ${count === n ? "chip-on" : ""}`}>
                   {n}
                 </button>
               ))}
             </div>
           </div>
           <div>
-            <p className="text-sm font-medium mb-2">Chủ đề</p>
+            <p className="mb-2 text-sm font-medium text-muted">Chủ đề</p>
             <div className="flex gap-2 flex-wrap">
               {([["all", "Tất cả"], ["weak", "Điểm yếu"], ["bookmarks", "Đã lưu"]] as const).map(([v, l]) => (
                 <button key={v} onClick={() => setMode(v)}
-                  className={`px-4 py-2 rounded ${mode === v ? "bg-purple-600 text-white" : "bg-gray-100 dark:bg-gray-800"}`}>
+                  aria-pressed={mode === v} className={`chip ${mode === v ? "chip-on" : ""}`}>
                   {l}
                 </button>
               ))}
             </div>
           </div>
-          {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+          {error && <p role="alert" className="text-sm text-margin">{error}</p>}
           <button onClick={startQuiz} disabled={loading}
             className="btn btn-primary w-full">
             {loading ? "Đang tải..." : "Bắt đầu"}
@@ -227,16 +227,16 @@ export default function GrammarQuizPage() {
     return (
       <main className="page">
         <h1 className="page-title mb-2">Kết quả</h1>
-        <p className="text-4xl font-bold text-blue-600 mb-1">{correct}/{results.length}</p>
-        <p className="text-gray-500 mb-8">{Math.round((correct / results.length) * 100)}% chính xác</p>
+        <p className="mb-1 font-display text-5xl font-extrabold tabular-nums text-primary-text">{correct}/{results.length}</p>
+        <p className="mb-8 text-muted">{Math.round((correct / results.length) * 100)}% chính xác</p>
         {topWeak && (
           <Link
             href={`/exam/drill/RC5?topic=${encodeURIComponent(worstCounts[topWeak])}&grammarSlug=${encodeURIComponent(topWeak)}`}
-            className="mt-2 mb-4 block px-6 py-2 bg-orange-500 text-white rounded-lg text-center">
+            className="btn mb-4 mt-2 bg-marker font-semibold text-deep hover:brightness-95">
             Luyện tiếp trong TOEIC RC5
           </Link>
         )}
-        <div className="flex gap-3 justify-center">
+        <div className="flex gap-3">
           <button onClick={() => setPhase("setup")} className="btn btn-primary">Làm lại</button>
           <Link href="/grammar" className="btn btn-secondary">Quay lại</Link>
         </div>
@@ -256,20 +256,16 @@ export default function GrammarQuizPage() {
 
   return (
     <main className="page">
-      <div className="flex justify-between text-sm text-gray-500 mb-4">
+      <div className="mb-4 flex justify-between gap-3 text-sm text-muted">
         <span>{currentQ.topicName} — {currentQ.subRuleName}</span>
         <span>{current + 1}/{count}</span>
       </div>
-      <p className="text-base font-medium mb-4">{currentQ.question.question}</p>
+      <p className="postcard mb-5 px-6 py-8 font-en text-xl leading-relaxed">{currentQ.question.question}</p>
       <div className="space-y-2">
         {(currentQ.question.options ?? [currentQ.question.answer]).map((opt) => {
           const isCorrect = opt === currentQ.question.answer;
           const isSelected = opt === selected;
-          let cls = "w-full text-left px-4 py-3 rounded border text-sm ";
-          if (selected === null) cls += "hover:bg-gray-50 dark:hover:bg-gray-800";
-          else if (isCorrect) cls += "bg-green-50 border-green-500 text-green-800 dark:bg-green-900/20 dark:text-green-300";
-          else if (isSelected) cls += "bg-red-50 border-red-400 text-red-700 dark:bg-red-900/20 dark:text-red-300";
-          else cls += "opacity-50";
+          const cls = `choice font-en ${selected === null ? "" : isCorrect ? "choice-right" : isSelected ? "choice-wrong" : "choice-dim"}`;
           return (
             <button key={opt} onClick={() => handleAnswer(opt)} className={cls} disabled={selected !== null && !isCorrect && !isSelected}>
               {opt}

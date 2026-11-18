@@ -153,7 +153,7 @@ function SkillGrove({ parts, accuracy }: { parts: { part: string; name: string }
           return (
             <li key={part} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end" title={`${name}: ${pct === null ? "chưa làm" : `${pct}% đúng`}`}>
               <span
-                className={`flex w-full max-w-[3.25rem] justify-center rounded-t-[1.6rem] rounded-b-2xl pt-1.5 font-display text-sm font-bold ${color} ${pct !== null && pct >= 60 && pct < 80 ? "text-deep" : "text-white"}`}
+                className={`flex w-full max-w-[3.25rem] justify-center rounded-t-[1.6rem] rounded-b-2xl pt-1.5 font-display text-sm font-bold ${color} ${pct !== null && pct >= 60 && pct < 80 ? "text-deep" : "text-ink"}`}
                 style={{ height: `${pct === null ? 18 : Math.max(22, pct)}%` }}
               >
                 {pct === null ? "" : `${pct}%`}

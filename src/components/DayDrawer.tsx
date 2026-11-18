@@ -30,7 +30,7 @@ function formatDateVi(date: string): string {
 
 function MasteryStars({ mastery = 0 }: { mastery?: number }) {
   return (
-    <span className="text-xs text-amber-400" aria-label={`Mastery: ${mastery}/5`}>
+    <span className="text-xs text-warn" aria-label={`Mastery: ${mastery}/5`}>
       {"★".repeat(mastery)}{"☆".repeat(5 - mastery)}
     </span>
   );
@@ -72,7 +72,7 @@ export default function DayDrawer({ date, words, studyMinutes, isOpen, onClose, 
         inert={!isOpen}
         aria-hidden={!isOpen}
         className={[
-          "fixed right-0 top-0 z-50 flex h-full w-full max-w-sm flex-col bg-white shadow-2xl transition-transform duration-300",
+          "fixed right-0 top-0 z-50 flex h-full w-full max-w-sm flex-col bg-card shadow-2xl transition-transform duration-300",
           isOpen ? "translate-x-0" : "translate-x-full",
         ].join(" ")}
       >
@@ -94,7 +94,7 @@ export default function DayDrawer({ date, words, studyMinutes, isOpen, onClose, 
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {noData ? (
-            <p className="py-12 text-center text-sm text-gray-500">Không có dữ liệu cho ngày này.</p>
+            <p className="py-12 text-center text-sm text-muted">Không có dữ liệu cho ngày này.</p>
           ) : (
             <>
               {/* Summary */}
@@ -117,7 +117,7 @@ export default function DayDrawer({ date, words, studyMinutes, isOpen, onClose, 
 
               {/* Word list */}
               {words.length === 0 ? (
-                <p className="py-4 text-center text-sm text-gray-500">
+                <p className="py-4 text-center text-sm text-muted">
                   Không có từ nào được học hôm này.
                 </p>
               ) : (
@@ -131,15 +131,15 @@ export default function DayDrawer({ date, words, studyMinutes, isOpen, onClose, 
                       >
                         <div>
                           <span className="font-medium text-ink">{w.word}</span>
-                          <span className="mx-2 text-gray-300">—</span>
+                          <span className="mx-2 text-muted">—</span>
                           <span className="text-sm text-muted">{w.meaning}</span>
                         </div>
-                        <span className="ml-2 text-gray-500 text-xs">{expandedWords.has(w.word) ? "▲" : "▼"}</span>
+                        <span className="ml-2 text-muted text-xs">{expandedWords.has(w.word) ? "▲" : "▼"}</span>
                       </button>
                       {expandedWords.has(w.word) && (
-                        <div className="border-t border-rule bg-gray-50 px-4 py-3 space-y-1">
+                        <div className="border-t border-rule bg-ink/5 px-4 py-3 space-y-1">
                           {w.example && (
-                            <p className="text-sm text-gray-600 italic">&quot;{w.example}&quot;</p>
+                            <p className="text-sm text-muted italic">&quot;{w.example}&quot;</p>
                           )}
                           <MasteryStars mastery={w.mastery} />
                         </div>

@@ -56,8 +56,8 @@ const TYPE_LABELS: Record<SearchResult["type"], string> = {
   vocabulary: "Từ vựng", mistake: "Lỗi sai", speaking: "Speaking", writing: "Writing",
 };
 const TYPE_COLORS: Record<SearchResult["type"], string> = {
-  vocabulary: "text-blue-500", mistake: "text-red-500",
-  speaking: "text-green-500", writing: "text-purple-500",
+  vocabulary: "text-primary-text", mistake: "text-margin",
+  speaking: "text-ok", writing: "text-primary-text",
 };
 
 export default function LibraryPage() {
@@ -85,11 +85,11 @@ export default function LibraryPage() {
       />
 
       {query.length >= 2 && results.length === 0 && (
-        <p className="text-gray-400 text-center py-8">Không tìm thấy kết quả.</p>
+        <p className="text-muted text-center py-8">Không tìm thấy kết quả.</p>
       )}
 
       {query.length < 2 && (
-        <div className="text-center py-8 text-gray-400">
+        <div className="text-center py-8 text-muted">
           <p className="text-sm">Nhập ít nhất 2 ký tự để tìm kiếm.</p>
           <p className="text-xs mt-1">Tìm trong: từ vựng, lỗi sai, bài nói, bài viết</p>
         </div>
@@ -105,7 +105,7 @@ export default function LibraryPage() {
               const content = (
                 <div className="px-3 py-2 rounded-lg hover:bg-primary-soft/50 transition-colors">
                   <p className="text-sm font-medium">{item.title}</p>
-                  <p className="text-xs text-gray-400">{item.subtitle}</p>
+                  <p className="text-xs text-muted">{item.subtitle}</p>
                 </div>
               );
               return item.href

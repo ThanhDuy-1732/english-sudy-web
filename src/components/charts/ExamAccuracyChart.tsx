@@ -24,7 +24,7 @@ export default function ExamAccuracyChart({ attempts }: { attempts: ExamAttempt[
     <section aria-labelledby="exam-accuracy-title">
       <h2 id="exam-accuracy-title" className="mb-3 text-base font-semibold text-ink">
         Độ chính xác luyện thi{" "}
-        <span className="font-normal text-gray-500">(4 tuần)</span>
+        <span className="font-normal text-muted">(4 tuần)</span>
       </h2>
       <div className="h-[200px] w-full">
         <ResponsiveContainer width="100%" height="100%">

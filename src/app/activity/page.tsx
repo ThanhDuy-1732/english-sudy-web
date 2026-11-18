@@ -15,12 +15,12 @@ const labels: Record<LearningActivityType, string> = {
 };
 
 const badgeColors: Record<LearningActivityType, string> = {
-  vocabulary: "bg-blue-100 text-blue-700",
-  review: "bg-purple-100 text-purple-700",
-  grammar: "bg-green-100 text-green-700",
-  exam: "bg-orange-100 text-orange-700",
-  speaking: "bg-pink-100 text-pink-700",
-  writing: "bg-yellow-100 text-yellow-700",
+  vocabulary: "bg-primary-soft text-primary-text",
+  review: "bg-ok-soft text-ok",
+  grammar: "bg-ink/5 text-ink",
+  exam: "bg-margin-soft text-margin",
+  speaking: "bg-soil/15 text-ink",
+  writing: "bg-warn-soft text-warn",
 };
 
 function localDate(iso: string): string {

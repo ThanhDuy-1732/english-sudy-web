@@ -24,14 +24,14 @@ export default function WritingChallenge({ word }: Props) {
     finally { setLoading(false); }
   }
 
-  const scoreColor = !result ? "" : result.score >= 8 ? "text-green-600" : result.score >= 5 ? "text-yellow-600" : "text-red-600";
+  const scoreColor = !result ? "" : result.score >= 8 ? "text-ok" : result.score >= 5 ? "text-warn" : "text-margin";
   return (
     <div className="mt-3 w-full space-y-2 text-left" onClick={(event) => event.stopPropagation()}>
-      <p className="text-sm text-gray-500">Viết câu dùng từ <strong>{word}</strong>:</p>
+      <p className="text-sm text-muted">Viết câu dùng từ <strong>{word}</strong>:</p>
       <textarea value={sentence} onChange={(event) => setSentence(event.target.value)} placeholder={`Ví dụ: I need to ${word}...`} rows={2} className="field w-full resize-none text-sm" />
       <button type="button" onClick={handleGrade} disabled={loading || !sentence.trim()} className="btn btn-primary w-full">{loading ? "Đang chấm..." : "Chấm điểm"}</button>
-      {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
-      {result && <div className="space-y-1 rounded-lg bg-paper p-3 text-sm"><p className={`text-lg font-bold ${scoreColor}`}>{result.score}/10</p><p className="text-gray-600">{result.feedback}</p>{result.corrected.trim() !== sentence.trim() && <p className="text-green-700"><span className="font-medium">Sửa lại:</span> {result.corrected}</p>}</div>}
+      {error && <p className="text-sm text-margin" role="alert">{error}</p>}
+      {result && <div className="space-y-1 rounded-lg bg-paper p-3 text-sm"><p className={`text-lg font-bold ${scoreColor}`}>{result.score}/10</p><p className="text-muted">{result.feedback}</p>{result.corrected.trim() !== sentence.trim() && <p className="text-ok"><span className="font-medium">Sửa lại:</span> {result.corrected}</p>}</div>}
     </div>
   );
 }

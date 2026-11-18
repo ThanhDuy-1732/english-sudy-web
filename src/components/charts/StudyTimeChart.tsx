@@ -9,7 +9,7 @@ export default function StudyTimeChart({ data }: { data: DailyStudyTime[] }) {
   return (
     <section aria-labelledby="study-time-title">
       <h2 id="study-time-title" className="mb-3 text-base font-semibold text-ink">
-        Thời gian học mỗi ngày <span className="font-normal text-gray-500">(30 ngày gần nhất)</span>
+        Thời gian học mỗi ngày <span className="font-normal text-muted">(30 ngày gần nhất)</span>
       </h2>
       <div className="h-[220px] w-full" role="img" aria-label="Biểu đồ thời gian học theo ngày">
         <ResponsiveContainer width="100%" height="100%">

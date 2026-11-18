@@ -30,7 +30,7 @@ export default function PronunciationButton({ word }: Props) {
         e.stopPropagation();
         speak();
       }}
-      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-blue-50 hover:text-blue-700"
+      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full text-muted transition-colors hover:bg-primary-soft hover:text-primary-text"
       title="Nghe phát âm"
     >
       🔊

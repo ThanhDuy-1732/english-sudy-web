@@ -119,22 +119,22 @@ export default function VocabQuizPage() {
         <h1 className="page-title mb-6">Quiz Từ vựng</h1>
         <div className="space-y-4">
           <div>
-            <p className="text-sm font-medium mb-2">Chế độ</p>
+            <p className="mb-2 text-sm font-medium text-muted">Chế độ</p>
             <div className="flex gap-2 flex-wrap">
               {([["meaning", "Chọn nghĩa"], ["fill", "Điền vào chỗ trống"]] as const).map(([v, l]) => (
                 <button key={v} onClick={() => setMode(v)}
-                  className={`px-3 py-2 rounded text-sm ${mode === v ? "bg-blue-600 text-white" : "bg-gray-100 dark:bg-gray-800"}`}>
+                  aria-pressed={mode === v} className={`chip ${mode === v ? "chip-on" : ""}`}>
                   {l}
                 </button>
               ))}
             </div>
           </div>
           <div>
-            <p className="text-sm font-medium mb-2">Số câu</p>
+            <p className="mb-2 text-sm font-medium text-muted">Số câu</p>
             <div className="flex gap-2">
               {([5, 10, 20] as const).map((n) => (
                 <button key={n} onClick={() => setCount(n)}
-                  className={`px-4 py-2 rounded ${count === n ? "bg-blue-600 text-white" : "bg-gray-100 dark:bg-gray-800"}`}>
+                  aria-pressed={count === n} className={`chip min-w-14 ${count === n ? "chip-on" : ""}`}>
                   {n}
                 </button>
               ))}
@@ -158,9 +158,9 @@ export default function VocabQuizPage() {
     return (
       <main className="page">
         <h1 className="page-title mb-2">Kết quả</h1>
-        <p className="text-4xl font-bold text-blue-600 mb-1">{correct}/{results.length}</p>
-        <p className="text-gray-500 mb-8">{Math.round((correct / results.length) * 100)}% chính xác</p>
-        <div className="flex gap-3 justify-center">
+        <p className="mb-1 font-display text-5xl font-extrabold tabular-nums text-primary-text">{correct}/{results.length}</p>
+        <p className="mb-8 text-muted">{Math.round((correct / results.length) * 100)}% chính xác</p>
+        <div className="flex gap-3">
           <button onClick={() => setPhase("setup")} className="btn btn-primary">Làm lại</button>
           <Link href="/" className="btn btn-secondary">Trang chủ</Link>
         </div>
@@ -173,21 +173,17 @@ export default function VocabQuizPage() {
 
   return (
     <main className="page">
-      <div className="flex justify-between text-sm text-gray-500 mb-4">
+      <div className="mb-4 flex justify-between text-sm text-muted">
         <span>{mode === "meaning" ? "Chọn nghĩa đúng" : "Điền từ vào chỗ trống"}</span>
         <span>{currentIdx + 1}/{questions.length}</span>
       </div>
 
       {q.type === "mcq" && (
         <>
-          <p className="text-2xl font-bold text-center mb-6">{q.word}</p>
+          <div className="postcard mb-6 px-6 py-10 text-center"><p className="break-words font-en text-[2.25rem] font-semibold leading-tight">{q.word}</p></div>
           <div className="space-y-2">
             {q.options.map((opt) => {
-              let cls = "w-full text-left px-4 py-3 rounded border text-sm ";
-              if (selected === null) cls += "hover:bg-gray-50 dark:hover:bg-gray-800";
-              else if (opt === q.answer) cls += "bg-green-50 border-green-500 text-green-800 dark:bg-green-900/20";
-              else if (opt === selected) cls += "bg-red-50 border-red-400 text-red-700 dark:bg-red-900/20";
-              else cls += "opacity-50";
+              const cls = `choice ${selected === null ? "" : opt === q.answer ? "choice-right" : opt === selected ? "choice-wrong" : "choice-dim"}`;
               return (
                 <button key={opt} onClick={() => handleAnswer(opt)} className={cls} disabled={selected !== null && opt !== q.answer && opt !== selected}>
                   {opt}
@@ -201,21 +197,21 @@ export default function VocabQuizPage() {
       {q.type === "fill" && (
         <>
           {q.isLoading ? (
-            <p className="text-center py-8 text-gray-400">Đang tạo câu hỏi...</p>
+            <p className="py-8 text-center text-muted">Đang tạo câu hỏi...</p>
           ) : (
             <>
-              <p className="text-base mb-4">{q.sentence.replace(new RegExp(`\\b${q.word}\\b`, "i"), "______")}</p>
+              <p className="postcard mb-4 px-6 py-8 font-en text-xl leading-relaxed">{q.sentence.replace(new RegExp(`\\b${q.word}\\b`, "i"), "______")}</p>
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 disabled={selected !== null}
                 onKeyDown={(e) => e.key === "Enter" && selected === null && handleAnswer(input)}
-                className="w-full border rounded-lg px-3 py-2 text-sm border-rule"
+                className="field w-full"
                 placeholder="Nhập từ..."
                 autoFocus
               />
               {selected !== null && (
-                <p className={`text-sm mt-2 ${input.toLowerCase() === q.answer.toLowerCase() ? "text-green-600" : "text-red-500"}`}>
+                <p className={`text-sm mt-2 ${input.toLowerCase() === q.answer.toLowerCase() ? "font-medium text-ok" : "font-medium text-margin"}`}>
                   {input.toLowerCase() === q.answer.toLowerCase() ? "Đúng!" : `Đáp án: ${q.answer}`}
                 </p>
               )}

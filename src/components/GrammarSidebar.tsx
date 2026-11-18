@@ -42,21 +42,21 @@ export default function GrammarSidebar({
             onClick={() => onSelect(topic.id)}
             className={`flex min-h-11 min-w-0 w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
               selectedId === topic.id
-                ? "bg-purple-600/40 font-medium text-white"
-                : "text-muted hover:bg-white/10 hover:text-white"
+                ? "bg-primary-soft font-medium text-primary-text"
+                : "text-muted hover:bg-ink/5 hover:text-ink"
             }`}
           >
             <span className="min-w-0 flex-1 truncate">{topic.name}</span>
             {topicAccuracy[topic.id] !== undefined ? (
-              <span className="ml-2 flex-none text-xs text-white/60">{topicAccuracy[topic.id]}%</span>
+              <span className="ml-2 flex-none text-xs text-muted">{topicAccuracy[topic.id]}%</span>
             ) : (
-              <span className="ml-2 flex-none text-xs text-white/40">{topic.rules.length}</span>
+              <span className="ml-2 flex-none text-xs text-muted">{topic.rules.length}</span>
             )}
           </button>
           {topicAccuracy[topic.id] !== undefined && (
-            <div className="mx-3 mb-1 h-1 rounded bg-white/10">
+            <div className="mx-3 mb-1 h-1 rounded bg-ink/5">
               <div
-                className="h-1 rounded bg-blue-400/70"
+                className="h-1 rounded bg-primary"
                 style={{ width: `${topicAccuracy[topic.id]}%` }}
               />
             </div>
@@ -64,7 +64,7 @@ export default function GrammarSidebar({
         </div>
       ))}
 
-      <div className="mt-4 border-t border-white/10 pt-4">
+      <div className="mt-4 border-t border-rule pt-4">
         <form aria-label="form" onSubmit={handleSubmit}>
           <input
             type="text"
@@ -72,7 +72,7 @@ export default function GrammarSidebar({
             onChange={(event) => setInput(event.target.value)}
             disabled={isAdding}
             placeholder="Nhập chủ đề mới..."
-            className="min-h-11 w-full rounded-lg bg-white/10 px-3 py-2 text-sm text-white placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-purple-400 disabled:opacity-60"
+            className="min-h-11 w-full rounded-lg bg-ink/5 px-3 py-2 text-sm text-ink placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-purple-400 disabled:opacity-60"
           />
           <button
             type="submit"

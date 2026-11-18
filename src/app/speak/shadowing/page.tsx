@@ -136,8 +136,8 @@ export default function ShadowingPage() {
       <Link href="/speak" className="back-link">← Luyện nói</Link>
       <h1 className="page-title mb-6">Shadowing</h1>
 
-      <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-4 mb-6 text-center">
-        <p className="text-sm text-gray-500 mb-1">Câu mẫu ({sentenceIdx % SHADOW_SENTENCES.length + 1}/{SHADOW_SENTENCES.length})</p>
+      <div className="bg-primary-soft rounded-lg p-4 mb-6 text-center">
+        <p className="text-sm text-muted mb-1">Câu mẫu ({sentenceIdx % SHADOW_SENTENCES.length + 1}/{SHADOW_SENTENCES.length})</p>
         <p className="text-lg font-medium">&ldquo;{sentence}&rdquo;</p>
       </div>
 
@@ -176,11 +176,11 @@ export default function ShadowingPage() {
         <div>
           <div className="text-center mb-4">
             <p className="text-4xl font-bold" style={{ color: matchColor }}>{matchPct}%</p>
-            <p className="text-sm text-gray-500">Độ tương đồng</p>
+            <p className="text-sm text-muted">Độ tương đồng</p>
           </div>
 
           <div className="bg-paper rounded-lg p-3 mb-4">
-            <p className="text-xs font-medium text-gray-500 mb-1">Bạn đã nói:</p>
+            <p className="text-xs font-medium text-muted mb-1">Bạn đã nói:</p>
             <p className="text-sm italic">&ldquo;{transcript || "(Không nhận được âm thanh)"}&rdquo;</p>
           </div>
 
@@ -190,10 +190,10 @@ export default function ShadowingPage() {
             );
             return missingWords.length > 0 ? (
               <div className="text-sm mb-4">
-                <p className="text-xs font-medium text-gray-500 mb-1">Từ còn thiếu:</p>
+                <p className="text-xs font-medium text-muted mb-1">Từ còn thiếu:</p>
                 <div className="flex flex-wrap gap-1">
                   {missingWords.map((w, i) => (
-                    <span key={i} className="px-2 py-0.5 bg-red-100 text-red-700 rounded text-xs">{w}</span>
+                    <span key={i} className="px-2 py-0.5 bg-margin-soft text-margin rounded text-xs">{w}</span>
                   ))}
                 </div>
               </div>
@@ -210,7 +210,7 @@ export default function ShadowingPage() {
       )}
 
       {isRecording && phase === "recording" && (
-        <p className="text-center text-sm text-red-500 animate-pulse mt-2">● Đang ghi âm…</p>
+        <p className="text-center text-sm text-margin animate-pulse mt-2">● Đang ghi âm…</p>
       )}
     </main>
   );

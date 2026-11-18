@@ -27,17 +27,18 @@ import SkillRadar from "@/components/charts/SkillRadar";
 import { weeklyBands, skillRadar, type WeeklyBand, type SkillRadarPoint } from "@/lib/stats-skills";
 import type { ExamAttempt } from "@/lib/exam/types";
 import Segmented from "@/components/Segmented";
+import StageCensus from "@/components/StageCensus";
 
-const PANEL = "min-w-0 overflow-hidden rounded-xl border border-rule bg-card p-5 sm:p-6";
+const PANEL = "panel min-w-0 overflow-hidden p-5 sm:p-6";
 
 /** One row of figures separated by rules, instead of a grid of identical stat cards. */
 function Figures({ items }: { items: [string, string][] }) {
   return (
-    <dl className="grid grid-cols-2 overflow-hidden rounded-xl border border-rule bg-card sm:grid-cols-[repeat(auto-fit,minmax(9rem,1fr))]">
+    <dl className="grid grid-cols-2 overflow-hidden rounded-3xl border border-rule bg-card sm:grid-cols-[repeat(auto-fit,minmax(9rem,1fr))]">
       {items.map(([value, label]) => (
         <div key={label} className="border-rule p-4 [&:not(:last-child)]:border-b sm:border-b-0 sm:[&:not(:last-child)]:border-r sm:p-5">
           <dt className="text-sm text-muted">{label}</dt>
-          <dd className="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-ink">{value}</dd>
+          <dd className="mt-1 font-display text-3xl font-extrabold tabular-nums text-ink">{value}</dd>
         </div>
       ))}
     </dl>
@@ -57,12 +58,14 @@ export default function StatsPage() {
   const [totalWords, setTotalWords] = useState(0);
   const [activeDays, setActiveDays] = useState(0);
   const [averageMastery, setAverageMastery] = useState(0);
+  const [masteries, setMasteries] = useState<(number | undefined)[]>([]);
   const [weeklyReport, setWeeklyReport] = useState(() => computeWeeklyReport([], []));
   const [streakInfo, setStreakInfo] = useState(() => computeStreak([]));
 
   useEffect(() => {
     const daily = getWordsPerDay(30);
     const learned = getLearnedWords();
+    setMasteries(learned.map((w) => w.mastery));
     setWordsPerDay(daily);
     setTopicDistribution(getTopicDistribution());
     setCalendarData(getCalendarData(26));
@@ -127,6 +130,11 @@ export default function StatsPage() {
             [`${averageMastery}/5`, "Mastery trung bình"],
             [`${todayMinutes} phút`, "Hôm nay"],
           ]} />
+          <section aria-labelledby="garden-census" className="rounded-3xl bg-gradient-to-b from-primary-soft/40 to-primary-soft px-4 pb-4 pt-5 sm:px-6">
+            <h2 id="garden-census" className="section-title">Vườn theo giai đoạn</h2>
+            <p className="mb-3 text-sm text-muted">Mỗi lần ôn đúng hạn, từ lớn thêm một bậc từ hạt đến hoa.</p>
+            <StageCensus masteries={masteries} />
+          </section>
           <section className={PANEL}><WordsPerDayChart data={wordsPerDay} /></section>
           <section className={PANEL}><StudyTimeChart data={studyTimePerDay} /></section>
           <div className="grid gap-6 lg:grid-cols-2">

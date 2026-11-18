@@ -39,7 +39,7 @@ export default function GrammarExercise({ exercise }: { exercise: Exercise }) {
 
   if (exercise.type === "fill") {
     return (
-      <div className="mt-3 rounded-lg border border-white/10 bg-white/5 p-4">
+      <div className="mt-3 rounded-lg border border-rule bg-ink/5 p-4">
         <p className="mb-3 text-sm text-ink">{exercise.question}</p>
         <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
           <input
@@ -51,7 +51,7 @@ export default function GrammarExercise({ exercise }: { exercise: Exercise }) {
             }}
             disabled={result !== null}
             placeholder="Nhập câu trả lời..."
-            className="min-h-10 min-w-0 flex-1 rounded bg-white/10 px-3 py-1.5 text-sm text-white placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-purple-400 disabled:opacity-60"
+            className="min-h-10 min-w-0 flex-1 rounded bg-ink/5 px-3 py-1.5 text-sm text-ink placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-purple-400 disabled:opacity-60"
           />
           {result === null ? (
             <button
@@ -66,18 +66,18 @@ export default function GrammarExercise({ exercise }: { exercise: Exercise }) {
             <button
               type="button"
               onClick={reset}
-              className="min-h-10 rounded bg-white/10 px-3 py-1.5 text-sm font-medium text-ink hover:bg-white/20"
+              className="min-h-10 rounded bg-ink/5 px-3 py-1.5 text-sm font-medium text-ink hover:bg-ink/5"
             >
               Thử lại
             </button>
           )}
         </div>
         {result === "correct" && (
-          <p className="mt-2 text-sm font-medium text-green-400">Đúng rồi!</p>
+          <p className="mt-2 text-sm font-medium text-ok">Đúng rồi!</p>
         )}
         {result === "incorrect" && (
-          <p className="mt-2 text-sm text-red-400">
-            Sai. Đáp án: <span className="font-medium text-white">{exercise.answer}</span>
+          <p className="mt-2 text-sm text-margin">
+            Sai. Đáp án: <span className="font-medium text-ink">{exercise.answer}</span>
           </p>
         )}
       </div>
@@ -85,7 +85,7 @@ export default function GrammarExercise({ exercise }: { exercise: Exercise }) {
   }
 
   return (
-    <div className="mt-3 rounded-lg border border-white/10 bg-white/5 p-4">
+    <div className="mt-3 rounded-lg border border-rule bg-ink/5 p-4">
       <p className="mb-3 text-sm text-ink">{exercise.question}</p>
       <div className="flex flex-col gap-2">
         {exercise.options.map((option) => {
@@ -104,10 +104,10 @@ export default function GrammarExercise({ exercise }: { exercise: Exercise }) {
               }}
               className={`min-h-10 rounded px-3 py-2 text-left text-sm transition-colors ${
                 showCorrect
-                  ? "bg-green-600/30 text-green-300"
+                  ? "bg-ok-soft text-ok"
                   : showWrong
-                    ? "bg-red-600/30 text-red-300"
-                    : "bg-white/10 text-ink hover:bg-white/20"
+                    ? "bg-margin-soft text-margin"
+                    : "bg-ink/5 text-ink hover:bg-ink/5"
               }`}
             >
               {option}
@@ -116,18 +116,18 @@ export default function GrammarExercise({ exercise }: { exercise: Exercise }) {
         })}
       </div>
       {result === "correct" && (
-        <p className="mt-2 text-sm font-medium text-green-400">Đúng rồi!</p>
+        <p className="mt-2 text-sm font-medium text-ok">Đúng rồi!</p>
       )}
       {result === "incorrect" && (
-        <p className="mt-2 text-sm text-red-400">
-          Sai. Đáp án: <span className="font-medium text-white">{exercise.answer}</span>
+        <p className="mt-2 text-sm text-margin">
+          Sai. Đáp án: <span className="font-medium text-ink">{exercise.answer}</span>
         </p>
       )}
       {result !== null && (
         <button
           type="button"
           onClick={reset}
-          className="mt-2 text-sm text-purple-400 hover:text-purple-300"
+          className="mt-2 text-sm text-primary-text hover:text-primary-text"
         >
           Thử lại
         </button>

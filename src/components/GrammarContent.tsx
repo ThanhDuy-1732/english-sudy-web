@@ -84,13 +84,13 @@ export default function GrammarContent({ topic }: { topic: GrammarTopic }) {
       <div>
         <h1 className="text-2xl font-bold text-ink">{topic.name}</h1>
         {topic.isUserGenerated && (
-          <p className="mt-1 text-sm text-purple-300">Chủ đề do AI tạo</p>
+          <p className="mt-1 text-sm text-primary-text">Chủ đề do AI tạo</p>
         )}
       </div>
 
       {topic.rules.map((rule) => (
         <section key={rule.id} className="rounded-xl border border-rule bg-card p-5">
-          <h2 className="mb-2 text-lg font-semibold text-white">{rule.name}</h2>
+          <h2 className="mb-2 text-lg font-semibold text-ink">{rule.name}</h2>
           <code className="mb-3 block overflow-x-auto rounded-md bg-primary-soft px-3 py-2 font-en text-[15px] text-ink">
             {rule.formula}
           </code>
@@ -108,7 +108,7 @@ export default function GrammarContent({ topic }: { topic: GrammarTopic }) {
             {(aiExamples[rule.id] ?? []).map((example) => (
               <li
                 key={`ai-${example}`}
-                className="text-sm italic text-ink/80 before:mr-2 before:text-purple-300 before:content-['>']"
+                className="text-sm italic text-ink/80 before:mr-2 before:text-primary-text before:content-['>']"
               >
                 {example}
               </li>
@@ -120,7 +120,7 @@ export default function GrammarContent({ topic }: { topic: GrammarTopic }) {
               type="button"
               onClick={() => void fetchExamples(rule)}
               disabled={loadingExamples.has(rule.id)}
-              className="min-h-9 rounded bg-white/10 px-3 py-1.5 text-xs font-medium text-ink hover:bg-white/20 disabled:opacity-50"
+              className="min-h-9 rounded bg-ink/5 px-3 py-1.5 text-xs font-medium text-ink hover:bg-ink/5 disabled:opacity-50"
             >
               {loadingExamples.has(rule.id) ? "Đang tạo..." : "+ Thêm ví dụ"}
             </button>
@@ -128,13 +128,13 @@ export default function GrammarContent({ topic }: { topic: GrammarTopic }) {
               type="button"
               onClick={() => void fetchExercise(rule)}
               disabled={loadingExercise.has(rule.id)}
-              className="min-h-9 rounded bg-purple-700/50 px-3 py-1.5 text-xs font-medium text-ink hover:bg-purple-700/70 disabled:opacity-50"
+              className="min-h-9 rounded bg-primary-soft px-3 py-1.5 text-xs font-medium text-primary-text hover:bg-primary-soft/70 disabled:opacity-50"
             >
               {loadingExercise.has(rule.id) ? "Đang tạo..." : "Luyện tập"}
             </button>
             <Link
               href={`/exam/drill/RC5?topic=${encodeURIComponent(rule.name)}&grammarSlug=${encodeURIComponent(rule.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''))}`}
-              className="flex items-center min-h-9 rounded px-3 py-1.5 text-xs font-medium text-purple-400 underline hover:text-purple-300"
+              className="flex items-center min-h-9 rounded px-3 py-1.5 text-xs font-medium text-primary-text underline hover:text-primary-text"
             >
               Luyện TOEIC Part 5
             </Link>
@@ -144,8 +144,8 @@ export default function GrammarContent({ topic }: { topic: GrammarTopic }) {
               title={bookmarks.has(rule.id) ? "Bỏ lưu" : "Lưu sub-rule"}
               className={`min-h-9 rounded px-3 py-1.5 text-xs font-medium transition-colors ${
                 bookmarks.has(rule.id)
-                  ? "bg-yellow-500/20 text-yellow-300 hover:bg-yellow-500/30"
-                  : "bg-white/10 text-white/40 hover:text-yellow-300 hover:bg-white/20"
+                  ? "bg-warn-soft text-warn hover:bg-warn-soft/70"
+                  : "bg-ink/5 text-muted hover:text-warn hover:bg-ink/5"
               }`}
             >
               {bookmarks.has(rule.id) ? "★ Đã lưu" : "☆ Lưu"}
@@ -153,10 +153,10 @@ export default function GrammarContent({ topic }: { topic: GrammarTopic }) {
           </div>
 
           {errors[`examples-${rule.id}`] && (
-            <p className="mt-2 text-sm text-red-300">{errors[`examples-${rule.id}`]}</p>
+            <p className="mt-2 text-sm text-margin">{errors[`examples-${rule.id}`]}</p>
           )}
           {errors[`exercise-${rule.id}`] && (
-            <p className="mt-2 text-sm text-red-300">{errors[`exercise-${rule.id}`]}</p>
+            <p className="mt-2 text-sm text-margin">{errors[`exercise-${rule.id}`]}</p>
           )}
           {exercises[rule.id] && <GrammarExercise exercise={exercises[rule.id]} />}
         </section>

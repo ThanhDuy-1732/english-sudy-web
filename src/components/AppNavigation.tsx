@@ -33,7 +33,7 @@ const GROUPS: { title?: string; links: NavLink[] }[] = [
     { href: "/stats", label: "Thống kê" },
     { href: "/diary", label: "Nhật ký" },
     { href: "/activity", label: "Hoạt động" },
-    { href: "/history", label: "Từ đã lưu" },
+    { href: "/history", label: "Vườn từ" },
     { href: "/library", label: "Tìm kiếm" },
   ] },
 ];

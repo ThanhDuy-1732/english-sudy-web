@@ -162,7 +162,7 @@ export default function SettingsPage() {
                       className="group -m-2 flex size-11 shrink-0 items-center justify-center disabled:cursor-not-allowed"
                     >
                       <span className={`relative inline-flex h-6 w-10 items-center rounded-full transition-colors ${!active ? "bg-rule opacity-50" : disabled ? "bg-rule" : "bg-primary"}`}>
-                        <span className={`inline-block size-5 rounded-full bg-white shadow transition-transform ${active && !disabled ? "translate-x-[1.125rem]" : "translate-x-0.5"}`} />
+                        <span className={`inline-block size-5 rounded-full bg-card shadow transition-transform ${active && !disabled ? "translate-x-[1.125rem]" : "translate-x-0.5"}`} />
                       </span>
                     </button>
                   </div>
@@ -193,10 +193,10 @@ export default function SettingsPage() {
           <p className="mb-8 text-sm text-muted">
             Chọn giọng đọc và điều chỉnh thông số phát âm.
           </p>
-          <div className="rounded-xl border border-white/10 p-6">
+          <div className="rounded-xl border border-rule p-6">
             <VoiceSettingsTab />
           </div>
-          <div className="mt-6 rounded-xl border border-white/10 p-6">
+          <div className="mt-6 rounded-xl border border-rule p-6">
             <p className="mb-2 text-sm font-medium text-ink">Bản ghi âm</p>
             <p className="mb-4 text-xs text-muted">
               Bản ghi âm được lưu cục bộ (tối đa 20). Không đồng bộ lên server.
@@ -207,7 +207,7 @@ export default function SettingsPage() {
                 await clearAllAudio();
                 setAudioCount(0);
               }}
-              className="text-sm text-red-400 underline hover:text-red-300"
+              className="text-sm text-margin underline hover:text-margin"
             >
               Xoá bản ghi âm ({audioCount})
             </button>
@@ -369,7 +369,7 @@ function ProfileSettings() {
           {([["communication","Giao tiếp"],["toeic","TOEIC"],["ielts","IELTS"],
             ["vocabulary","Từ vựng"],["mixed","Tổng hợp"]] as [LearningGoal, string][]).map(([v,l]) => (
             <button key={v} onClick={() => update({ goal: v })}
-              className={`px-3 py-2 rounded-lg text-sm ${profile.goal === v ? "bg-primary text-white" : "bg-white/10 text-muted hover:bg-white/20"}`}>
+              aria-pressed={profile.goal === v} className={`chip ${profile.goal === v ? "chip-on" : ""}`}>
               {l}
             </button>
           ))}
@@ -381,7 +381,7 @@ function ProfileSettings() {
         <div className="flex flex-wrap gap-2">
           {([1,2,3,4,5] as const).map((n) => (
             <button key={n} onClick={() => update({ currentLevel: n })}
-              className={`px-3 py-2 rounded-lg text-sm ${profile.currentLevel === n ? "bg-primary text-white" : "bg-white/10 text-muted hover:bg-white/20"}`}>
+              aria-pressed={profile.currentLevel === n} className={`chip ${profile.currentLevel === n ? "chip-on" : ""}`}>
               {["Sơ cấp","Tiền trung","Trung cấp","Trung cao","Nâng cao"][n-1]}
             </button>
           ))}
@@ -393,7 +393,7 @@ function ProfileSettings() {
         <div className="flex flex-wrap gap-2">
           {[15, 30, 45, 60, 90].map((m) => (
             <button key={m} onClick={() => update({ dailyStudyMinutes: m })}
-              className={`px-3 py-2 rounded-lg text-sm ${profile.dailyStudyMinutes === m ? "bg-primary text-white" : "bg-white/10 text-muted hover:bg-white/20"}`}>
+              aria-pressed={profile.dailyStudyMinutes === m} className={`chip ${profile.dailyStudyMinutes === m ? "chip-on" : ""}`}>
               {m} phút
             </button>
           ))}
@@ -448,9 +448,9 @@ function ProfileSettings() {
         <p className="text-sm text-ink">Phím tắt bàn phím</p>
         <button
           onClick={() => update({ shortcutsEnabled: !profile.shortcutsEnabled })}
-          className={`relative w-12 h-6 rounded-full transition-colors ${profile.shortcutsEnabled ? "bg-primary" : "bg-white/20"}`}
+          className={`relative w-12 h-6 rounded-full transition-colors ${profile.shortcutsEnabled ? "bg-primary" : "bg-ink/5"}`}
         >
-          <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${profile.shortcutsEnabled ? "translate-x-6" : ""}`} />
+          <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-card rounded-full shadow transition-transform ${profile.shortcutsEnabled ? "translate-x-6" : ""}`} />
         </button>
       </div>
     </div>
@@ -469,7 +469,7 @@ function ThemeToggle() {
     <div className="flex gap-2">
       {(["system", "light", "dark"] as const).map((t) => (
         <button key={t} onClick={() => applyTheme(t)}
-          className={`px-3 py-2 rounded-lg text-sm ${theme === t ? "bg-primary text-white" : "bg-white/10 text-muted hover:bg-white/20"}`}>
+          aria-pressed={theme === t} className={`chip ${theme === t ? "chip-on" : ""}`}>
           {t === "system" ? "Hệ thống" : t === "light" ? "Sáng" : "Tối"}
         </button>
       ))}

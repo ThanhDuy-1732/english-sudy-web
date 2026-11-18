@@ -26,10 +26,10 @@ function ScoreBars({ bands }: { bands: SpeakingRecord["feedback"]["bands"] }) {
       {items.map(([label, score]) => (
         <div key={label} className="text-xs">
           <div className="flex justify-between mb-0.5">
-            <span className="text-gray-500">{label}</span>
+            <span className="text-muted">{label}</span>
             <span className="font-medium">{score > 0 ? score.toFixed(1) : "—"}</span>
           </div>
-          <div className="h-1.5 bg-gray-200 rounded">
+          <div className="h-1.5 bg-ink/10 rounded">
             <div className="h-1.5 bg-blue-500 rounded" style={{ width: `${(score / 9) * 100}%` }} />
           </div>
         </div>
@@ -73,7 +73,7 @@ export default function SpeakingHistoryPage() {
       <RetentionNotice className="mb-6" />
 
       {records.length === 0 && (
-        <p className="text-gray-500 text-center py-12">Chưa có bài nói nào.</p>
+        <p className="text-muted text-center py-12">Chưa có bài nói nào.</p>
       )}
 
       <ul className="space-y-3">
@@ -85,12 +85,12 @@ export default function SpeakingHistoryPage() {
             >
               <div className="flex justify-between items-start">
                 <div className="min-w-0 flex-1">
-                  <span className="text-xs font-medium text-blue-500">{MODE_LABELS[r.mode] ?? r.mode}</span>
+                  <span className="text-xs font-medium text-primary-text">{MODE_LABELS[r.mode] ?? r.mode}</span>
                   <p className="text-sm font-medium mt-0.5 line-clamp-2">{r.prompt}</p>
                 </div>
                 <div className="text-right ml-2 shrink-0">
-                  <span className="text-2xl font-bold text-blue-300">{r.feedback.overall.toFixed(1)}</span>
-                  <p className="text-xs text-gray-400">{formatDate(r.createdAt)}</p>
+                  <span className="text-2xl font-bold text-primary-text">{r.feedback.overall.toFixed(1)}</span>
+                  <p className="text-xs text-muted">{formatDate(r.createdAt)}</p>
                 </div>
               </div>
             </button>
@@ -98,19 +98,19 @@ export default function SpeakingHistoryPage() {
             {expanded === r.id && (
               <div className="px-4 pb-4 border-t">
                 <ScoreBars bands={r.feedback.bands} />
-                <p className="text-xs text-gray-500 mt-3 italic line-clamp-4">{r.transcript}</p>
+                <p className="text-xs text-muted mt-3 italic line-clamp-4">{r.transcript}</p>
                 <div className="flex gap-2 mt-3 flex-wrap">
                   {r.audioId && (
                     <button
                       onClick={() => void handleReplay(r.audioId!, r.id)}
-                      className="text-xs px-3 py-1.5 bg-gray-100 rounded"
+                      className="text-xs px-3 py-1.5 bg-ink/5 rounded"
                     >
                       ▶ Nghe lại
                     </button>
                   )}
                   <Link
                     href={`/speak/ielts/${r.mode.replace("ielts_", "")}?retryOf=${r.id}`}
-                    className="text-xs px-3 py-1.5 bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200 rounded"
+                    className="text-xs px-3 py-1.5 bg-primary-soft text-primary-text rounded"
                   >
                     Thử lại
                   </Link>

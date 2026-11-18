@@ -13,7 +13,7 @@ const COLORS = {
 
 export default function BandTimelineChart({ data }: { data: WeeklyBand[] }) {
   if (data.length === 0) {
-    return <p className="text-sm text-gray-500 py-4 text-center">Chưa có dữ liệu band.</p>;
+    return <p className="text-sm text-muted py-4 text-center">Chưa có dữ liệu band.</p>;
   }
   return (
     <ResponsiveContainer width="100%" height={240}>

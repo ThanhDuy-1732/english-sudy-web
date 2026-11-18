@@ -108,7 +108,7 @@ export default function RewritePage() {
     <main className="page">
       <div className="flex justify-between items-center mb-4">
         <h1 className="page-title">Luyện viết lại</h1>
-        <span className="text-sm text-gray-400">{currentIdx + 1}/{items.length}</span>
+        <span className="text-sm text-muted">{currentIdx + 1}/{items.length}</span>
       </div>
 
       {done ? (
@@ -120,10 +120,10 @@ export default function RewritePage() {
         </div>
       ) : (
         <>
-          <div className="bg-red-50 dark:bg-red-950 rounded-lg p-4 mb-4">
-            <p className="text-xs font-medium text-red-600 mb-1">Câu gốc</p>
+          <div className="bg-margin-soft rounded-lg p-4 mb-4">
+            <p className="text-xs font-medium text-margin mb-1">Câu gốc</p>
             <p className="text-sm italic">&ldquo;{current.excerpt}&rdquo;</p>
-            <p className="text-xs text-red-500 mt-1">Lỗi: {current.issue}</p>
+            <p className="text-xs text-margin mt-1">Lỗi: {current.issue}</p>
           </div>
 
           <label className="block text-sm font-medium mb-2">Viết lại câu đúng:</label>
@@ -136,7 +136,7 @@ export default function RewritePage() {
           />
 
           {feedback ? (
-            <div className={`mt-3 p-3 rounded-lg text-sm ${feedback.correct ? "bg-green-50 text-green-800 dark:bg-green-950 dark:text-green-200" : "bg-orange-50 text-orange-800 dark:bg-orange-950 dark:text-orange-200"}`}>
+            <div className={`mt-3 p-3 rounded-lg text-sm ${feedback.correct ? "bg-ok-soft text-ok" : "bg-warn-soft text-warn"}`}>
               <p className="font-medium">{feedback.correct ? "✓ Đúng!" : "Chưa chính xác"}</p>
               <p className="mt-1">{feedback.feedback}</p>
               {!feedback.correct && (
@@ -145,7 +145,7 @@ export default function RewritePage() {
             </div>
           ) : (
             <>
-            {error && <p role="alert" className="mt-2 text-sm text-red-600">{error}</p>}
+            {error && <p role="alert" className="mt-2 text-sm text-margin">{error}</p>}
             <button
               onClick={() => void handleCheck()}
               disabled={checking || !input.trim()}

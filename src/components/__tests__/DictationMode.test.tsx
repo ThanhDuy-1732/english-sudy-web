@@ -13,5 +13,5 @@ test("shows dictation comparison after checking", () => {
   fireEvent.change(screen.getByPlaceholderText("Gõ lại câu bạn vừa nghe..."), { target: { value: "We negotiate terms extra." } });
   fireEvent.click(screen.getByRole("button", { name: "Kiểm tra" }));
   expect(screen.getByText("Câu đúng: We negotiate terms.")).toBeInTheDocument();
-  expect(screen.getByText("extra.")).toHaveClass("text-red-600");
+  expect(screen.getByText("extra.")).toHaveClass("text-margin");
 });

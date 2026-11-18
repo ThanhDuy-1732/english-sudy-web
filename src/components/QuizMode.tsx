@@ -74,18 +74,18 @@ export default function QuizMode({ words, onClose }: Props) {
 
   if (done) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div className="mx-4 w-full max-w-sm rounded-2xl bg-card p-8 text-center shadow-xl">
-          <p className="mb-2 text-4xl font-semibold tabular-nums tracking-tight text-ink">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-deep/50">
+        <div className="mx-4 w-full max-w-sm rounded-3xl bg-card p-8 text-center shadow-xl">
+          <p className="mb-2 font-display text-5xl font-extrabold tabular-nums text-primary-text">
             {score}/{words.length}
           </p>
-          <p className="mb-6 text-gray-500">
+          <p className="mb-6 text-muted">
             {score === words.length ? "Đúng hết, làm tốt lắm." : "Xem lại các từ sai rồi làm lại."}
           </p>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl bg-primary px-6 py-3 font-medium text-white hover:bg-primary-strong"
+            className="btn btn-primary"
           >
             Đóng
           </button>
@@ -95,16 +95,16 @@ export default function QuizMode({ words, onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="mx-4 w-full max-w-md rounded-2xl bg-card p-6 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-deep/50">
+      <div className="mx-4 w-full max-w-md rounded-3xl bg-card p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
-          <span className="text-sm text-gray-400">
+          <span className="text-sm text-muted">
             {index + 1} / {words.length}
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-muted hover:bg-ink/5 hover:text-ink"
             aria-label="Đóng quiz"
           >
             ✕
@@ -113,7 +113,7 @@ export default function QuizMode({ words, onClose }: Props) {
         {lastCorrect !== null && (
           <div
             className={`mb-2 text-center text-lg font-bold ${
-              lastCorrect ? "text-green-500" : "text-red-500"
+              lastCorrect ? "text-ok" : "text-margin"
             }`}
           >
             {lastCorrect ? "Đúng rồi! ✓" : "Sai rồi ✗"}

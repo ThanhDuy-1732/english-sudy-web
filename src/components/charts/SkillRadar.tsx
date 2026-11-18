@@ -7,7 +7,7 @@ import type { SkillRadarPoint } from "@/lib/stats-skills";
 export default function SkillRadar({ data }: { data: SkillRadarPoint[] }) {
   const hasData = data.some((d) => d.value !== null);
   if (!hasData) {
-    return <p className="text-sm text-gray-500 py-4 text-center">Chưa có đủ dữ liệu 4 kỹ năng.</p>;
+    return <p className="text-sm text-muted py-4 text-center">Chưa có đủ dữ liệu 4 kỹ năng.</p>;
   }
   const chartData = data.map((d) => ({ label: d.label, value: d.value ?? 0 }));
   return (

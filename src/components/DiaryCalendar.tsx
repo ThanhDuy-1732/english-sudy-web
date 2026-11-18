@@ -3,7 +3,7 @@
 import type { CalendarDay } from "@/lib/stats";
 
 const LEVEL_COLORS = [
-  "bg-gray-100",
+  "bg-ink/5",
   "bg-primary-soft",
   "bg-primary-soft",
   "bg-primary",
@@ -30,7 +30,7 @@ export default function DiaryCalendar({ data, studyTimeByDate, selectedDate, onS
 
   return (
     <section aria-labelledby="diary-calendar-title">
-      <h2 id="diary-calendar-title" className="mb-3 font-semibold text-gray-700">
+      <h2 id="diary-calendar-title" className="mb-3 font-semibold text-ink">
         Lịch học tập
       </h2>
       <div className="overflow-x-auto pb-1" tabIndex={0} aria-label="Lịch nhật ký học tập">
@@ -38,7 +38,7 @@ export default function DiaryCalendar({ data, studyTimeByDate, selectedDate, onS
           <div className="mr-1 flex flex-col gap-1">
             <div className="h-3 w-8" />
             {DAY_LABELS.map((label) => (
-              <div key={label} className="flex h-3 w-8 items-center text-[10px] text-gray-500">
+              <div key={label} className="flex h-3 w-8 items-center text-[10px] text-muted">
                 {label}
               </div>
             ))}
@@ -51,7 +51,7 @@ export default function DiaryCalendar({ data, studyTimeByDate, selectedDate, onS
                 : "";
             return (
               <div key={firstDay?.date ?? weekIndex} className="flex flex-col gap-1">
-                <div className="h-3 text-[10px] text-gray-500">{monthLabel}</div>
+                <div className="h-3 text-[10px] text-muted">{monthLabel}</div>
                 {week.map((day, dayIndex) =>
                   day ? (
                     <button
@@ -76,7 +76,7 @@ export default function DiaryCalendar({ data, studyTimeByDate, selectedDate, onS
           })}
         </div>
       </div>
-      <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
+      <div className="mt-2 flex items-center gap-1 text-xs text-muted">
         <span>Ít</span>
         {LEVEL_COLORS.map((color, i) => (
           <span key={i} aria-label={`Mức ${i}`} className={`h-3 w-3 rounded-sm ${color}`} />

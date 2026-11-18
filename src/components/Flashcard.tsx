@@ -216,7 +216,7 @@ export default function Flashcard({
           </span>
           {!loading && <span className="mb-auto mt-1 text-sm font-medium text-primary-text">Chạm để lật thẻ</span>}
           {error && (
-            <span className="mt-3 text-center text-sm text-red-700" role="alert">
+            <span className="mt-3 text-center text-sm text-margin" role="alert">
               {error}
             </span>
           )}

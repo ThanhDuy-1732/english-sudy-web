@@ -92,46 +92,45 @@ export default function LearningPathPage() {
 
   return (
     <main className="page">
-      <div className="flex justify-between items-center mb-2">
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <h1 className="page-title">Lộ trình học</h1>
-        <Link href="/settings" className="inline-flex min-h-11 items-center text-sm font-medium text-primary hover:underline">Chỉnh mục tiêu</Link>
+        <Link href="/settings" className="btn btn-secondary">Chỉnh mục tiêu</Link>
       </div>
-      <p className="text-sm text-gray-500 mb-6">
-        Mục tiêu: {GOAL_LABELS[profile.goal]} · {profile.dailyStudyMinutes} phút/ngày
+      <p className="page-lead mb-6">
+        Mục tiêu: {GOAL_LABELS[profile.goal]}, {profile.dailyStudyMinutes} phút mỗi ngày. Đi lần lượt từ bước 1, việc cần nhất ở trước.
       </p>
 
       {items.length === 0 && (
-        <p className="text-gray-400 text-center py-12">Học thêm một ít để nhận gợi ý cá nhân hóa.</p>
+        <p className="py-12 text-center text-muted">Học thêm một ít để nhận gợi ý cá nhân hóa.</p>
       )}
 
-      <ol className="space-y-3">
+      {/* Stepping stones on a garden path: the dashed line joins the steps in priority order. */}
+      <ol className="relative space-y-3 before:absolute before:bottom-6 before:left-[1.4rem] before:top-6 before:border-l-[3px] before:border-dashed before:border-soil/40">
         {items.map((item) => (
-          <li key={item.rank}>
-            <Link href={item.href}
-              className="flex items-start gap-3 p-4 border rounded-xl hover:bg-primary-soft/50 transition-colors border-rule">
-              <span className="text-2xl font-bold text-gray-200 w-8 shrink-0 text-center leading-none pt-1">
+          <li key={item.rank} className="relative">
+            <Link href={item.href} className="group flex items-center gap-4 rounded-3xl py-1 pr-2">
+              <span className="relative z-[1] flex h-11 w-11 shrink-0 items-center justify-center rounded-[46%_54%_50%_50%/55%_48%_52%_45%] bg-soil font-display text-lg font-bold text-white shadow-[0_3px_0_rgb(0_0_0/0.15)]">
                 {item.rank}
               </span>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm">{item.title}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{item.reason}</p>
+              <div className="panel min-w-0 flex-1 p-4 transition-colors group-hover:border-primary">
+                <p className="font-semibold text-ink">{item.title}</p>
+                <p className="mt-0.5 text-sm text-muted">{item.reason}</p>
                 {item.mastery !== undefined && (
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <div className="flex-1 h-1.5 bg-gray-200 rounded-full">
-                      <div className="h-1.5 bg-blue-500 rounded-full" style={{ width: `${item.mastery}%` }} />
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-primary-soft">
+                      <div className="h-full rounded-full bg-primary" style={{ width: `${item.mastery}%` }} />
                     </div>
-                    <span className="text-xs text-gray-400">{item.mastery}%</span>
+                    <span className="text-xs tabular-nums text-muted">{item.mastery}%</span>
                   </div>
                 )}
               </div>
-              <span className="text-gray-300 self-center">→</span>
             </Link>
           </li>
         ))}
       </ol>
 
       {items.length > 0 && (
-        <p className="text-xs text-center text-gray-400 mt-6">Lộ trình cập nhật dựa trên tiến độ học của bạn.</p>
+        <p className="mt-6 text-center text-sm text-muted">Lộ trình cập nhật dựa trên tiến độ học của bạn.</p>
       )}
     </main>
   );
