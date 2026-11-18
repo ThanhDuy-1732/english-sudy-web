@@ -96,7 +96,7 @@ Bỏ `seenWords` tạm trong `page.tsx`; ngân hàng thay thế.
 
 - Vòng lặp: gọi lô `count: 20` → `addBankWords` → cập nhật `updatedAt`/heartbeat → dừng khi `countBank(topic) ≥ target`.
 - **Giới hạn phía client**: cửa sổ trượt **40 request/phút** cho job (chừa 20 cho thao tác tay của người dùng), không dựa vào độ trễ provider.
-- **429**: đọc `Retry-After`, đặt `cooldownUntil` **toàn job** (worker duy nhất chờ), **không** tính vào chuỗi lỗi.
+- **429**: đọc `Retry-After`, đặt `cooldownUntil` **toàn job** (worker duy nhất chờ), **không** tính vào chuỗi lỗi; 5 lần 429 liên tiếp → `error` để không treo vô hạn.
 - **5xx/network**: backoff 2^n giây (tối đa 30 s); tính vào chuỗi lỗi chung.
 - **Dừng**: đủ target (`done`); người dùng bấm Dừng (`paused`); 3 lô liên tiếp 0 từ mới (`paused`, "chủ đề đã cạn"); 3 lỗi liên tiếp (`error`, giữ tiến trình); ghi bank thất bại (`error` riêng, xem 5.4).
 - **Checkpoint**: mỗi lô ghi bank + `wordJob`; reload mất tối đa 1 lô và không gây trùng.

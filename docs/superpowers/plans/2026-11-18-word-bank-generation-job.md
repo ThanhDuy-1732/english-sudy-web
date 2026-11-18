@@ -452,7 +452,7 @@ function makeDeps(overrides: Partial<Parameters<typeof runWordJob>[0]> = {}) {
       ok: true as const,
       words: [{ word: `w${count + 1}`, meaning: "m" }, { word: `w${count + 2}`, meaning: "m" }],
     })),
-    addWords: (words: { word: string }[]) => {
+    addWords: (words: { word: string; meaning: string }[]) => {
       const n = words.length;
       count += n; added += n;
       return { added: n, persisted: true };
@@ -479,17 +479,34 @@ test("dừng exhausted sau 3 lô không thêm từ", async () => {
 
 test("429 chờ retryAfter rồi chạy tiếp, không tính lỗi", async () => {
   let first = true;
+  let count = 0;
   const { deps } = makeDeps({
-    target: 2,
+    target: 1,
+    countBank: () => count,
     fetchBatch: jest.fn(async () => {
-      if (first) { first = false; return { ok: false as const, status: 429, retryAfterSec: 7 }; }
-      return { ok: true as const, words: [{ word: "a" }] };
+      if (first) {
+        first = false;
+        return { ok: false as const, status: 429, retryAfterSec: 7 };
+      }
+      return { ok: true as const, words: [{ word: "a", meaning: "m" }] };
     }),
-    addWords: () => ({ added: 1, persisted: true }),
+    addWords: () => {
+      count += 1;
+      return { added: 1, persisted: true };
+    },
   });
   const result = await runWordJob(deps);
   expect(result.reason).toBe("done");
   expect(deps.wait).toHaveBeenCalledWith(7000);
+});
+
+test("429 liên tục 5 lần thì dừng để không treo vô hạn", async () => {
+  const { deps } = makeDeps({
+    target: 100,
+    fetchBatch: jest.fn(async () => ({ ok: false as const, status: 429, retryAfterSec: 1 })),
+  });
+  await expect(runWordJob(deps)).resolves.toMatchObject({ reason: "error" });
+  expect(deps.fetchBatch).toHaveBeenCalledTimes(5);
 });
 
 test("ghi bank thất bại dừng ngay với reason storage", async () => {
@@ -503,7 +520,7 @@ test("huỷ giữa chừng không gọi thêm", async () => {
   const { deps } = makeDeps({
     target: 100,
     shouldContinue: () => calls < 2,
-    fetchBatch: jest.fn(async () => { calls++; return { ok: true as const, words: [{ word: `w${calls}` }] }; }),
+    fetchBatch: jest.fn(async () => { calls++; return { ok: true as const, words: [{ word: `w${calls}`, meaning: "m" }] }; }),
     addWords: () => ({ added: 1, persisted: true }),
   });
   await expect(runWordJob(deps)).resolves.toMatchObject({ reason: "cancelled" });
@@ -520,7 +537,7 @@ Expected: FAIL — chưa có module.
 
 ```ts
 // Thuật toán (rút gọn, deps đã có trong chữ ký):
-let wordsAdded = 0, emptyStreak = 0, failures = 0;
+let wordsAdded = 0, emptyStreak = 0, failures = 0, cooldowns = 0;
 while (deps.shouldContinue()) {
   const stop = shouldStopJob({ count: deps.countBank(), target: deps.target, emptyStreak, failures });
   if (stop) return { reason: stop, wordsAdded };
@@ -530,12 +547,18 @@ while (deps.shouldContinue()) {
   const res = await deps.fetchBatch({ exclude: deps.pickExclude(), count: 20, knownCount: deps.countBank() });
   if (!res.ok) {
     const kind = classifyFailure(res.status);
-    if (kind === "cooldown") { await deps.wait((res.retryAfterSec ?? 30) * 1000); continue; }
+    if (kind === "cooldown") {
+      cooldowns += 1;
+      if (cooldowns >= 5) return { reason: "error", wordsAdded };
+      await deps.wait((res.retryAfterSec ?? 30) * 1000);
+      continue;
+    }
     failures += 1;
     await deps.wait(nextBackoffMs(failures));
     continue;
   }
   failures = 0;
+  cooldowns = 0;
   const result = deps.addWords(res.words);
   wordsAdded += result.added;
   if (!result.persisted) return { reason: "storage", wordsAdded };

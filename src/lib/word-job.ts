@@ -73,10 +73,12 @@ export function shouldStopJob(input: {
   target: number;
   emptyStreak: number;
   failures: number;
+  maxFailures?: number;
+  maxEmptyBatches?: number;
 }): "done" | "exhausted" | "error" | null {
   if (input.count >= input.target) return "done";
-  if (input.emptyStreak >= 3) return "exhausted";
-  if (input.failures >= 3) return "error";
+  if (input.emptyStreak >= (input.maxEmptyBatches ?? 3)) return "exhausted";
+  if (input.failures >= (input.maxFailures ?? 3)) return "error";
   return null;
 }
 
