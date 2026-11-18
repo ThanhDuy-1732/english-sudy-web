@@ -384,8 +384,8 @@ test("rate window chặn request thứ 41 trong 60 s", () => {
   const window = createRateWindow(40, 60_000);
   const t0 = 1_000_000;
   for (let i = 0; i < 40; i++) window.record(t0 + i);
-  expect(window.waitMs(t0 + 40)).toBe(0);
-  expect(window.waitMs(t0 + 100)).toBeGreaterThan(0);
+  expect(window.waitMs(t0 + 40)).toBe(59_960);
+  expect(window.waitMs(t0 + 30_000)).toBe(30_000);
   expect(window.waitMs(t0 + 60_000)).toBe(0);
 });
 
