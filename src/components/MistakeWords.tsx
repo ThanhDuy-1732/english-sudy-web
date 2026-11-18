@@ -17,7 +17,7 @@ export default function MistakeWords({ mistake }: { mistake: UnifiedMistake }) {
       <span className="text-muted">Thêm vào ôn tập:</span>
       {words.map((word) =>
         added.includes(word) ? (
-          <span key={word} className="rounded-md bg-ok-soft px-2 py-1 text-ink">
+          <span key={word} className="rounded-xl bg-ok-soft px-2 py-1 text-ink">
             <span className="font-en">{word}</span> đã thêm
           </span>
         ) : (
@@ -28,7 +28,7 @@ export default function MistakeWords({ mistake }: { mistake: UnifiedMistake }) {
               addMistakeWord(word, mistake);
               setAdded((current) => [...current, word]);
             }}
-            className="min-h-9 rounded-md border border-rule bg-card px-2.5 font-en text-ink transition-colors hover:border-primary hover:text-primary"
+            className="min-h-9 rounded-xl border border-rule bg-card px-2.5 font-en text-ink transition-colors hover:border-primary hover:text-primary"
           >
             + {word}
           </button>

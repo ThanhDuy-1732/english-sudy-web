@@ -130,7 +130,7 @@ export default function SettingsPage() {
       {activeTab === "providers" && (
         <div>
           <p className="mb-6 text-sm leading-6 text-muted">
-            Mỗi mô hình được bật khi có API key tương ứng trong <code className="rounded bg-ink/[0.06] px-1">.env.local</code>. Mô hình đang dùng được thử trước; nếu lỗi, app chuyển sang mô hình bật tiếp theo.
+            Mỗi mô hình được bật khi có API key tương ứng trong <code className="rounded-md bg-ink/[0.06] px-1">.env.local</code>. Mô hình đang dùng được thử trước; nếu lỗi, app chuyển sang mô hình bật tiếp theo.
           </p>
 
           <ul className="panel divide-y divide-rule">
@@ -150,7 +150,7 @@ export default function SettingsPage() {
                         {isCurrent && active && !disabled && <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-semibold text-primary">Đang dùng</span>}
                       </p>
                       <p className="mt-0.5 break-all font-mono text-xs text-muted">{model}</p>
-                      {!active && <p className="mt-1 text-sm text-muted">Chưa cấu hình: thêm <code className="rounded bg-ink/[0.06] px-1">{provider.envKey}</code></p>}
+                      {!active && <p className="mt-1 text-sm text-muted">Chưa cấu hình: thêm <code className="rounded-md bg-ink/[0.06] px-1">{provider.envKey}</code></p>}
                     </div>
                     <button
                       type="button"
@@ -323,7 +323,7 @@ function StorageUsage() {
         <div className={`h-full rounded-full ${high ? "bg-margin" : "bg-primary"}`} style={{ width: `${Math.max(percent, 1)}%` }} />
       </div>
       {high && (
-        <p role="alert" className="mt-3 rounded-lg bg-margin-soft px-3 py-2 text-sm text-ink">
+        <p role="alert" className="mt-3 rounded-2xl bg-margin-soft px-3 py-2 text-sm text-ink">
           Sắp đầy ({percent}%). Khi đầy, app không lưu thêm được từ hay bài làm mới. Hãy xuất file sao lưu; đề thi đã tạo chiếm nhiều chỗ nhất và sẽ được tạo lại khi cần.
         </p>
       )}

@@ -82,7 +82,7 @@ export default function GrammarContent({ topic }: { topic: GrammarTopic }) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-ink">{topic.name}</h1>
+        <h2 className="font-display text-2xl font-extrabold text-ink">{topic.name}</h2>
         {topic.isUserGenerated && (
           <p className="mt-1 text-sm text-primary-text">Chủ đề do AI tạo</p>
         )}
@@ -90,8 +90,8 @@ export default function GrammarContent({ topic }: { topic: GrammarTopic }) {
 
       {topic.rules.map((rule) => (
         <section key={rule.id} className="rounded-xl border border-rule bg-card p-5">
-          <h2 className="mb-2 text-lg font-semibold text-ink">{rule.name}</h2>
-          <code className="mb-3 block overflow-x-auto rounded-md bg-primary-soft px-3 py-2 font-en text-[15px] text-ink">
+          <h3 className="mb-2 text-lg font-semibold text-ink">{rule.name}</h3>
+          <code className="mb-3 block overflow-x-auto rounded-xl bg-primary-soft px-3 py-2 font-en text-[15px] text-ink">
             {rule.formula}
           </code>
           <p className="mb-4 text-sm leading-6 text-muted">{rule.explanation}</p>
@@ -120,7 +120,7 @@ export default function GrammarContent({ topic }: { topic: GrammarTopic }) {
               type="button"
               onClick={() => void fetchExamples(rule)}
               disabled={loadingExamples.has(rule.id)}
-              className="min-h-9 rounded bg-ink/5 px-3 py-1.5 text-xs font-medium text-ink hover:bg-ink/5 disabled:opacity-50"
+              className="min-h-9 rounded-xl bg-ink/5 px-3 py-1.5 text-xs font-medium text-ink hover:bg-ink/5 disabled:opacity-50"
             >
               {loadingExamples.has(rule.id) ? "Đang tạo..." : "+ Thêm ví dụ"}
             </button>
@@ -128,13 +128,13 @@ export default function GrammarContent({ topic }: { topic: GrammarTopic }) {
               type="button"
               onClick={() => void fetchExercise(rule)}
               disabled={loadingExercise.has(rule.id)}
-              className="min-h-9 rounded bg-primary-soft px-3 py-1.5 text-xs font-medium text-primary-text hover:bg-primary-soft/70 disabled:opacity-50"
+              className="min-h-9 rounded-xl bg-primary-soft px-3 py-1.5 text-xs font-medium text-primary-text hover:bg-primary-soft/70 disabled:opacity-50"
             >
               {loadingExercise.has(rule.id) ? "Đang tạo..." : "Luyện tập"}
             </button>
             <Link
               href={`/exam/drill/RC5?topic=${encodeURIComponent(rule.name)}&grammarSlug=${encodeURIComponent(rule.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''))}`}
-              className="flex items-center min-h-9 rounded px-3 py-1.5 text-xs font-medium text-primary-text underline hover:text-primary-text"
+              className="flex items-center min-h-9 rounded-full px-3 py-1.5 text-xs font-medium text-primary-text underline hover:text-primary-text"
             >
               Luyện TOEIC Part 5
             </Link>
@@ -142,7 +142,7 @@ export default function GrammarContent({ topic }: { topic: GrammarTopic }) {
               type="button"
               onClick={() => handleToggleBookmark(rule.id)}
               title={bookmarks.has(rule.id) ? "Bỏ lưu" : "Lưu sub-rule"}
-              className={`min-h-9 rounded px-3 py-1.5 text-xs font-medium transition-colors ${
+              className={`min-h-9 rounded-xl px-3 py-1.5 text-xs font-medium transition-colors ${
                 bookmarks.has(rule.id)
                   ? "bg-warn-soft text-warn hover:bg-warn-soft/70"
                   : "bg-ink/5 text-muted hover:text-warn hover:bg-ink/5"

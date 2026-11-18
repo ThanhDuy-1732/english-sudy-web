@@ -29,8 +29,8 @@ function ScoreBars({ bands }: { bands: SpeakingRecord["feedback"]["bands"] }) {
             <span className="text-muted">{label}</span>
             <span className="font-medium">{score > 0 ? score.toFixed(1) : "—"}</span>
           </div>
-          <div className="h-1.5 bg-ink/10 rounded">
-            <div className="h-1.5 bg-blue-500 rounded" style={{ width: `${(score / 9) * 100}%` }} />
+          <div className="h-1.5 bg-ink/10 rounded-full">
+            <div className="h-1.5 bg-blue-500 rounded-full" style={{ width: `${(score / 9) * 100}%` }} />
           </div>
         </div>
       ))}
@@ -78,7 +78,7 @@ export default function SpeakingHistoryPage() {
 
       <ul className="space-y-3">
         {records.map((r) => (
-          <li key={r.id} className="border rounded-lg border-rule">
+          <li key={r.id} className="border rounded-2xl border-rule">
             <button
               onClick={() => setExpanded(expanded === r.id ? null : r.id)}
               className="w-full text-left p-4"
@@ -103,14 +103,14 @@ export default function SpeakingHistoryPage() {
                   {r.audioId && (
                     <button
                       onClick={() => void handleReplay(r.audioId!, r.id)}
-                      className="text-xs px-3 py-1.5 bg-ink/5 rounded"
+                      className="text-xs px-3 py-1.5 bg-ink/5 rounded-full"
                     >
                       ▶ Nghe lại
                     </button>
                   )}
                   <Link
                     href={`/speak/ielts/${r.mode.replace("ielts_", "")}?retryOf=${r.id}`}
-                    className="text-xs px-3 py-1.5 bg-primary-soft text-primary-text rounded"
+                    className="text-xs px-3 py-1.5 bg-primary-soft text-primary-text rounded-full"
                   >
                     Thử lại
                   </Link>

@@ -199,7 +199,7 @@ export default function WritingTaskPage() {
 
   return (
     <div className="writing-task">
-      {error && <p role="alert" className="mb-4 rounded-lg bg-margin-soft p-3 text-margin">{error}</p>}
+      {error && <p role="alert" className="mb-4 rounded-2xl bg-margin-soft p-3 text-margin">{error}</p>}
       <div className="task-header">
         <button onClick={() => router.push("/write")} className="back-btn">← Luyện viết</button>
         <h1>{config.title}</h1>

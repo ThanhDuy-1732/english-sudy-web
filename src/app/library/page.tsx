@@ -103,7 +103,7 @@ export default function LibraryPage() {
           <ul className="space-y-1">
             {items.slice(0, 8).map((item, i) => {
               const content = (
-                <div className="px-3 py-2 rounded-lg hover:bg-primary-soft/50 transition-colors">
+                <div className="px-3 py-2 rounded-2xl hover:bg-primary-soft/50 transition-colors">
                   <p className="text-sm font-medium">{item.title}</p>
                   <p className="text-xs text-muted">{item.subtitle}</p>
                 </div>

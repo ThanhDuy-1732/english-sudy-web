@@ -120,7 +120,7 @@ export default function RewritePage() {
         </div>
       ) : (
         <>
-          <div className="bg-margin-soft rounded-lg p-4 mb-4">
+          <div className="bg-margin-soft rounded-2xl p-4 mb-4">
             <p className="text-xs font-medium text-margin mb-1">Câu gốc</p>
             <p className="text-sm italic">&ldquo;{current.excerpt}&rdquo;</p>
             <p className="text-xs text-margin mt-1">Lỗi: {current.issue}</p>
@@ -136,7 +136,7 @@ export default function RewritePage() {
           />
 
           {feedback ? (
-            <div className={`mt-3 p-3 rounded-lg text-sm ${feedback.correct ? "bg-ok-soft text-ok" : "bg-warn-soft text-warn"}`}>
+            <div className={`mt-3 p-3 rounded-2xl text-sm ${feedback.correct ? "bg-ok-soft text-ok" : "bg-warn-soft text-warn"}`}>
               <p className="font-medium">{feedback.correct ? "✓ Đúng!" : "Chưa chính xác"}</p>
               <p className="mt-1">{feedback.feedback}</p>
               {!feedback.correct && (

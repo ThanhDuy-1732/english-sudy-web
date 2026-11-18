@@ -122,7 +122,7 @@ export default function ServiceWorkerRegistration() {
         <div className="mx-auto flex w-full max-w-6xl items-start justify-between gap-2 px-4 py-4 text-sm text-ink">
           <div className="flex-1">
           {installPrompt ? (
-            <button type="button" disabled={installing} onClick={() => void install()} className="min-h-11 rounded-lg bg-ink/5 px-4">Cài ThankZ English</button>
+            <button type="button" disabled={installing} onClick={() => void install()} className="min-h-11 rounded-full bg-ink/5 px-4">Cài ThankZ English</button>
           ) : (
             <details>
               <summary className="flex min-h-11 cursor-pointer items-center">Cài ứng dụng trên điện thoại</summary>
@@ -131,7 +131,7 @@ export default function ServiceWorkerRegistration() {
             </details>
           )}
           </div>
-          <button type="button" aria-label="Ẩn hướng dẫn cài đặt" onClick={dismiss} className="min-h-11 min-w-11 rounded-lg bg-ink/5">✕</button>
+          <button type="button" aria-label="Ẩn hướng dẫn cài đặt" onClick={dismiss} className="min-h-11 min-w-11 rounded-full bg-ink/5">✕</button>
         </div>
       )}
       {(offline || waiting) && (
@@ -139,7 +139,7 @@ export default function ServiceWorkerRegistration() {
           {offline && <p>Đang ngoại tuyến. Bạn có thể ôn từ đã lưu, đọc ngữ pháp và viết nháp. Chức năng AI cần mạng.</p>}
           {waiting && <>
             <p>Có phiên bản mới. Lưu bài đang làm trước khi tải lại.</p>
-            <button type="button" disabled={offline} className="min-h-11 rounded-lg bg-ink/5 px-4 disabled:opacity-50" onClick={() => {
+            <button type="button" disabled={offline} className="min-h-11 rounded-full bg-ink/5 px-4 disabled:opacity-50" onClick={() => {
               reloadRequested.current = true;
               waiting.postMessage({ type: "SKIP_WAITING" });
             }}>Cập nhật và tải lại</button>

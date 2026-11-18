@@ -40,7 +40,7 @@ export default function GrammarSidebar({
           <button
             type="button"
             onClick={() => onSelect(topic.id)}
-            className={`flex min-h-11 min-w-0 w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
+            className={`flex min-h-11 min-w-0 w-full items-center justify-between rounded-full px-3 py-2.5 text-left text-sm transition-colors ${
               selectedId === topic.id
                 ? "bg-primary-soft font-medium text-primary-text"
                 : "text-muted hover:bg-ink/5 hover:text-ink"
@@ -54,9 +54,9 @@ export default function GrammarSidebar({
             )}
           </button>
           {topicAccuracy[topic.id] !== undefined && (
-            <div className="mx-3 mb-1 h-1 rounded bg-ink/5">
+            <div className="mx-3 mb-1 h-1 rounded-full bg-ink/5">
               <div
-                className="h-1 rounded bg-primary"
+                className="h-1 rounded-full bg-primary"
                 style={{ width: `${topicAccuracy[topic.id]}%` }}
               />
             </div>
@@ -72,7 +72,7 @@ export default function GrammarSidebar({
             onChange={(event) => setInput(event.target.value)}
             disabled={isAdding}
             placeholder="Nhập chủ đề mới..."
-            className="min-h-11 w-full rounded-lg bg-ink/5 px-3 py-2 text-sm text-ink placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-purple-400 disabled:opacity-60"
+            className="min-h-11 w-full rounded-2xl bg-ink/5 px-3 py-2 text-sm text-ink placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-purple-400 disabled:opacity-60"
           />
           <button
             type="submit"

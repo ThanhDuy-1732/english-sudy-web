@@ -20,10 +20,10 @@ export default function StreakCalendar({ data }: { data: CalendarDay[] }) {
         {weeks.map((week, weekIndex) => {
           const firstDay = week.find((day): day is CalendarDay => day !== null);
           const monthLabel = weekIndex === 0 || firstDay?.date.slice(8) === "01" ? new Date(`${firstDay?.date}T12:00:00`).toLocaleDateString("vi-VN", { month: "short" }) : "";
-          return <div key={`${firstDay?.date ?? weekIndex}`} className="flex flex-col gap-1"><div className="h-3 text-[10px] text-muted">{monthLabel}</div>{week.map((day, dayIndex) => day ? <div key={day.date} title={`${day.date}: ${day.count} từ`} aria-label={`${day.date}: ${day.count} từ`} className={`h-3 w-3 rounded-sm ${LEVEL_COLORS[day.level]}`} /> : <div key={`empty-${weekIndex}-${dayIndex}`} className="h-3 w-3" aria-hidden="true" />)}</div>;
+          return <div key={`${firstDay?.date ?? weekIndex}`} className="flex flex-col gap-1"><div className="h-3 text-[10px] text-muted">{monthLabel}</div>{week.map((day, dayIndex) => day ? <div key={day.date} title={`${day.date}: ${day.count} từ`} aria-label={`${day.date}: ${day.count} từ`} className={`h-3 w-3 rounded-full ${LEVEL_COLORS[day.level]}`} /> : <div key={`empty-${weekIndex}-${dayIndex}`} className="h-3 w-3" aria-hidden="true" />)}</div>;
         })}
       </div>
     </div>
-    <div className="mt-2 flex items-center gap-1 text-xs text-muted"><span>Ít</span>{LEVEL_COLORS.map((color, index) => <span key={index} aria-label={`Mức ${index}`} className={`h-3 w-3 rounded-sm ${color}`} />)}<span>Nhiều</span></div>
+    <div className="mt-2 flex items-center gap-1 text-xs text-muted"><span>Ít</span>{LEVEL_COLORS.map((color, index) => <span key={index} aria-label={`Mức ${index}`} className={`h-3 w-3 rounded-full ${color}`} />)}<span>Nhiều</span></div>
   </section>;
 }

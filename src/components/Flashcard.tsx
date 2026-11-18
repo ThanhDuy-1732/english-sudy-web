@@ -286,7 +286,7 @@ export default function Flashcard({
                 >
                   <span>
                     {label}
-                    {shortcuts && <kbd aria-hidden="true" className="ml-1 hidden rounded border border-ink/20 px-1 text-[10px] font-normal text-muted sm:inline">{key}</kbd>}
+                    {shortcuts && <kbd aria-hidden="true" className="ml-1 hidden rounded-full border border-ink/20 px-1 text-[10px] font-normal text-muted sm:inline">{key}</kbd>}
                   </span>
                   {preview(quality) && (
                     <span aria-hidden="true" className="mt-0.5 text-[11px] font-normal text-muted">

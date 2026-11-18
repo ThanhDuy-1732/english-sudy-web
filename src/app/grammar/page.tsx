@@ -61,9 +61,12 @@ export default function GrammarPage() {
 
   return (
     <main className="page-wide">
-      <div className="mb-4 flex items-center justify-between">
-        <span />
-        <Link href="/grammar/quiz" className="btn btn-primary min-h-10 px-4 text-sm">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="page-title">Ngữ pháp</h1>
+          <p className="page-lead">Chọn một chủ điểm, đọc công thức và ví dụ, rồi làm bài tập ngay bên dưới.</p>
+        </div>
+        <Link href="/grammar/quiz" className="btn btn-primary">
           Quiz Ngữ pháp
         </Link>
       </div>
@@ -71,7 +74,7 @@ export default function GrammarPage() {
         <select
           value={selectedId}
           onChange={(event) => setSelectedId(event.target.value)}
-          className="min-h-11 w-full rounded-lg bg-ink/5 px-3 py-2.5 text-sm text-ink focus:outline-none focus:ring-1 focus:ring-purple-400"
+          className="min-h-11 w-full rounded-2xl bg-ink/5 px-3 py-2.5 text-sm text-ink focus:outline-none focus:ring-1 focus:ring-purple-400"
         >
           {allTopics.map((topic) => (
             <option key={topic.id} value={topic.id}>
@@ -82,7 +85,7 @@ export default function GrammarPage() {
       </div>
 
       {error && (
-        <p className="mb-4 rounded-lg border border-margin/30 bg-margin-soft px-4 py-3 text-sm text-margin">
+        <p className="mb-4 rounded-2xl border border-margin/30 bg-margin-soft px-4 py-3 text-sm text-margin">
           {error}
         </p>
       )}
@@ -105,7 +108,7 @@ export default function GrammarPage() {
       </div>
 
       <div className="mt-6 md:hidden">
-        <div className="rounded-lg border border-rule bg-ink/5 p-4">
+        <div className="rounded-2xl border border-rule bg-ink/5 p-4">
           <p className="mb-2 text-sm font-medium text-ink">Thêm chủ đề ngữ pháp</p>
           <form
             onSubmit={(event) => {
@@ -123,7 +126,7 @@ export default function GrammarPage() {
               type="text"
               placeholder="Nhập chủ đề mới..."
               disabled={isAdding}
-              className="min-h-11 min-w-0 flex-1 rounded-lg bg-ink/5 px-3 py-2 text-sm text-ink placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-purple-400 disabled:opacity-60"
+              className="min-h-11 min-w-0 flex-1 rounded-2xl bg-ink/5 px-3 py-2 text-sm text-ink placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-purple-400 disabled:opacity-60"
             />
             <button
               type="submit"

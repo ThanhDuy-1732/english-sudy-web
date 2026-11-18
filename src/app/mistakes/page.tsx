@@ -63,7 +63,7 @@ export default function MistakesPage() {
 
       <ul className="space-y-3">
         {filtered.map((m) => (
-          <li key={m.id} className="border rounded-lg p-4 border-rule">
+          <li key={m.id} className="border rounded-2xl p-4 border-rule">
             <div className="flex justify-between items-start mb-1">
               <span className="text-xs font-medium text-primary-text">
                 {SKILL_LABELS[m.skill]} · {questionTypeLabel(m.category)}
@@ -80,7 +80,7 @@ export default function MistakesPage() {
             {m.status !== "resolved" && (
               <button
                 onClick={() => handleResolve(m.id)}
-                className="mt-3 rounded bg-ok-soft px-2 py-1 text-xs text-ink hover:bg-ok/20"
+                className="mt-3 rounded-full bg-ok-soft px-2 py-1 text-xs text-ink hover:bg-ok/20"
               >
                 Đánh dấu đã hiểu
               </button>

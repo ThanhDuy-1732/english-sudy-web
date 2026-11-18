@@ -158,14 +158,14 @@ export default function DayDrawer({ date, words, studyMinutes, isOpen, onClose, 
             <button
               type="button"
               onClick={() => onNavigate(offsetDate(date, -1))}
-              className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-primary hover:bg-paper"
+              className="flex items-center gap-1 rounded-full px-3 py-2 text-sm text-primary hover:bg-paper"
             >
               ← Ngày trước
             </button>
             <button
               type="button"
               onClick={() => onNavigate(offsetDate(date, 1))}
-              className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-primary hover:bg-paper"
+              className="flex items-center gap-1 rounded-full px-3 py-2 text-sm text-primary hover:bg-paper"
             >
               Ngày sau →
             </button>

@@ -54,7 +54,7 @@ export default function ActivityPage() {
         <div className="mx-auto max-w-2xl text-center">
           <h1 className="page-title mb-3">Chưa có hoạt động</h1>
           <p className="mb-8 text-muted">Bắt đầu học để xem lịch sử tại đây.</p>
-          <Link href="/" className="inline-flex min-h-11 items-center rounded-xl bg-primary px-6 font-semibold text-white hover:bg-primary-strong">
+          <Link href="/" className="btn btn-primary">
             Bắt đầu học
           </Link>
         </div>

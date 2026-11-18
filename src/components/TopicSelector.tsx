@@ -77,13 +77,13 @@ export default function TopicSelector({ value, onChange }: TopicSelectorProps) {
           onChange={(event) => setInputValue(event.target.value)}
           onKeyDown={(event) => { if (event.key === "Enter") addTopic(); }}
           placeholder="Chủ đề khác, ví dụ: du lịch"
-          className="min-h-11 min-w-0 flex-1 rounded-lg border border-rule bg-card px-3 py-2 text-sm text-ink placeholder:text-muted focus:border-primary focus:outline-none sm:w-72 sm:flex-none"
+          className="field min-w-0 flex-1 text-sm"
         />
         <button
           type="button"
           onClick={addTopic}
           disabled={!inputValue.trim()}
-          className="min-h-11 rounded-lg border border-rule bg-card px-4 py-2 text-sm font-medium text-ink transition-colors enabled:hover:border-primary disabled:text-muted"
+          className="btn btn-secondary"
         >
           Thêm chủ đề
         </button>

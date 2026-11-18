@@ -121,7 +121,7 @@ export default function ReviewPage() {
           <p className="page-lead">{words.length} cây cần tưới. Nhớ đúng thì cây lớn thêm một bậc và được hẹn ôn xa hơn.</p>
           {shortcutsOn && (
             <p className="mt-3 hidden text-sm text-muted sm:block">
-              Phím tắt cho thẻ đang viền xanh: <kbd className="rounded border border-rule bg-card px-1.5">Space</kbd> lật thẻ, <kbd className="rounded border border-rule bg-card px-1.5">1</kbd> Quên, <kbd className="rounded border border-rule bg-card px-1.5">2</kbd> Khó, <kbd className="rounded border border-rule bg-card px-1.5">3</kbd> Được, <kbd className="rounded border border-rule bg-card px-1.5">4</kbd> Dễ.
+              Phím tắt cho thẻ đang viền xanh: <kbd className="rounded-md border border-rule bg-card px-1.5">Space</kbd> lật thẻ, <kbd className="rounded-md border border-rule bg-card px-1.5">1</kbd> Quên, <kbd className="rounded-md border border-rule bg-card px-1.5">2</kbd> Khó, <kbd className="rounded-md border border-rule bg-card px-1.5">3</kbd> Được, <kbd className="rounded-md border border-rule bg-card px-1.5">4</kbd> Dễ.
             </p>
           )}
           <RetentionNotice className="mt-4 max-w-2xl" />

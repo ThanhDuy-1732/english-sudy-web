@@ -35,7 +35,7 @@ export default function WritingHistoryPage() {
 
       <ul className="space-y-3">
         {records.map((r) => (
-          <li key={r.id} className="border rounded-lg border-rule">
+          <li key={r.id} className="border rounded-2xl border-rule">
             <button
               onClick={() => setExpanded(expanded === r.id ? null : r.id)}
               className="w-full text-left p-4"
@@ -69,7 +69,7 @@ export default function WritingHistoryPage() {
                     <p className="text-xs font-medium text-muted mb-1">Các phiên bản:</p>
                     <div className="flex gap-2 text-xs flex-wrap">
                       {r.versions!.map((v) => (
-                        <span key={v.version} className="px-2 py-0.5 bg-ink/5 rounded">
+                        <span key={v.version} className="px-2 py-0.5 bg-ink/5 rounded-xl">
                           v{v.version}: {v.feedback.overall.toFixed(1)}
                         </span>
                       ))}
@@ -80,13 +80,13 @@ export default function WritingHistoryPage() {
                 <div className="flex gap-2 mt-2 flex-wrap">
                   <Link
                     href={`/write/result/${r.id}`}
-                    className="text-xs px-3 py-1.5 bg-ink/5 rounded"
+                    className="text-xs px-3 py-1.5 bg-ink/5 rounded-full"
                   >
                     Xem chi tiết
                   </Link>
                   <Link
                     href={`/write/rewrite/${r.id}`}
-                    className="text-xs px-3 py-1.5 bg-primary-soft text-primary-text rounded"
+                    className="text-xs px-3 py-1.5 bg-primary-soft text-primary-text rounded-full"
                   >
                     Luyện viết lại
                   </Link>

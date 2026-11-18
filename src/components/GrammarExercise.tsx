@@ -39,7 +39,7 @@ export default function GrammarExercise({ exercise }: { exercise: Exercise }) {
 
   if (exercise.type === "fill") {
     return (
-      <div className="mt-3 rounded-lg border border-rule bg-ink/5 p-4">
+      <div className="mt-3 rounded-2xl border border-rule bg-ink/5 p-4">
         <p className="mb-3 text-sm text-ink">{exercise.question}</p>
         <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
           <input
@@ -51,7 +51,7 @@ export default function GrammarExercise({ exercise }: { exercise: Exercise }) {
             }}
             disabled={result !== null}
             placeholder="Nhập câu trả lời..."
-            className="min-h-10 min-w-0 flex-1 rounded bg-ink/5 px-3 py-1.5 text-sm text-ink placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-purple-400 disabled:opacity-60"
+            className="min-h-10 min-w-0 flex-1 rounded-xl bg-ink/5 px-3 py-1.5 text-sm text-ink placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-purple-400 disabled:opacity-60"
           />
           {result === null ? (
             <button
@@ -66,7 +66,7 @@ export default function GrammarExercise({ exercise }: { exercise: Exercise }) {
             <button
               type="button"
               onClick={reset}
-              className="min-h-10 rounded bg-ink/5 px-3 py-1.5 text-sm font-medium text-ink hover:bg-ink/5"
+              className="min-h-10 rounded-full bg-ink/5 px-3 py-1.5 text-sm font-medium text-ink hover:bg-ink/5"
             >
               Thử lại
             </button>
@@ -85,7 +85,7 @@ export default function GrammarExercise({ exercise }: { exercise: Exercise }) {
   }
 
   return (
-    <div className="mt-3 rounded-lg border border-rule bg-ink/5 p-4">
+    <div className="mt-3 rounded-2xl border border-rule bg-ink/5 p-4">
       <p className="mb-3 text-sm text-ink">{exercise.question}</p>
       <div className="flex flex-col gap-2">
         {exercise.options.map((option) => {
@@ -102,7 +102,7 @@ export default function GrammarExercise({ exercise }: { exercise: Exercise }) {
                 setSelectedOption(option);
                 setResult(isCorrect(option) ? "correct" : "incorrect");
               }}
-              className={`min-h-10 rounded px-3 py-2 text-left text-sm transition-colors ${
+              className={`min-h-10 rounded-xl px-3 py-2 text-left text-sm transition-colors ${
                 showCorrect
                   ? "bg-ok-soft text-ok"
                   : showWrong

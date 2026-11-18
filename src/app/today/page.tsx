@@ -240,7 +240,7 @@ function GoalCard({ goal }: { goal: GoalProgress }) {
                 {/* The goal tree: grows towards the red line, the target score. */}
                 <div className="relative h-32 w-8 shrink-0 overflow-hidden rounded-full bg-primary-soft" role="progressbar" aria-label="Điểm ước lượng so với mục tiêu" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}>
                   <div className={`absolute inset-x-0 bottom-0 rounded-full ${goal.gap === 0 ? "bg-ok" : "bg-gradient-to-b from-[#43b874] to-primary"}`} style={{ height: `${Math.max(percent, 4)}%` }} />
-                  <div className="absolute inset-x-1 top-1.5 h-[3px] rounded bg-margin" />
+                  <div className="absolute inset-x-1 top-1.5 h-[3px] rounded-xl bg-margin" />
                 </div>
                 <div>
                   <p className="font-display text-4xl font-extrabold leading-none text-ink">{goal.latest.score}</p>

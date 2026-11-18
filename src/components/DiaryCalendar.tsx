@@ -62,7 +62,7 @@ export default function DiaryCalendar({ data, studyTimeByDate, selectedDate, onS
                       aria-label={`${day.date}: ${day.count} từ, ${studyTimeByDate[day.date] ?? 0} phút`}
                       onClick={() => onSelectDate(day.date)}
                       className={[
-                        "h-3 w-3 rounded-sm transition-opacity hover:opacity-80",
+                        "h-3 w-3 rounded-full transition-opacity hover:opacity-80",
                         LEVEL_COLORS[day.level],
                         selectedDate === day.date ? "ring-2 ring-primary ring-offset-1" : "",
                       ].join(" ")}
@@ -79,7 +79,7 @@ export default function DiaryCalendar({ data, studyTimeByDate, selectedDate, onS
       <div className="mt-2 flex items-center gap-1 text-xs text-muted">
         <span>Ít</span>
         {LEVEL_COLORS.map((color, i) => (
-          <span key={i} aria-label={`Mức ${i}`} className={`h-3 w-3 rounded-sm ${color}`} />
+          <span key={i} aria-label={`Mức ${i}`} className={`h-3 w-3 rounded-full ${color}`} />
         ))}
         <span>Nhiều</span>
       </div>

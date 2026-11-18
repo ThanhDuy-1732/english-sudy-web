@@ -40,9 +40,8 @@ function SetCountdownModal({ onClose }: { onClose: () => void }) {
                 key={preset}
                 type="button"
                 onClick={() => setMinutes(preset)}
-                className={`flex-1 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
-                  minutes === preset ? "bg-primary text-white" : "bg-ink/5 text-ink hover:bg-ink/5"
-                }`}
+                aria-pressed={minutes === preset}
+                className={`chip flex-1 ${minutes === preset ? "chip-on" : ""}`}
               >
                 {preset} phút
               </button>
@@ -56,14 +55,14 @@ function SetCountdownModal({ onClose }: { onClose: () => void }) {
               max="180"
               value={minutes}
               onChange={(event) => setMinutes(Math.max(1, Number(event.target.value)))}
-              className="mt-1 w-full rounded-xl border border-rule bg-ink/5 px-4 py-2 text-ink focus:border-primary focus:outline-none"
+              className="field mt-1 w-full"
             />
           </label>
           <div className="flex gap-2">
-            <button type="button" onClick={onClose} className="flex-1 rounded-xl bg-ink/5 py-2 text-sm text-ink hover:bg-ink/5">
+            <button type="button" onClick={onClose} className="btn btn-secondary flex-1">
               Hủy
             </button>
-            <button type="button" onClick={handleStart} className="flex-1 rounded-xl bg-primary py-2 text-sm font-semibold text-white hover:bg-primary-strong">
+            <button type="button" onClick={handleStart} className="btn btn-primary flex-1">
               Bắt đầu
             </button>
           </div>
@@ -87,14 +86,14 @@ function TimeUpModal() {
             Bạn đã học <strong className="text-ink">{studiedMinutes} phút</strong> hôm nay.
           </p>
           <div className="flex gap-2">
-            <button type="button" onClick={clearTimeUp} className="flex-1 rounded-xl bg-ink/5 py-2 text-sm text-ink hover:bg-ink/5">
+            <button type="button" onClick={clearTimeUp} className="btn btn-secondary flex-1">
               Nghỉ thôi
             </button>
             {targetMinutes > 0 && (
               <button
                 type="button"
                 onClick={() => { startCountdown(countdownTarget!); }}
-                className="flex-1 rounded-xl bg-primary py-2 text-sm font-semibold text-white hover:bg-primary-strong"
+                className="btn btn-primary flex-1"
               >
                 Học thêm {targetMinutes} phút
               </button>
@@ -119,7 +118,7 @@ export default function HeaderTimer() {
         <button
           type="button"
           onClick={isRunning ? pause : resume}
-          className={`inline-flex min-h-11 items-center gap-1 whitespace-nowrap rounded-lg px-2 text-sm font-medium tabular-nums transition-colors hover:bg-ink/5 ${
+          className={`inline-flex min-h-11 items-center gap-1 whitespace-nowrap rounded-full px-2 text-sm font-medium tabular-nums transition-colors hover:bg-ink/5 ${
             !isRunning ? "text-ink opacity-50" : isCountdownMode ? "text-primary" : "text-ink"
           }`}
           aria-label={isRunning ? "Tạm dừng timer" : "Tiếp tục timer"}

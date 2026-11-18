@@ -31,7 +31,7 @@ export default function WritingChallenge({ word }: Props) {
       <textarea value={sentence} onChange={(event) => setSentence(event.target.value)} placeholder={`Ví dụ: I need to ${word}...`} rows={2} className="field w-full resize-none text-sm" />
       <button type="button" onClick={handleGrade} disabled={loading || !sentence.trim()} className="btn btn-primary w-full">{loading ? "Đang chấm..." : "Chấm điểm"}</button>
       {error && <p className="text-sm text-margin" role="alert">{error}</p>}
-      {result && <div className="space-y-1 rounded-lg bg-paper p-3 text-sm"><p className={`text-lg font-bold ${scoreColor}`}>{result.score}/10</p><p className="text-muted">{result.feedback}</p>{result.corrected.trim() !== sentence.trim() && <p className="text-ok"><span className="font-medium">Sửa lại:</span> {result.corrected}</p>}</div>}
+      {result && <div className="space-y-1 rounded-2xl bg-paper p-3 text-sm"><p className={`text-lg font-bold ${scoreColor}`}>{result.score}/10</p><p className="text-muted">{result.feedback}</p>{result.corrected.trim() !== sentence.trim() && <p className="text-ok"><span className="font-medium">Sửa lại:</span> {result.corrected}</p>}</div>}
     </div>
   );
 }

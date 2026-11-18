@@ -136,9 +136,9 @@ export default function ShadowingPage() {
       <Link href="/speak" className="back-link">← Luyện nói</Link>
       <h1 className="page-title mb-6">Shadowing</h1>
 
-      <div className="bg-primary-soft rounded-lg p-4 mb-6 text-center">
-        <p className="text-sm text-muted mb-1">Câu mẫu ({sentenceIdx % SHADOW_SENTENCES.length + 1}/{SHADOW_SENTENCES.length})</p>
-        <p className="text-lg font-medium">&ldquo;{sentence}&rdquo;</p>
+      <div className="postcard mb-6 px-6 py-8 text-center">
+        <p className="mb-2 text-sm text-muted">Câu mẫu ({sentenceIdx % SHADOW_SENTENCES.length + 1}/{SHADOW_SENTENCES.length})</p>
+        <p className="font-en text-2xl font-semibold leading-snug">&ldquo;{sentence}&rdquo;</p>
       </div>
 
       <div className="flex gap-3 mb-6 justify-center">
@@ -160,7 +160,7 @@ export default function ShadowingPage() {
         {phase === "recording" && (
           <button
             onClick={() => void handleStopRecording()}
-            className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium animate-pulse"
+            className="btn bg-margin font-semibold text-white motion-safe:animate-pulse"
           >
             ⏹ Dừng ghi âm
           </button>
@@ -179,7 +179,7 @@ export default function ShadowingPage() {
             <p className="text-sm text-muted">Độ tương đồng</p>
           </div>
 
-          <div className="bg-paper rounded-lg p-3 mb-4">
+          <div className="bg-paper rounded-2xl p-3 mb-4">
             <p className="text-xs font-medium text-muted mb-1">Bạn đã nói:</p>
             <p className="text-sm italic">&ldquo;{transcript || "(Không nhận được âm thanh)"}&rdquo;</p>
           </div>
@@ -193,7 +193,7 @@ export default function ShadowingPage() {
                 <p className="text-xs font-medium text-muted mb-1">Từ còn thiếu:</p>
                 <div className="flex flex-wrap gap-1">
                   {missingWords.map((w, i) => (
-                    <span key={i} className="px-2 py-0.5 bg-margin-soft text-margin rounded text-xs">{w}</span>
+                    <span key={i} className="px-2 py-0.5 bg-margin-soft text-margin rounded-full text-xs">{w}</span>
                   ))}
                 </div>
               </div>

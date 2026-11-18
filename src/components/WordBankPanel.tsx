@@ -38,7 +38,7 @@ export function WordBankPanel({ topic }: { topic: string }) {
               type="button"
               aria-pressed={target === value}
               onClick={() => setTarget(value)}
-              className={`min-h-9 rounded-lg border px-3 text-sm tabular-nums transition-colors ${
+              className={`min-h-9 rounded-2xl border px-3 text-sm tabular-nums transition-colors ${
                 target === value
                   ? "border-primary bg-primary/10 text-ink"
                   : "border-rule text-muted hover:border-primary"
