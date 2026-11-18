@@ -117,7 +117,7 @@ test("takeUnseen đánh dấu đã xem và không trả lại lần sau", () => 
 });
 
 test("bank giới hạn WORD_BANK_LIMIT, bỏ cũ nhất", () => {
-  const entries = Array.from({ length: WORD_BANK_LIMIT + 1 }, (_, i) =>
+  const entries = Array.from({ length: WORD_BANK_LIMIT }, (_, i) =>
     bankWord(`w${i}`, "TOEIC", { createdAt: `2026-11-01T00:00:${String(i % 60).padStart(2, "0")}.000Z` }));
   localStorage.setItem("wordBank", JSON.stringify(entries));
   addBankWords([bankWord("last")]);
@@ -139,7 +139,8 @@ test("pickExcludeSample tối đa max, ưu tiên từ mới và không trùng", 
   expect(sample).toHaveLength(200);
   expect(new Set(sample).size).toBe(200);
   expect(sample).toContain("w299");
-  expect(sample).toContain("w0");
+  // 120 từ mới nhất luôn có mặt; phần còn lại lấy ngẫu nhiên từ 180 từ cũ.
+  expect(sample.some((word) => Number(word.slice(1)) < 180)).toBe(true);
 });
 
 test("getKnownWordSet gồm bank và learnedWords", () => {
@@ -161,7 +162,7 @@ Dùng `readStored` và `getLearnedWords`. `getBank()` đọc mảng đã lưu, c
 - [ ] **Step 4: Chạy test, xác nhận xanh**
 
 Run: `npx jest src/lib/__tests__/word-bank.test.ts`
-Expected: PASS (10 test).
+Expected: PASS (11 test).
 
 - [ ] **Step 5: Commit**
 
