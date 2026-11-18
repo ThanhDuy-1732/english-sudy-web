@@ -23,6 +23,7 @@ function stripJsonCodeFence(text: string) {
 export interface GenerateWordsOptions {
   exclude?: string[];
   count?: number;
+  knownCount?: number;
 }
 
 export async function generateWords(
@@ -34,15 +35,20 @@ export async function generateWords(
   const excluded = (options.exclude ?? []).map((word) => word.trim()).filter(Boolean);
   const blocked = new Set(excluded.map((word) => word.toLowerCase()));
   const requested: string[] = [];
+  const knownCount = options.knownCount ?? 0;
 
   // The model returns the topic's most obvious words every time unless the prompt
   // carries what the learner has already seen; temperature alone does not help.
   const buildPrompt = (missing: number) => {
     const avoid = [...excluded, ...requested];
+    const knownLine =
+      knownCount > 0
+        ? `\nThe learner already knows ${knownCount} words on this topic; avoid them and prefer less common words.`
+        : "";
     const avoidLine = avoid.length
       ? `\nDo NOT use any of these words, they were already shown to the learner: ${avoid.join(", ")}. Pick different words.`
       : "";
-    return `Generate ${missing} English vocabulary words for the topic "${topic}". For each word, provide the Vietnamese meaning.${avoidLine}\nReturn ONLY a JSON array with no markdown: [{"word": "...", "meaning": "..."}]`;
+    return `Generate ${missing} English vocabulary words for the topic "${topic}". For each word, provide the Vietnamese meaning.${knownLine}${avoidLine}\nReturn ONLY a JSON array with no markdown: [{"word": "...", "meaning": "..."}]`;
   };
 
   const ask = async (missing: number): Promise<GeneratedWord[]> => {

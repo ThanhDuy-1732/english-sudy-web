@@ -6,7 +6,14 @@ import { NextRequest, NextResponse } from "next/server";
 export const maxDuration = 300;
 
 const NO_STORE = { "Cache-Control": "no-store" };
-const MAX_EXCLUDE = 60;
+const MAX_EXCLUDE = 200;
+const MAX_WORDS = 30;
+
+function clampInt(value: unknown, min: number, max: number, fallback: number): number {
+  const parsed = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(max, Math.max(min, Math.trunc(parsed)));
+}
 
 // Words the learner already saw for this topic; capped and de-duplicated because
 // they go straight into the prompt.
@@ -28,9 +35,11 @@ function sanitizeExclude(value: unknown): string[] {
 }
 
 export async function POST(req: NextRequest) {
-  const { topic, exclude, provider, disabledProviders } = (await req.json()) as {
+  const { topic, exclude, count, knownCount, provider, disabledProviders } = (await req.json()) as {
     topic?: string;
     exclude?: unknown;
+    count?: unknown;
+    knownCount?: unknown;
     provider?: string;
     disabledProviders?: string[];
   };
@@ -47,7 +56,11 @@ export async function POST(req: NextRequest) {
       return result.text;
     };
 
-    const words = await generateWords(topic, generateFn, { exclude: sanitizeExclude(exclude) });
+    const words = await generateWords(topic, generateFn, {
+      exclude: sanitizeExclude(exclude),
+      count: clampInt(count, 1, MAX_WORDS, 5),
+      knownCount: clampInt(knownCount, 0, 100_000, 0),
+    });
     return NextResponse.json(words, {
       headers: { ...NO_STORE, "X-Provider-Used": resolvedProviderId },
     });

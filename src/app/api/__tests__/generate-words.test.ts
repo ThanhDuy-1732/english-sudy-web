@@ -41,6 +41,8 @@ test("forwards sanitized exclude list to generateWords", async () => {
   await POST(req);
   expect(mockGenerateWords).toHaveBeenCalledWith("TOEIC", expect.any(Function), {
     exclude: ["negotiate", "invoice"],
+    count: 5,
+    knownCount: 0,
   });
 });
 
@@ -51,7 +53,37 @@ test("ignores a non-array exclude value", async () => {
     headers: { "Content-Type": "application/json" },
   });
   await POST(req);
-  expect(mockGenerateWords).toHaveBeenCalledWith("TOEIC", expect.any(Function), { exclude: [] });
+  expect(mockGenerateWords).toHaveBeenCalledWith("TOEIC", expect.any(Function), {
+    exclude: [],
+    count: 5,
+    knownCount: 0,
+  });
+});
+
+test("kẹp count trong 1–30 và forward knownCount", async () => {
+  const req = new NextRequest("http://localhost/api/generate-words", {
+    method: "POST",
+    body: JSON.stringify({ topic: "TOEIC", count: 99, knownCount: 12 }),
+    headers: { "Content-Type": "application/json" },
+  });
+  await POST(req);
+  expect(mockGenerateWords).toHaveBeenCalledWith("TOEIC", expect.any(Function), {
+    exclude: [],
+    count: 30,
+    knownCount: 12,
+  });
+});
+
+test("cắt exclude còn 200 từ", async () => {
+  const exclude = Array.from({ length: 250 }, (_, i) => `w${i}`);
+  const req = new NextRequest("http://localhost/api/generate-words", {
+    method: "POST",
+    body: JSON.stringify({ topic: "TOEIC", exclude }),
+    headers: { "Content-Type": "application/json" },
+  });
+  await POST(req);
+  const args = mockGenerateWords.mock.calls.at(-1)?.[2] as { exclude: string[] };
+  expect(args.exclude).toHaveLength(200);
 });
 
 test("returns 400 when topic is missing", async () => {
