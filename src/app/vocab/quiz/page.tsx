@@ -147,7 +147,7 @@ export default function VocabQuizPage() {
           >
             {allWords.length < 4 ? "Cần ít nhất 4 từ" : "Bắt đầu"}
           </button>
-          <Link href="/" className="block text-center text-sm text-gray-500">← Trang chủ</Link>
+          <Link href="/" className="back-link mt-2">← Từ mới</Link>
         </div>
       </main>
     );

@@ -63,10 +63,8 @@ export default function ContextPracticePage() {
 
   return (
     <main className="page">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="page-title">Luyện từ trong ngữ cảnh</h1>
-        <Link href="/" className="text-sm text-blue-500">← Trang chủ</Link>
-      </div>
+      <Link href="/" className="back-link">← Từ mới</Link>
+      <h1 className="page-title mb-4">Luyện từ trong ngữ cảnh</h1>
 
       <p className="text-sm text-gray-500 mb-4">Chọn 2–8 từ, sau đó tạo nội dung chứa các từ đó.</p>
 

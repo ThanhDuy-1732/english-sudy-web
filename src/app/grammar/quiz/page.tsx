@@ -209,7 +209,7 @@ export default function GrammarQuizPage() {
             className="btn btn-primary w-full">
             {loading ? "Đang tải..." : "Bắt đầu"}
           </button>
-          <Link href="/grammar" className="block text-center text-sm text-gray-500 mt-2">← Quay lại ngữ pháp</Link>
+          <Link href="/grammar" className="back-link mt-2">← Quay lại ngữ pháp</Link>
         </div>
       </main>
     );

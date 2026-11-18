@@ -1,5 +1,6 @@
 "use client";
 
+import { questionTypeLabel } from "@/lib/exam/labels";
 import type { ExamQuestion, ExamItem } from "@/lib/exam/types";
 import PassageReader from "./PassageReader";
 import ListeningPlayer from "./ListeningPlayer";
@@ -56,7 +57,7 @@ export default function QuestionCard({
         <span className="question-number">
           {questionNumber} / {totalQuestions}
         </span>
-        <span className="question-type">{formatType(question.type)}</span>
+        <span className="question-type">{questionTypeLabel(question.type)}</span>
       </div>
 
       {/* Listening player for LC parts */}
@@ -228,6 +229,3 @@ export default function QuestionCard({
   );
 }
 
-function formatType(t: string): string {
-  return t.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-}

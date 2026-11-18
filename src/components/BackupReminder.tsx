@@ -46,15 +46,16 @@ export default function BackupReminder() {
   }
 
   return (
-    <div role="region" aria-label="Nhắc sao lưu" className="border-b border-rule bg-warn-soft px-4 py-3 sm:px-8">
-      <div className="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm leading-6 text-ink">
-          {days === null ? "Bạn chưa sao lưu lần nào." : `Lần sao lưu gần nhất là ${days} ngày trước.`}{" "}
-          Dữ liệu học chỉ nằm trong trình duyệt này; xuất file để không mất khi xoá dữ liệu trình duyệt hoặc đổi máy.
+    <div role="region" aria-label="Nhắc sao lưu" className="border-b border-rule bg-warn-soft px-4 py-2 sm:px-8 sm:py-3">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <p className="min-w-0 flex-1 basis-56 text-sm leading-6 text-ink">
+          {days === null ? "Bạn chưa sao lưu lần nào." : `Lần sao lưu gần nhất là ${days} ngày trước.`}
+          {/* The full reason only where there is room for it. */}
+          <span className="hidden sm:inline"> Dữ liệu học chỉ nằm trong trình duyệt này; xuất file để không mất khi xoá dữ liệu trình duyệt hoặc đổi máy.</span>
         </p>
         <div className="flex shrink-0 gap-2">
-          <button type="button" onClick={backup} className="btn btn-primary min-h-10 px-4 text-sm">Xuất file sao lưu</button>
-          <button type="button" onClick={snooze} className="btn btn-secondary min-h-10 px-4 text-sm">Để mai</button>
+          <button type="button" onClick={backup} className="btn btn-primary min-h-10 px-3 text-sm sm:px-4">Sao lưu</button>
+          <button type="button" onClick={snooze} className="btn btn-secondary min-h-10 px-3 text-sm sm:px-4">Để mai</button>
         </div>
       </div>
     </div>

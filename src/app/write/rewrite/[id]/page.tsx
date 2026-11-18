@@ -95,10 +95,9 @@ export default function RewritePage() {
   if (items.length === 0) {
     return (
       <main className="page">
-        <p className="text-gray-500">Không có lỗi nào để luyện lại.</p>
-        <Link href="/write/history" className="text-blue-500 text-sm mt-4 block">
-          ← Quay lại lịch sử
-        </Link>
+        <Link href="/write/history" className="back-link">← Bài viết đã làm</Link>
+        <h1 className="page-title">Luyện viết lại</h1>
+        <p className="page-lead">Bài này không có câu nào bị sửa để luyện lại.</p>
       </main>
     );
   }

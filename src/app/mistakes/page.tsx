@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Segmented from "@/components/Segmented";
+import { questionTypeLabel } from "@/lib/exam/labels";
 import MistakeWords from "@/components/MistakeWords";
 import {
   getMistakes,
@@ -40,12 +41,8 @@ export default function MistakesPage() {
 
   return (
     <main className="page">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="page-title">Sổ lỗi</h1>
-        <Link href="/today" className="text-sm font-medium text-primary hover:underline">
-          ← Hôm nay
-        </Link>
-      </div>
+      <Link href="/today" className="back-link">← Hôm nay</Link>
+      <h1 className="page-title mb-4">Sổ lỗi</h1>
 
       <div className="mb-6 space-y-3">
         <div className="flex flex-wrap items-center gap-3">
@@ -69,7 +66,7 @@ export default function MistakesPage() {
           <li key={m.id} className="border rounded-lg p-4 border-rule">
             <div className="flex justify-between items-start mb-1">
               <span className="text-xs font-medium text-blue-500">
-                {SKILL_LABELS[m.skill]} · {m.category}
+                {SKILL_LABELS[m.skill]} · {questionTypeLabel(m.category)}
               </span>
               <span className="text-xs text-gray-400">{m.occurrenceCount}×</span>
             </div>

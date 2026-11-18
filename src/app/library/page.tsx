@@ -1,4 +1,5 @@
 "use client";
+import { questionTypeLabel } from "@/lib/exam/labels";
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { getLearnedWords } from "@/lib/storage";
@@ -28,7 +29,7 @@ function search(query: string): SearchResult[] {
     if (m.category.toLowerCase().includes(q) || m.correctAnswer.toLowerCase().includes(q) ||
         m.explanation.toLowerCase().includes(q)) {
       results.push({ type: "mistake", title: m.correctAnswer.slice(0, 80),
-        subtitle: `${m.skill} · ${m.category}`, href: "/mistakes" });
+        subtitle: questionTypeLabel(m.category), href: "/mistakes" });
     }
   }
 

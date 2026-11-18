@@ -1,4 +1,5 @@
 "use client";
+import { questionTypeLabel } from "@/lib/exam/labels";
 import { useState, useEffect } from "react";
 import { readString } from "@/lib/safe-json";
 import Link from "next/link";
@@ -44,7 +45,7 @@ function buildPath(): PathItem[] {
     const top = topMistakes[0];
     items.push({
       rank: rank++,
-      title: `Giải quyết lỗi: ${top.category}`,
+      title: `Giải quyết lỗi: ${questionTypeLabel(top.category)}`,
       reason: `Lặp lại ${top.count} lần`,
       href: "/mistakes",
     });
@@ -93,7 +94,7 @@ export default function LearningPathPage() {
     <main className="page">
       <div className="flex justify-between items-center mb-2">
         <h1 className="page-title">Lộ trình học</h1>
-        <Link href="/settings" className="text-sm text-gray-400 hover:text-gray-600">Chỉnh mục tiêu</Link>
+        <Link href="/settings" className="inline-flex min-h-11 items-center text-sm font-medium text-primary hover:underline">Chỉnh mục tiêu</Link>
       </div>
       <p className="text-sm text-gray-500 mb-6">
         Mục tiêu: {GOAL_LABELS[profile.goal]} · {profile.dailyStudyMinutes} phút/ngày

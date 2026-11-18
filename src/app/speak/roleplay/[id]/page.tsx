@@ -235,8 +235,11 @@ export default function RoleplayPage() {
         <div className="scenario-info">
           <strong>{scenario.title}</strong>
           <span className="goal-hint">Mục tiêu: {scenario.goal}</span>
+          {goalAchieved && <span className="goal-badge">Đã đạt mục tiêu</span>}
         </div>
-        {goalAchieved && <span className="goal-badge">Đã đạt mục tiêu</span>}
+        <button onClick={endSession} className="end-btn">
+          Kết thúc
+        </button>
       </div>
 
       <div className="chat-area">
@@ -282,37 +285,38 @@ export default function RoleplayPage() {
         <button onClick={sendMessage} disabled={loading || !input.trim()}>
           Gửi
         </button>
-        <button onClick={endSession} className="end-btn">
-          Kết thúc
-        </button>
       </div>
 
       <style jsx>{`
-        .roleplay-page { display: flex; flex-direction: column; height: calc(100vh - 4rem); height: calc(100dvh - 4rem); max-height: calc(100dvh - 4rem); overflow: hidden; }
-        .roleplay-header { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem 1rem; border-bottom: 1px solid rgb(var(--rule)); flex-shrink: 0; }
+        /* The page scrolls; the message box sticks to the bottom, above the phone tab bar (4.5rem) or at the bottom on desktop. */
+        .roleplay-page { display: flex; flex-direction: column; max-width: 48rem; margin: 0 auto; min-height: calc(100dvh - 8.5rem - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
+        @media (min-width: 1024px) { .roleplay-page { min-height: 100dvh; } }
+        .roleplay-header { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1rem 0.75rem; border-bottom: 1px solid rgb(var(--rule)); flex-shrink: 0; }
+        .end-btn { flex-shrink: 0; min-height: 40px; padding: 0.4rem 0.9rem; border-radius: 999px; border: 1.5px solid rgb(var(--rule)); background: rgb(var(--card)); color: rgb(var(--ink)); font-size: 0.85rem; cursor: pointer; white-space: nowrap; }
+        .end-btn:hover { border-color: rgb(var(--primary)); }
         .back-btn { background: none; border: none; cursor: pointer; color: rgb(var(--muted)); font-size: 0.875rem; white-space: nowrap; }
         .scenario-info { flex: 1; }
-        .scenario-info strong { display: block; font-size: 0.95rem; }
-        .goal-hint { font-size: 0.75rem; color: rgb(var(--muted)); }
-        .goal-badge { background: rgb(var(--ok-soft)); color: rgb(var(--ink)); border-radius: 10px; padding: 0.15rem 0.6rem; font-size: 0.8rem; white-space: nowrap; }
-        .chat-area { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
+        .scenario-info { min-width: 0; }
+        .scenario-info strong { display: block; font-size: 1.05rem; color: rgb(var(--ink)); }
+        .goal-hint { display: block; font-size: 0.8rem; line-height: 1.4; color: rgb(var(--muted)); }
+        .goal-badge { display: inline-block; margin-top: 0.35rem; background: rgb(var(--ok-soft)); color: rgb(var(--ink)); border-radius: 10px; padding: 0.15rem 0.6rem; font-size: 0.8rem; white-space: nowrap; }
+        .chat-area { flex: 1; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
         .intro-message { text-align: center; color: rgb(var(--muted)); padding: 2rem; background: rgb(var(--paper)); border-radius: 10px; font-size: 0.875rem; }
         .intro-message p { margin: 0.35rem 0; }
         .turn { display: flex; }
         .turn.user { justify-content: flex-end; }
         .turn.ai { justify-content: flex-start; }
-        .bubble { max-width: 70%; padding: 0.75rem 1rem; border-radius: 12px; font-size: 0.9rem; line-height: 1.5; }
+        .bubble { max-width: 80%; padding: 0.75rem 1rem; border-radius: 12px; font-size: 0.9rem; line-height: 1.5; }
         .turn.user .bubble { background: rgb(var(--primary)); color: white; border-bottom-right-radius: 4px; }
         .turn.ai .bubble { background: rgb(var(--rule)); color: rgb(var(--ink)); border-bottom-left-radius: 4px; }
         .bubble p { margin: 0; }
         .bubble.loading { color: rgb(var(--muted)); font-style: italic; }
         .correction-chip { display: block; margin-top: 0.35rem; background: none; border: none; color: rgba(255,255,255,0.7); font-size: 0.75rem; cursor: pointer; padding: 0; text-decoration: underline; }
-        .input-area { display: flex; gap: 0.5rem; padding: 0.75rem 1rem; border-top: 1px solid rgb(var(--rule)); flex-shrink: 0; }
-        .input-area input { flex: 1; padding: 0.6rem 0.9rem; border: 1.5px solid rgb(var(--rule)); border-radius: 20px; font-size: 0.9rem; }
+        .input-area { position: sticky; bottom: calc(4.5rem + env(safe-area-inset-bottom)); z-index: 10; display: flex; gap: 0.5rem; padding: 0.75rem 1rem; border-top: 1px solid rgb(var(--rule)); background: rgb(var(--paper)); flex-shrink: 0; }
+        @media (min-width: 1024px) { .input-area { bottom: 0; } }
+        .input-area input { flex: 1; min-width: 0; min-height: 44px; background: rgb(var(--card)); color: rgb(var(--ink)); padding: 0.6rem 0.9rem; border: 1.5px solid rgb(var(--rule)); border-radius: 20px; font-size: 0.9rem; }
         .input-area button { padding: 0.6rem 1.1rem; border-radius: 20px; border: none; background: rgb(var(--primary)); color: white; cursor: pointer; font-size: 0.875rem; }
         .input-area button:disabled { background: rgb(var(--muted)); cursor: not-allowed; }
-        .end-btn { background: rgb(var(--paper)) !important; color: rgb(var(--muted)) !important; border: 1.5px solid rgb(var(--rule)) !important; }
-        .end-btn:hover { background: rgb(var(--rule)) !important; }
         .error { padding: 2rem; text-align: center; }
       `}</style>
     </div>

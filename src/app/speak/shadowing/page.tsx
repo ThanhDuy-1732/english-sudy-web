@@ -133,10 +133,8 @@ export default function ShadowingPage() {
 
   return (
     <main className="page">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="page-title">Shadowing</h1>
-        <Link href="/speak" className="text-sm text-blue-500">← Quay lại</Link>
-      </div>
+      <Link href="/speak" className="back-link">← Luyện nói</Link>
+      <h1 className="page-title mb-6">Shadowing</h1>
 
       <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-4 mb-6 text-center">
         <p className="text-sm text-gray-500 mb-1">Câu mẫu ({sentenceIdx % SHADOW_SENTENCES.length + 1}/{SHADOW_SENTENCES.length})</p>
@@ -147,7 +145,7 @@ export default function ShadowingPage() {
         <button
           onClick={handleSpeak}
           disabled={phase === "processing"}
-          className="px-4 py-2 bg-green-100 text-green-800 rounded-lg text-sm font-medium disabled:opacity-40"
+          className="btn btn-secondary min-h-10 px-4 text-sm"
         >
           Nghe câu mẫu
         </button>

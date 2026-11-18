@@ -1,3 +1,4 @@
+import { questionTypeLabel } from "@/lib/exam/labels";
 import type { ExamAttempt, QuestionType, ExamSettings } from "@/lib/exam/types";
 import type { UnifiedMistake } from "@/lib/mistakes";
 import type { SkillMastery } from "@/lib/mastery";
@@ -119,7 +120,7 @@ export function generatePlan(ctx: PlanContext): PlanBlock[] {
     blocks.push({
       id: "exam-weak",
       kind: "exam_drill",
-      title: `Luyện điểm yếu: ${formatType(weak.type)}`,
+      title: `Luyện điểm yếu: ${questionTypeLabel(weak.type)}`,
       reason: `Accuracy ${weak.accuracy}% — thấp nhất trong 2 tuần`,
       estimatedMin: 15,
       href: `/exam/drill/${part}`,
@@ -207,8 +208,5 @@ export function generatePlan(ctx: PlanContext): PlanBlock[] {
   return fitToBudget(blocks, ctx.availableMin);
 }
 
-function formatType(t: string) {
-  return t.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-}
 
 // ponytail: no persistence here — caller reads localStorage and passes ctx in

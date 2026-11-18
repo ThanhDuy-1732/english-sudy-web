@@ -26,10 +26,8 @@ export default function WritingHistoryPage() {
 
   return (
     <main className="page">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="page-title">Lịch sử Writing</h1>
-        <Link href="/write" className="text-sm text-blue-500">← Quay lại</Link>
-      </div>
+      <Link href="/write" className="back-link">← Luyện viết</Link>
+      <h1 className="page-title mb-4">Bài viết đã làm</h1>
 
       {records.length === 0 && (
         <p className="text-gray-500 text-center py-12">Chưa có bài viết nào.</p>

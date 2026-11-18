@@ -29,9 +29,9 @@ export default function StudyReminder() {
   }
 
   return (
-    <div role="region" aria-label="Nhắc học" className="border-b border-rule bg-primary-soft px-4 py-3 sm:px-8">
-      <div className="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm leading-6 text-ink">
+    <div role="region" aria-label="Nhắc học" className="border-b border-rule bg-primary-soft px-4 py-2 sm:px-8 sm:py-3">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <p className="min-w-0 flex-1 basis-56 text-sm leading-6 text-ink">
           Hôm nay bạn chưa học.
           {nudge.dueWords > 0 && <> Có <span className="font-semibold tabular-nums">{nudge.dueWords} từ</span> đến hạn ôn.</>}
           {nudge.streak > 0 && <> Học vài phút để giữ chuỗi <span className="font-semibold tabular-nums">{nudge.streak} ngày</span>.</>}

@@ -1,5 +1,6 @@
 "use client";
 
+import { questionTypeLabel } from "@/lib/exam/labels";
 import type { ExamItem, ExamQuestion } from "@/lib/exam/types";
 
 interface Props {
@@ -43,7 +44,7 @@ export default function PassageReader({
       <div className="question-pane">
         <div className="question-header">
           <span>{questionNumber} / {totalQuestions}</span>
-          <span className="q-type">{formatType(question.type)}</span>
+          <span className="q-type">{questionTypeLabel(question.type)}</span>
         </div>
 
         <p className="question-prompt">{question.prompt}</p>
@@ -146,6 +147,3 @@ export default function PassageReader({
   );
 }
 
-function formatType(t: string) {
-  return t.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-}

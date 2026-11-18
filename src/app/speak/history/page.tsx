@@ -68,10 +68,8 @@ export default function SpeakingHistoryPage() {
 
   return (
     <main className="page">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="page-title">Bài nói đã làm</h1>
-        <Link href="/speak" className="text-sm font-medium text-primary hover:underline">← Luyện nói</Link>
-      </div>
+      <Link href="/speak" className="back-link">← Luyện nói</Link>
+      <h1 className="page-title mb-4">Bài nói đã làm</h1>
       <RetentionNotice className="mb-6" />
 
       {records.length === 0 && (

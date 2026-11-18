@@ -191,6 +191,11 @@
     @apply border border-rule bg-card text-ink enabled:hover:border-primary [&:is(a)]:hover:border-primary;
   }
 
+  /* "← Page" link back to the parent screen: its own line above the title, a 44px tap target. */
+  .back-link {
+    @apply -ml-1 inline-flex min-h-11 items-center px-1 text-sm font-medium text-muted transition-colors hover:text-primary;
+  }
+
   .field {
     @apply min-h-11 rounded-lg border border-rule bg-card px-3 py-2 text-ink placeholder:text-muted focus:border-primary focus:outline-none;
   }
@@ -390,4 +395,28 @@
 
 :root[data-theme="dark"] .recharts-cartesian-grid line {
   stroke: rgb(var(--rule));
+}
+
+/*
+ * Task-page headers (styled-jsx pages): the back button takes its own line, so a long title never gets squeezed
+ * into two or three lines next to it on phones. Plain class selectors: styled-jsx doesn't set these properties.
+ */
+:is(.result-header, .task-header, .speak-header, .drill-header, .page-header, .roleplay-header) {
+  flex-wrap: wrap;
+  row-gap: 0.25rem;
+}
+
+:is(.result-header, .task-header, .speak-header, .drill-header, .page-header, .roleplay-header) > .back-btn {
+  flex-basis: 100%;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0;
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+:is(.result-header, .task-header, .speak-header, .drill-header, .page-header, .roleplay-header) > .back-btn:hover {
+  color: rgb(var(--primary-text));
 }

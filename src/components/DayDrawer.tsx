@@ -68,6 +68,9 @@ export default function DayDrawer({ date, words, studyMinutes, isOpen, onClose, 
         role="dialog"
         aria-modal="true"
         aria-label="Chi tiết ngày học"
+        // Closed: off screen, and out of the tab order and the accessibility tree.
+        inert={!isOpen}
+        aria-hidden={!isOpen}
         className={[
           "fixed right-0 top-0 z-50 flex h-full w-full max-w-sm flex-col bg-white shadow-2xl transition-transform duration-300",
           isOpen ? "translate-x-0" : "translate-x-full",
@@ -81,7 +84,7 @@ export default function DayDrawer({ date, words, studyMinutes, isOpen, onClose, 
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-600"
+            className="-mr-2 flex h-11 w-11 items-center justify-center rounded-full text-muted hover:bg-ink/5 hover:text-ink"
             aria-label="Đóng"
           >
             ✕

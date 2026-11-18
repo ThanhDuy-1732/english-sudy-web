@@ -58,7 +58,7 @@ test("shows the question header with formatted type", () => {
   );
 
   expect(screen.getByText("2 / 5")).toBeInTheDocument();
-  expect(screen.getByText("Single Passage")).toBeInTheDocument();
+  expect(screen.getByText("Đọc hiểu một đoạn")).toBeInTheDocument();
   expect(screen.getByText("What is the passage about?")).toBeInTheDocument();
 });
 
