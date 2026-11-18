@@ -46,6 +46,14 @@ describe("exportData", () => {
     expect(backup.data).toEqual({ learnedWords: "[]" });
   });
 
+  it("exports wordBank but not wordJob", () => {
+    localStorage.setItem("wordBank", '[{"word":"alpha"}]');
+    localStorage.setItem("wordJob", '{"id":"j1"}');
+    const backup = parseBackup(exportData());
+    expect(backup.data.wordBank).toBe('[{"word":"alpha"}]');
+    expect(backup.data.wordJob).toBeUndefined();
+  });
+
   it("produces a valid ISO export date", () => {
     const backup = parseBackup(exportData());
     expect(backup.exportedAt).toBe(new Date(backup.exportedAt).toISOString());
@@ -126,6 +134,14 @@ describe("clearAllData", () => {
     expect(localStorage.getItem("theme")).toBeNull();
     expect(localStorage.getItem("syncKey")).toBe("abc");
   });
+
+  it("also removes the word job even though it is runtime-only", () => {
+    localStorage.setItem("wordBank", "[]");
+    localStorage.setItem("wordJob", '{"id":"j1"}');
+    clearAllData();
+    expect(localStorage.getItem("wordJob")).toBeNull();
+    expect(localStorage.getItem("wordBank")).toBeNull();
+  });
 });
 
 describe("backupFileName", () => {
@@ -168,6 +184,21 @@ describe("mergeData", () => {
     expect(JSON.parse(localStorage.getItem("examBank")!)).toEqual({ "TOEIC:RC5:3": [{ id: "q1" }, { id: "q2" }], "IELTS:READ_P3:2": [{ id: "r1" }] });
     expect(localStorage.getItem("unifiedMistakes")).toBe("not json");
   });
+
+  it("merges wordBank by word and keeps seenAt", () => {
+    localStorage.setItem("wordBank", JSON.stringify([
+      { word: "alpha", meaning: "a", topic: "TOEIC", createdAt: "2026-11-01T00:00:00.000Z" },
+    ]));
+    mergeData(makeBackup({
+      wordBank: JSON.stringify([
+        { word: "Alpha", meaning: "a", topic: "TOEIC", createdAt: "2026-11-01T00:00:00.000Z", seenAt: "2026-11-02T00:00:00.000Z" },
+        { word: "beta", meaning: "b", topic: "TOEIC", createdAt: "2026-11-01T00:00:00.000Z" },
+      ]),
+    }));
+    const bank = JSON.parse(localStorage.getItem("wordBank") ?? "[]");
+    expect(bank).toHaveLength(2);
+    expect(bank[0].seenAt).toBe("2026-11-02T00:00:00.000Z");
+  });
 });
 
 describe("backup reminder", () => {
@@ -180,6 +211,11 @@ describe("backup reminder", () => {
     markBackedUp(new Date("2026-11-12T12:00:00.000Z"));
     expect(needsBackup(now)).toBe(false);
     markBackedUp(new Date("2026-11-09T12:00:00.000Z"));
+    expect(needsBackup(now)).toBe(true);
+  });
+
+  it("sees word bank activity as data worth backing up", () => {
+    localStorage.setItem("wordBank", '[{"word":"alpha"}]');
     expect(needsBackup(now)).toBe(true);
   });
 });

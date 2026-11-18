@@ -41,6 +41,8 @@ test("forwards sanitized exclude list to generateWords", async () => {
   await POST(req);
   expect(mockGenerateWords).toHaveBeenCalledWith("TOEIC", expect.any(Function), {
     exclude: ["negotiate", "invoice"],
+    count: 5,
+    knownCount: 0,
   });
 });
 
@@ -51,7 +53,37 @@ test("ignores a non-array exclude value", async () => {
     headers: { "Content-Type": "application/json" },
   });
   await POST(req);
-  expect(mockGenerateWords).toHaveBeenCalledWith("TOEIC", expect.any(Function), { exclude: [] });
+  expect(mockGenerateWords).toHaveBeenCalledWith("TOEIC", expect.any(Function), {
+    exclude: [],
+    count: 5,
+    knownCount: 0,
+  });
+});
+
+test("kẹp count trong 1–30 và forward knownCount", async () => {
+  const req = new NextRequest("http://localhost/api/generate-words", {
+    method: "POST",
+    body: JSON.stringify({ topic: "TOEIC", count: 99, knownCount: 12 }),
+    headers: { "Content-Type": "application/json" },
+  });
+  await POST(req);
+  expect(mockGenerateWords).toHaveBeenCalledWith("TOEIC", expect.any(Function), {
+    exclude: [],
+    count: 30,
+    knownCount: 12,
+  });
+});
+
+test("cắt exclude còn 200 từ", async () => {
+  const exclude = Array.from({ length: 250 }, (_, i) => `w${i}`);
+  const req = new NextRequest("http://localhost/api/generate-words", {
+    method: "POST",
+    body: JSON.stringify({ topic: "TOEIC", exclude }),
+    headers: { "Content-Type": "application/json" },
+  });
+  await POST(req);
+  const args = mockGenerateWords.mock.calls.at(-1)?.[2] as { exclude: string[] };
+  expect(args.exclude).toHaveLength(200);
 });
 
 test("returns 400 when topic is missing", async () => {
@@ -81,8 +113,22 @@ test("returns friendly 503 when Gemini fails", async () => {
   });
 });
 
-test("returns 5xx with JSON error body when generateWords throws", async () => {
+test("giữ 429 của provider kèm Retry-After để client cooldown", async () => {
   jest.spyOn(console, "error").mockImplementation(() => {});
+  mockGenerateWords.mockRejectedValueOnce(Object.assign(new Error("rate limited"), { status: 429 }));
+
+  const req = new NextRequest("http://localhost/api/generate-words", {
+    method: "POST",
+    body: JSON.stringify({ topic: "TOEIC" }),
+    headers: { "Content-Type": "application/json" },
+  });
+
+  const res = await POST(req);
+  expect(res.status).toBe(429);
+  expect(res.headers.get("Retry-After")).toBe("30");
+});
+
+test("returns 5xx with JSON error body when generateWords throws", async () => {  jest.spyOn(console, "error").mockImplementation(() => {});
   const { generateWords } = await import("@/lib/gemini");
   (generateWords as jest.Mock).mockRejectedValueOnce(new Error("Gemini API failure"));
   const req = new NextRequest("http://localhost/api/generate-words", {

@@ -2,12 +2,14 @@ import type { Metadata, Viewport } from "next";
 import { Baloo_2, Fraunces, Lexend } from "next/font/google";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import { ProviderContextProvider } from "@/contexts/ProviderContext";
+import { WordJobProvider } from "@/contexts/WordJobContext";
 import { TimerContextProvider } from "@/contexts/TimerContext";
 import { FirebaseInitializer } from "@/components/FirebaseInitializer";
 import AppNavigation from "@/components/AppNavigation";
 import BackupReminder from "@/components/BackupReminder";
 import StudyReminder from "@/components/StudyReminder";
 import DataRetention from "@/components/DataRetention";
+import { WordJobStripConnected } from "@/components/WordJobStrip";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
@@ -59,15 +61,17 @@ export default function RootLayout({
       </head>
       <body className={`${ui.variable} ${display.variable} ${en.variable} min-h-svh min-w-0 bg-paper font-sans text-ink`}>
         <ProviderContextProvider>
-          <TimerContextProvider>
-            <div className="flex min-h-svh min-w-0 flex-col lg:flex-row">
-              <AppNavigation />
-              <div className="app-content min-w-0 flex-1"><StudyReminder /><BackupReminder />{children}</div>
-            </div>
-            <FirebaseInitializer />
-            <DataRetention />
-            <ServiceWorkerRegistration />
-          </TimerContextProvider>
+          <WordJobProvider>
+            <TimerContextProvider>
+              <div className="flex min-h-svh min-w-0 flex-col lg:flex-row">
+                <AppNavigation />
+                <div className="app-content min-w-0 flex-1"><WordJobStripConnected /><StudyReminder /><BackupReminder />{children}</div>
+              </div>
+              <FirebaseInitializer />
+              <DataRetention />
+              <ServiceWorkerRegistration />
+            </TimerContextProvider>
+          </WordJobProvider>
         </ProviderContextProvider>
       </body>
     </html>

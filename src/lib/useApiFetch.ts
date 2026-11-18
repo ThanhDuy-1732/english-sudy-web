@@ -8,8 +8,9 @@ export function useApiFetch() {
   const { currentProvider, setProvider, disabledProviders } = useProvider();
 
   const fetchWithProvider = useCallback(
-    async (url: string, body: Record<string, unknown>): Promise<Response> => {
+    async (url: string, body: Record<string, unknown>, init?: RequestInit): Promise<Response> => {
       const res = await fetch(url, {
+        ...init,
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...body, provider: currentProvider, disabledProviders }),

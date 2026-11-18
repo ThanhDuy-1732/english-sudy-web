@@ -71,6 +71,14 @@ test("generateWords keeps the first batch when the replacement call fails", asyn
   expect(words.map((w) => w.word)).toEqual(["invoice"]);
 });
 
+test("generateWords đưa count và knownCount vào prompt", async () => {
+  mockFn.mockResolvedValue(JSON.stringify([{ word: "launch", meaning: "ra mắt" }]));
+  await generateWords("TOEIC", mockFn, { count: 20, knownCount: 640 });
+  const prompt = mockFn.mock.calls[0][0];
+  expect(prompt).toContain("Generate 20 English");
+  expect(prompt).toContain("already knows 640 words");
+});
+
 // generateSentence
 test("generateSentence returns trimmed text", async () => {
   mockFn.mockResolvedValue("  We need to negotiate.  ");
