@@ -292,7 +292,7 @@ export default function WritingTaskPage() {
   );
 }
 
-const COLORS = ["#4a6fe3", "#14998a", "#c98a12", "#c8435a"];
+const COLORS = ["#2e9e5b", "#2f8fb5", "#d99a00", "#e0533f"];
 
 function TaskChart({ data }: { data: Record<string, unknown> }) {
   const type = data.type as string;
@@ -311,7 +311,7 @@ function TaskChart({ data }: { data: Record<string, unknown> }) {
         {title && <p style={{ fontSize: "0.8rem", fontWeight: 600, marginBottom: "0.5rem" }}>{title}</p>}
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 4 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#d4ddee" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#d6e6dc" />
             <XAxis dataKey="cat" tick={{ fontSize: 10 }} />
             <YAxis tick={{ fontSize: 10 }} />
             <Tooltip />
@@ -338,7 +338,7 @@ function TaskChart({ data }: { data: Record<string, unknown> }) {
       {title && <p style={{ fontSize: "0.8rem", fontWeight: 600, marginBottom: "0.5rem" }}>{title}</p>}
       <ResponsiveContainer width="100%" height={180}>
         <LineChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 4 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#d4ddee" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#d6e6dc" />
           <XAxis dataKey="x" tick={{ fontSize: 10 }} />
           <YAxis tick={{ fontSize: 10 }} unit="%" />
           <Tooltip />

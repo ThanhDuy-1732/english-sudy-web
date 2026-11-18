@@ -6,6 +6,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { DueBadge } from "@/components/DueBadge";
 import { ProviderBadge } from "@/components/ProviderBadge";
 import HeaderTimer from "@/components/HeaderTimer";
+import Plant from "@/components/Plant";
 
 type NavLink = { href: string; label: string };
 
@@ -49,8 +50,8 @@ const TABS: NavLink[] = [
 // 20px line icons for the phone tab bar, drawn on one 24-unit grid so they read as a set.
 const ICONS: Record<string, ReactNode> = {
   "/today": <><circle cx="12" cy="12" r="4" /><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4" /></>,
-  "/": <><rect x="4" y="5" width="16" height="14" rx="2" /><path d="M4 9.5h16M8 13h8M8 16h5" /></>,
-  "/review": <><path d="M20 12a8 8 0 1 1-2.3-5.6" /><path d="M20 4v4.5h-4.5" /></>,
+  "/": <><path d="M12 20v-8" /><path d="M12 13c-4 0-6-2-6-6 4 0 6 2 6 6z" /><path d="M12 11c3 0 5-2 5-5-3 0-5 2-5 5z" /></>,
+  "/review": <><path d="M4 11h11v6a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z" /><path d="M15 13l5-4" /><path d="M7 11c0-3 1.5-5 4-5s4 2 4 5" /></>,
   "/exam": <><path d="M9 4h6M9 4a2 2 0 0 0-2 2v0H6a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-1a2 2 0 0 0-2-2" /><path d="m9 13 2 2 4-4" /></>,
   more: <><circle cx="6" cy="12" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="18" cy="12" r="1.2" /></>,
 };
@@ -72,8 +73,8 @@ function SidebarLink({ link, active }: { link: NavLink; active: boolean }) {
     <Link
       href={link.href}
       aria-current={active ? "page" : undefined}
-      className={`flex min-h-11 items-center rounded-md px-3 text-[15px] lg:min-h-8 transition-colors ${
-        active ? "bg-primary-soft font-semibold text-primary" : "text-ink/80 hover:bg-ink/5 hover:text-ink"
+      className={`flex min-h-11 items-center rounded-2xl px-3 text-[15px] lg:min-h-9 transition-colors ${
+        active ? "bg-primary-soft font-semibold text-primary-text" : "text-ink/80 hover:bg-ink/5 hover:text-ink"
       }`}
     >
       <span className="flex-1">{link.label}</span>
@@ -96,9 +97,9 @@ export default function AppNavigation() {
   return (
     <>
       {/* Desktop sidebar */}
-      <nav aria-label="Điều hướng chính" className="sticky top-0 hidden h-svh w-60 shrink-0 flex-col border-r border-rule bg-paper px-3 py-5 lg:flex">
-        <Link href="/today" className="mb-4 flex min-h-11 items-center px-3 font-en text-2xl font-semibold tracking-tight text-ink">
-          English Study
+      <nav aria-label="Điều hướng chính" className="sticky top-0 hidden h-svh w-60 shrink-0 flex-col border-r border-rule bg-card px-3 py-5 lg:flex">
+        <Link href="/today" className="mb-4 flex min-h-11 items-center gap-2 px-3 font-display text-[1.4rem] font-extrabold text-primary-text">
+          <Plant stage={3} size={30} />English Study
         </Link>
         <div className="flex-1 space-y-4 overflow-y-auto">
           {GROUPS.map((group, index) => (
@@ -118,30 +119,30 @@ export default function AppNavigation() {
 
       {/* Phone top bar */}
       <header className="app-topbar sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-rule bg-paper/95 pb-2 backdrop-blur lg:hidden">
-        <Link href="/today" className="inline-flex min-h-11 items-center font-en text-xl font-semibold tracking-tight text-ink">English Study</Link>
+        <Link href="/today" className="inline-flex min-h-11 items-center gap-1.5 font-display text-xl font-extrabold text-primary-text"><Plant stage={3} size={26} />English Study</Link>
         <HeaderTimer />
       </header>
 
       {/* Phone tab bar */}
-      <nav aria-label="Điều hướng nhanh" className="app-tabbar fixed inset-x-0 bottom-0 z-40 border-t border-rule bg-card/95 backdrop-blur lg:hidden">
-        <div className="mx-auto grid max-w-lg grid-cols-5">
+      <nav aria-label="Điều hướng nhanh" className="app-tabbar fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-40 rounded-3xl border border-rule bg-card/95 p-1.5 shadow-[0_12px_32px_-12px_rgb(23_51_42/0.35)] backdrop-blur lg:hidden">
+        <div className="mx-auto grid max-w-lg grid-cols-5 gap-1">
           {TABS.map((tab) => {
             const active = isActive(pathname, tab.href);
             return (
               <Link key={tab.href} href={tab.href} aria-current={active ? "page" : undefined}
-                className={`relative flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs ${active ? "font-semibold text-primary" : "text-muted"}`}>
+                className={`relative flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-2xl text-xs ${active ? "bg-primary-soft font-semibold text-primary-text" : "text-muted"}`}>
                 <TabIcon name={tab.href} />
                 <span className="flex items-center">{tab.label}{tab.href === "/review" && <DueBadge compact />}</span>
               </Link>
             );
           })}
           <details ref={moreRef} className="group relative">
-            <summary className={`flex min-h-14 cursor-pointer list-none flex-col items-center justify-center gap-0.5 text-xs [&::-webkit-details-marker]:hidden ${moreActive ? "font-semibold text-primary" : "text-muted"}`}>
+            <summary className={`flex min-h-14 cursor-pointer list-none flex-col items-center justify-center gap-0.5 rounded-2xl text-xs [&::-webkit-details-marker]:hidden ${moreActive ? "bg-primary-soft font-semibold text-primary-text" : "text-muted"}`}>
               <TabIcon name="more" />
               <span>Thêm</span>
             </summary>
             <div aria-hidden="true" className="fixed inset-0 bg-deep/40" onClick={() => { if (moreRef.current) moreRef.current.open = false; }} />
-            <div className="more-sheet fixed inset-x-3 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] overflow-y-auto rounded-2xl border border-rule bg-card p-3 shadow-[0_12px_40px_rgb(22_35_63/0.18)]">
+            <div className="more-sheet fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] overflow-y-auto rounded-3xl border border-rule bg-card p-3 shadow-[0_12px_40px_rgb(23_51_42/0.18)]">
               {GROUPS.slice(1).map((group) => (
                 <div key={group.title} className="mb-3">
                   <p className="mb-1 px-3 text-sm font-medium text-muted">{group.title}</p>

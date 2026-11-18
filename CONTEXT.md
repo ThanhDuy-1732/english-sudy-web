@@ -17,13 +17,13 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 | `/` | `src/app/page.tsx` | Generate & study flashcards |
 | `/history` | `src/app/history/page.tsx` | Browse saved words, filter by topic/mastery |
 | `/activity` | `src/app/activity/page.tsx` | Completed learning sessions grouped by local date, with type, duration, and accuracy |
-| `/review` | `src/app/review/page.tsx` | Spaced-repetition review of due words; records a learning session and shows a quality-count summary after the last card |
+| `/review` | `src/app/review/page.tsx` | "Tưới vườn": spaced-repetition review of due words (passes `learned` to `Flashcard`); records a learning session and shows a quality-count summary after the last card |
 | `/stats` | `src/app/stats/page.tsx` | Learning analytics — 4 stat tiles (words, active days, mastery, today's study minutes), words-per-day chart, study-time chart, topic distribution, streak calendar, exam accuracy chart (weekly), weakness radar (by question type) |
 | `/diary` | `src/app/diary/page.tsx` | Daily learning journal — interactive 26-week heatmap, click a day to see words learned and study time in a slide-in drawer |
 | `/grammar` | `src/app/grammar/page.tsx` | Grammar study page — desktop sidebar/mobile selector, static grammar rules, AI examples/exercises, user-generated grammar topics |
 | `/import` | `src/app/import/page.tsx` | Bulk import words |
 | `/settings` | `src/app/settings/page.tsx` | 4 tabs (`Segmented`): Mô hình AI · Giọng đọc · Dữ liệu · Hồ sơ. Mô hình AI is a list (one row per provider: model id, `role=switch` toggle, Test, "Dùng mô hình này trước") that fits phones |
-| `/exam` | `src/app/exam/page.tsx` | Exam dashboard — chọn TOEIC/IELTS, level, drill/mock |
+| `/exam` | `src/app/exam/page.tsx` | Exam dashboard — chọn TOEIC/IELTS, level, drill/mock; `SkillGrove` ("Rừng kỹ năng"): one tree per part, height = % correct over all attempts (coral <60, sun <80, green), grey stump when not practised |
 | `/exam/drill/[part]` | `src/app/exam/drill/[part]/page.tsx` | Luyện 1 part (TOEIC RC5/RC6/RC7/LC2/LC3/LC4; IELTS READ_P1/READ_P2/READ_P3, LISTEN_S1–S4; prompt từng part trong `lib/exam/prompts.ts`); records an exam session with part metadata and result totals |
 | `/exam/mock` | `src/app/exam/mock/page.tsx` | Full mock test rút gọn với countdown timer; records an exam session with mock metadata and result totals |
 | `/exam/mistakes` | `src/app/exam/mistakes/page.tsx` | Sổ lỗi exam: `getExamMistakes()` (unified, `source` `exam:*`), filter, resolve dùng chung với `/mistakes`, badge "sai N lần", drill lại; chạy `runMistakeMigration()` khi tải |
@@ -33,7 +33,7 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 | `/write` | `src/app/write/page.tsx` | Chọn dạng bài viết IELTS/TOEIC |
 | `/write/task/[id]` | `src/app/write/task/[id]/page.tsx` | Editor + wall-clock timer + word count + per-task local draft recovery (a draft past its deadline is still restored, shows "Đã hết giờ" and a "Làm lại từ đầu" button that discards it; submitting stays allowed); validates HTTP/feedback before saving; opens result by persisted record UUID; writing session ends after grading result is saved, cancels on early exit |
 | `/write/result/[id]` | `src/app/write/result/[id]/page.tsx` | Kết quả chấm — annotated essay + model answer; reads saved record by UUID (survives PWA restart), with sessionStorage fallback for legacy task-ID URLs; title is derived from `kind` (IELTS Task 1 / IELTS Task 2 / TOEIC Writing – Business Email) |
-| `/today` | `src/app/today/page.tsx` | Kế hoạch học tự động từ `generatePlan` (SRS debt, điểm yếu exam, lỗi chưa xử lý, grammar mastery, nhắc speaking/writing). Khung **mục tiêu** (`goalProgress` trong `lib/goal-progress.ts`) khi hồ sơ có goal TOEIC/IELTS: điểm mục tiêu, điểm thi thử gần nhất (chỉ tính bài `mock`; IELTS = trung bình band Listening/Reading làm tròn 0.5), còn thiếu bao nhiêu, còn bao nhiêu ngày tới `targetDate` |
+| `/today` | `src/app/today/page.tsx` | Kế hoạch học tự động từ `generatePlan` (SRS debt, điểm yếu exam, lỗi chưa xử lý, grammar mastery, nhắc speaking/writing). Trang "Vườn hôm nay": `GardenBed` ở đầu, cột phải có chuỗi ngày tưới (`computeStreak`) và cây mục tiêu. Khung **mục tiêu** (`goalProgress` trong `lib/goal-progress.ts`) khi hồ sơ có goal TOEIC/IELTS: điểm mục tiêu, điểm thi thử gần nhất (chỉ tính bài `mock`; IELTS = trung bình band Listening/Reading làm tròn 0.5), còn thiếu bao nhiêu, còn bao nhiêu ngày tới `targetDate` |
 | `/path` | `src/app/path/page.tsx` | Lộ trình: learning profile + mastery 6 kỹ năng (`recomputeMastery()`) + top nhóm lỗi; link tới quiz/mistakes |
 | `/mistakes` | `src/app/mistakes/page.tsx` | Sổ lỗi hợp nhất (`unifiedMistakes`) — lọc theo skill/status, đổi status, resolve |
 | `/library` | `src/app/library/page.tsx` | Tìm kiếm xuyên từ vựng / lỗi / speaking / writing |
@@ -330,9 +330,9 @@ Registry order: `opencode` đứng đầu khi `OPENCODE_API_KEY` có mặt, nên
 - **fill** — `FillBlank` (fill-in-the-blank exercise)
 - **dictation** — `DictationMode` (listen and type the sentence)
 
-On first flip: fetches sentence + synonyms in parallel. Saved state is lazy (only after flip). Pronunciation button (`PronunciationButton`) floats on front face.
+On first flip: fetches sentence + synonyms in parallel. Saved state is lazy (only after flip). Pronunciation button (`PronunciationButton`) floats on front face. Both faces are `.postcard`s; the front has a `.stamp` with the word's `Plant` (stage = `growthStage(learned?.mastery)`). Save button: "Gieo vào vườn" / "Đã gieo".
 
-In **review mode** (`isReviewMode=true`): shows 4 review grade buttons — Quên (0), Khó (3), Được (4), Dễ (5) — instead of save. Prop `shortcuts` (set on the first card of `/review`, outlined in blue): Space/Enter flips, 1–4 grade; ignored while typing or when a button/link has focus; off when `learningProfile.shortcutsEnabled` is false. Updates SM-2 fields via `updateWordReviewSm2(word, quality)` and passes the quality to `onReviewed` for session tracking. `/review` cancels unfinished sessions on exit; its summary reports counts, accuracy (Được + Dễ), duration, and remaining due words.
+In **review mode** (`isReviewMode=true`): shows 4 review grade buttons — Quên (0), Khó (3), Được (4), Dễ (5) — instead of save. Prop `shortcuts` (set on the first card of `/review`, outlined in blue): Space/Enter flips, 1–4 grade; ignored while typing or when a button/link has focus; off when `learningProfile.shortcutsEnabled` is false. Optional prop `learned` (the `LearnedWord`): each grade button previews the stage and interval it would give (`fsrs(fsrsStateOf(learned), q)`). Updates the schedule via `reviewWord` and passes the quality to `onReviewed` for session tracking. `/review` cancels unfinished sessions on exit; its summary reports counts, accuracy (Được + Dễ), duration, and remaining due words.
 
 ---
 
@@ -427,6 +427,8 @@ Không cần server. `studyNudge(reminderTime, now?)` trả `{ dueWords, streak 
 
 | Component | Purpose |
 |---|---|
+| `Plant` | SVG of a word's growth stage 0–5 (Hạt, Mầm, Lá, Bụi, Nụ, Hoa = mastery stars); exports `STAGE_NAMES`, `growthStage(mastery)` |
+| `GardenBed` | `/today`: the 12 most recently saved words as plants on soil labels; due words are thirsty (yellow drop and rim); "Tưới N cây" links to `/review` |
 | `FlashcardGrid` | Renders word grid, passes `onFlip` counter up |
 | `TopicSelector` | Preset + custom topics; custom topics have a × delete button |
 | `QuizMode` | Multiple-choice quiz over current word set |
@@ -507,14 +509,13 @@ Jest + `@testing-library/react`. Config: `jest.config.ts` + `jest.setup.ts`. Tes
 
 ## Theming
 
-- **Design tokens** ("sổ tay thẻ từ"): RGB triplets in `globals.css` per `data-theme` — `paper` (page), `card` (raised surfaces), `ink`, `muted`, `rule` (lines/borders), `primary` (+`strong`, `soft`; ballpoint blue for actions/links/focus), `marker` (highlighter yellow — only for what needs the learner now, e.g. due counts), `margin` (index-card red; errors). Tailwind exposes them as `bg-paper`, `text-ink`, `border-rule`, `bg-primary/10`… plus fixed `deep` (#16233f, ink on yellow/light pills). Use tokens for new UI; never hardcode hex.
-- Tailwind remaps `purple`/`violet`/`indigo` → `blue` and `gray` → `slate`, so older accent classes fall into one palette.
+- **Design tokens** ("Vườn bưu thiếp": each word is a postcard, the garden shows progress): RGB triplets in `globals.css` per `data-theme` — `paper` (mint page), `card`, `ink`, `muted`, `rule`, `primary` (leaf green, +`strong`, `soft`, `text` = readable green on paper/card), `marker` (sun yellow — only for what needs the learner now: due counts, thirsty plants), `margin` (coral; errors), `soil` (plant labels, grove ground). Tailwind: `bg-paper`, `text-primary-text`, `bg-soil`… plus fixed `deep` (#17332a, ink on yellow pills). Old `blue/purple/violet/indigo` classes map to Tailwind green, `gray` to neutral. Use tokens for new UI; never hardcode hex.
 - Status tokens: `ok`, `warn`, `margin` each with `-soft` (`bg-ok-soft`, `text-margin`). styled-jsx and inline styles use `rgb(var(--token))` — no hex, and no `:root[data-theme="dark"]` overrides (tokens already switch).
-- **Shared classes** (`@layer components` in `globals.css`) — use them for every new screen:
-  `page` (max-w-3xl column) / `page-wide` (max-w-6xl), `page-title` (h1), `page-lead` (one line under the title), `section-title`, `panel` (bordered card), `btn` + `btn-primary` / `btn-secondary`, `field` (input/textarea).
-- Copy rules: sentence case, no emoji in labels or headings (✓ ✗ and media glyphs ▶ ⏹ are fine), no "→" on buttons, no ALL-CAPS eyebrow labels. Back links read "← <page name>".
-- **Type**: `font-sans` = Be Vietnam Pro (Vietnamese UI); `font-en`/`font-display` = Literata — set English study content (words, example sentences, formulas, passages) in `font-en`.
-- `.index-card`: ruled card (3.5rem header, red line, blue rules every 1.75rem). Content below the header uses `leading-7` and no vertical gaps so text sits on the rules (`Flashcard`, home empty state). `.marker-stroke`: highlighter behind a short number (plain marker colour on dark).
+- Shared classes (globals.css `@layer components`):
+  `page` (max-w-3xl column) / `page-wide` (max-w-6xl), `page-title` (h1, Baloo 2 extrabold), `page-lead`, `section-title`, `panel` (rounded-3xl card), `btn` (pill) + `btn-primary` / `btn-secondary`, `field` (input/textarea).
+- **Type** (`layout.tsx`, next/font with the vietnamese subset): `font-sans` = Lexend (UI), `font-display` = Baloo 2 (headings, brand), `font-en` = Fraunces — set English study content (words, example sentences, formulas, passages) in `font-en`.
+- `.postcard`: airmail-striped border around an always-light card (light tokens forced inside, also in dark mode). `.stamp`: perforated stamp box for a `Plant`. `.marker-stroke`: highlighter behind a short number.
+- Phone chrome: floating rounded tab bar (`bottom-3`, sprout/watering-can icons), `.app-content` bottom padding 6.5rem, `.pwa-status` above it. Theme colours #eef6f0 / #0e1f19 (`lib/theme.ts`, `manifest.ts`).
 - `data-theme` is the resolved theme; `dark:` follows it (`darkMode: ["selector", '[data-theme="dark"]']`). Older pages written for a dark canvas (`text-white`, `white/NN`) or light cards (`bg-white`, grey ink, `*-50/100` tints) are re-mapped by the two blocks at the end of `globals.css`. styled-jsx uses `rgb(var(--token))` and `:global(:root[data-theme="dark"]) .x`.
 - `dark-surface` keeps light text on deliberately dark elements in light theme; `keep-light` keeps a light button in dark theme.
 - Rule when adding UI: text/background must read in **both** themes (contrast ≥3; `e2e/contrast.e2e.js`).

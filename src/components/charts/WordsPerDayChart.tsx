@@ -10,11 +10,11 @@ export default function WordsPerDayChart({ data }: { data: DailyWordCount[] }) {
     <div className="h-[220px] w-full" role="img" aria-label="Biểu đồ số từ học theo ngày">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={displayData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-          <CartesianGrid stroke="#d4ddee" strokeDasharray="3 3" />
+          <CartesianGrid stroke="#d6e6dc" strokeDasharray="3 3" />
           <XAxis dataKey="label" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
           <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
           <Tooltip formatter={(value) => [value, "Từ"]} labelFormatter={(label) => `Ngày ${label}`} />
-          <Bar dataKey="count" fill="#4a6fe3" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="count" fill="#2e9e5b" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

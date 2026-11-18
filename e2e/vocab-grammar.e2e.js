@@ -18,9 +18,9 @@ scenario("custom and TOEIC topics drive word generation", async ({ browser, chec
   await page.type('input[placeholder^="Chủ đề khác"]', "Travel and tourism"); await page.keyboard.press("Enter"); await sleep(500);
   check("custom topic chip added", (await page.evaluate(() => [...document.querySelectorAll("button")].some((b) => /Travel and tourism/.test(b.innerText)))));
   check("custom topic persisted", /Travel and tourism/.test((await page.evaluate(() => localStorage.getItem("customTopics"))) || ""));
-  await clickText(page, "Sinh từ mới"); await sleep(1000);
+  await clickText(page, "Gieo 5 từ mới"); await sleep(1000);
   check("generation uses the custom topic", topics.at(-1) === "Travel and tourism", String(topics.at(-1)));
-  await clickText(page, "TOEIC"); await sleep(300); await clickText(page, "Sinh từ mới"); await sleep(1000);
+  await clickText(page, "TOEIC"); await sleep(300); await clickText(page, "Gieo 5 từ mới"); await sleep(1000);
   check("TOEIC chip switches the topic", topics.at(-1) === "TOEIC", String(topics.at(-1)));
 });
 

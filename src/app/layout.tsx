@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Be_Vietnam_Pro, Literata } from "next/font/google";
+import { Baloo_2, Fraunces, Lexend } from "next/font/google";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import { ProviderContextProvider } from "@/contexts/ProviderContext";
 import { WordJobProvider } from "@/contexts/WordJobContext";
@@ -13,10 +13,12 @@ import { WordJobStripConnected } from "@/components/WordJobStrip";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
-// Vietnamese interface text: Be Vietnam Pro (drawn for Vietnamese diacritics).
-const ui = Be_Vietnam_Pro({ subsets: ["latin", "vietnamese"], weight: ["400", "500", "600", "700"], variable: "--font-ui" });
-// English being studied (words, example sentences, passages): Literata, a reading serif.
-const en = Literata({ subsets: ["latin", "vietnamese"], variable: "--font-en" });
+// Interface text: Lexend, drawn for reading ease; all three fonts cover Vietnamese.
+const ui = Lexend({ subsets: ["latin", "vietnamese"], weight: ["300", "400", "500", "600"], variable: "--font-ui" });
+// Headings: Baloo 2, rounded and friendly.
+const display = Baloo_2({ subsets: ["latin", "vietnamese"], weight: ["600", "700", "800"], variable: "--font-display" });
+// English being studied (words on postcards, example sentences): Fraunces.
+const en = Fraunces({ subsets: ["latin", "vietnamese"], variable: "--font-en" });
 
 export const metadata: Metadata = {
   title: "English Study",
@@ -42,8 +44,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f4f7fc" },
-    { media: "(prefers-color-scheme: dark)", color: "#0e182b" },
+    { media: "(prefers-color-scheme: light)", color: "#eef6f0" },
+    { media: "(prefers-color-scheme: dark)", color: "#0e1f19" },
   ],
 };
 
@@ -57,7 +59,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
-      <body className={`${ui.variable} ${en.variable} min-h-svh min-w-0 bg-paper font-sans text-ink`}>
+      <body className={`${ui.variable} ${display.variable} ${en.variable} min-h-svh min-w-0 bg-paper font-sans text-ink`}>
         <ProviderContextProvider>
           <WordJobProvider>
             <TimerContextProvider>

@@ -92,7 +92,7 @@ export default function ReviewPage() {
           <button
             type="button"
             onClick={() => router.push("/")}
-            className="w-full rounded-xl bg-primary px-6 py-3 font-semibold text-white transition-colors hover:bg-primary-strong"
+            className="btn btn-primary w-full"
           >
             Xong
           </button>
@@ -117,8 +117,8 @@ export default function ReviewPage() {
     <main className="page-wide">
       <div>
         <div className="mb-8">
-          <h1 className="page-title">Ôn tập hôm nay</h1>
-          <p className="page-lead">{words.length} từ cần ôn</p>
+          <h1 className="page-title">Tưới vườn</h1>
+          <p className="page-lead">{words.length} cây cần tưới. Nhớ đúng thì cây lớn thêm một bậc và được hẹn ôn xa hơn.</p>
           {shortcutsOn && (
             <p className="mt-3 hidden text-sm text-muted sm:block">
               Phím tắt cho thẻ đang viền xanh: <kbd className="rounded border border-rule bg-card px-1.5">Space</kbd> lật thẻ, <kbd className="rounded border border-rule bg-card px-1.5">1</kbd> Quên, <kbd className="rounded border border-rule bg-card px-1.5">2</kbd> Khó, <kbd className="rounded border border-rule bg-card px-1.5">3</kbd> Được, <kbd className="rounded border border-rule bg-card px-1.5">4</kbd> Dễ.
@@ -140,6 +140,7 @@ export default function ReviewPage() {
                 antonyms: w.antonyms ?? [],
               }}
               isReviewMode={true}
+              learned={w}
               onReviewed={handleReviewed}
             />
           ))}

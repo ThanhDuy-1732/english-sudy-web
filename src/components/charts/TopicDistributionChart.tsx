@@ -3,7 +3,7 @@
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 // Categorical set, ≥3:1 against both the light and the dark card.
-const COLORS = ["#4a6fe3", "#14998a", "#c98a12", "#c8435a", "#7a5bd6", "#64748b"];
+const COLORS = ["#2e9e5b", "#2f8fb5", "#d99a00", "#e0533f", "#8a6fd1", "#6b7d74"];
 
 export default function TopicDistributionChart({ data }: { data: { topic: string; count: number }[] }) {
   return <section aria-labelledby="topic-distribution-title">

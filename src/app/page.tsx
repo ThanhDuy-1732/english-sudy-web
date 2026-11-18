@@ -1,5 +1,6 @@
 "use client";
 
+import Plant from "@/components/Plant";
 import { useEffect, useState } from "react";
 import { localDateKey } from "@/lib/date";
 import FlashcardGrid from "@/components/FlashcardGrid";
@@ -143,10 +144,8 @@ export default function HomePage() {
   return (
     <main className="mx-auto w-full max-w-6xl px-4 pb-16 pt-8 sm:px-8 lg:pt-12">
       <header className="max-w-2xl">
-        <h1 className="text-3xl font-semibold tracking-tight text-ink sm:text-4xl">Từ mới</h1>
-        <p className="page-lead">
-          Chọn chủ đề và sinh 5 từ. Lật từng thẻ để xem nghĩa, câu ví dụ, rồi lưu những từ bạn muốn ôn lại.
-        </p>
+        <h1 className="page-title">Gieo từ mới</h1>
+        <p className="page-lead">Chọn chủ đề và gieo 5 từ. Lật từng bưu thiếp để xem nghĩa và câu ví dụ, rồi gieo những từ muốn giữ vào vườn để ôn.</p>
       </header>
 
       <section aria-label="Chọn chủ đề" className="mt-8 flex flex-col items-start gap-4">
@@ -155,9 +154,9 @@ export default function HomePage() {
           type="button"
           onClick={handleGenerate}
           disabled={loading}
-          className="min-h-12 shrink-0 rounded-xl bg-primary px-6 text-base font-semibold text-white transition-colors hover:bg-primary-strong disabled:cursor-wait disabled:opacity-60"
+          className="btn btn-primary min-h-12 px-7 text-base disabled:cursor-wait"
         >
-          {loading ? "Đang sinh từ..." : "Sinh từ mới"}
+          {loading ? "Đang sinh từ..." : "Gieo 5 từ mới"}
         </button>
       </section>
 
@@ -169,9 +168,9 @@ export default function HomePage() {
 
       <WordBankPanel topic={topic} />
 
-      <section aria-label="Thử thách hằng ngày" className="mt-6 flex flex-col gap-3 rounded-xl border border-rule bg-card px-4 py-3 sm:flex-row sm:items-center sm:gap-6">
+      <section aria-label="Thử thách hằng ngày" className="panel mt-6 flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:gap-6">
         <p className="shrink-0 text-sm text-muted">
-          Chuỗi ngày học <span className="marker-stroke text-lg font-semibold tabular-nums">{streak}</span>
+          Chuỗi ngày tưới vườn <span className="ml-1 rounded-full bg-marker px-2.5 py-0.5 font-display text-lg font-bold tabular-nums text-deep">{streak}</span>
         </p>
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-rule" role="progressbar" aria-label="Thẻ đã lật" aria-valuemin={0} aria-valuemax={words.length || 5} aria-valuenow={flippedCount}>
@@ -183,7 +182,7 @@ export default function HomePage() {
           type="button"
           onClick={completeDailyChallenge}
           disabled={!words.length || flippedCount < words.length || dailyCompleted}
-          className="min-h-11 shrink-0 rounded-lg border border-rule px-4 text-sm font-medium text-ink transition-colors enabled:hover:bg-marker enabled:hover:text-deep disabled:text-muted"
+          className="btn btn-secondary shrink-0 text-sm disabled:opacity-100 disabled:text-muted"
         >
           {challengeLabel}
         </button>
@@ -193,17 +192,18 @@ export default function HomePage() {
         {loading && (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">
             {Array.from({ length: 3 }, (_, index) => (
-              <div key={index} className="index-card h-72 animate-pulse rounded-xl border border-rule" />
+              <div key={index} className="postcard h-80 animate-pulse" />
             ))}
             <p className="sr-only">Đang chuẩn bị bộ từ mới...</p>
           </div>
         )}
 
         {!loading && words.length === 0 && (
-          <div className="index-card max-w-xl rounded-xl border border-rule px-6 pb-7">
-            <p className="flex h-14 items-center text-sm text-muted">{topic === "Daily Communication" ? "Giao tiếp hằng ngày" : topic}</p>
-            <p className="pt-[1.5px] font-en text-xl leading-7 text-ink">Chưa có thẻ nào.</p>
-            <p className="text-base leading-7 text-muted">Bấm <strong className="font-semibold text-ink">Sinh từ mới</strong> để nhận 5 từ cho chủ đề này. Mỗi thẻ có nghĩa tiếng Việt, câu ví dụ, và bài luyện viết câu, điền từ, nghe chép.</p>
+          <div className="postcard relative max-w-xl px-6 pb-7 pt-5">
+            <span className="stamp absolute right-4 top-4 h-[5.25rem] w-[4.5rem]"><span><Plant stage={0} size={40} />hạt</span></span>
+            <p className="pr-20 text-sm text-muted">{topic === "Daily Communication" ? "Giao tiếp hằng ngày" : topic}</p>
+            <p className="mt-10 font-en text-2xl font-semibold text-ink">Chưa có bưu thiếp nào.</p>
+            <p className="mt-2 text-base leading-7 text-muted">Bấm <strong className="font-semibold text-ink">Gieo 5 từ mới</strong> để nhận 5 từ cho chủ đề này. Mỗi bưu thiếp có nghĩa tiếng Việt, câu ví dụ, và bài luyện viết câu, điền từ, nghe chép.</p>
           </div>
         )}
 

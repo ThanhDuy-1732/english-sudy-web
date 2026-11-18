@@ -29,11 +29,11 @@ export default function ExamAccuracyChart({ attempts }: { attempts: ExamAttempt[
       <div className="h-[200px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-            <CartesianGrid stroke="#d4ddee" strokeDasharray="3 3" />
+            <CartesianGrid stroke="#d6e6dc" strokeDasharray="3 3" />
             <XAxis dataKey="label" tick={{ fontSize: 11 }} />
             <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
             <Tooltip formatter={(v) => [`${v}%`, "Accuracy"]} />
-            <Bar dataKey="accuracy" fill="#4a6fe3" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="accuracy" fill="#2e9e5b" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

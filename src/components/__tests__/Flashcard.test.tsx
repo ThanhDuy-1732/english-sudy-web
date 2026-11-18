@@ -87,8 +87,8 @@ test("uses a saved example and synonyms without requesting the network", async (
 test("calls saveLearnedWord when Đã học is clicked", async () => {
   render(<Flashcard word="greet" meaning="chào hỏi" topic="Daily Communication" />);
   fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của greet" }));
-  await waitFor(() => screen.getByText("Lưu để ôn"));
-  fireEvent.click(screen.getByText("Lưu để ôn"));
+  await waitFor(() => screen.getByText("Gieo vào vườn"));
+  fireEvent.click(screen.getByText("Gieo vào vườn"));
   expect(saveLearnedWord).toHaveBeenCalledWith(
     expect.objectContaining({
       word: "greet",
@@ -125,12 +125,12 @@ test("setSaved stays false when saveLearnedWord returns false (duplicate)", asyn
 
   render(<Flashcard word="greet" meaning="chào hỏi" topic="Daily Communication" />);
   fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của greet" }));
-  await waitFor(() => screen.getByText("Lưu để ôn"));
-  fireEvent.click(screen.getByText("Lưu để ôn"));
+  await waitFor(() => screen.getByText("Gieo vào vườn"));
+  fireEvent.click(screen.getByText("Gieo vào vườn"));
 
-  // Button label should NOT change to "Đã lưu"
-  expect(screen.getByText("Lưu để ôn")).toBeInTheDocument();
-  expect(screen.queryByText("Đã lưu")).not.toBeInTheDocument();
+  // Button label should NOT change to "Đã gieo"
+  expect(screen.getByText("Gieo vào vườn")).toBeInTheDocument();
+  expect(screen.queryByText("Đã gieo")).not.toBeInTheDocument();
 });
 
 test("keeps flip and save actions as separate accessible buttons", async () => {
@@ -138,7 +138,7 @@ test("keeps flip and save actions as separate accessible buttons", async () => {
 
   fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của greet" }));
   await waitFor(() =>
-    expect(screen.getByRole("button", { name: "Lưu để ôn" })).toBeInTheDocument(),
+    expect(screen.getByRole("button", { name: "Gieo vào vườn" })).toBeInTheDocument(),
   );
 
   expect(screen.getByRole("button", { name: "Lật lại" })).toBeInTheDocument();
