@@ -8,6 +8,15 @@ import QuizMode from "@/components/QuizMode";
 import ReadingMode from "@/components/ReadingMode";
 import { getDailyChallenge, getStreak, setDailyComplete } from "@/lib/daily-challenge";
 import { useApiFetch } from "@/lib/useApiFetch";
+import { WordBankPanel } from "@/components/WordBankPanel";
+import {
+  addBankWords,
+  countBank,
+  getUnseen,
+  markBankWordsSeen,
+  pickExcludeSample,
+  takeUnseen,
+} from "@/lib/word-bank";
 
 interface Word {
   word: string;
@@ -31,9 +40,6 @@ export default function HomePage() {
   const { fetchWithProvider } = useApiFetch();
   const [topic, setTopic] = useState("Daily Communication");
   const [words, setWords] = useState<Word[]>([]);
-  // Words already shown for this topic in this visit; sent back so the AI returns
-  // different ones instead of the topic's same five default words.
-  const [seenWords, setSeenWords] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [flippedCount, setFlippedCount] = useState(0);
@@ -51,25 +57,45 @@ export default function HomePage() {
   }, []);
 
   async function handleGenerate() {
-    setLoading(true);
     setError(null);
     setWords([]);
     setFlippedCount(0);
     setQuizOpen(false);
     setReadingData(null);
 
+    // Peek first: taking words here would mark them seen and then lose them when the
+    // fallback below only shows the freshly generated batch.
+    const ready = getUnseen(topic, 5);
+    if (ready.length === 5) {
+      markBankWordsSeen(ready.map((entry) => entry.word));
+      setWords(ready.map(({ word, meaning }) => ({ word, meaning })));
+      return;
+    }
+
+    setLoading(true);
     try {
-      const res = await fetchWithProvider("/api/generate-words", { topic, exclude: seenWords });
+      const res = await fetchWithProvider("/api/generate-words", {
+        topic,
+        exclude: pickExcludeSample(topic),
+        count: 20,
+        knownCount: countBank(topic),
+      });
 
       if (!res.ok) {
         throw new Error("Không thể sinh từ mới lúc này.");
       }
 
       const data = (await res.json()) as Word[];
-      setWords(data);
-      setSeenWords((prev) =>
-        Array.from(new Set([...prev, ...data.map((word) => word.word)])).slice(-40)
+      addBankWords(
+        data.map((entry) => ({ ...entry, topic, createdAt: new Date().toISOString() }))
       );
+
+      const picked = takeUnseen(topic, 5);
+      if (picked.length === 0) {
+        setError("Chủ đề này đã cạn từ mới. Thử chủ đề khác.");
+        return;
+      }
+      setWords(picked.map(({ word, meaning }) => ({ word, meaning })));
     } catch {
       setError("Không thể sinh từ mới lúc này. Vui lòng thử lại.");
     } finally {
@@ -80,7 +106,6 @@ export default function HomePage() {
   function handleTopicChange(nextTopic: string) {
     setTopic(nextTopic);
     setWords([]);
-    setSeenWords([]);
     setError(null);
     setFlippedCount(0);
     setQuizOpen(false);
@@ -141,6 +166,8 @@ export default function HomePage() {
           {error}
         </p>
       )}
+
+      <WordBankPanel topic={topic} />
 
       <section aria-label="Thử thách hằng ngày" className="mt-6 flex flex-col gap-3 rounded-xl border border-rule bg-card px-4 py-3 sm:flex-row sm:items-center sm:gap-6">
         <p className="shrink-0 text-sm text-muted">
