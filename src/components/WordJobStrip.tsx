@@ -40,7 +40,12 @@ export function WordJobStrip({
             </>
           )}
           {job.status === "running" && !isOwner && <>Đang chạy ở tab khác · {progress}</>}
-          {job.status === "paused" && <>Đã dừng ở {progress} từ</>}
+          {job.status === "paused" && (
+            <>
+              Đã dừng ở {progress} từ
+              {job.lastError ? ` — ${job.lastError}` : ""}
+            </>
+          )}
           {job.status === "error" && <>{job.lastError ?? "Job đã dừng do lỗi."}</>}
         </p>
 

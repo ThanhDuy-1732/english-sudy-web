@@ -66,6 +66,13 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("Failed to generate words", error);
+    // Keep provider throttling visible so the client can cool down instead of retrying blind.
+    if ((error as { status?: number }).status === 429) {
+      return NextResponse.json(
+        { error: "Nhà cung cấp AI đang giới hạn tốc độ. Thử lại sau." },
+        { status: 429, headers: { ...NO_STORE, "Retry-After": "30" } }
+      );
+    }
     return NextResponse.json(
       { error: "Không thể sinh từ mới lúc này. Vui lòng thử lại." },
       { status: 503, headers: NO_STORE }

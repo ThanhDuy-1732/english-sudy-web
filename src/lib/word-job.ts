@@ -102,6 +102,31 @@ export function isLockStale(
   return Number.isNaN(heartbeat) || now - heartbeat > staleMs;
 }
 
+/** True when the stored job is still the one this loop is generating for. */
+export function isSameRunningJob(stored: WordJob | null, id: string): boolean {
+  return stored?.id === id && stored.status === "running";
+}
+
+/**
+ * A followed job becomes resumable once its owner is gone: the lock belongs to no
+ * one (the owner closed) or its heartbeat is older than the stale window.
+ */
+export function reconcileFollowedJob(
+  stored: WordJob | null,
+  tabId: string,
+  now = Date.now()
+): WordJob | null {
+  if (!stored || stored.status !== "running") return stored;
+  if (stored.lock?.tabId === tabId) return stored;
+  if (!isLockStale(stored.lock, now)) return stored;
+  return {
+    ...stored,
+    status: "paused",
+    lock: undefined,
+    updatedAt: new Date(now).toISOString(),
+  };
+}
+
 export interface RateWindow {
   /** Milliseconds to wait before the next request is allowed (0 when a slot is free). */
   waitMs(now?: number): number;

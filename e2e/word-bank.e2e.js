@@ -121,3 +121,73 @@ scenario("a second tab shows the running job but makes no requests", async ({ br
 
   await second.close();
 });
+
+scenario("closing the job tab leaves a resumable job", async ({ browser, check }) => {
+  const calls = { n: 0 };
+  const page = await newPage(browser, { intercept: wordMocks(calls, { delayMs: 300 }) });
+  const context = page.browserContext();
+  await goto(page, "/");
+  await clickText(page, "300");
+  await clickText(page, "Bắt đầu");
+  check("job starts", await waitText(page, "Đang tạo", 5000));
+  await sleep(1200);
+  const before = (await bankOf(page)).length;
+  check("progress before closing", before > 0, String(before));
+
+  await page.close();
+  await sleep(300);
+
+  const next = await context.newPage();
+  await next.setRequestInterception(true);
+  next.on("request", (req) => {
+    if (!wordMocks(calls, { delayMs: 300 })(req)) req.continue();
+  });
+  await next.goto(BASE + "/", { waitUntil: "networkidle2" });
+  check("closed tab's job comes back paused", await waitText(next, "Chạy tiếp", 6000));
+  const job = await jobOf(next);
+  check("status is paused", job?.status === "paused", String(job?.status));
+  check("progress kept", (await bankOf(next)).length >= before);
+
+  await clickText(next, "Chạy tiếp");
+  check("resume finishes the job", await waitText(next, "Đã đủ 300", 90000));
+  const bank = await bankOf(next);
+  check("300 unique words after takeover", bank.length === 300 && new Set(bank.map((w) => w.word.toLowerCase())).size === 300, String(bank.length));
+});
+
+scenario("an already-open tab adopts a job started elsewhere", async ({ browser, check }) => {
+  const calls = { n: 0 };
+  const page = await newPage(browser, { intercept: wordMocks(calls, { delayMs: 300 }) });
+  await goto(page, "/");
+
+  const idle = await page.browserContext().newPage();
+  await idle.setRequestInterception(true);
+  idle.on("request", (req) => {
+    if (!wordMocks(calls, { delayMs: 300 })(req)) req.continue();
+  });
+  await idle.goto(BASE + "/", { waitUntil: "networkidle2" });
+  await sleep(600);
+  check("idle tab has no strip yet", !(await bodyText(idle)).includes("Đang tạo"));
+
+  await clickText(page, "300");
+  await clickText(page, "Bắt đầu");
+  check("idle tab learns about the job", await waitText(idle, "tab khác", 8000));
+  check("idle tab shows progress", (await bodyText(idle)).includes("/300"));
+
+  await idle.close();
+});
+
+scenario("a blocked-storage start shows an error and spends nothing", async ({ browser, check }) => {
+  const calls = { n: 0 };
+  const page = await newPage(browser, { intercept: wordMocks(calls) });
+  await page.evaluateOnNewDocument(() => {
+    Storage.prototype.setItem = function () {
+      throw new Error("QuotaExceededError");
+    };
+  });
+  await goto(page, "/");
+  await clickText(page, "100");
+  await clickText(page, "Bắt đầu");
+  check("storage error is shown", await waitText(page, "Không lưu được", 6000));
+  await sleep(1500);
+  check("no AI calls were made", calls.n === 0, String(calls.n));
+});

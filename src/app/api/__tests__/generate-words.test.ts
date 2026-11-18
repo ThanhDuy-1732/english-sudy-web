@@ -113,8 +113,22 @@ test("returns friendly 503 when Gemini fails", async () => {
   });
 });
 
-test("returns 5xx with JSON error body when generateWords throws", async () => {
+test("giữ 429 của provider kèm Retry-After để client cooldown", async () => {
   jest.spyOn(console, "error").mockImplementation(() => {});
+  mockGenerateWords.mockRejectedValueOnce(Object.assign(new Error("rate limited"), { status: 429 }));
+
+  const req = new NextRequest("http://localhost/api/generate-words", {
+    method: "POST",
+    body: JSON.stringify({ topic: "TOEIC" }),
+    headers: { "Content-Type": "application/json" },
+  });
+
+  const res = await POST(req);
+  expect(res.status).toBe(429);
+  expect(res.headers.get("Retry-After")).toBe("30");
+});
+
+test("returns 5xx with JSON error body when generateWords throws", async () => {  jest.spyOn(console, "error").mockImplementation(() => {});
   const { generateWords } = await import("@/lib/gemini");
   (generateWords as jest.Mock).mockRejectedValueOnce(new Error("Gemini API failure"));
   const req = new NextRequest("http://localhost/api/generate-words", {

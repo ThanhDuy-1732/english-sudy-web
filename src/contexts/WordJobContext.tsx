@@ -10,14 +10,17 @@ import {
   type ReactNode,
 } from "react";
 import { useApiFetch } from "@/lib/useApiFetch";
-import { addBankWords, countBank, pickExcludeSample } from "@/lib/word-bank";
+import { addBankWords, countBank, pickExcludeSample, WORD_BANK_KEY } from "@/lib/word-bank";
 import {
   clearJob,
   createRateWindow,
   getJob,
   isLockStale,
+  isSameRunningJob,
   makeJob,
+  reconcileFollowedJob,
   saveJob,
+  WORD_JOB_KEY,
   type WordJob,
 } from "@/lib/word-job";
 import { runWordJob, type JobRunReason, type JobWord } from "@/lib/word-job-runner";
@@ -75,8 +78,9 @@ export function WordJobProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const persist = useCallback((next: WordJob) => {
-    saveJob(next);
+    const saved = saveJob(next);
     setJob(next);
+    return saved;
   }, []);
 
   const run = useCallback(
@@ -91,7 +95,7 @@ export function WordJobProvider({ children }: { children: ReactNode }) {
       const finish = (reason: JobRunReason) => {
         if (token !== runToken.current) return;
         const current = getJob();
-        if (!current || reason === "cancelled") return;
+        if (!current || current.id !== initial.id || reason === "cancelled") return;
         const status: WordJob["status"] =
           reason === "done" ? "done" : reason === "error" || reason === "storage" ? "error" : "paused";
         const lastError =
@@ -116,7 +120,7 @@ export function WordJobProvider({ children }: { children: ReactNode }) {
       const heartbeat = window.setInterval(() => {
         if (token !== runToken.current) return;
         const current = getJob();
-        if (!current || current.status !== "running") return;
+        if (!current || current.id !== initial.id || current.status !== "running") return;
         saveJob({
           ...current,
           updatedAt: new Date().toISOString(),
@@ -169,11 +173,21 @@ export function WordJobProvider({ children }: { children: ReactNode }) {
         pickExclude: () => pickExcludeSample(initial.topic),
         wait: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
         shouldContinue: () =>
-          token === runToken.current && getJob()?.status === "running",
+          token === runToken.current && isSameRunningJob(getJob(), initial.id),
         onProgress: ({ count: next, added }) => {
           setCount(next);
           const minutes = (Date.now() - startedAt) / 60_000;
           if (minutes > 0.01) setWordsPerMinute(Math.round(added / minutes));
+          // Refresh the lock on every batch: background tabs throttle timers, which
+          // would otherwise make a live owner look stale.
+          const current = getJob();
+          if (current?.id === initial.id && current.status === "running") {
+            saveJob({
+              ...current,
+              updatedAt: new Date().toISOString(),
+              lock: { tabId: tabId.current, heartbeatAt: new Date().toISOString() },
+            });
+          }
         },
         rateWindow: rate,
       })
@@ -195,9 +209,13 @@ export function WordJobProvider({ children }: { children: ReactNode }) {
         ...makeJob(topic, target),
         lock: { tabId: tabId.current, heartbeatAt: new Date().toISOString() },
       };
-      persist(next);
-      setCount(countBank(topic));
       setWordsPerMinute(0);
+      if (!persist(next)) {
+        setJob({ ...next, status: "error", lastError: STORAGE_ERROR, lock: undefined });
+        setCount(0);
+        return;
+      }
+      setCount(countBank(topic));
       run(next);
     },
     [persist, run]
@@ -226,7 +244,11 @@ export function WordJobProvider({ children }: { children: ReactNode }) {
       updatedAt: new Date().toISOString(),
       lock: { tabId: tabId.current, heartbeatAt: new Date().toISOString() },
     };
-    persist(next);
+    setWordsPerMinute(0);
+    if (!persist(next)) {
+      setJob({ ...next, status: "error", lastError: STORAGE_ERROR, lock: undefined });
+      return;
+    }
     run(next);
   }, [persist, run]);
 
@@ -260,35 +282,64 @@ export function WordJobProvider({ children }: { children: ReactNode }) {
     setCount(countBank(existing.topic));
   }, []);
 
-  // Follow a job run by another tab.
+  // Follow a job run by another tab; take it over once its owner is gone.
   const activeId = job?.id;
   const activeTopic = job?.topic;
   useEffect(() => {
     if (!activeId || activeTopic === undefined) return;
     const timer = window.setInterval(() => {
       const stored = getJob();
-      setJob(stored);
-      setCount(countBank(stored?.topic ?? activeTopic));
+      if (!stored) return; // storage may be blocked; keep an in-memory error visible
+      const next = reconcileFollowedJob(stored, tabId.current);
+      if (next !== stored && next) saveJob(next);
+      setJob(next);
+      setCount(countBank(next?.topic ?? activeTopic));
     }, 5000);
     return () => window.clearInterval(timer);
   }, [activeId, activeTopic]);
 
-  // Leaving the page stops the loop; the checkpoint stays, so the next visit can resume.
-  useEffect(
-    () => () => {
-      const current = getJob();
-      if (current?.status === "running" && current.lock?.tabId === tabId.current) {
-        saveJob({
-          ...current,
-          status: "paused",
-          lock: undefined,
-          updatedAt: new Date().toISOString(),
-        });
+  // A tab that is already open must learn about a job started elsewhere.
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== null && event.key !== WORD_JOB_KEY && event.key !== WORD_BANK_KEY) return;
+      if (event.key === WORD_JOB_KEY && event.newValue === null) {
+        setJob(null);
+        setCount(0);
+        return;
       }
+      const stored = getJob();
+      if (!stored) return;
+      const next = reconcileFollowedJob(stored, tabId.current);
+      if (next !== stored && next) saveJob(next);
+      setJob(next);
+      setCount(next?.topic ? countBank(next.topic) : 0);
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
+  // Closing the tab pauses the job (pagehide fires on close, unlike React unmount).
+  // The unmount cleanup still covers Fast Refresh and client-side unmounts.
+  const pauseOwnJob = useCallback(() => {
+    const current = getJob();
+    if (current?.status === "running" && current.lock?.tabId === tabId.current) {
+      saveJob({
+        ...current,
+        status: "paused",
+        lock: undefined,
+        updatedAt: new Date().toISOString(),
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("pagehide", pauseOwnJob);
+    return () => {
+      window.removeEventListener("pagehide", pauseOwnJob);
+      pauseOwnJob();
       stopRun();
-    },
-    [stopRun]
-  );
+    };
+  }, [pauseOwnJob, stopRun]);
 
   const isOwner = !job || job.status !== "running" || job.lock?.tabId === tabId.current;
 

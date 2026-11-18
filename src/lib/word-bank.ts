@@ -40,8 +40,12 @@ export function getBank(): BankWord[] {
   return [...merged.values()];
 }
 
+function learnedWordsList(): { word: string }[] {
+  return getLearnedWords().filter((entry) => typeof entry?.word === "string");
+}
+
 function learnedNormalized(): Set<string> {
-  return new Set(getLearnedWords().map((entry) => normalizeWord(entry.word)));
+  return new Set(learnedWordsList().map((entry) => normalizeWord(entry.word)));
 }
 
 export function getKnownWordSet(): Set<string> {
@@ -134,7 +138,7 @@ export function pickExcludeSample(topic: string, max = DEFAULT_EXCLUDE_MAX): str
 
   const used = new Set(recent.map(normalizeWord));
   const rest: string[] = [];
-  for (const word of [...older, ...getLearnedWords().map((entry) => entry.word)]) {
+  for (const word of [...older, ...learnedWordsList().map((entry) => entry.word)]) {
     const key = normalizeWord(word);
     if (!key || used.has(key)) continue;
     used.add(key);

@@ -118,3 +118,14 @@ test("getKnownWordSet gồm bank và learnedWords", () => {
   localStorage.setItem("learnedWords", JSON.stringify([{ word: "Beta" }]));
   expect([...getKnownWordSet()].sort()).toEqual(["alpha", "beta"]);
 });
+
+test("không crash khi learnedWords có phần tử thiếu word", () => {
+  localStorage.setItem("learnedWords", JSON.stringify([{ meaning: "x" }, { word: "Alpha" }]));
+  localStorage.setItem("wordBank", JSON.stringify([bankWord("alpha"), bankWord("beta")]));
+
+  expect(() => countBank("TOEIC")).not.toThrow();
+  expect(getUnseen("TOEIC", 5).map((w) => w.word)).toEqual(["beta"]);
+  expect([...getKnownWordSet()].sort()).toEqual(["alpha", "beta"]);
+  expect(addBankWords([bankWord("gamma")]).added).toBe(1);
+  expect(pickExcludeSample("TOEIC", 10)).toEqual(expect.arrayContaining(["beta"]));
+});

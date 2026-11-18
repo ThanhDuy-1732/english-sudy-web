@@ -72,6 +72,20 @@ test("lỗi lưu trữ hiện thông báo riêng", () => {
   expect(screen.getByText(/Không lưu được/)).toBeInTheDocument();
 });
 
+test("job paused hiện lý do dừng", () => {
+  render(
+    <WordJobStrip
+      job={{ ...base, status: "paused", lastError: "Chủ đề này đã cạn từ mới." }}
+      count={420}
+      isOwner
+      onPause={jest.fn()}
+      onResume={jest.fn()}
+      onCancel={jest.fn()}
+    />
+  );
+  expect(screen.getByText(/đã cạn từ mới/)).toBeInTheDocument();
+});
+
 test("không có job thì không render gì", () => {
   const { container } = render(
     <WordJobStrip job={null} count={0} isOwner onPause={jest.fn()} onResume={jest.fn()} onCancel={jest.fn()} />

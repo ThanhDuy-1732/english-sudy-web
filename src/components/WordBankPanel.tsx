@@ -71,6 +71,7 @@ export function WordBankPanel({ topic }: { topic: string }) {
       {paused && (
         <p className="mt-2 text-sm text-muted">
           Đang có {FORMAT.format(count)}/{FORMAT.format(job.target)} từ — dùng “Chạy tiếp” ở thanh trên.
+          {job.lastError ? ` ${job.lastError}` : ""}
         </p>
       )}
     </section>

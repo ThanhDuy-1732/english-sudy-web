@@ -4,8 +4,10 @@ import {
   createRateWindow,
   getJob,
   isLockStale,
+  isSameRunningJob,
   makeJob,
   nextBackoffMs,
+  reconcileFollowedJob,
   saveJob,
   shouldStopJob,
 } from "../word-job";
@@ -41,6 +43,30 @@ test("isLockStale sau 30 s", () => {
   expect(isLockStale({ tabId: "a", heartbeatAt: "2026-11-18T00:00:45.000Z" }, now)).toBe(false);
   expect(isLockStale({ tabId: "a", heartbeatAt: "2026-11-18T00:00:20.000Z" }, now)).toBe(true);
   expect(isLockStale(undefined, now)).toBe(true);
+});
+
+test("isSameRunningJob chỉ nhận đúng job và trạng thái running", () => {
+  const job = makeJob("TOEIC", 100);
+  expect(isSameRunningJob(job, job.id)).toBe(true);
+  expect(isSameRunningJob({ ...job, id: "other" }, job.id)).toBe(false);
+  expect(isSameRunningJob({ ...job, status: "paused" }, job.id)).toBe(false);
+  expect(isSameRunningJob(null, job.id)).toBe(false);
+});
+
+test("reconcileFollowedJob chuyển job của tab đã chết thành paused", () => {
+  const now = Date.parse("2026-11-18T00:01:00.000Z");
+  const job = {
+    ...makeJob("TOEIC", 100),
+    lock: { tabId: "other", heartbeatAt: "2026-11-18T00:00:20.000Z" },
+  };
+  const next = reconcileFollowedJob(job, "mine", now);
+  expect(next?.status).toBe("paused");
+  expect(next?.lock).toBeUndefined();
+
+  const live = { ...job, lock: { tabId: "other", heartbeatAt: "2026-11-18T00:00:45.000Z" } };
+  expect(reconcileFollowedJob(live, "mine", now)).toEqual(live);
+  expect(reconcileFollowedJob({ ...job, lock: { tabId: "mine", heartbeatAt: "2026-11-18T00:00:20.000Z" } }, "mine", now)?.status).toBe("running");
+  expect(reconcileFollowedJob(null, "mine", now)).toBeNull();
 });
 
 test("rate window chặn request thứ 41 trong 60 s", () => {
