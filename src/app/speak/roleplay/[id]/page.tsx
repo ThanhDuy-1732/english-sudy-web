@@ -216,12 +216,12 @@ export default function RoleplayPage() {
           .goal-status { font-size: 1.1rem; font-weight: 600; }
           .goal { color: rgb(var(--muted)); font-size: 0.9rem; margin-bottom: 1rem; }
           .corrections { display: flex; flex-direction: column; gap: 0.75rem; }
-          .correction-item { color: rgb(var(--ink)); padding: 0.75rem; background: rgb(var(--paper)); border-radius: 8px; }
+          .correction-item { color: rgb(var(--ink)); padding: 0.75rem; background: rgb(var(--paper)); border-radius: 1rem; }
           .wrong { color: rgb(var(--margin)); margin: 0; }
           .right { color: rgb(var(--ok)); margin: 0.25rem 0 0; }
           .note { color: rgb(var(--muted)); font-size: 0.8rem; margin: 0.25rem 0 0; }
           .report-actions { display: flex; gap: 0.75rem; margin-top: 2rem; flex-wrap: wrap; }
-          .report-actions button { color: rgb(var(--ink)); padding: 0.6rem 1.25rem; border-radius: 8px; border: 1.5px solid rgb(var(--rule)); background: rgb(var(--card)); cursor: pointer; }
+          .report-actions button { color: rgb(var(--ink)); padding: 0.6rem 1.25rem; border-radius: 999px; min-height: 44px; border: 1.5px solid rgb(var(--rule)); background: rgb(var(--card)); cursor: pointer; }
           .report-actions button:first-child { background: rgb(var(--primary)); color: white; border-color: rgb(var(--primary)); }
         `}</style>
       </div>
@@ -244,7 +244,7 @@ export default function RoleplayPage() {
 
       <div className="chat-area">
         {turns.length === 0 && (
-          <div className="intro-message">
+          <div className="intro-message postcard">
             <p>Bạn đang đóng vai: <strong>{scenario.userRole}</strong></p>
             <p>AI đóng vai: <strong>{scenario.aiRole}</strong></p>
             <p>Bắt đầu hội thoại bằng cách nhập tin nhắn bên dưới.</p>
@@ -299,14 +299,14 @@ export default function RoleplayPage() {
         .scenario-info { min-width: 0; }
         .scenario-info strong { display: block; font-size: 1.05rem; color: rgb(var(--ink)); }
         .goal-hint { display: block; font-size: 0.8rem; line-height: 1.4; color: rgb(var(--muted)); }
-        .goal-badge { display: inline-block; margin-top: 0.35rem; background: rgb(var(--ok-soft)); color: rgb(var(--ink)); border-radius: 10px; padding: 0.15rem 0.6rem; font-size: 0.8rem; white-space: nowrap; }
+        .goal-badge { display: inline-block; margin-top: 0.35rem; background: rgb(var(--ok-soft)); color: rgb(var(--ink)); border-radius: 1.5rem; padding: 0.15rem 0.6rem; font-size: 0.8rem; white-space: nowrap; }
         .chat-area { flex: 1; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
-        .intro-message { text-align: center; color: rgb(var(--muted)); padding: 2rem; background: rgb(var(--paper)); border-radius: 10px; font-size: 0.875rem; }
+        .intro-message { text-align: center; padding: 1.5rem; font-size: 0.9rem; }
         .intro-message p { margin: 0.35rem 0; }
         .turn { display: flex; }
         .turn.user { justify-content: flex-end; }
         .turn.ai { justify-content: flex-start; }
-        .bubble { max-width: 80%; padding: 0.75rem 1rem; border-radius: 12px; font-size: 0.9rem; line-height: 1.5; }
+        .bubble { max-width: 80%; padding: 0.75rem 1rem; border-radius: 1.5rem; font-size: 0.9rem; line-height: 1.5; }
         .turn.user .bubble { background: rgb(var(--primary)); color: white; border-bottom-right-radius: 4px; }
         .turn.ai .bubble { background: rgb(var(--rule)); color: rgb(var(--ink)); border-bottom-left-radius: 4px; }
         .bubble p { margin: 0; }
@@ -315,14 +315,14 @@ export default function RoleplayPage() {
         .correction summary { display: inline-flex; align-items: center; min-height: 32px; cursor: pointer; color: rgb(var(--primary-text)); font-size: 0.8rem; font-weight: 600; text-decoration: underline; list-style: none; }
         .correction summary::-webkit-details-marker { display: none; }
         .correction[open] summary { text-decoration: none; }
-        .fix-line, .fix-note { margin: 0.35rem 0 0; padding: 0.4rem 0.6rem; border-radius: 8px; background: rgb(var(--card)); font-size: 0.85rem; }
+        .fix-line, .fix-note { margin: 0.35rem 0 0; padding: 0.4rem 0.6rem; border-radius: 1rem; background: rgb(var(--card)); font-size: 0.85rem; }
         .fix-line s { color: rgb(var(--margin)); }
         .fix-line strong { color: rgb(var(--ok)); }
         .fix-note { background: none; padding: 0.25rem 0 0; color: rgb(var(--muted)); }
         .input-area { position: sticky; bottom: calc(5.75rem + env(safe-area-inset-bottom)); z-index: 10; display: flex; gap: 0.5rem; padding: 0.75rem 1rem; border-top: 1px solid rgb(var(--rule)); background: rgb(var(--paper)); flex-shrink: 0; }
         @media (min-width: 1024px) { .input-area { bottom: 0; } }
-        .input-area input { flex: 1; min-width: 0; min-height: 44px; background: rgb(var(--card)); color: rgb(var(--ink)); padding: 0.6rem 0.9rem; border: 1.5px solid rgb(var(--rule)); border-radius: 20px; font-size: 0.9rem; }
-        .input-area button { padding: 0.6rem 1.1rem; border-radius: 20px; border: none; background: rgb(var(--primary)); color: white; cursor: pointer; font-size: 0.875rem; }
+        .input-area input { flex: 1; min-width: 0; min-height: 44px; background: rgb(var(--card)); color: rgb(var(--ink)); padding: 0.6rem 0.9rem; border: 1.5px solid rgb(var(--rule)); border-radius: 1.5rem; font-size: 0.9rem; }
+        .input-area button { padding: 0.6rem 1.1rem; border-radius: 999px; min-height: 44px; border: none; background: rgb(var(--primary)); color: white; cursor: pointer; font-size: 0.875rem; }
         .input-area button:disabled { background: rgb(var(--muted)); cursor: not-allowed; }
         .error { padding: 2rem; text-align: center; }
       `}</style>

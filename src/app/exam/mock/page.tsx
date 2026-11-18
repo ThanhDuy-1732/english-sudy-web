@@ -72,8 +72,8 @@ export default function MockPage() {
           h1 { color: rgb(var(--ink)); letter-spacing: -0.015em; font-size: 1.625rem; font-weight: 600; margin-bottom: 1rem; }
           p { color: rgb(var(--muted)); margin-bottom: 0.5rem; }
           .level-note { font-size: 0.9rem; }
-          .warning { color: rgb(var(--ink)); background: rgb(var(--warn-soft)); border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.875rem; }
-          .start-btn, .cancel-btn { display: block; width: 100%; padding: 0.875rem; border-radius: 8px; font-size: 1rem; cursor: pointer; border: none; margin-top: 0.75rem; }
+          .warning { color: rgb(var(--ink)); background: rgb(var(--warn-soft)); border-radius: 1rem; padding: 0.5rem 1rem; font-size: 0.875rem; }
+          .start-btn, .cancel-btn { display: block; width: 100%; padding: 0.875rem; border-radius: 999px; min-height: 44px; font-size: 1rem; cursor: pointer; border: none; margin-top: 0.75rem; }
           .start-btn { background: rgb(var(--primary)); color: white; }
           .start-btn:hover { background: rgb(var(--primary-strong)); }
           .cancel-btn { background: rgb(var(--card)); border: 1.5px solid rgb(var(--rule)) !important; color: rgb(var(--muted)); }
@@ -122,12 +122,12 @@ export default function MockPage() {
           .mock-result { max-width: 480px; margin: 3rem auto; text-align: center; padding: 2rem; }
           h1 { color: rgb(var(--ink)); letter-spacing: -0.015em; font-weight: 600; font-size: 1.625rem; margin-bottom: 1rem; }
           .raw-score { font-size: 1.1rem; margin-bottom: 1rem; }
-          .score-box { color: rgb(var(--ink)); background: rgb(var(--paper)); border-radius: 10px; padding: 1rem; margin-bottom: 1rem; }
+          .score-box { color: rgb(var(--ink)); background: rgb(var(--paper)); border-radius: 1.5rem; padding: 1rem; margin-bottom: 1rem; }
           .score-box p { margin: 0.35rem 0; }
           .total { font-size: 1.25rem; font-weight: 700; margin-top: 0.5rem !important; }
           .disclaimer { font-size: 0.75rem; color: rgb(var(--muted)); }
           .result-actions { display: flex; gap: 0.75rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap; }
-          .result-actions button { color: rgb(var(--ink)); padding: 0.6rem 1.25rem; border-radius: 8px; border: 1.5px solid rgb(var(--rule)); background: rgb(var(--card)); cursor: pointer; }
+          .result-actions button { color: rgb(var(--ink)); padding: 0.6rem 1.25rem; border-radius: 999px; min-height: 44px; border: 1.5px solid rgb(var(--rule)); background: rgb(var(--card)); cursor: pointer; }
           .result-actions button:first-child { background: rgb(var(--primary)); color: white; border-color: rgb(var(--primary)); }
         `}</style>
       </div>

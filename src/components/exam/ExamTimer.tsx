@@ -29,7 +29,7 @@ export default function ExamTimer({ totalSeconds, onTimeUp, enabled = true }: Pr
           font-weight: 700;
           font-size: 1rem;
           padding: 0.3rem 0.75rem;
-          border-radius: 20px;
+          border-radius: 1.5rem;
           background: rgb(var(--paper));
           border: 1.5px solid rgb(var(--rule));
           color: rgb(var(--muted));

@@ -106,7 +106,7 @@ export default function ListeningPlayer({ script, onPlaybackComplete }: Props) {
         .play-btn, .stop-btn {
           padding: 0.5rem 1.25rem;
           border: none;
-          border-radius: 20px;
+          border-radius: 999px; min-height: 44px;
           cursor: pointer;
           font-size: 0.9rem;
           font-weight: 600;
@@ -126,7 +126,7 @@ export default function ListeningPlayer({ script, onPlaybackComplete }: Props) {
           padding: 0;
           margin-bottom: 0.5rem;
         }
-        .transcript { color: rgb(var(--ink)); background: rgb(var(--paper)); border-radius: 8px; padding: 0.75rem 1rem; margin-top: 0.5rem; }
+        .transcript { color: rgb(var(--ink)); background: rgb(var(--paper)); border-radius: 1rem; padding: 0.75rem 1rem; margin-top: 0.5rem; }
         .transcript-line { margin: 0 0 0.4rem; font-size: 0.875rem; line-height: 1.5; transition: background 0.2s; border-radius: 4px; padding: 0.1rem 0.3rem; }
         .transcript-line.active { color: rgb(var(--ink)); background: rgb(var(--warn-soft)); font-weight: 500; }
         .speaker { font-weight: 700; color: rgb(var(--muted)); margin-right: 0.3rem; }

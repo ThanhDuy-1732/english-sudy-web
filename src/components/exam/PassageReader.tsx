@@ -31,7 +31,7 @@ export default function PassageReader({
   return (
     <div className="passage-reader">
       {/* Left: passage */}
-      <div className="passage-pane">
+      <div className="passage-pane postcard">
         <p className="passage-label">Đoạn văn</p>
         <div className="passage-text">
           {(item.passage ?? "").split("\n").map((line, i) =>
@@ -47,7 +47,7 @@ export default function PassageReader({
           <span className="q-type">{questionTypeLabel(question.type)}</span>
         </div>
 
-        <p className="question-prompt">{question.prompt}</p>
+        <p className="question-prompt postcard">{question.prompt}</p>
 
         {question.options ? (
           <div className="options-list">
@@ -110,10 +110,7 @@ export default function PassageReader({
           top: 80px;
           max-height: calc(100vh - 120px);
           overflow-y: auto;
-          padding: 1rem;
-          background: rgb(var(--paper));
-          border-radius: 10px;
-          border-left: 3px solid rgb(var(--muted));
+          padding: 1rem 1.1rem;
         }
         .passage-label {
           font-size: 0.75rem;
@@ -122,19 +119,19 @@ export default function PassageReader({
           color: rgb(var(--muted));
           margin-bottom: 0.75rem;
         }
-        .passage-text p { margin: 0 0 0.75rem; line-height: 1.7; font-size: 0.9rem; }
+        .passage-text p { margin: 0 0 0.75rem; line-height: 1.75; font-family: var(--font-en), Georgia, serif; font-size: 1rem; }
         .question-pane { padding: 0.5rem; }
         .question-header { display: flex; justify-content: space-between; font-size: 0.8rem; color: rgb(var(--muted)); margin-bottom: 0.75rem; }
         .q-type { font-style: italic; }
-        .question-prompt { font-size: 0.95rem; font-weight: 500; line-height: 1.6; margin-bottom: 1rem; }
+        .question-prompt { font-family: var(--font-en), Georgia, serif; font-size: 1.1rem; line-height: 1.6; margin-bottom: 1rem; padding: 1.1rem 1.2rem; }
         .options-list { display: flex; flex-direction: column; gap: 0.5rem; }
-        .option-btn { color: rgb(var(--ink)); text-align: left; padding: 0.65rem 0.9rem; border: 1.5px solid rgb(var(--rule)); border-radius: 6px; background: rgb(var(--card)); cursor: pointer; font-size: 0.9rem; }
+        .option-btn { color: rgb(var(--ink)); text-align: left; min-height: 2.75rem; padding: 0.65rem 0.9rem; border: 1.5px solid rgb(var(--rule)); border-radius: 1rem; background: rgb(var(--card)); cursor: pointer; font-family: var(--font-en), Georgia, serif; font-size: 0.95rem; }
         .option-btn:hover:not(:disabled) { border-color: rgb(var(--primary)); background: rgb(var(--primary-soft)); }
         .option-btn.selected { border-color: rgb(var(--primary)); background: rgb(var(--primary-soft)); }
         .option-btn.correct { border-color: rgb(var(--ok)); background: rgb(var(--ok-soft)); }
         .option-btn.wrong { border-color: rgb(var(--margin)); background: rgb(var(--margin-soft)); }
-        .text-input { width: 100%; padding: 0.6rem 0.8rem; border: 1.5px solid rgb(var(--rule)); border-radius: 6px; font-size: 0.9rem; box-sizing: border-box; }
-        .result-panel { margin-top: 0.75rem; padding: 0.75rem; border-radius: 6px; background: rgb(var(--ok-soft)); border-left: 3px solid rgb(var(--ok)); font-size: 0.875rem; }
+        .text-input { width: 100%; padding: 0.6rem 0.8rem; min-height: 2.75rem; border: 1.5px solid rgb(var(--rule)); border-radius: 1rem; background: rgb(var(--card)); color: rgb(var(--ink)); font-size: 0.95rem; box-sizing: border-box; }
+        .result-panel { margin-top: 0.75rem; padding: 0.75rem 1rem; border-radius: 1rem; background: rgb(var(--ok-soft)); border-left: 4px solid rgb(var(--ok)); font-size: 0.875rem; }
         .result-panel.wrong { background: rgb(var(--margin-soft)); border-color: rgb(var(--margin)); }
         .result-panel p { margin: 0 0 0.35rem; }
         .vocab { font-style: italic; color: rgb(var(--muted)); }

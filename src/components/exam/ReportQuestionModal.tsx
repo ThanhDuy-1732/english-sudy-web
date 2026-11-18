@@ -95,36 +95,36 @@ export default function ReportQuestionModal({ questionId, itemId, onClose }: Pro
         }
         .report-modal {
           color: rgb(var(--ink));
-          background: rgb(var(--card)); border-radius: 12px; padding: 1.5rem;
+          background: rgb(var(--card)); border-radius: 1.5rem; padding: 1.5rem;
           width: min(400px, 90vw); box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
         h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; }
         .report-reasons { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
         .reason-btn {
           color: rgb(var(--ink));
-          padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.8rem;
+          padding: 0.4rem 0.8rem; border-radius: 999px; min-height: 44px; font-size: 0.8rem;
           border: 1.5px solid rgb(var(--rule)); background: rgb(var(--card)); cursor: pointer;
         }
         .reason-btn.selected { border-color: rgb(var(--primary)); background: rgb(var(--primary-soft)); color: rgb(var(--primary-text)); }
         .report-note {
-          width: 100%; padding: 0.5rem; border: 1px solid rgb(var(--rule)); border-radius: 6px;
+          width: 100%; padding: 0.5rem; border: 1px solid rgb(var(--rule)); border-radius: 1rem;
           font-size: 0.85rem; resize: none; margin-bottom: 1rem;
         }
         .report-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
         .report-cancel-btn {
           color: rgb(var(--ink));
-          padding: 0.5rem 1rem; border-radius: 6px; border: 1.5px solid rgb(var(--rule));
+          padding: 0.5rem 1rem; border-radius: 999px; min-height: 44px; border: 1.5px solid rgb(var(--rule));
           background: rgb(var(--card)); cursor: pointer; font-size: 0.875rem;
         }
         .report-submit-btn {
-          padding: 0.5rem 1rem; border-radius: 6px; border: none;
+          padding: 0.5rem 1rem; border-radius: 999px; min-height: 44px; border: none;
           background: rgb(var(--primary)); color: white; cursor: pointer; font-size: 0.875rem;
         }
         .report-thanks { text-align: center; padding: 1rem 0; font-size: 1rem; }
         .report-close-btn {
           color: rgb(var(--ink));
           display: block; width: 100%; padding: 0.6rem; margin-top: 0.5rem;
-          border-radius: 6px; border: 1.5px solid rgb(var(--rule)); background: rgb(var(--card));
+          border-radius: 999px; min-height: 44px; border: 1.5px solid rgb(var(--rule)); background: rgb(var(--card));
           cursor: pointer; font-size: 0.875rem;
         }
       `}</style>

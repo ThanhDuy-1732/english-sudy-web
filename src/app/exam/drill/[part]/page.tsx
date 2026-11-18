@@ -119,7 +119,7 @@ export default function DrillPage() {
         <style jsx>{`
           .done-container { max-width: 480px; margin: 3rem auto; text-align: center; padding: 2rem; }
           h1 { color: rgb(var(--ink)); letter-spacing: -0.015em; font-weight: 600; font-size: 1.625rem; margin-bottom: 1rem; }
-          .tag-stats { text-align: left; margin: 1.5rem 0; padding: 1rem; border: 1px solid rgb(var(--rule)); border-radius: 8px; }
+          .tag-stats { text-align: left; margin: 1.5rem 0; padding: 1rem; border: 1px solid rgb(var(--rule)); border-radius: 1rem; }
           .tag-stats-title { font-size: 0.75rem; font-weight: 600; color: rgb(var(--muted)); margin-bottom: 0.75rem; }
           .tag-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
           .tag-name { font-size: 0.8rem; min-width: 120px; flex-shrink: 0; }
@@ -127,7 +127,7 @@ export default function DrillPage() {
           .tag-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
           .tag-pct { font-size: 0.75rem; color: rgb(var(--muted)); min-width: 32px; text-align: right; }
           .done-actions { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 2rem; }
-          .done-actions button { color: rgb(var(--ink)); padding: 0.75rem 1.5rem; border-radius: 8px; border: 1.5px solid rgb(var(--rule)); background: rgb(var(--card)); cursor: pointer; font-size: 0.95rem; }
+          .done-actions button { color: rgb(var(--ink)); padding: 0.75rem 1.5rem; border-radius: 999px; min-height: 44px; border: 1.5px solid rgb(var(--rule)); background: rgb(var(--card)); cursor: pointer; font-size: 0.95rem; }
           .done-actions button:first-child { background: rgb(var(--primary)); color: white; border-color: rgb(var(--primary)); }
         `}</style>
       </div>

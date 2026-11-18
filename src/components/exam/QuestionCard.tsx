@@ -70,7 +70,7 @@ export default function QuestionCard({
         </div>
       )}
 
-      <p className="question-prompt">{question.prompt}</p>
+      <p className="question-prompt postcard">{question.prompt}</p>
 
       {question.options ? (
         <div className="options-list">
@@ -140,20 +140,21 @@ export default function QuestionCard({
         .passage-context {
           color: rgb(var(--ink));
           background: rgb(var(--paper));
-          border-left: 3px solid rgb(var(--muted));
+          border-left: 4px solid rgb(var(--soil));
           padding: 0.75rem 1rem;
           margin-bottom: 1rem;
           font-size: 0.9rem;
           line-height: 1.6;
-          border-radius: 0 4px 4px 0;
+          border-radius: 0 1rem 1rem 0;
           max-height: 200px;
           overflow-y: auto;
         }
         .question-prompt {
-          font-size: 1rem;
+          font-family: var(--font-en), Georgia, serif;
+          font-size: 1.2rem;
           line-height: 1.6;
           margin-bottom: 1.25rem;
-          font-weight: 500;
+          padding: 1.5rem 1.4rem;
         }
         .options-list {
           display: flex;
@@ -163,12 +164,14 @@ export default function QuestionCard({
         .option-btn {
           color: rgb(var(--ink));
           text-align: left;
+          min-height: 3rem;
           padding: 0.75rem 1rem;
           border: 1.5px solid rgb(var(--rule));
-          border-radius: 6px;
+          border-radius: 1rem;
           background: rgb(var(--card));
           cursor: pointer;
-          font-size: 0.95rem;
+          font-family: var(--font-en), Georgia, serif;
+          font-size: 1rem;
           transition: all 0.15s;
         }
         .option-btn:hover:not(:disabled) {
@@ -193,17 +196,20 @@ export default function QuestionCard({
         .text-input {
           width: 100%;
           padding: 0.6rem 0.9rem;
+          min-height: 2.75rem;
           border: 1.5px solid rgb(var(--rule));
-          border-radius: 6px;
-          font-size: 0.95rem;
+          border-radius: 1rem;
+          background: rgb(var(--card));
+          color: rgb(var(--ink));
+          font-size: 1rem;
           box-sizing: border-box;
         }
         .result-panel {
           margin-top: 1rem;
           padding: 0.75rem 1rem;
           background: rgb(var(--ok-soft));
-          border-radius: 6px;
-          border-left: 3px solid rgb(var(--ok));
+          border-radius: 1rem;
+          border-left: 4px solid rgb(var(--ok));
         }
         .result-panel.wrong {
           background: rgb(var(--margin-soft));

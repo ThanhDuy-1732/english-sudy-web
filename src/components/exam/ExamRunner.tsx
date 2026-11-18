@@ -301,7 +301,7 @@ export default function ExamRunner({
         <style jsx>{`
           .runner-error { text-align: center; padding: 3rem; }
           .runner-error p { color: rgb(var(--ink)); margin-bottom: 1rem; }
-          .runner-error button { padding: 0.5rem 1.5rem; background: rgb(var(--primary)); color: white; border: none; border-radius: 8px; cursor: pointer; }
+          .runner-error button { padding: 0.5rem 1.5rem; background: rgb(var(--primary)); color: white; border: none; border-radius: 999px; min-height: 44px; cursor: pointer; }
         `}</style>
       </div>
     );
@@ -317,7 +317,7 @@ export default function ExamRunner({
         </button>
         <style jsx>{`
           .runner-ready { text-align: center; padding: 3rem; }
-          .start-btn { padding: 0.75rem 2rem; background: rgb(var(--primary)); color: white; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; }
+          .start-btn { padding: 0.75rem 2rem; background: rgb(var(--primary)); color: white; border: none; border-radius: 999px; min-height: 44px; font-size: 1rem; cursor: pointer; }
           .start-btn:hover { background: rgb(var(--primary-strong)); }
         `}</style>
       </div>
@@ -400,12 +400,12 @@ export default function ExamRunner({
       <style jsx>{`
         .runner-controls { display: flex; justify-content: space-between; align-items: center; max-width: 720px; margin: 1rem auto; padding: 0 1.5rem; }
         .controls-left { display: flex; gap: 0.5rem; }
-        .next-btn { padding: 0.6rem 1.5rem; background: rgb(var(--primary)); color: white; border: none; border-radius: 6px; font-size: 0.95rem; cursor: pointer; }
+        .next-btn { padding: 0.6rem 1.5rem; background: rgb(var(--primary)); color: white; border: none; border-radius: 999px; min-height: 44px; font-size: 0.95rem; cursor: pointer; }
         .next-btn:disabled { background: rgb(var(--muted)); cursor: not-allowed; }
         .next-btn:hover:not(:disabled) { background: rgb(var(--primary-strong)); }
-        .flag-btn { padding: 0.5rem 1rem; background: transparent; border: 1.5px solid rgb(var(--rule)); border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
+        .flag-btn { padding: 0.5rem 1rem; background: transparent; border: 1.5px solid rgb(var(--rule)); border-radius: 999px; min-height: 44px; font-size: 0.85rem; cursor: pointer; }
         .flag-btn.flagged { border-color: rgb(var(--warn)); background: rgb(var(--warn-soft)); }
-        .report-btn { padding: 0.5rem 1rem; background: transparent; border: 1.5px solid rgb(var(--rule)); border-radius: 6px; font-size: 0.85rem; cursor: pointer; color: rgb(var(--muted)); }
+        .report-btn { padding: 0.5rem 1rem; background: transparent; border: 1.5px solid rgb(var(--rule)); border-radius: 999px; min-height: 44px; font-size: 0.85rem; cursor: pointer; color: rgb(var(--muted)); }
         .report-btn:hover { border-color: rgb(var(--muted)); color: rgb(var(--muted)); }
       `}</style>
     </div>
@@ -454,9 +454,9 @@ function ReviewSummary({
       <button onClick={onDone} className="done-btn">Hoàn tất</button>
       <style jsx>{`
         .review-summary { max-width: 720px; margin: 0 auto; padding: 1.5rem; }
-        .score { font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem; }
+        .score { font-family: var(--font-display); font-size: 1.6rem; font-weight: 800; margin-bottom: 1.5rem; }
         .review-list { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2rem; }
-        .done-btn { width: 100%; padding: 0.75rem; background: rgb(var(--ok)); color: white; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; }
+        .done-btn { width: 100%; padding: 0.75rem; background: rgb(var(--primary)); color: white; border: none; border-radius: 999px; min-height: 44px; font-size: 1rem; cursor: pointer; }
         .done-btn:hover { background: rgb(var(--ok)); }
       `}</style>
     </div>

@@ -243,7 +243,7 @@ export default function IeltsSpeakingPage() {
 
         <section>
           <h2>Bản nâng cấp, band cao hơn</h2>
-          <p className="upgraded">{feedback.upgradedVersion}</p>
+          <p className="upgraded postcard">{feedback.upgradedVersion}</p>
         </section>
 
         {feedback.newVocabulary.length > 0 && (
@@ -275,27 +275,27 @@ export default function IeltsSpeakingPage() {
           h1 { color: rgb(var(--ink)); letter-spacing: -0.015em; font-size: 1.625rem; font-weight: 600; margin: 0; }
           h2 { font-size: 1rem; font-weight: 600; color: rgb(var(--ink)); margin: 1.25rem 0 0.5rem; }
           .score-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 1rem; }
-          .score-box { color: rgb(var(--ink)); text-align: center; padding: 0.75rem; background: rgb(var(--paper)); border-radius: 10px; }
+          .score-box { color: rgb(var(--ink)); text-align: center; padding: 0.75rem; background: rgb(var(--paper)); border-radius: 1.5rem; }
           .score-box.overall { background: rgb(var(--ok-soft)); }
           .score-label { font-size: 0.75rem; color: rgb(var(--muted)); margin: 0; }
           .score-val { font-size: 1.5rem; font-weight: 700; margin: 0.25rem 0 0; }
           .stats-row { display: flex; gap: 1rem; font-size: 0.8rem; color: rgb(var(--muted)); margin-bottom: 0.5rem; flex-wrap: wrap; }
           ul { padding-left: 1.25rem; }
           li { margin-bottom: 0.35rem; font-size: 0.9rem; }
-          .improvement { color: rgb(var(--ink)); background: rgb(var(--paper)); border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem; }
+          .improvement { color: rgb(var(--ink)); background: rgb(var(--paper)); border-radius: 1rem; padding: 0.75rem; margin-bottom: 0.5rem; }
           .issue { font-weight: 600; font-size: 0.875rem; margin: 0 0 0.35rem; }
           .wrong { color: rgb(var(--margin)); font-size: 0.85rem; margin: 0; }
           .better { color: rgb(var(--ok)); font-size: 0.85rem; margin: 0.25rem 0 0; }
-          .transcript { color: rgb(var(--ink)); font-size: 0.875rem; line-height: 1.6; background: rgb(var(--paper)); padding: 0.75rem; border-radius: 8px; }
-          .upgraded { font-size: 0.875rem; line-height: 1.6; background: rgb(var(--primary-soft)); padding: 0.75rem; border-radius: 8px; border-left: 3px solid rgb(var(--primary)); }
+          .transcript { color: rgb(var(--ink)); font-family: var(--font-en), Georgia, serif; font-size: 0.95rem; line-height: 1.6; background: rgb(var(--paper)); padding: 0.75rem; border-radius: 1rem; }
+          .upgraded { font-family: var(--font-en), Georgia, serif; font-size: 1rem; line-height: 1.7; padding: 1rem 1.2rem; }
           .vocab-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-          .vocab-chip { padding: 0.3rem 0.75rem; border: 1.5px solid rgb(var(--primary)); border-radius: 16px; background: rgb(var(--card)); cursor: pointer; font-size: 0.8rem; color: rgb(var(--primary-text)); }
+          .vocab-chip { padding: 0.3rem 0.75rem; border: 1.5px solid rgb(var(--primary)); border-radius: 999px; min-height: 44px; background: rgb(var(--card)); cursor: pointer; font-size: 0.8rem; color: rgb(var(--primary-text)); }
           .vocab-chip:hover { background: rgb(var(--primary-soft)); }
           .vocab-hint { font-size: 0.75rem; color: rgb(var(--muted)); margin-top: 0.35rem; }
           .replay-section { margin: 0.75rem 0; }
           .replay-label { font-size: 0.75rem; color: rgb(var(--muted)); margin: 0 0 0.35rem; }
-          .replay-audio { width: 100%; border-radius: 8px; }
-          .retry-btn { width: 100%; padding: 0.875rem; background: rgb(var(--primary)); color: white; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; margin-top: 1.5rem; }
+          .replay-audio { width: 100%; border-radius: 1rem; }
+          .retry-btn { width: 100%; padding: 0.875rem; background: rgb(var(--primary)); color: white; border: none; border-radius: 999px; min-height: 44px; font-size: 1rem; cursor: pointer; margin-top: 1.5rem; }
         `}</style>
       </div>
     );
@@ -311,7 +311,7 @@ export default function IeltsSpeakingPage() {
         </button>
       </div>
 
-      <div className="task-card">
+      <div className="task-card postcard">
         <p className="task-label">Task</p>
         <p className="task-prompt">{config.prompt}</p>
       </div>
@@ -361,12 +361,12 @@ export default function IeltsSpeakingPage() {
         .speak-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; }
         .back-btn { background: none; border: none; cursor: pointer; color: rgb(var(--muted)); }
         h1 { color: rgb(var(--ink)); letter-spacing: -0.015em; flex: 1; font-size: 1.625rem; font-weight: 600; margin: 0; }
-        .mode-btn { color: rgb(var(--ink)); padding: 0.35rem 0.75rem; border: 1.5px solid rgb(var(--rule)); border-radius: 16px; background: rgb(var(--card)); cursor: pointer; font-size: 0.8rem; }
-        .task-card { color: rgb(var(--ink)); background: rgb(var(--paper)); border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem; border-left: 3px solid rgb(var(--primary)); }
+        .mode-btn { color: rgb(var(--ink)); padding: 0.35rem 0.75rem; border: 1.5px solid rgb(var(--rule)); border-radius: 999px; min-height: 44px; background: rgb(var(--card)); cursor: pointer; font-size: 0.8rem; }
+        .task-card { padding: 1.25rem 1.4rem; margin-bottom: 1.5rem; }
         .task-label { font-size: 0.75rem; color: rgb(var(--muted)); margin: 0 0 0.5rem; }
-        .task-prompt { font-size: 0.95rem; line-height: 1.6; margin: 0; }
+        .task-prompt { font-family: var(--font-en), Georgia, serif; font-size: 1.15rem; line-height: 1.6; margin: 0; }
         .mic-section, .text-section { text-align: center; }
-        .big-btn { display: block; width: 100%; padding: 1rem; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; margin-top: 1rem; }
+        .big-btn { display: block; width: 100%; padding: 1rem; border: none; border-radius: 999px; min-height: 44px; font-size: 1rem; cursor: pointer; margin-top: 1rem; }
         .big-btn.start { background: rgb(var(--primary)); color: white; }
         .big-btn.start:hover:not(:disabled) { background: rgb(var(--primary-strong)); }
         .big-btn:disabled { background: rgb(var(--muted)); cursor: not-allowed; }
@@ -375,9 +375,9 @@ export default function IeltsSpeakingPage() {
         .recording-state { padding: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
         .rec-dot { width: 16px; height: 16px; border-radius: 50%; background: rgb(var(--margin)); animation: blink 1s infinite; }
         @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
-        .stop-btn { padding: 0.6rem 1.5rem; border: 1.5px solid rgb(var(--margin)); color: rgb(var(--margin)); background: rgb(var(--card)); border-radius: 8px; cursor: pointer; }
+        .stop-btn { padding: 0.6rem 1.5rem; border: 1.5px solid rgb(var(--margin)); color: rgb(var(--margin)); background: rgb(var(--card)); border-radius: 999px; min-height: 44px; cursor: pointer; }
         .processing { color: rgb(var(--muted)); padding: 2rem; }
-        textarea { width: 100%; padding: 0.75rem; border: 1.5px solid rgb(var(--rule)); border-radius: 8px; font-size: 0.9rem; resize: vertical; box-sizing: border-box; }
+        textarea { width: 100%; padding: 0.75rem; border: 1.5px solid rgb(var(--rule)); border-radius: 1rem; font-size: 0.9rem; resize: vertical; box-sizing: border-box; }
       `}</style>
     </div>
   );

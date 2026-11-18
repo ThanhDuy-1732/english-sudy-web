@@ -112,10 +112,10 @@ export default function MistakesPage() {
         .filter-row { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
         .empty { text-align: center; padding: 3rem; color: rgb(var(--muted)); }
         .mistakes-list { display: flex; flex-direction: column; gap: 1rem; }
-        .mistake-card { padding: 1rem; border: 1.5px solid rgb(var(--rule)); border-radius: 10px; }
+        .mistake-card { padding: 1rem; border: 1.5px solid rgb(var(--rule)); border-radius: 1.5rem; }
         .mistake-card.resolved { opacity: 0.65; border-style: dashed; }
         .mistake-meta { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; font-size: 0.8rem; }
-        .part-tag { color: rgb(var(--ink)); background: rgb(var(--rule)); border-radius: 10px; padding: 0.15rem 0.5rem; font-weight: 600; }
+        .part-tag { color: rgb(var(--ink)); background: rgb(var(--rule)); border-radius: 1.5rem; padding: 0.15rem 0.5rem; font-weight: 600; }
         .date { color: rgb(var(--muted)); }
         .resolved-tag { color: rgb(var(--ok)); font-weight: 600; }
         .mistake-prompt { font-size: 0.9rem; font-weight: 500; margin-bottom: 0.5rem; }
@@ -124,7 +124,7 @@ export default function MistakesPage() {
         .correct-answer { color: rgb(var(--ok)); }
         .explanation { font-size: 0.85rem; color: rgb(var(--muted)); margin-bottom: 0.75rem; }
         .mistake-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-        .drill-btn, .resolve-btn { padding: 0.4rem 0.9rem; border-radius: 6px; font-size: 0.8rem; cursor: pointer; border: 1.5px solid; }
+        .drill-btn, .resolve-btn { padding: 0.4rem 0.9rem; border-radius: 999px; min-height: 44px; font-size: 0.8rem; cursor: pointer; border: 1.5px solid; }
         .drill-btn { border-color: rgb(var(--primary)); color: rgb(var(--primary-text)); background: rgb(var(--card)); }
         .drill-btn:hover { background: rgb(var(--primary-soft)); }
         .resolve-btn { border-color: rgb(var(--ok)); color: rgb(var(--ok)); background: rgb(var(--card)); }

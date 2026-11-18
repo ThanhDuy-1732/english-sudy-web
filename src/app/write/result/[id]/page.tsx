@@ -21,7 +21,7 @@ interface WritingFeedback {
 
 const CATEGORY_COLORS: Record<string, string> = {
   grammar: "rgb(var(--margin))",
-  vocab: "#8a6fd1",
+  vocab: "rgb(var(--soil))",
   cohesion: "rgb(var(--primary))",
   task: "rgb(var(--warn))",
   style: "rgb(var(--muted))",
@@ -139,7 +139,7 @@ export default function WritingResultPage() {
       {/* Model answer */}
       <section>
         <h2>Bài mẫu band 8</h2>
-        <div className="model-answer">{feedback.modelAnswer}</div>
+        <div className="model-answer postcard">{feedback.modelAnswer}</div>
       </section>
 
       <div className="result-actions">
@@ -158,21 +158,21 @@ export default function WritingResultPage() {
         h1 { color: rgb(var(--ink)); letter-spacing: -0.015em; font-size: 1.625rem; font-weight: 600; margin: 0; }
         h2 { font-weight: 600; font-size: 1rem; color: rgb(var(--ink)); margin: 1.5rem 0 0.5rem; }
         .score-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem; margin-bottom: 0.5rem; }
-        .score-box { color: rgb(var(--ink)); text-align: center; padding: 0.75rem; background: rgb(var(--paper)); border-radius: 10px; }
+        .score-box { color: rgb(var(--ink)); text-align: center; padding: 0.75rem; background: rgb(var(--paper)); border-radius: 1.5rem; }
         .score-box.overall { background: rgb(var(--ok-soft)); }
         .score-label { font-size: 0.7rem; color: rgb(var(--muted)); margin: 0; }
         .score-val { font-size: 1.5rem; font-weight: 700; margin: 0.2rem 0 0; }
         .word-count { font-size: 0.8rem; color: rgb(var(--muted)); margin-bottom: 0.75rem; }
-        .next-focus { color: rgb(var(--ink)); background: rgb(var(--warn-soft)); border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.875rem; margin-bottom: 0.5rem; }
-        .annotated-text { color: rgb(var(--ink)); font-size: 0.9rem; line-height: 1.7; background: rgb(var(--paper)); padding: 1rem; border-radius: 8px; margin-bottom: 0.75rem; white-space: pre-wrap; }
+        .next-focus { color: rgb(var(--ink)); background: rgb(var(--warn-soft)); border-radius: 1rem; padding: 0.75rem 1rem; font-size: 0.875rem; margin-bottom: 0.5rem; }
+        .annotated-text { color: rgb(var(--ink)); font-family: var(--font-en), Georgia, serif; font-size: 1rem; line-height: 1.7; background: rgb(var(--paper)); padding: 1rem; border-radius: 1rem; margin-bottom: 0.75rem; white-space: pre-wrap; }
         .annotation-list { display: flex; flex-direction: column; gap: 0.5rem; }
         .ann-item { color: rgb(var(--ink)); padding: 0.6rem 0.75rem; border-left: 3px solid; background: rgb(var(--paper)); border-radius: 0 6px 6px 0; font-size: 0.85rem; }
         .ann-excerpt { font-style: italic; color: rgb(var(--muted)); margin: 0 0 0.2rem; }
         .ann-issue { font-weight: 600; margin: 0 0 0.15rem; }
         .ann-suggestion { color: rgb(var(--ok)); margin: 0; }
-        .model-answer { color: rgb(var(--ink)); font-size: 0.9rem; line-height: 1.7; background: rgb(var(--primary-soft)); padding: 1rem; border-radius: 8px; border-left: 3px solid rgb(var(--primary)); white-space: pre-wrap; }
+        .model-answer { font-family: var(--font-en), Georgia, serif; font-size: 1rem; line-height: 1.75; padding: 1.25rem 1.4rem; white-space: pre-wrap; }
         .result-actions { display: flex; gap: 0.75rem; margin-top: 2rem; flex-wrap: wrap; }
-        .result-actions button { color: rgb(var(--ink)); padding: 0.6rem 1.25rem; border-radius: 8px; border: 1.5px solid rgb(var(--rule)); background: rgb(var(--card)); cursor: pointer; font-size: 0.9rem; }
+        .result-actions button { color: rgb(var(--ink)); padding: 0.6rem 1.25rem; border-radius: 999px; min-height: 44px; border: 1.5px solid rgb(var(--rule)); background: rgb(var(--card)); cursor: pointer; font-size: 0.9rem; }
         .result-actions button:first-child { background: rgb(var(--primary)); color: white; border-color: rgb(var(--primary)); }
         .not-found { padding: 2rem; text-align: center; }
         .not-found button { background: none; border: none; color: rgb(var(--primary-text)); cursor: pointer; text-decoration: underline; }

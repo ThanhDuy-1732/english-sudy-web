@@ -210,7 +210,7 @@ export default function WritingTaskPage() {
         )}
       </div>
 
-      <div className="prompt-box">
+      <div className="prompt-box postcard">
         <p className="prompt-label">Task</p>
         <p className="prompt-text">{config.prompt}</p>
         {config.chartData && <TaskChart data={config.chartData} />}
@@ -267,25 +267,25 @@ export default function WritingTaskPage() {
         .task-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; }
         .back-btn { background: none; border: none; cursor: pointer; color: rgb(var(--muted)); white-space: nowrap; }
         h1 { color: rgb(var(--ink)); letter-spacing: -0.015em; flex: 1; font-size: 1.625rem; font-weight: 600; margin: 0; }
-        .timer { color: rgb(var(--ink)); font-variant-numeric: tabular-nums; font-weight: 700; padding: 0.3rem 0.75rem; border-radius: 20px; background: rgb(var(--paper)); border: 1.5px solid rgb(var(--rule)); font-size: 0.9rem; white-space: nowrap; }
+        .timer { color: rgb(var(--ink)); font-variant-numeric: tabular-nums; font-weight: 700; padding: 0.3rem 0.75rem; border-radius: 1.5rem; background: rgb(var(--paper)); border: 1.5px solid rgb(var(--rule)); font-size: 0.9rem; white-space: nowrap; }
         .timer.urgent { color: rgb(var(--margin)); border-color: rgb(var(--margin)); background: rgb(var(--margin-soft)); }
-        .prompt-box { color: rgb(var(--ink)); background: rgb(var(--paper)); border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem; border-left: 3px solid rgb(var(--primary)); }
+        .prompt-box { padding: 1.25rem 1.4rem; margin-bottom: 1.25rem; }
         .prompt-label { font-size: 0.75rem; color: rgb(var(--muted)); margin: 0 0 0.5rem; }
-        .prompt-text { font-size: 0.9rem; line-height: 1.6; margin: 0 0 0.5rem; }
-        .chart-placeholder { font-size: 0.85rem; background: rgb(var(--rule)); padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 0.5rem; color: rgb(var(--muted)); border-radius: 8px; }
+        .prompt-text { font-family: var(--font-en), Georgia, serif; font-size: 1.1rem; line-height: 1.6; margin: 0 0 0.5rem; }
+        .chart-placeholder { font-size: 0.85rem; background: rgb(var(--rule)); padding: 0.5rem 0.75rem; border-radius: 1rem; margin-bottom: 0.5rem; color: rgb(var(--muted)); border-radius: 8px; }
         .task-meta { font-size: 0.8rem; color: rgb(var(--muted)); margin: 0; }
-        .start-btn { display: block; width: 100%; padding: 1rem; background: rgb(var(--primary)); color: white; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; }
+        .start-btn { display: block; width: 100%; padding: 1rem; background: rgb(var(--primary)); color: white; border: none; border-radius: 999px; min-height: 44px; font-size: 1rem; cursor: pointer; }
         .start-btn:hover { background: rgb(var(--primary-strong)); }
-        .time-up { margin: 0; padding: 0.6rem 0.75rem; border-radius: 8px; background: rgb(var(--margin-soft)); color: rgb(var(--margin)); font-size: 0.875rem; }
+        .time-up { margin: 0; padding: 0.6rem 0.75rem; border-radius: 1rem; background: rgb(var(--margin-soft)); color: rgb(var(--margin)); font-size: 0.875rem; }
         .restart-btn { background: none; border: none; padding: 0; color: rgb(var(--primary-text)); text-decoration: underline; cursor: pointer; font-size: inherit; }
         .editor-area { display: flex; flex-direction: column; gap: 0.75rem; }
-        textarea { width: 100%; padding: 0.875rem; border: 1.5px solid rgb(var(--rule)); border-radius: 10px; font-size: 1rem; line-height: 1.6; resize: vertical; box-sizing: border-box; font-family: inherit; color: rgb(var(--ink)); background: rgb(var(--card)); }
+        textarea { width: 100%; padding: 0.875rem; border: 1.5px solid rgb(var(--rule)); border-radius: 1.5rem; font-size: 1rem; line-height: 1.6; resize: vertical; box-sizing: border-box; font-family: inherit; color: rgb(var(--ink)); background: rgb(var(--card)); }
         textarea:focus { border-color: rgb(var(--primary)); outline: none; }
         .word-count-row { display: flex; align-items: center; justify-content: space-between; }
         .word-count { font-size: 0.875rem; font-weight: 600; }
         .word-count.ok { color: rgb(var(--ok)); }
         .word-count.low { color: rgb(var(--margin)); }
-        .submit-btn { padding: 0.6rem 1.5rem; background: rgb(var(--ok)); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
+        .submit-btn { padding: 0.6rem 1.5rem; background: rgb(var(--primary)); color: white; border: none; border-radius: 999px; min-height: 44px; cursor: pointer; font-size: 0.9rem; }
         .submit-btn:disabled { background: rgb(var(--muted)); cursor: not-allowed; }
       `}</style>
     </div>
