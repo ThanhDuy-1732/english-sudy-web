@@ -6,7 +6,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { DueBadge } from "@/components/DueBadge";
 import { ProviderBadge } from "@/components/ProviderBadge";
 import HeaderTimer from "@/components/HeaderTimer";
-import Plant from "@/components/Plant";
+import Image from "next/image";
 
 type NavLink = { href: string; label: string };
 
@@ -68,6 +68,19 @@ function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 }
 
+/** Logo mark plus the name as text, so it follows the light/dark theme. The Z is the brand gold (darker on light paper for contrast). */
+function Brand({ size }: { size: number }) {
+  return (
+    <>
+      <Image src="/brand/mark.png" alt="" width={size} height={size} priority />
+      <span className="flex flex-col leading-none">
+        <span className="font-display font-extrabold text-ink">Thank<span className="text-warn dark:text-marker">Z</span></span>
+        <span className="mt-0.5 text-[0.6em] font-semibold tracking-[0.3em] text-primary-text">ENGLISH</span>
+      </span>
+    </>
+  );
+}
+
 function SidebarLink({ link, active }: { link: NavLink; active: boolean }) {
   return (
     <Link
@@ -98,8 +111,8 @@ export default function AppNavigation() {
     <>
       {/* Desktop sidebar */}
       <nav aria-label="Điều hướng chính" className="sticky top-0 hidden h-svh w-60 shrink-0 flex-col border-r border-rule bg-card px-3 py-5 lg:flex">
-        <Link href="/today" className="mb-4 flex min-h-11 items-center gap-2 px-3 font-display text-[1.4rem] font-extrabold text-primary-text">
-          <Plant stage={3} size={30} />English Study
+        <Link href="/today" aria-label="ThankZ English, trang Hôm nay" className="mb-4 flex min-h-11 items-center gap-2.5 px-3 text-[1.45rem]">
+          <Brand size={40} />
         </Link>
         <div className="flex-1 space-y-4 overflow-y-auto">
           {GROUPS.map((group, index) => (
@@ -119,7 +132,7 @@ export default function AppNavigation() {
 
       {/* Phone top bar */}
       <header className="app-topbar sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-rule bg-paper/95 pb-2 backdrop-blur lg:hidden">
-        <Link href="/today" className="inline-flex min-h-11 items-center gap-1.5 font-display text-xl font-extrabold text-primary-text"><Plant stage={3} size={26} />English Study</Link>
+        <Link href="/today" aria-label="ThankZ English, trang Hôm nay" className="inline-flex min-h-11 items-center gap-2 text-xl"><Brand size={34} /></Link>
         <HeaderTimer />
       </header>
 

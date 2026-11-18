@@ -16,7 +16,7 @@ test("shows native installation guidance and uses the browser install prompt whe
   });
   act(() => { window.dispatchEvent(event); });
   expect(event.defaultPrevented).toBe(true);
-  fireEvent.click(screen.getByRole("button", { name: "Cài English Study" }));
+  fireEvent.click(screen.getByRole("button", { name: "Cài ThankZ English" }));
   await waitFor(() => expect(prompt).toHaveBeenCalledTimes(1));
 });
 

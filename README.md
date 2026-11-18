@@ -1,6 +1,6 @@
-# English Study
+# ThankZ English
 
-English Study là website tự học tiếng Anh cá nhân, tập trung vào việc học từ vựng theo chủ đề bằng flashcard. Người học có thể chọn chủ đề, sinh bộ từ mới bằng AI, lật thẻ để xem nghĩa tiếng Việt và câu ví dụ, sau đó lưu lại những từ đã học để ôn tập sau.
+ThankZ English là website tự học tiếng Anh cá nhân, tập trung vào việc học từ vựng theo chủ đề bằng flashcard. Người học có thể chọn chủ đề, sinh bộ từ mới bằng AI, lật thẻ để xem nghĩa tiếng Việt và câu ví dụ, sau đó lưu lại những từ đã học để ôn tập sau.
 
 ## Tính năng chính
 

@@ -21,17 +21,19 @@ const display = Baloo_2({ subsets: ["latin", "vietnamese"], weight: ["600", "700
 const en = Fraunces({ subsets: ["latin", "vietnamese"], variable: "--font-en" });
 
 export const metadata: Metadata = {
-  title: "English Study",
+  title: "ThankZ English",
   description: "Website tự học tiếng Anh cá nhân",
-  applicationName: "English Study",
+  applicationName: "ThankZ English",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "English Study",
+    title: "ThankZ English",
   },
   icons: {
     icon: [
+      { url: "/favicon.ico", sizes: "16x16 32x32 48x48", type: "image/x-icon" },
+      { url: "/icons/icon-32.png", sizes: "32x32", type: "image/png" },
       { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
       { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
     ],

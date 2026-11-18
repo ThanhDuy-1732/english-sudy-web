@@ -122,7 +122,7 @@ export default function ServiceWorkerRegistration() {
         <div className="mx-auto flex w-full max-w-6xl items-start justify-between gap-2 px-4 py-4 text-sm text-ink">
           <div className="flex-1">
           {installPrompt ? (
-            <button type="button" disabled={installing} onClick={() => void install()} className="min-h-11 rounded-lg bg-ink/5 px-4">Cài English Study</button>
+            <button type="button" disabled={installing} onClick={() => void install()} className="min-h-11 rounded-lg bg-ink/5 px-4">Cài ThankZ English</button>
           ) : (
             <details>
               <summary className="flex min-h-11 cursor-pointer items-center">Cài ứng dụng trên điện thoại</summary>

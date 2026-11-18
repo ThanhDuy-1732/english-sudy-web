@@ -50,7 +50,7 @@ export function parseBackup(json: string): BackupFile {
 
   const file = parsed as Partial<BackupFile>;
   if (file.app !== BACKUP_APP) {
-    throw new Error("Đây không phải file sao lưu của English Study.");
+    throw new Error("Đây không phải file sao lưu của ThankZ English.");
   }
   if (typeof file.version !== "number" || file.version > BACKUP_VERSION) {
     throw new Error("Phiên bản file sao lưu không được hỗ trợ.");
@@ -264,5 +264,5 @@ export function backupFileName(date = new Date()): string {
   const y = date.getFullYear();
   const m = `${date.getMonth() + 1}`.padStart(2, "0");
   const d = `${date.getDate()}`.padStart(2, "0");
-  return `english-study-backup-${y}-${m}-${d}.json`;
+  return `thankz-english-backup-${y}-${m}-${d}.json`;
 }

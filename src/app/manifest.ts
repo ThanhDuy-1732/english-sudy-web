@@ -3,8 +3,8 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: "English Study",
-    short_name: "English Study",
+    name: "ThankZ English",
+    short_name: "ThankZ",
     description: "Học từ vựng tiếng Anh theo chủ đề bằng flashcard và AI.",
     start_url: "/",
     scope: "/",
@@ -25,6 +25,12 @@ export default function manifest(): MetadataRoute.Manifest {
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
+      },
+      {
+        src: "/icons/icon-maskable-192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "maskable",
       },
       {
         src: "/icons/icon-maskable-512.png",

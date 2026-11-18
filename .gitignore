@@ -39,3 +39,6 @@ firebase-debug.log
 
 # Generated image drafts (kept locally, not in git)
 /generated_images/
+
+# Logo kit archive (the unpacked kit is committed)
+/docs/design/logo/*.zip

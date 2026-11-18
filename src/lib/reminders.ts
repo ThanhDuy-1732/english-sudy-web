@@ -36,11 +36,11 @@ export function buildReminderIcs(time: string, appUrl: string, now = new Date())
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, h || 20, m || 0);
   const local = `${start.getFullYear()}${pad(start.getMonth() + 1)}${pad(start.getDate())}T${pad(start.getHours())}${pad(start.getMinutes())}00`;
   const stamp = now.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
-  const description = escapeText(`Mở English Study để ôn từ đến hạn và làm kế hoạch hôm nay: ${appUrl}`);
+  const description = escapeText(`Mở ThankZ English để ôn từ đến hạn và làm kế hoạch hôm nay: ${appUrl}`);
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//English Study//Nhac hoc//VI",
+    "PRODID:-//ThankZ English//Nhac hoc//VI",
     "CALSCALE:GREGORIAN",
     "BEGIN:VEVENT",
     "UID:english-study-daily-reminder",

@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
-  <title id="title">English Study</title>
-  <rect width="512" height="512" fill="#2c1f4a"/>
-  <rect x="102" y="102" width="308" height="308" rx="76" fill="#3a2a61"/>
-  <path d="M154 164c0-14 12-26 26-26h152c14 0 26 12 26 26v184c0 14-12 26-26 26H180c-14 0-26-12-26-26V164Z" fill="#f7f4ff"/>
-  <path d="M180 138h152c14 0 26 12 26 26v20H154v-20c0-14 12-26 26-26Z" fill="#7f56d9"/>
-  <path d="M196 218h120v28h-86v28h74v27h-74v31h91v28H196V218Z" fill="#2c1f4a"/>
-</svg>

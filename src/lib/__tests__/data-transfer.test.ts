@@ -94,7 +94,7 @@ describe("importData", () => {
 
   it("rejects a file from another app", () => {
     expect(() => importData(makeBackup({}, { app: "other-app" }))).toThrow(
-      "Đây không phải file sao lưu của English Study."
+      "Đây không phải file sao lưu của ThankZ English."
     );
   });
 
@@ -146,7 +146,7 @@ describe("clearAllData", () => {
 
 describe("backupFileName", () => {
   it("includes the export date", () => {
-    expect(backupFileName(new Date(2026, 10, 13))).toBe("english-study-backup-2026-11-13.json");
+    expect(backupFileName(new Date(2026, 10, 13))).toBe("thankz-english-backup-2026-11-13.json");
   });
 });
 
