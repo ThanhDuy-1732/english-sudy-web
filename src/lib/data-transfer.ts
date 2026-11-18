@@ -5,7 +5,7 @@ export const BACKUP_APP = "english-study";
 export const BACKUP_VERSION = 1;
 
 // Runtime-only keys that must never leave the device.
-const EXCLUDED_KEYS = new Set(["syncKey", "syncFailedQueue", "backupReminderSnoozedUntil", "retentionRanOn", "studyReminderSnoozedOn"]);
+const EXCLUDED_KEYS = new Set(["syncKey", "syncFailedQueue", "backupReminderSnoozedUntil", "retentionRanOn", "studyReminderSnoozedOn", "wordJob"]);
 
 export interface BackupFile {
   app: string;
@@ -94,6 +94,7 @@ type Item = Record<string, unknown>;
 
 const IDENTITY: Record<string, (item: Item) => string> = {
   learnedWords: (x) => String(x.word),
+  wordBank: (x) => String(x.word).trim().toLowerCase(),
   dailyChallenge: (x) => String(x.date),
   reportedQuestions: (x) => String(x.questionId),
   grammarBookmarks: (x) => `${x.topicId}:${x.subRuleId}`,
@@ -119,6 +120,8 @@ function isRecord(value: unknown): value is Item {
 function incomingWins(key: string, local: Item, incoming: Item): boolean {
   if (key === "examTagAccuracies") return Number(incoming.total) > Number(local.total);
   if (key === "dailyChallenge") return Boolean(incoming.completed) && !local.completed;
+  // A word seen on either device must stay seen after a merge, or it reappears as new.
+  if (key === "wordBank") return Boolean(incoming.seenAt) && !local.seenAt;
   return stamp(incoming) > stamp(local);
 }
 
@@ -202,7 +205,7 @@ export function markBackedUp(date = new Date()): void {
 /** True when there is learning data and no backup in the last BACKUP_REMIND_DAYS days. */
 export function needsBackup(now = new Date()): boolean {
   try {
-    const hasData = ["learnedWords", "learningSessions", "unifiedMistakes", "writingSubmissions", "speakingSessions"].some((key) => {
+    const hasData = ["learnedWords", "learningSessions", "unifiedMistakes", "writingSubmissions", "speakingSessions", "wordBank"].some((key) => {
       const raw = localStorage.getItem(key);
       return raw !== null && raw !== "[]";
     });
@@ -251,6 +254,9 @@ export function clearAllData(): number {
     if (key && !isExcluded(key)) keys.push(key);
   }
   keys.forEach((key) => localStorage.removeItem(key));
+  // Runtime keys stay out of backup/import, but clearing data must not leave a job
+  // that resumes later and spends AI against an empty bank.
+  localStorage.removeItem("wordJob");
   return keys.length;
 }
 
