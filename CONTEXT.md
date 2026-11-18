@@ -14,7 +14,7 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 
 | Route | File | Purpose |
 |---|---|---|
-| `/` | `src/app/page.tsx` | Generate & study flashcards |
+| `/` | `src/app/page.tsx` | Generate & study flashcards; serves unseen words from the local word bank before calling AI, plus a "Tạo trước" job panel |
 | `/history` | `src/app/history/page.tsx` | Browse saved words, filter by topic/mastery |
 | `/activity` | `src/app/activity/page.tsx` | Completed learning sessions grouped by local date, with type, duration, and accuracy |
 | `/review` | `src/app/review/page.tsx` | "Tưới vườn": spaced-repetition review of due words (passes `learned` to `Flashcard`); records a learning session and shows a quality-count summary after the last card |
@@ -53,7 +53,7 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 
 | Route | Body | Response |
 |---|---|---|
-| `/api/generate-words` | `{ topic, exclude?: string[], provider?, disabledProviders? }` | `{ word, meaning }[]` |
+| `/api/generate-words` | `{ topic, exclude?: string[], count?: 1–30, knownCount?: number, provider?, disabledProviders? }` | `{ word, meaning }[]` |
 | `/api/generate-sentence` | `{ word, provider?, disabledProviders? }` | `{ sentence }` |
 | `/api/generate-synonyms` | `{ word, provider?, disabledProviders? }` | `{ synonyms: string[], antonyms: string[] }` |
 | `/api/generate-batch` | `{ words, provider?, disabledProviders? }` | batch sentences+synonyms |
@@ -77,7 +77,7 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 
 Mọi route gọi AI đều đi qua `callTask` (task router, có metrics) — kể cả lần gọi sửa JSON (`repair`). Chúng set header `X-Provider-Used`. Lời gọi AI thật nằm ở `src/lib/providers/`.
 
-`/api/generate-words` nhận thêm `exclude` — các từ đã hiện cho người học cùng chủ đề (tối đa 60, khử trùng, client giữ trong bộ nhớ của trang). Prompt yêu cầu model tránh chúng; kết quả bị lọc lại và gọi bổ sung một lần nếu model vẫn trả từ trùng.
+`/api/generate-words` nhận `exclude` (từ đã có, tối đa 200, khử trùng), `count` (1–30, mặc định 5) và `knownCount` (số từ đã biết của chủ đề, thêm vào prompt). Prompt yêu cầu model tránh các từ đó; kết quả bị lọc lại và gọi bổ sung một lần nếu model vẫn trả từ trùng.
 
 **Vercel `maxDuration`**: mọi route gọi AI export `maxDuration = 300` (mức tối đa của gói Hobby khi bật Fluid compute; chuỗi fallback có thể tốn nhiều lần 25 s); `/api/speech/transcribe` giữ `60`. Nếu project tắt Fluid compute, Hobby chỉ cho tối đa 60 s và cần giảm số này.
 
@@ -116,6 +116,33 @@ interface LearnedWord {
 }
 ```
 SRS uses **FSRS-4.5** (`src/lib/srs.ts`, default weights, target retention 90%, max interval 365 days). Use `reviewWord(word, quality: 0|3|4|5)` (Quên/Khó/Được/Dễ → Again/Hard/Good/Easy).
+
+### Word bank & generation job (`src/lib/word-bank.ts`, `src/lib/word-job.ts`, `src/lib/word-job-runner.ts`)
+
+```ts
+interface BankWord {
+  word: string;
+  meaning: string;
+  topic: string;
+  createdAt: string;   // ISO
+  seenAt?: string;     // ISO, set when displayed on a card
+}
+
+interface WordJob {
+  id: string;
+  topic: string;
+  target: number;      // total words wanted for the topic in the bank
+  status: "running" | "paused" | "done" | "error";
+  createdAt: string;
+  updatedAt: string;
+  lastError?: string;
+  lock?: { tabId: string; heartbeatAt: string };
+}
+```
+
+`word-bank.ts` chuẩn hoá `trim + gộp space + lowercase`; `addBankWords` lọc trùng với bank **và** `learnedWords`, trả `{ added, persisted }` (ghi lỗi → giữ batch trong overlay bộ nhớ, `persisted: false`). `getUnseen`/`countBank` bỏ từ đã học; `takeUnseen` lấy + đánh dấu `seenAt`; `pickExcludeSample` gửi tối đa 200 từ (120 mới nhất + ngẫu nhiên phần còn lại + learned).
+
+`word-job-runner.ts`: một worker, lô 20, rate window 40 request/phút, backoff 2^n (≤30 s), 429 = cooldown (`Retry-After`, 5 lần liên tiếp → `error`), dừng khi đủ target / 3 lô rỗng / 3 lỗi / ghi bank lỗi. `WordJobContext` (mount trong `layout.tsx`) chạy job xuyên trang, giữ lock giữa các tab (heartbeat 5 s, cũ sau 30 s) và dừng khi đóng tab.
 
 ### DailyChallenge (`src/lib/daily-challenge.ts`)
 ```ts
@@ -250,6 +277,8 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 |---|---|---|
 | `learningSessions` | `LearningSession[]` | Recent activity sessions from review, exam, speaking, and writing; newest-first, max 500 |
 | `learnedWords` | `LearnedWord[]` | All saved words |
+| `wordBank` | `BankWord[]` | Từ đã sinh, tối đa 5.000; nguồn chặn trùng (bank + `learnedWords`), có `seenAt` |
+| `wordJob` | `WordJob \| null` | Job sinh trước đang chạy/dở; runtime, không vào backup, `clearAllData` xoá |
 | `dailyChallenge` | `DailyChallenge[]` | Full history |
 | `customTopics` | `string[]` | User-added topics |
 | `studyTime` | `Record<string, number>` | Daily study seconds — `{ "YYYY-MM-DD": seconds }` |
@@ -392,13 +421,13 @@ interface DailyStudyTime { date: string; minutes: number; }
 
 Không dùng Supabase hay backend nào. Toàn bộ dữ liệu nằm trong localStorage của trình duyệt.
 
-- `exportData()` → JSON string `{ app: "english-study", version: 1, exportedAt, data: { key: value } }`, giữ nguyên raw string của từng key. Bỏ qua key runtime (`syncKey`, `syncFailedQueue`, `backupReminderSnoozedUntil`, `retentionRanOn`, `studyReminderSnoozedOn`).
+- `exportData()` → JSON string `{ app: "english-study", version: 1, exportedAt, data: { key: value } }`, giữ nguyên raw string của từng key. Bỏ qua key runtime (`syncKey`, `syncFailedQueue`, `backupReminderSnoozedUntil`, `retentionRanOn`, `studyReminderSnoozedOn`, `wordJob`).
 - `importData(json)` → validate `app`/`version`/`data`, ghi đè từng key có trong file; key không có trong file được giữ nguyên. Trả `{ imported, skipped }`.
 - `clearAllData()` → xoá mọi key của app (trừ key runtime), trả số key đã xoá.
 - `backupFileName(date?)` → `english-study-backup-YYYY-MM-DD.json`.
-- `mergeData(json)` → **nhập gộp**: không ghi đè cả key. Danh sách bản ghi gộp theo từng mục (định danh: `id`; `learnedWords` theo `word`, `dailyChallenge` theo `date`, `reportedQuestions` theo `questionId`, `grammarBookmarks` theo `topicId:subRuleId`, `masteryTimeline` theo `date:skill`, `examTagAccuracies` theo `tag`), bản có mốc thời gian mới hơn (`updatedAt` → `finishedAt` → `createdAt` → `learnedAt` → `startedAt` → `reportedAt` → `at`) thắng, hoà thì giữ bản trên máy. `examTagAccuracies` lấy bản có `total` lớn hơn, `dailyChallenge` ưu tiên `completed`. Mảng chuỗi (`customTopics`) hợp nhất; `studyTime` lấy số giây lớn hơn mỗi ngày; `examBank` gộp theo từng bank key; `lastSpeakingAt`/`lastWritingAt`/`lastBackupAt` lấy mốc sau. `learningSessions`, `examAttempts`, `speakingSessions`, `writingSubmissions` sắp lại mới nhất trước. Cài đặt, hồ sơ, cache giữ giá trị trên máy, chỉ điền key còn thiếu. Giới hạn: không có tombstone nên từ đã xoá trên máy sẽ quay lại nếu file còn.
+- `mergeData(json)` → **nhập gộp**: không ghi đè cả key. Danh sách bản ghi gộp theo từng mục (định danh: `id`; `learnedWords` theo `word`, `wordBank` theo `word` chuẩn hoá, `dailyChallenge` theo `date`, `reportedQuestions` theo `questionId`, `grammarBookmarks` theo `topicId:subRuleId`, `masteryTimeline` theo `date:skill`, `examTagAccuracies` theo `tag`), bản có mốc thời gian mới hơn (`updatedAt` → `finishedAt` → `createdAt` → `learnedAt` → `startedAt` → `reportedAt` → `at`) thắng, hoà thì giữ bản trên máy. `examTagAccuracies` lấy bản có `total` lớn hơn, `dailyChallenge` ưu tiên `completed`, `wordBank` giữ `seenAt` nếu một bên đã đánh dấu. Mảng chuỗi (`customTopics`) hợp nhất; `studyTime` lấy số giây lớn hơn mỗi ngày; `examBank` gộp theo từng bank key; `lastSpeakingAt`/`lastWritingAt`/`lastBackupAt` lấy mốc sau. `learningSessions`, `examAttempts`, `speakingSessions`, `writingSubmissions` sắp lại mới nhất trước. Cài đặt, hồ sơ, cache giữ giá trị trên máy, chỉ điền key còn thiếu. Giới hạn: không có tombstone nên từ đã xoá trên máy sẽ quay lại nếu file còn.
 - `downloadBackup(json)` tải file và ghi `lastBackupAt`; `markBackedUp()`, `needsBackup()` (có dữ liệu học và chưa sao lưu trong `BACKUP_REMIND_DAYS` = 7 ngày). `storageUsage()` → byte ước tính của localStorage (2 byte/ký tự), key lớn nhất trước; `LOCAL_STORAGE_LIMIT` = 5 MB.
-- UI: Settings → tab **Dữ liệu** (`src/app/settings/page.tsx`) — xuất file, nhập file chọn **Gộp từ file** (`mergeData`) hoặc **Thay thế bằng file** (`importData`, có confirm) rồi reload, **Dung lượng** (thanh % trên ~5 MB, cảnh báo ≥80%, 3 mục lớn nhất), xoá toàn bộ (confirm 2 bước).
+- UI: Settings → tab **Dữ liệu** (`src/app/settings/page.tsx`) — xuất file, nhập file chọn **Gộp từ file** (`mergeData`) hoặc **Thay thế bằng file** (`importData`, có confirm) rồi reload, **Dung lượng** (thanh % trên ~5 MB, cảnh báo ≥80%, 3 mục lớn nhất), xoá toàn bộ (confirm 2 bước). `clearAllData` xoá tường minh `wordJob` dù nó nằm trong danh sách runtime bị bỏ qua.
 - `BackupReminder` (trong `layout.tsx`, đầu vùng nội dung): banner nhắc sao lưu khi `needsBackup()`; "Xuất file sao lưu" tải ngay, "Để mai" ghi `backupReminderSnoozedUntil` (+1 ngày).
 - Không đồng bộ tự động giữa các thiết bị; chuyển máy bằng xuất/nhập file.
 - `exam_items`: đề sinh ra chỉ lưu local trong `examBank`; không còn kho đề dùng chung trên server.
@@ -465,6 +494,8 @@ Không cần server. `studyNudge(reminderTime, now?)` trả `{ dueWords, streak 
 | `LinkList` | Titled list of destinations in one bordered card (rows divided by rules, chevron); used by `/exam`, `/speak`, `/write` |
 | `Segmented` | Single-choice segmented control (`role=radiogroup`); used by `/exam` (kỳ thi, trình độ), `/stats` tabs, `/today` minutes, `/settings` tabs, `/mistakes` + `/exam/mistakes` + `/history` filters |
 | `ImportWords` · `QuizCard` | Bulk import từ; thẻ quiz dùng chung |
+| `WordBankPanel` | Trang chủ: số từ chưa học, chọn mốc 100/300/1.000 và bắt đầu job; khoá khi job khác đang chạy |
+| `WordJobStrip` | Dải tiến trình job trên mọi trang (`Dừng`/`Chạy tiếp`/`Huỷ`); `WordJobStripConnected` mount trong `layout.tsx` |
 
 ---
 
@@ -478,6 +509,10 @@ Không cần server. `studyNudge(reminderTime, now?)` trả `{ dueWords, streak 
 - `setProvider(id)` — sets preferred provider (persisted to localStorage)
 - `disabledProviders` — list of opted-out provider ids
 - `toggleProvider(id)` — enable/disable; auto-switches away if current is disabled
+
+### `WordJobContext` (`src/contexts/WordJobContext.tsx`)
+
+Mount trong `ProviderContextProvider` (cần `useApiFetch`) và ngoài `TimerContextProvider`. `useWordJob()` trả `{ job, count, wordsPerMinute, isOwner, startJob, pauseJob, resumeJob, cancelJob }`. Vòng lặp chạy qua `runWordJob`; `fetchBatch` gọi `/api/generate-words` với `exclude`/`count`/`knownCount` và `AbortController`. Job dở của lần mở trước trở về `paused` (khoá cũ) để người dùng bấm "Chạy tiếp"; tab khác thấy heartbeat mới thì chỉ hiển thị tiến trình.
 
 ### `TimerContext` (`src/contexts/TimerContext.tsx`)
 
