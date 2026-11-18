@@ -36,3 +36,6 @@ firebase-debug.log
 /docs/key/api-key.md
 /supabase/
 .claude/
+
+# Generated image drafts (kept locally, not in git)
+/generated_images/
