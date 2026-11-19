@@ -33,3 +33,13 @@ test("saving stores one word per language with the same conceptId", async () => 
   expect(saved[1].example).toBe("我有发票。");
   expect(screen.getByRole("button", { name: "Đã gieo" })).toBeDisabled();
 });
+
+test("flipping back and forth while examples load counts one flip", async () => {
+  const onFlip = jest.fn();
+  render(<ConceptCard concept={concept} langs={["en", "zh"]} topic="TOEIC" onFlip={onFlip} />);
+  fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của invoice, 发票" }));
+  fireEvent.click(screen.getByRole("button", { name: "Lật lại" }));
+  fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của invoice, 发票" }));
+  await act(async () => {});
+  expect(onFlip).toHaveBeenCalledTimes(1);
+});

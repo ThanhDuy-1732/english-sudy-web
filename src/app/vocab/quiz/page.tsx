@@ -3,24 +3,14 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { getLearnedWords, type LearnedWord } from "@/lib/storage";
+import { buildMCQ, quizWords, type MCQQuestion } from "@/lib/vocab-quiz";
 import { startSession, finishSession } from "@/lib/sessions";
 
 type QuizMode = "meaning" | "fill";
 type Phase = "setup" | "quiz" | "done";
 
-interface MCQQuestion { type: "mcq"; word: string; meaning: string; options: string[]; answer: string }
 interface FillQuestion { type: "fill"; word: string; sentence: string; answer: string; isLoading: boolean }
 type Question = MCQQuestion | FillQuestion;
-
-function buildMCQ(word: LearnedWord, allWords: LearnedWord[]): MCQQuestion {
-  const distractors = allWords
-    .filter((w) => w.word !== word.word && w.meaning)
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 3)
-    .map((w) => w.meaning);
-  const options = [...distractors, word.meaning].sort(() => Math.random() - 0.5);
-  return { type: "mcq", word: word.word, meaning: word.meaning, options, answer: word.meaning };
-}
 
 export default function VocabQuizPage() {
   const [phase, setPhase] = useState<Phase>("setup");
@@ -35,7 +25,7 @@ export default function VocabQuizPage() {
   const sessionIdRef = { current: "" };
 
   useEffect(() => {
-    setAllWords(getLearnedWords());
+    setAllWords(quizWords(getLearnedWords()));
   }, []);
 
   function startQuiz() {

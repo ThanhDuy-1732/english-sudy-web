@@ -28,12 +28,39 @@ test("uses the language voice code", () => {
   expect(speak.mock.calls[0][0].voice.voiceURI).toBe("ko");
 });
 
-test("disabled when no voice matches the language", async () => {
+test("no voice for the language: tapping shows a visible hint instead of staying silent", async () => {
   render(<PronunciationButton word="水" lang="ja" />);
   await act(async () => {});
-  const button = screen.getByRole("button", { name: "Nghe phát âm 水" });
-  expect(button).toBeDisabled();
-  expect(button).toHaveAttribute("title", "Thiết bị chưa có giọng đọc Tiếng Nhật");
+  const button = screen.getByRole("button", { name: "Thiết bị chưa có giọng đọc Tiếng Nhật" });
+  fireEvent.click(button);
+  expect(speak).not.toHaveBeenCalled();
+  expect(screen.getByRole("status")).toHaveTextContent("Thiết bị chưa có giọng đọc Tiếng Nhật");
+});
+
+test("without a saved voice, an exact language match is used and otherwise the platform default", () => {
+  voices = [{ voiceURI: "gb", lang: "en-GB" }, { voiceURI: "us", lang: "en-US" }];
+  const first = render(<PronunciationButton word="apple" />);
+  fireEvent.click(screen.getByRole("button", { name: "Nghe phát âm apple" }));
+  expect(speak.mock.calls[0][0].voice.voiceURI).toBe("us");
+  first.unmount();
+  voices = [{ voiceURI: "gb", lang: "en-GB" }];
+  render(<PronunciationButton word="apple" />);
+  fireEvent.click(screen.getByRole("button", { name: "Nghe phát âm apple" }));
+  expect(speak.mock.calls[1][0].voice).toBeNull();
+  expect(speak.mock.calls[1][0].lang).toBe("en-US");
+});
+
+test("Mandarin never falls back to a Cantonese voice", () => {
+  voices = [{ voiceURI: "hk", lang: "zh-HK" }, { voiceURI: "cn", lang: "zh_CN" }];
+  const first = render(<PronunciationButton word="学生" lang="zh" />);
+  fireEvent.click(screen.getByRole("button", { name: "Nghe phát âm 学生" }));
+  expect(speak.mock.calls[0][0].voice.voiceURI).toBe("cn");
+  first.unmount();
+  voices = [{ voiceURI: "hk", lang: "zh-HK" }];
+  render(<PronunciationButton word="学生" lang="zh" />);
+  fireEvent.click(screen.getByRole("button", { name: "Nghe phát âm 学生" }));
+  expect(speak.mock.calls[1][0].voice).toBeNull();
+  expect(speak.mock.calls[1][0].lang).toBe("zh-CN");
 });
 
 test("english default keeps en-US", () => {

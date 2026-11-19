@@ -172,22 +172,39 @@ export function countConcepts(topic: string, langs: LearnLang[]): number {
   return getUnseenConcepts(topic, langs, Number.MAX_SAFE_INTEGER).length;
 }
 
-/** Stores each concept as one bank word per language, linked by a fresh conceptId. */
+/**
+ * Stores each concept as one bank word per language, linked by a fresh conceptId. A concept is stored whole or
+ * not at all: if any of its words is already in the bank, learned, or used by an earlier concept of the batch,
+ * the whole concept is skipped, so no partial concept can hide (and block) its other words. `added` counts concepts.
+ */
 export function addConcepts(topic: string, concepts: Omit<Concept, "conceptId">[]): { added: number; persisted: boolean } {
+  const known = new Set(getBank().map(keyOf));
+  for (const key of learnedKeys()) known.add(key);
   const createdAt = new Date().toISOString();
-  const entries: BankWord[] = concepts.flatMap((concept) => {
+  const entries: BankWord[] = [];
+  let added = 0;
+  for (const concept of concepts) {
+    const items = (Object.entries(concept.words) as [LearnLang, { word: string; reading?: string }][])
+      .map(([lang, item]) => ({ lang, word: item.word.trim(), reading: item.reading }))
+      .filter((item) => normalizeWord(item.word));
+    if (items.length === 0 || items.some((item) => known.has(keyOf(item)))) continue;
     const conceptId = crypto.randomUUID();
-    return (Object.entries(concept.words) as [LearnLang, { word: string; reading?: string }][]).map(([lang, item]) => ({
-      word: item.word,
-      meaning: concept.meaning,
-      topic,
-      createdAt,
-      lang,
-      conceptId,
-      ...(item.reading ? { reading: item.reading } : {}),
-    }));
-  });
-  return addBankWords(entries);
+    for (const item of items) {
+      known.add(keyOf(item));
+      entries.push({
+        word: item.word,
+        meaning: concept.meaning,
+        topic,
+        createdAt,
+        lang: item.lang,
+        conceptId,
+        ...(item.reading ? { reading: item.reading } : {}),
+      });
+    }
+    added += 1;
+  }
+  if (entries.length === 0) return { added: 0, persisted: true };
+  return { added, persisted: addBankWords(entries).persisted };
 }
 
 export function markConceptsSeen(concepts: Concept[]): void {

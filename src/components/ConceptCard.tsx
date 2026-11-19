@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import LangText from "./LangText";
 import PronunciationButton from "./PronunciationButton";
 import { LANG_INFO, type LearnLang } from "@/lib/languages";
@@ -20,13 +20,16 @@ export default function ConceptCard({ concept, langs, topic, onFlip }: { concept
   const [flipped, setFlipped] = useState(false);
   const [examples, setExamples] = useState<Partial<Record<LearnLang, Example | null>>>({});
   const [saved, setSaved] = useState(false);
+  // Examples are requested (and the flip counted) once, even if the card is flipped back before they arrive.
+  const requested = useRef(false);
   const shown = langs.filter((lang) => concept.words[lang]);
   const names = shown.map((lang) => concept.words[lang]!.word).join(", ");
 
   async function flip() {
-    const first = !flipped && Object.keys(examples).length === 0;
+    const first = !flipped && !requested.current;
     setFlipped((value) => !value);
     if (!first) return;
+    requested.current = true;
     onFlip?.();
     const results = await Promise.all(
       shown.map(async (lang) => {

@@ -189,3 +189,25 @@ test("countAvailable counts words for English only and concepts otherwise", () =
   expect(countAvailable("TOEIC", ["en"])).toBe(2);
   expect(countAvailable("TOEIC", ["en", "zh"])).toBe(1);
 });
+
+describe("addConcepts stores whole concepts only", () => {
+  test("a concept with an already-known word is skipped entirely", () => {
+    addBankWords([bankWord("student")]);
+    const result = addConcepts("TOEIC", [{ meaning: "học sinh", words: { en: { word: "student" }, zh: { word: "学生" } } }]);
+    expect(result.added).toBe(0);
+    expect(countConcepts("TOEIC", ["en", "zh"])).toBe(0);
+    expect(getBank().some((e) => e.word === "学生")).toBe(false);
+  });
+
+  test("a learned word also blocks its concept, and duplicates inside one batch are dropped", () => {
+    localStorage.setItem("learnedWords", JSON.stringify([{ word: "teacher" }]));
+    const result = addConcepts("TOEIC", [
+      { meaning: "giáo viên", words: { en: { word: "teacher" }, zh: { word: "老师" } } },
+      { meaning: "hoá đơn", words: { en: { word: "invoice" }, zh: { word: "发票" } } },
+      { meaning: "hoá đơn 2", words: { en: { word: "receipt" }, zh: { word: "发票" } } },
+    ]);
+    expect(result.added).toBe(1);
+    expect(getUnseenConcepts("TOEIC", ["en", "zh"], 5).map((c) => c.words.en!.word)).toEqual(["invoice"]);
+    expect(getBank().some((e) => e.word === "老师" || e.word === "receipt")).toBe(false);
+  });
+});
