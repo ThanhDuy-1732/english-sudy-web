@@ -18,7 +18,8 @@ export type AITaskName =
   | "reading-generation"
   | "sentence-grade"
   | "grammar-exercise"
-  | "exam-grade";
+  | "exam-grade"
+  | "translation";
 
 export interface CallTaskOptions {
   task: AITaskName;
@@ -47,6 +48,7 @@ const TASK_PROVIDER_MAP: Record<AITaskName, string> = {
   "sentence-grade": "",
   "grammar-exercise": "",
   "exam-grade": "",
+  translation: "",
 };
 
 export function getTaskProviderMap(): Record<AITaskName, string> {
