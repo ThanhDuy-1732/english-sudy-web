@@ -51,3 +51,33 @@ test("returns 400 when the body is not multipart form data", async () => {
   const response = await POST(new NextRequest("http://localhost/api/speech/transcribe", { method: "POST" }));
   expect(response.status).toBe(400);
 });
+
+async function transcribeWith(language?: string) {
+  const previousKey = process.env.GROQ_API_KEY;
+  const previousFetch = global.fetch;
+  process.env.GROQ_API_KEY = "test-key";
+  const fetcher = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ text: "我是学生", language: "chinese", duration: 1, segments: [] }) });
+  global.fetch = fetcher;
+  try {
+    const form = new FormData();
+    form.append("audio", new Blob(["audio"], { type: "audio/webm" }), "r.webm");
+    if (language) form.append("language", language);
+    const response = await POST(new NextRequest("http://localhost/api/speech/transcribe", { method: "POST", body: form }));
+    return { sent: fetcher.mock.calls[0][1].body.get("language"), body: await response.json() };
+  } finally {
+    global.fetch = previousFetch;
+    if (previousKey === undefined) delete process.env.GROQ_API_KEY;
+    else process.env.GROQ_API_KEY = previousKey;
+  }
+}
+
+test("transcribe forwards language=zh to Whisper", async () => {
+  const { sent, body } = await transcribeWith("zh");
+  expect(sent).toBe("zh");
+  expect(body.language).toBe("chinese");
+});
+
+test("transcribe without language keeps en, and rejects unknown codes to en", async () => {
+  expect((await transcribeWith()).sent).toBe("en");
+  expect((await transcribeWith("fr")).sent).toBe("en");
+});

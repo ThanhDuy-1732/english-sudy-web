@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isLearnLang } from "@/lib/languages";
 import { audioFilename } from "@/lib/speech/recorder";
 
 export const runtime = "nodejs";
@@ -38,7 +39,9 @@ export async function POST(req: NextRequest) {
   upstream.append("file", audio, audioFilename(audio));
   upstream.append("model", model);
   upstream.append("response_format", "verbose_json");
-  upstream.append("language", "en");
+  // Whisper is told the language being practised; missing or unknown codes keep English.
+  const language = form?.get("language");
+  upstream.append("language", isLearnLang(language) ? language : "en");
 
   const res = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
     method: "POST",
@@ -53,6 +56,7 @@ export async function POST(req: NextRequest) {
   const data = await res.json();
   return NextResponse.json({
     text: data.text,
+    language: data.language,
     durationSec: data.duration,
     segments: (data.segments ?? []).map((s: { start: number; end: number; text: string }) => ({
       start: s.start,

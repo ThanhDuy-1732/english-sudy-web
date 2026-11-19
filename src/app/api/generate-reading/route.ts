@@ -1,4 +1,5 @@
 import { generateReading } from "@/lib/gemini";
+import { isLearnLang } from "@/lib/languages";
 import { callTask } from "@/lib/ai-tasks";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -7,6 +8,7 @@ export const maxDuration = 300;
 
 export async function POST(request: NextRequest) {
   const body = (await request.json()) as {
+    lang?: unknown;
     words?: unknown;
     provider?: string;
     disabledProviders?: string[];
@@ -34,7 +36,7 @@ export async function POST(request: NextRequest) {
       return result.text;
     };
 
-    const result = await generateReading(words, generateFn);
+    const result = await generateReading(words, generateFn, isLearnLang(body.lang) ? body.lang : "en");
     return NextResponse.json(result, { headers: { "X-Provider-Used": resolvedProviderId } });
   } catch {
     return NextResponse.json({ error: "Unable to generate reading" }, { status: 502 });

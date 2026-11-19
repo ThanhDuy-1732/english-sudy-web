@@ -198,3 +198,36 @@ test("generateSynonyms names the word's language", async () => {
   await generateSynonyms("学生", mockFn, "zh");
   expect(mockFn.mock.calls[0][0]).toContain("Chinese");
 });
+
+// Practice prompts per language
+test("generateFillBlank in Chinese asks for pinyin and a Vietnamese translation", async () => {
+  mockFn.mockResolvedValue(JSON.stringify({ sentence: "我是_____。", reading: "wǒ shì _____.", translation: "Tôi là học sinh." }));
+  const result = await generateFillBlank("学生", mockFn, "zh");
+  const prompt = mockFn.mock.calls[0][0];
+  expect(prompt).toContain("Chinese");
+  expect(prompt).toContain("pinyin");
+  expect(prompt).toContain("Vietnamese");
+  expect(result).toEqual({ sentence: "我是_____。", reading: "wǒ shì _____.", translation: "Tôi là học sinh." });
+});
+
+test("generateFillBlank in English keeps its prompt", async () => {
+  mockFn.mockResolvedValue(JSON.stringify({ sentence: "I _____ them." }));
+  await generateFillBlank("greet", mockFn);
+  expect(mockFn.mock.calls[0][0]).toBe('Write one natural English sentence using the word "greet". Replace the word "greet" with "_____".\nReturn JSON only: {"sentence": "The sentence with _____ here."}');
+});
+
+test("gradeSentence in Korean names Korean and keeps Vietnamese feedback", async () => {
+  mockFn.mockResolvedValue(JSON.stringify({ score: 8, feedback: "Tốt.", corrected: "저는 학생입니다." }));
+  await gradeSentence("학생", "저는 학생입니다", mockFn, "ko");
+  const prompt = mockFn.mock.calls[0][0];
+  expect(prompt).toContain("Korean");
+  expect(prompt).toContain("Vietnamese");
+});
+
+test("generateReading in Japanese asks for a Japanese passage and a translation", async () => {
+  mockFn.mockResolvedValue(JSON.stringify({ passage: "…", questions: [], translation: "…" }));
+  await generateReading(["水"], mockFn, "ja");
+  const prompt = mockFn.mock.calls[0][0];
+  expect(prompt).toContain("Japanese");
+  expect(prompt).toContain("translation");
+});

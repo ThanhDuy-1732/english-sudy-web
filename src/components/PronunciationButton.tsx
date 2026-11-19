@@ -3,19 +3,11 @@
 import { useEffect, useState } from "react";
 import { LANG_INFO, type LearnLang } from "@/lib/languages";
 import { useVoiceSettings } from "@/lib/useVoiceSettings";
+import { speakText, voicesFor } from "@/lib/speech-voice";
 
 interface Props {
   word: string;
   lang?: LearnLang;
-}
-
-const normalized = (code: string) => code.toLowerCase().replace("_", "-");
-
-/** Voices for a language: those whose lang starts with its 2-letter code (ko-KR, ko_KR…). Only decides whether the device can speak it. */
-function voicesFor(lang: LearnLang): SpeechSynthesisVoice[] {
-  if (typeof window === "undefined" || !window.speechSynthesis) return [];
-  const prefix = LANG_INFO[lang].voice.slice(0, 2).toLowerCase();
-  return window.speechSynthesis.getVoices().filter((voice) => normalized(voice.lang).startsWith(prefix));
 }
 
 export default function PronunciationButton({ word, lang = "en" }: Props) {
@@ -37,22 +29,7 @@ export default function PronunciationButton({ word, lang = "en" }: Props) {
   }, [lang]);
 
   function speak() {
-    if (typeof window === "undefined" || !window.speechSynthesis) return;
-    const candidates = voicesFor(lang);
-    const utterance = new SpeechSynthesisUtterance(word);
-    // The saved voice if it speaks this language, else an exact match (en-US, zh-CN — never zh-HK Cantonese for
-    // Mandarin), else none: the browser then picks its own default for utterance.lang, as before multi-language.
-    const exact = normalized(LANG_INFO[lang].voice);
-    const voice =
-      candidates.find((item) => item.voiceURI === settings.voiceURI) ??
-      candidates.find((item) => normalized(item.lang) === exact) ??
-      null;
-    if (voice) utterance.voice = voice;
-    utterance.lang = LANG_INFO[lang].voice;
-    utterance.rate = settings.rate;
-    utterance.pitch = settings.pitch;
-    utterance.volume = settings.volume;
-    window.speechSynthesis.speak(utterance);
+    speakText(word, lang, settings);
   }
 
   return (

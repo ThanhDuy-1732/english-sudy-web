@@ -1,4 +1,5 @@
 import { gradeSentence } from "@/lib/gemini";
+import { isLearnLang } from "@/lib/languages";
 import { callTask } from "@/lib/ai-tasks";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -7,6 +8,7 @@ export const maxDuration = 300;
 
 export async function POST(request: NextRequest) {
   const body = (await request.json()) as {
+    lang?: unknown;
     word?: string;
     sentence?: string;
     provider?: string;
@@ -25,7 +27,7 @@ export async function POST(request: NextRequest) {
       return result.text;
     };
 
-    const gradeResult = await gradeSentence(body.word.trim(), body.sentence.trim(), generateFn);
+    const gradeResult = await gradeSentence(body.word.trim(), body.sentence.trim(), generateFn, isLearnLang(body.lang) ? body.lang : "en");
     return NextResponse.json(gradeResult, {
       headers: { "X-Provider-Used": resolvedProviderId },
     });
