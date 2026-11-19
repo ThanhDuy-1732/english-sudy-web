@@ -31,7 +31,12 @@ export function pickVoice(lang: LearnLang, savedVoiceURI: string | null): Speech
 }
 
 /** Reads text aloud in a language with the learner's voice settings. False when the browser can't speak. */
-export function speakText(text: string, lang: LearnLang, settings: SpeechSettings): boolean {
+export function speakText(
+  text: string,
+  lang: LearnLang,
+  settings: SpeechSettings,
+  events: { onstart?: () => void; onend?: () => void } = {}
+): boolean {
   if (typeof window === "undefined" || !window.speechSynthesis) return false;
   window.speechSynthesis.cancel?.();
   const utterance = new SpeechSynthesisUtterance(text);
@@ -41,6 +46,11 @@ export function speakText(text: string, lang: LearnLang, settings: SpeechSetting
   utterance.rate = settings.rate;
   utterance.pitch = settings.pitch;
   utterance.volume = settings.volume;
+  if (events.onstart) utterance.onstart = events.onstart;
+  if (events.onend) {
+    utterance.onend = events.onend;
+    utterance.onerror = events.onend;
+  }
   window.speechSynthesis.speak(utterance);
   return true;
 }

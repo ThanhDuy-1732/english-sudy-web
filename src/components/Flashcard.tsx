@@ -77,6 +77,7 @@ export default function Flashcard({
   const [mode, setMode] = useState<CardMode>("study");
   const [exampleExtra, setExampleExtra] = useState<{ reading?: string; translation?: string } | null>(null);
   const [fillSentence, setFillSentence] = useState<string | null>(null);
+  const [fillExtra, setFillExtra] = useState<{ reading?: string; translation?: string }>({});
   const [fillLoading, setFillLoading] = useState(false);
 
   async function handleFlip() {
@@ -138,9 +139,11 @@ export default function Flashcard({
     if (fillSentence || fillLoading) return;
     setFillLoading(true);
     try {
-      const response = await fetchWithProvider("/api/generate-fillblank", { word });
+      const response = await fetchWithProvider("/api/generate-fillblank", { word, ...langBody });
       if (!response.ok) throw new Error();
-      setFillSentence(((await response.json()) as { sentence: string }).sentence);
+      const data = (await response.json()) as { sentence: string; reading?: string; translation?: string };
+      setFillSentence(data.sentence);
+      setFillExtra({ reading: data.reading, translation: data.translation });
     } catch {
       setError("Không thể tạo bài điền từ.");
     } finally { setFillLoading(false); }
@@ -245,13 +248,13 @@ export default function Flashcard({
           aria-hidden={!flipped}
           className="postcard absolute inset-0 flex flex-col gap-2 overflow-y-auto px-4 pb-4 pt-3 text-left [backface-visibility:hidden] [transform:rotateY(180deg)]"
         >
-          {english && <div className="flex shrink-0 items-center"><div role="group" aria-label="Cách học thẻ này" className="flex w-full gap-0.5 rounded-full bg-paper p-1" onClick={(event) => event.stopPropagation()}>
+          <div className="flex shrink-0 items-center"><div role="group" aria-label="Cách học thẻ này" className="flex w-full gap-0.5 rounded-full bg-paper p-1" onClick={(event) => event.stopPropagation()}>
             {(["study", "write", "fill", "dictation"] as CardMode[]).map((cardMode) => (
               <button key={cardMode} type="button" onClick={() => selectMode(cardMode)} aria-pressed={mode === cardMode} className={`min-h-9 flex-1 rounded-full px-1 text-xs font-medium transition-colors ${mode === cardMode ? "bg-card text-ink shadow-sm" : "text-muted hover:text-ink"}`}>
                 {cardMode === "study" ? "Nghĩa" : cardMode === "write" ? "Viết câu" : cardMode === "fill" ? "Điền từ" : "Nghe"}
               </button>
             ))}
-          </div></div>}
+          </div></div>
           {mode === "study" && <div className="px-1">
             <p lang={LANG_INFO[lang].htmlLang} className={`break-words ${english ? "font-en" : "font-sans"} text-2xl font-semibold leading-tight text-ink [overflow-wrap:anywhere]`}>{word}</p>
             {reading && <p className="text-sm text-muted">{reading}</p>}
@@ -269,9 +272,9 @@ export default function Flashcard({
             )}
             {synonymData && <div className="text-sm leading-7 text-muted">{synonymData.synonyms.length > 0 && <p><span className="font-medium text-ink">Đồng nghĩa</span>{" "}<span className="font-en">{synonymData.synonyms.join(", ")}</span></p>}{synonymData.antonyms.length > 0 && <p><span className="font-medium text-ink">Trái nghĩa</span>{" "}<span className="font-en">{synonymData.antonyms.join(", ")}</span></p>}</div>}
           </div>}
-          {mode === "write" && <WritingChallenge word={word} />}
-          {mode === "fill" && (fillSentence ? <FillBlank word={word} sentence={fillSentence} /> : <p className="text-sm text-muted">{fillLoading ? "Đang tạo câu điền từ..." : "Chưa có câu điền từ."}</p>)}
-          {mode === "dictation" && (example ? <DictationMode sentence={example} /> : <p className="text-sm text-muted">Đang tạo câu ví dụ...</p>)}
+          {mode === "write" && <WritingChallenge word={word} lang={lang} />}
+          {mode === "fill" && (fillSentence ? <FillBlank word={word} sentence={fillSentence} lang={lang} reading={fillExtra.reading} translation={fillExtra.translation} /> : <p className="text-sm text-muted">{fillLoading ? "Đang tạo câu điền từ..." : "Chưa có câu điền từ."}</p>)}
+          {mode === "dictation" && (example ? <DictationMode sentence={example} lang={lang} /> : <p className="text-sm text-muted">Đang tạo câu ví dụ...</p>)}
           <div className="mt-auto flex flex-wrap items-center justify-end gap-2 pt-1">
             <button
               type="button"

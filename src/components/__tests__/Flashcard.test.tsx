@@ -170,14 +170,15 @@ describe("languages", () => {
     expect(reviewWord).toHaveBeenCalledWith("学生", 4, undefined, "zh");
   });
 
-  test("non-English card hides typing modes and shows its reading", async () => {
+  test("non-English card shows the typing modes and its reading", async () => {
     render(<Flashcard word="学生" meaning="học sinh" topic="TOEIC" lang="zh" reading="xuéshēng" initialExample="我是学生。" initialSynonymData={{ synonyms: [], antonyms: [] }} />);
     expect(screen.getAllByText("学生")[0]).toHaveAttribute("lang", "zh-CN");
     expect(screen.getAllByText("xuéshēng").length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của 学生" }));
     await waitFor(() => expect(screen.getByRole("button", { name: "Lật lại" })).toBeInTheDocument());
-    expect(screen.queryByRole("button", { name: "Viết câu" })).toBeNull();
-    expect(screen.queryByRole("button", { name: "Điền từ" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Viết câu" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Điền từ" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Nghe" })).toBeInTheDocument();
   });
 
   test("shows sibling words of the same meaning", async () => {
