@@ -4,6 +4,10 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { getLearnedWords } from "@/lib/storage";
 import { MAX_CUSTOM_WORDS, parseWordInput } from "@/lib/word-input";
+import { LANG_INFO, LEARN_LANGS, langOf, type LearnLang } from "@/lib/languages";
+import { useLearningLanguages } from "@/lib/useLearningLanguages";
+import Segmented from "@/components/Segmented";
+import type { LearnedWord } from "@/lib/storage";
 
 type Format = "mini_story" | "dialogue" | "email" | "workplace";
 
@@ -15,7 +19,9 @@ const FORMAT_LABELS: Record<Format, string> = {
 };
 
 export default function ContextPracticePage() {
-  const [allWords, setAllWords] = useState<string[]>([]);
+  const [saved, setSaved] = useState<LearnedWord[]>([]);
+  const [learning] = useLearningLanguages();
+  const [chosenLang, setChosenLang] = useState<LearnLang | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [format, setFormat] = useState<Format>("dialogue");
   const [result, setResult] = useState<string | null>(null);
@@ -25,9 +31,20 @@ export default function ContextPracticePage() {
   const [draft, setDraft] = useState("");
 
   useEffect(() => {
-    // One chip per spelling: 学生 saved in Chinese and Japanese is one word to place in context.
-    setAllWords([...new Set(getLearnedWords().map((w) => w.word))]);
+    setSaved(getLearnedWords());
   }, []);
+
+  // The content is written in one language, from that language's saved words (each spelling once).
+  const offered = LEARN_LANGS.filter((lang) => learning.includes(lang) && saved.some((w) => langOf(w) === lang));
+  const contextLang: LearnLang = chosenLang && offered.includes(chosenLang) ? chosenLang : offered.includes("en") ? "en" : offered[0] ?? "en";
+  const allWords = [...new Set(saved.filter((w) => langOf(w) === contextLang).map((w) => w.word))];
+
+  function chooseLang(lang: LearnLang) {
+    setChosenLang(lang);
+    setSelected(new Set());
+    setCustomWords([]);
+    setResult(null);
+  }
 
   const filtered = allWords.filter((w) => w.toLowerCase().includes(search.toLowerCase()));
 
@@ -90,7 +107,7 @@ export default function ContextPracticePage() {
       const res = await fetch("/api/vocab/context", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ words: Array.from(selected), format }),
+        body: JSON.stringify({ words: Array.from(selected), format, ...(contextLang === "en" ? {} : { lang: contextLang }) }),
       });
       const data = await res.json() as { text?: string };
       setResult(data.text ?? "Không thể tạo nội dung.");
@@ -112,6 +129,16 @@ export default function ContextPracticePage() {
     <main className="page">
       <Link href="/" className="back-link">← Từ mới</Link>
       <h1 className="page-title mb-4">Luyện từ trong ngữ cảnh</h1>
+      {offered.length > 1 && (
+        <div className="mb-4">
+          <Segmented
+            label="Ngôn ngữ"
+            value={contextLang}
+            onChange={(value) => chooseLang(value as LearnLang)}
+            options={offered.map((lang) => ({ value: lang, label: LANG_INFO[lang].native }))}
+          />
+        </div>
+      )}
 
       <p className="page-lead mb-4">Chọn ít nhất 2 từ — từ đã lưu hoặc tự thêm — rồi tạo nội dung chứa các từ đó.</p>
 
@@ -148,7 +175,7 @@ export default function ContextPracticePage() {
                 type="button"
                 onClick={() => toggle(word)}
                 aria-pressed={selected.has(word)}
-                className={`chip font-en ${selected.has(word) ? "chip-on" : ""}`}
+                lang={LANG_INFO[contextLang].htmlLang} className={`chip ${contextLang === "en" ? "font-en" : "font-sans"} ${selected.has(word) ? "chip-on" : ""}`}
               >
                 {word}
               </button>
@@ -175,7 +202,7 @@ export default function ContextPracticePage() {
         )}
         {filtered.map((w) => (
           <button key={w} onClick={() => toggle(w)}
-            aria-pressed={selected.has(w)} className={`chip font-en ${selected.has(w) ? "chip-on" : ""}`}>
+            aria-pressed={selected.has(w)} lang={LANG_INFO[contextLang].htmlLang} className={`chip ${contextLang === "en" ? "font-en" : "font-sans"} ${selected.has(w) ? "chip-on" : ""}`}>
             {w}
           </button>
         ))}
@@ -201,7 +228,7 @@ export default function ContextPracticePage() {
       </button>
 
       {result && (
-        <div className="postcard whitespace-pre-wrap px-6 py-6 font-en text-lg leading-relaxed">
+        <div lang={LANG_INFO[contextLang].htmlLang} className={`postcard whitespace-pre-wrap px-6 py-6 ${contextLang === "en" ? "font-en" : "font-sans"} text-lg leading-relaxed`}>
           {renderWithBold(result)}
         </div>
       )}
