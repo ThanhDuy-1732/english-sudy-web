@@ -6,7 +6,7 @@ import type { Scenario, ConversationTurn } from "@/lib/speech/types";
 import { saveLearnedWord } from "@/lib/storage";
 import { startSession, finishSession, cancelSession } from "@/lib/sessions";
 import { saveSpeaking } from "@/lib/speech/speaking-storage";
-import { LANG_INFO, type LearnLang } from "@/lib/languages";
+import { LANG_INFO, languagePhrase, type LearnLang } from "@/lib/languages";
 import { useLearningLanguages } from "@/lib/useLearningLanguages";
 import Segmented from "@/components/Segmented";
 
@@ -299,7 +299,7 @@ export default function RoleplayPage() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
-          placeholder={lang === "en" ? "Nhập tin nhắn (Enter để gửi)" : `Nhập tin nhắn bằng ${LANG_INFO[lang].label.toLowerCase()} (Enter để gửi)`}
+          placeholder={lang === "en" ? "Nhập tin nhắn (Enter để gửi)" : `Nhập tin nhắn bằng ${languagePhrase(lang)} (Enter để gửi)`}
           lang={LANG_INFO[lang].htmlLang}
           disabled={loading}
         />

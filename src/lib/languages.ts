@@ -12,6 +12,11 @@ export const LANG_INFO: Record<LearnLang, { label: string; native: string; short
   ko: { label: "Tiếng Hàn", native: "한국어", short: "한", voice: "ko-KR", htmlLang: "ko", reading: "romanization" },
 };
 
+/** "tiếng Hàn" mid-sentence: only "Tiếng" is lowercased, the language name keeps its capital. */
+export function languagePhrase(lang: LearnLang): string {
+  return LANG_INFO[lang].label.replace(/^Tiếng/, "tiếng");
+}
+
 export const LEARNING_LANGUAGES_KEY = "learningLanguages";
 export const LEARNING_LANGUAGES_EVENT = "learning-languages";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { LANG_INFO, type LearnLang } from "@/lib/languages";
+import { LANG_INFO, languagePhrase, type LearnLang } from "@/lib/languages";
 import { useApiFetch } from "@/lib/useApiFetch";
 
 interface Props { word: string; lang?: LearnLang }
@@ -28,7 +28,7 @@ export default function WritingChallenge({ word, lang = "en" }: Props) {
   const scoreColor = !result ? "" : result.score >= 8 ? "text-ok" : result.score >= 5 ? "text-warn" : "text-margin";
   return (
     <div className="mt-3 w-full space-y-2 text-left" onClick={(event) => event.stopPropagation()}>
-      <p className="text-sm text-muted">Viết câu {lang === "en" ? "" : `${LANG_INFO[lang].label.toLowerCase()} `}dùng từ <strong lang={LANG_INFO[lang].htmlLang}>{word}</strong>:</p>
+      <p className="text-sm text-muted">Viết câu {lang === "en" ? "" : `${languagePhrase(lang)} `}dùng từ <strong lang={LANG_INFO[lang].htmlLang}>{word}</strong>:</p>
       <textarea value={sentence} onChange={(event) => setSentence(event.target.value)} placeholder={lang === "en" ? `Ví dụ: I need to ${word}...` : `Viết một câu có từ ${word}...`} lang={LANG_INFO[lang].htmlLang} rows={2} className="field w-full resize-none text-sm" />
       <button type="button" onClick={handleGrade} disabled={loading || !sentence.trim()} className="btn btn-primary w-full">{loading ? "Đang chấm..." : "Chấm điểm"}</button>
       {error && <p className="text-sm text-margin" role="alert">{error}</p>}

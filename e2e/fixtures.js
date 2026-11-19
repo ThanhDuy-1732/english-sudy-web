@@ -32,7 +32,8 @@ function aiMocks(req, json, extra = {}) {
     "/api/generate-words": (req) => (/"langs"/.test(req.postData() || "") ? { concepts: CONCEPTS } : WORDS),
     "/api/generate-sentence": { sentence: "She greeted everyone with a warm smile at the meeting." },
     "/api/generate-synonyms": { synonyms: ["hello", "welcome"], antonyms: ["farewell"] },
-    "/api/generate-fillblank": { sentence: "I always ______ my neighbours." },
+    // Chinese practice gets a Chinese sentence with its reading and translation; English is unchanged.
+    "/api/generate-fillblank": (req) => (/"lang":"zh"/.test(req.postData() || "") ? { sentence: "我是_____。", reading: "wǒ shì _____.", translation: "Tôi là học sinh." } : { sentence: "I always ______ my neighbours." }),
     "/api/exam/generate-item": EXAM_ITEM,
     "/api/grammar-exercise": { type: "mcq", question: "She ______ to school every day.", options: ["go", "goes", "going", "gone"], answer: "goes" },
     ...extra,

@@ -1,4 +1,4 @@
-import { getLearningLanguages, langOf, setLearningLanguages } from "../languages";
+import { getLearningLanguages, langOf, languagePhrase, setLearningLanguages } from "../languages";
 
 beforeEach(() => localStorage.clear());
 
@@ -20,4 +20,9 @@ test("langOf", () => {
   expect(langOf({})).toBe("en");
   expect(langOf({ lang: "ja" })).toBe("ja");
   expect(langOf({ lang: "fr" })).toBe("en");
+});
+
+test("languagePhrase keeps the language name capitalized", () => {
+  expect(languagePhrase("ko")).toBe("tiếng Hàn");
+  expect(languagePhrase("zh")).toBe("tiếng Trung");
 });

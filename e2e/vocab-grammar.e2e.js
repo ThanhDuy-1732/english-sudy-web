@@ -36,6 +36,21 @@ scenario("generates English and Chinese words", async ({ browser, check }) => {
   check("saving plants both languages", saved.includes("en:greeting") && saved.includes("zh:问候"), saved.join(","));
 });
 
+scenario("practise a Chinese card: fill-blank and quiz", async ({ browser, check }) => {
+  const zh = (word, meaning, reading) => ({ word, meaning, reading, lang: "zh", example: "我是学生。", topic: "TOEIC", learnedAt: "2026-11-01T00:00:00.000Z", nextReviewAt: "2026-11-02T00:00:00.000Z" });
+  const seed = { ...baseSeed(), learningLanguages: ["en", "zh"], learnedWords: [zh("学生", "học sinh", "xuéshēng"), zh("老师", "giáo viên", "lǎoshī"), zh("朋友", "bạn bè", "péngyou"), zh("医生", "bác sĩ", "yīshēng")] };
+  const page = await newPage(browser, { seed, intercept: (req) => aiMocks(req, json) });
+  await openMode(page, "Điền từ");
+  check("Chinese fill-blank shows the reading", /wǒ shì/.test(await faceText(page)), await faceText(page));
+  await typeIn(page, "input", "学生 。"); await face(page, "[...f.querySelectorAll('button')].find(b=>b.innerText.trim()==='Kiểm tra')?.click()"); await sleep(600);
+  check("Chinese answer with a space and 。 is accepted", /Đúng rồi/.test(await faceText(page)), await faceText(page));
+  await goto(page, "/vocab/quiz"); await sleep(800);
+  await page.evaluate(() => [...document.querySelectorAll('[role="radio"]')].find((r) => r.innerText.trim() === "中文")?.click()); await sleep(200);
+  await clickText(page, "5"); await clickText(page, "Bắt đầu"); await sleep(600);
+  const question = await page.evaluate(() => document.querySelector("main .postcard p")?.innerText ?? "");
+  check("quiz asks a Chinese word", /^(学生|老师|朋友|医生)$/.test(question), question);
+});
+
 scenario("review study modes: fill-blank, write-sentence, dictation", async ({ browser, check }) => {
   const page = await newPage(browser, { seed: baseSeed(), intercept: (req) => aiMocks(req, json, { "/api/grade-sentence": { score: 10, feedback: "Câu đúng ngữ pháp và dùng từ đúng.", corrected: "I greet my teacher every morning." } }) });
   await openMode(page, "Điền từ");
