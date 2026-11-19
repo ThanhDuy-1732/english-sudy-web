@@ -8,6 +8,10 @@ import {
   markBankWordsSeen,
   normalizeWord,
   pickExcludeSample,
+  addConcepts,
+  countConcepts,
+  getUnseenConcepts,
+  markConceptsSeen,
   takeUnseen,
 } from "../word-bank";
 
@@ -134,4 +138,46 @@ test("pickExcludeSample cho chủ đề ngẫu nhiên lấy từ mọi chủ đ�
   localStorage.setItem("wordBank", JSON.stringify([bankWord("invoice", "TOEIC"), bankWord("greet", "Daily Communication"), bankWord("umbrella", "Random")]));
   expect(pickExcludeSample("Random").sort()).toEqual(["greet", "invoice", "umbrella"]);
   expect(pickExcludeSample("TOEIC")).toEqual(["invoice"]);
+});
+
+describe("languages and concepts", () => {
+  const zh = (word: string, extra: Record<string, unknown> = {}) => bankWord(word, "TOEIC", { lang: "zh", ...extra });
+
+  test("same characters in zh and ja are two entries", () => {
+    addBankWords([zh("学生"), bankWord("学生", "TOEIC", { lang: "ja" })]);
+    expect(getBank()).toHaveLength(2);
+    expect(getUnseen("TOEIC", 5, "ja").map((e) => e.word)).toEqual(["学生"]);
+    expect(getUnseen("TOEIC", 5)).toEqual([]);
+  });
+
+  test("getUnseenConcepts returns only complete concepts", () => {
+    addConcepts("TOEIC", [
+      { meaning: "hoá đơn", words: { en: { word: "invoice" }, zh: { word: "发票", reading: "fāpiào" } } },
+      { meaning: "hợp đồng", words: { en: { word: "contract" } } },
+    ]);
+    const concepts = getUnseenConcepts("TOEIC", ["en", "zh"], 5);
+    expect(concepts).toHaveLength(1);
+    expect(concepts[0].words.zh).toEqual({ word: "发票", reading: "fāpiào" });
+    expect(concepts[0].meaning).toBe("hoá đơn");
+    expect(countConcepts("TOEIC", ["en"])).toBe(2);
+  });
+
+  test("markConceptsSeen hides the concept", () => {
+    addConcepts("TOEIC", [{ meaning: "hoá đơn", words: { en: { word: "invoice" }, zh: { word: "发票" } } }]);
+    markConceptsSeen(getUnseenConcepts("TOEIC", ["en", "zh"], 5));
+    expect(countConcepts("TOEIC", ["en", "zh"])).toBe(0);
+  });
+
+  test("pickExcludeSample filters by language", () => {
+    addBankWords([bankWord("invoice"), zh("发票")]);
+    expect(pickExcludeSample("TOEIC", 200, "zh")).toEqual(["发票"]);
+    expect(pickExcludeSample("TOEIC")).toEqual(["invoice"]);
+  });
+
+  test("a learned zh word hides only the zh bank entry", () => {
+    addBankWords([zh("学生"), bankWord("学生", "TOEIC", { lang: "ja" })]);
+    localStorage.setItem("learnedWords", JSON.stringify([{ word: "学生", lang: "zh" }]));
+    expect(countBank("TOEIC", "zh")).toBe(0);
+    expect(countBank("TOEIC", "ja")).toBe(1);
+  });
 });

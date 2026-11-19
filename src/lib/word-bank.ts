@@ -1,5 +1,6 @@
 import { readStored } from "./safe-json";
-import { getLearnedWords } from "./storage";
+import { getLearnedWords, wordKey } from "./storage";
+import { langOf, type LearnLang } from "./languages";
 import { RANDOM_TOPIC } from "./topics";
 
 export interface BankWord {
@@ -8,7 +9,19 @@ export interface BankWord {
   topic: string;
   createdAt: string;
   seenAt?: string;
+  lang?: LearnLang;            // missing = English
+  reading?: string;
+  conceptId?: string;          // words with the same meaning in other languages share it
 }
+
+/** One meaning with a word per language, generated together. */
+export interface Concept {
+  conceptId: string;
+  meaning: string;
+  words: Partial<Record<LearnLang, { word: string; reading?: string }>>;
+}
+
+const keyOf = (entry: { word: string; lang?: string }) => wordKey(langOf(entry), normalizeWord(entry.word));
 
 export const WORD_BANK_KEY = "wordBank";
 export const WORD_BANK_LIMIT = 5000;
@@ -34,38 +47,38 @@ export function getBank(): BankWord[] {
   const merged = new Map<string, BankWord>();
   for (const entry of [...stored, ...(overlay ?? [])]) {
     if (!isValidEntry(entry)) continue;
-    const key = normalizeWord(entry.word);
-    if (!key) continue;
-    merged.set(key, entry);
+    if (!normalizeWord(entry.word)) continue;
+    merged.set(keyOf(entry), entry);
   }
   return [...merged.values()];
 }
 
-function learnedWordsList(): { word: string }[] {
+function learnedWordsList(): { word: string; lang?: string }[] {
   return getLearnedWords().filter((entry) => typeof entry?.word === "string");
 }
 
-function learnedNormalized(): Set<string> {
-  return new Set(learnedWordsList().map((entry) => normalizeWord(entry.word)));
+/** Learned words as language keys. */
+function learnedKeys(): Set<string> {
+  return new Set(learnedWordsList().map(keyOf));
 }
 
 export function getKnownWordSet(): Set<string> {
   const known = new Set(getBank().map((entry) => normalizeWord(entry.word)));
-  for (const word of learnedNormalized()) known.add(word);
+  for (const entry of learnedWordsList()) known.add(normalizeWord(entry.word));
   return known;
 }
 
 export function addBankWords(entries: BankWord[]): { added: number; persisted: boolean } {
   const bank = getBank();
-  const known = new Set(bank.map((entry) => normalizeWord(entry.word)));
-  for (const word of learnedNormalized()) known.add(word);
+  const known = new Set(bank.map(keyOf));
+  for (const key of learnedKeys()) known.add(key);
 
   const fresh: BankWord[] = [];
   for (const entry of entries) {
     if (!isValidEntry(entry)) continue;
     const word = entry.word.trim();
-    const key = normalizeWord(word);
-    if (!key || known.has(key)) continue;
+    const key = keyOf({ ...entry, word });
+    if (!normalizeWord(word) || known.has(key)) continue;
     known.add(key);
     fresh.push({ ...entry, word });
   }
@@ -83,23 +96,26 @@ export function addBankWords(entries: BankWord[]): { added: number; persisted: b
   }
 }
 
-export function getUnseen(topic: string, limit: number): BankWord[] {
-  const learned = learnedNormalized();
+export function getUnseen(topic: string, limit: number, lang: LearnLang = "en"): BankWord[] {
+  const learned = learnedKeys();
   return getBank()
     .filter(
       (entry) =>
-        !entry.seenAt && entry.topic === topic && !learned.has(normalizeWord(entry.word))
+        !entry.seenAt && entry.topic === topic && langOf(entry) === lang && !learned.has(keyOf(entry))
     )
     .sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt))
     .slice(0, limit);
 }
 
-export function markBankWordsSeen(words: string[]): void {
-  if (words.length === 0) return;
-  const keys = new Set(words.map(normalizeWord));
+export function markBankWordsSeen(words: string[], lang: LearnLang = "en"): void {
+  markSeen(new Set(words.map((word) => keyOf({ word, lang }))));
+}
+
+function markSeen(keys: Set<string>): void {
+  if (keys.size === 0) return;
   const now = new Date().toISOString();
   const next = getBank().map((entry) =>
-    !entry.seenAt && keys.has(normalizeWord(entry.word)) ? { ...entry, seenAt: now } : entry
+    !entry.seenAt && keys.has(keyOf(entry)) ? { ...entry, seenAt: now } : entry
   );
   try {
     localStorage.setItem(WORD_BANK_KEY, JSON.stringify(next));
@@ -115,24 +131,68 @@ export function takeUnseen(topic: string, limit: number): BankWord[] {
   return picked;
 }
 
-export function countBank(topic?: string): number {
-  const learned = learnedNormalized();
+export function countBank(topic?: string, lang: LearnLang = "en"): number {
+  const learned = learnedKeys();
   return getBank().filter(
     (entry) =>
       !entry.seenAt &&
       (!topic || entry.topic === topic) &&
-      !learned.has(normalizeWord(entry.word))
+      langOf(entry) === lang &&
+      !learned.has(keyOf(entry))
   ).length;
+}
+
+/** Unseen concepts of a topic that have a word, not yet learned, in every one of `langs`; oldest first. */
+export function getUnseenConcepts(topic: string, langs: LearnLang[], limit: number): Concept[] {
+  const learned = learnedKeys();
+  const groups = new Map<string, { createdAt: string; concept: Concept }>();
+  for (const entry of getBank()) {
+    if (!entry.conceptId || entry.seenAt || entry.topic !== topic || learned.has(keyOf(entry))) continue;
+    const group = groups.get(entry.conceptId) ?? { createdAt: entry.createdAt, concept: { conceptId: entry.conceptId, meaning: entry.meaning, words: {} } };
+    group.concept.words[langOf(entry)] = entry.reading ? { word: entry.word, reading: entry.reading } : { word: entry.word };
+    groups.set(entry.conceptId, group);
+  }
+  return [...groups.values()]
+    .filter(({ concept }) => langs.every((lang) => concept.words[lang]))
+    .sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt))
+    .slice(0, limit)
+    .map(({ concept }) => concept);
+}
+
+export function countConcepts(topic: string, langs: LearnLang[]): number {
+  return getUnseenConcepts(topic, langs, Number.MAX_SAFE_INTEGER).length;
+}
+
+/** Stores each concept as one bank word per language, linked by a fresh conceptId. */
+export function addConcepts(topic: string, concepts: Omit<Concept, "conceptId">[]): { added: number; persisted: boolean } {
+  const createdAt = new Date().toISOString();
+  const entries: BankWord[] = concepts.flatMap((concept) => {
+    const conceptId = crypto.randomUUID();
+    return (Object.entries(concept.words) as [LearnLang, { word: string; reading?: string }][]).map(([lang, item]) => ({
+      word: item.word,
+      meaning: concept.meaning,
+      topic,
+      createdAt,
+      lang,
+      conceptId,
+      ...(item.reading ? { reading: item.reading } : {}),
+    }));
+  });
+  return addBankWords(entries);
+}
+
+export function markConceptsSeen(concepts: Concept[]): void {
+  markSeen(new Set(concepts.flatMap((concept) => (Object.entries(concept.words) as [LearnLang, { word: string }][]).map(([lang, item]) => keyOf({ word: item.word, lang })))));
 }
 
 /**
  * Bounded sample for the model: the topic's newest words first (so repeats are
  * avoided immediately), then a random slice of older bank words and learned words.
  */
-export function pickExcludeSample(topic: string, max = DEFAULT_EXCLUDE_MAX): string[] {
+export function pickExcludeSample(topic: string, max = DEFAULT_EXCLUDE_MAX, lang: LearnLang = "en"): string[] {
   // Random has no theme of its own, so every topic's words count as already seen.
   const topicWords = getBank()
-    .filter((entry) => topic === RANDOM_TOPIC || entry.topic === topic)
+    .filter((entry) => langOf(entry) === lang && (topic === RANDOM_TOPIC || entry.topic === topic))
     .map((entry) => entry.word);
   const recentCount = Math.min(RECENT_EXCLUDE_COUNT, topicWords.length);
   const recent = topicWords.slice(topicWords.length - recentCount);
@@ -140,7 +200,7 @@ export function pickExcludeSample(topic: string, max = DEFAULT_EXCLUDE_MAX): str
 
   const used = new Set(recent.map(normalizeWord));
   const rest: string[] = [];
-  for (const word of [...older, ...learnedWordsList().map((entry) => entry.word)]) {
+  for (const word of [...older, ...learnedWordsList().filter((entry) => langOf(entry) === lang).map((entry) => entry.word)]) {
     const key = normalizeWord(word);
     if (!key || used.has(key)) continue;
     used.add(key);
