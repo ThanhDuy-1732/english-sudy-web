@@ -1,7 +1,8 @@
 "use client";
 
 import { topicLabel } from "@/lib/topics";
-import { useEffect, useRef, useState } from "react";
+import { LANG_INFO, langOf, type LearnLang } from "@/lib/languages";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { getProfile } from "@/lib/profile";
 import { saveLearnedWord, reviewWord, getLearnedWords, type LearnedWord } from "@/lib/storage";
 import { fsrs, fsrsStateOf, stabilityToMastery } from "@/lib/srs";
@@ -21,6 +22,8 @@ interface FlashcardProps {
   initialExample?: string;
   initialSynonymData?: { synonyms: string[]; antonyms: string[] };
   isReviewMode?: boolean;
+  lang?: LearnLang;
+  reading?: string;
   onReviewed?: (quality: 0 | 3 | 4 | 5) => void;
   onFlip?: () => void;
   /** Keyboard shortcuts for the active review card: Space/Enter flips, 1–4 grade (Quên, Khó, Được, Dễ). */
@@ -41,7 +44,18 @@ export default function Flashcard({
   onFlip,
   shortcuts = false,
   learned,
+  lang = "en",
+  reading,
 }: FlashcardProps) {
+  const english = lang === "en";
+  // Only non-English requests name the language, so English requests stay exactly as before.
+  const langBody = english ? {} : { lang };
+  // The same meaning saved in other languages (generated together), shown as a hint on the back.
+  const conceptId = learned?.conceptId;
+  const siblings = useMemo(
+    () => (conceptId ? getLearnedWords().filter((w) => w.conceptId === conceptId && langOf(w) !== lang) : []),
+    [conceptId, lang]
+  );
   const stage = growthStage(learned?.mastery);
   // What each grade would do, computed with the same FSRS step the review uses.
   const preview = (quality: 0 | 3 | 4 | 5) => {
@@ -61,6 +75,7 @@ export default function Flashcard({
     antonyms: string[];
   } | null>(initialSynonymData ?? null);
   const [mode, setMode] = useState<CardMode>("study");
+  const [exampleExtra, setExampleExtra] = useState<{ reading?: string; translation?: string } | null>(null);
   const [fillSentence, setFillSentence] = useState<string | null>(null);
   const [fillLoading, setFillLoading] = useState(false);
 
@@ -82,16 +97,17 @@ export default function Flashcard({
       setError(null);
       try {
         const requests: Promise<Response>[] = [];
-        if (needsSentence) requests.push(fetchWithProvider("/api/generate-sentence", { word }));
-        if (needsSynonyms) requests.push(fetchWithProvider("/api/generate-synonyms", { word }));
+        if (needsSentence) requests.push(fetchWithProvider("/api/generate-sentence", { word, ...langBody }));
+        if (needsSynonyms) requests.push(fetchWithProvider("/api/generate-synonyms", { word, ...langBody }));
         const results = await Promise.allSettled(requests);
         let requestIndex = 0;
 
         if (needsSentence) {
           const sentenceResult = results[requestIndex++];
           if (sentenceResult?.status === "rejected" || !sentenceResult?.value.ok) throw new Error();
-          const data = (await sentenceResult.value.json()) as { sentence: string };
+          const data = (await sentenceResult.value.json()) as { sentence: string; reading?: string; translation?: string };
           setExample(data.sentence);
+          if (!english) setExampleExtra({ reading: data.reading, translation: data.translation });
         }
         if (needsSynonyms) {
           const synonymsResult = results[requestIndex++];
@@ -146,6 +162,7 @@ export default function Flashcard({
       learnedAt: new Date().toISOString(),
       synonyms: synonymData?.synonyms,
       antonyms: synonymData?.antonyms,
+      ...(english ? {} : { lang, ...(reading ? { reading } : {}) }),
     });
     if (didSave) {
       setSaved(true);
@@ -153,7 +170,7 @@ export default function Flashcard({
   }
 
   function grade(quality: 0 | 3 | 4 | 5) {
-    reviewWord(word, quality);
+    reviewWord(word, quality, undefined, lang);
     onReviewed?.(quality);
   }
 
@@ -189,7 +206,7 @@ export default function Flashcard({
       {/* Pronunciation button floats on the front face, outside the front <button> to avoid nesting buttons */}
       {!flipped && !loading && (
         <div className="absolute bottom-4 right-4 z-10">
-          <PronunciationButton word={word} />
+          <PronunciationButton word={word} lang={lang} />
         </div>
       )}
 
@@ -211,9 +228,10 @@ export default function Flashcard({
         >
           <span className="pr-20 text-sm text-muted">{topicLabel(topic)}</span>
           <span className="stamp absolute right-3 top-3 h-[5.25rem] w-[4.5rem]"><span><Plant stage={stage} size={40} />{STAGE_NAMES[stage].toLowerCase()}</span></span>
-          <span className="mt-auto break-words font-en text-[2.5rem] font-semibold leading-tight tracking-tight text-ink [overflow-wrap:anywhere]">
+          <span lang={loading ? undefined : LANG_INFO[lang].htmlLang} className={`mt-auto break-words ${english ? "font-en" : "font-sans"} text-[2.5rem] font-semibold leading-tight tracking-tight text-ink [overflow-wrap:anywhere]`}>
             {loading ? <span className="text-xl font-normal text-muted">Đang tạo câu ví dụ...</span> : word}
           </span>
+          {!loading && reading && <span className="mt-0.5 text-base text-muted">{reading}</span>}
           {!loading && <span className="mb-auto mt-1 text-sm font-medium text-primary-text">Chạm để lật thẻ</span>}
           {error && (
             <span className="mt-3 text-center text-sm text-margin" role="alert">
@@ -227,17 +245,28 @@ export default function Flashcard({
           aria-hidden={!flipped}
           className="postcard absolute inset-0 flex flex-col gap-2 overflow-y-auto px-4 pb-4 pt-3 text-left [backface-visibility:hidden] [transform:rotateY(180deg)]"
         >
-          <div className="flex shrink-0 items-center"><div role="group" aria-label="Cách học thẻ này" className="flex w-full gap-0.5 rounded-full bg-paper p-1" onClick={(event) => event.stopPropagation()}>
+          {english && <div className="flex shrink-0 items-center"><div role="group" aria-label="Cách học thẻ này" className="flex w-full gap-0.5 rounded-full bg-paper p-1" onClick={(event) => event.stopPropagation()}>
             {(["study", "write", "fill", "dictation"] as CardMode[]).map((cardMode) => (
               <button key={cardMode} type="button" onClick={() => selectMode(cardMode)} aria-pressed={mode === cardMode} className={`min-h-9 flex-1 rounded-full px-1 text-xs font-medium transition-colors ${mode === cardMode ? "bg-card text-ink shadow-sm" : "text-muted hover:text-ink"}`}>
                 {cardMode === "study" ? "Nghĩa" : cardMode === "write" ? "Viết câu" : cardMode === "fill" ? "Điền từ" : "Nghe"}
               </button>
             ))}
-          </div></div>
+          </div></div>}
           {mode === "study" && <div className="px-1">
-            <p className="break-words font-en text-2xl font-semibold leading-tight text-ink [overflow-wrap:anywhere]">{word}</p>
+            <p lang={LANG_INFO[lang].htmlLang} className={`break-words ${english ? "font-en" : "font-sans"} text-2xl font-semibold leading-tight text-ink [overflow-wrap:anywhere]`}>{word}</p>
+            {reading && <p className="text-sm text-muted">{reading}</p>}
             <p className="mt-1 break-words text-lg font-semibold text-primary-text [overflow-wrap:anywhere]">{meaning}</p>
-            {example && <p className="mt-1 break-words font-en text-[15px] italic leading-relaxed text-ink [overflow-wrap:anywhere]">{example}</p>}
+            {example && <p lang={LANG_INFO[lang].htmlLang} className={`mt-1 break-words ${english ? "font-en italic" : "font-sans"} text-[15px] leading-relaxed text-ink [overflow-wrap:anywhere]`}>{example}</p>}
+            {exampleExtra?.reading && <p className="text-sm text-muted">{exampleExtra.reading}</p>}
+            {exampleExtra?.translation && <p className="text-sm text-muted">{exampleExtra.translation}</p>}
+            {siblings.length > 0 && (
+              <p className="mt-1 text-sm text-muted">
+                Cũng là:{" "}
+                {siblings.map((w, i) => (
+                  <span key={`${langOf(w)}:${w.word}`}>{i > 0 && " · "}{LANG_INFO[langOf(w)].short} <span lang={LANG_INFO[langOf(w)].htmlLang} className="font-medium text-ink">{w.word}</span></span>
+                ))}
+              </p>
+            )}
             {synonymData && <div className="text-sm leading-7 text-muted">{synonymData.synonyms.length > 0 && <p><span className="font-medium text-ink">Đồng nghĩa</span>{" "}<span className="font-en">{synonymData.synonyms.join(", ")}</span></p>}{synonymData.antonyms.length > 0 && <p><span className="font-medium text-ink">Trái nghĩa</span>{" "}<span className="font-en">{synonymData.antonyms.join(", ")}</span></p>}</div>}
           </div>}
           {mode === "write" && <WritingChallenge word={word} />}

@@ -156,3 +156,45 @@ test("review shortcuts: Space flips the active card and 3 grades it 'Được'",
   fireEvent.keyDown(window, { key: "3" });
   expect(onReviewed).toHaveBeenCalledWith(4);
 });
+
+describe("languages", () => {
+  const zhWord = { word: "学生", meaning: "học sinh", example: "", topic: "TOEIC", learnedAt: "2026-11-01T00:00:00.000Z", lang: "zh" as const, reading: "xuéshēng", conceptId: "c1" };
+
+  test("grading a zh card reviews the zh word", async () => {
+    const { reviewWord } = jest.requireMock("@/lib/storage") as { reviewWord: jest.Mock };
+    reviewWord.mockClear();
+    render(<Flashcard word="学生" meaning="học sinh" topic="TOEIC" lang="zh" reading="xuéshēng" initialExample="我是学生。" initialSynonymData={{ synonyms: [], antonyms: [] }} isReviewMode learned={zhWord} />);
+    fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của 学生" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Lật lại" })).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: /^Được/ }));
+    expect(reviewWord).toHaveBeenCalledWith("学生", 4, undefined, "zh");
+  });
+
+  test("non-English card hides typing modes and shows its reading", async () => {
+    render(<Flashcard word="学生" meaning="học sinh" topic="TOEIC" lang="zh" reading="xuéshēng" initialExample="我是学生。" initialSynonymData={{ synonyms: [], antonyms: [] }} />);
+    expect(screen.getAllByText("学生")[0]).toHaveAttribute("lang", "zh-CN");
+    expect(screen.getAllByText("xuéshēng").length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của 学生" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Lật lại" })).toBeInTheDocument());
+    expect(screen.queryByRole("button", { name: "Viết câu" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Điền từ" })).toBeNull();
+  });
+
+  test("shows sibling words of the same meaning", async () => {
+    (getLearnedWords as jest.Mock).mockReturnValueOnce([zhWord, { ...zhWord, word: "学生", lang: "ja", reading: "がくせい" }, { ...zhWord, word: "student", lang: "en", reading: undefined }]);
+    render(<Flashcard word="学生" meaning="học sinh" topic="TOEIC" lang="zh" initialExample="我是学生。" initialSynonymData={{ synonyms: [], antonyms: [] }} isReviewMode learned={zhWord} />);
+    fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của 学生" }));
+    await waitFor(() => expect(screen.getByText(/Cũng là/)).toBeInTheDocument());
+    expect(screen.getByText(/Cũng là/).textContent).toContain("student");
+    expect(screen.getByText(/Cũng là/).textContent).toContain("日");
+  });
+
+  test("english request bodies carry no lang", async () => {
+    (global.fetch as jest.Mock).mockClear();
+    render(<Flashcard word="greet" meaning="chào hỏi" topic="TOEIC" />);
+    fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của greet" }));
+    await waitFor(() => expect(global.fetch).toHaveBeenCalled());
+    const bodies = (global.fetch as jest.Mock).mock.calls.map((call) => String(call[1]?.body ?? ""));
+    expect(bodies.some((body) => body.includes('"lang"'))).toBe(false);
+  });
+});

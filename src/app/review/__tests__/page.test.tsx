@@ -79,3 +79,28 @@ test("flips a saved review card offline without requesting generated content", a
   expect(screen.getByText("bargain")).toBeInTheDocument();
   expect(global.fetch).not.toHaveBeenCalled();
 });
+
+test("language chips filter the queue", async () => {
+  localStorage.setItem("learningLanguages", JSON.stringify(["en", "zh"]));
+  localStorage.setItem("learnedWords", JSON.stringify([
+    { word: "apple", meaning: "táo", example: "", topic: "TOEIC", learnedAt: "2026-07-16T00:00:00.000Z", nextReviewAt: "2026-07-15T00:00:00.000Z" },
+    { word: "苹果", meaning: "táo", example: "", topic: "TOEIC", learnedAt: "2026-07-16T00:00:00.000Z", nextReviewAt: "2026-07-15T00:00:00.000Z", lang: "zh", reading: "píngguǒ" },
+    { word: "사과", meaning: "táo", example: "", topic: "TOEIC", learnedAt: "2026-07-16T00:00:00.000Z", nextReviewAt: "2026-07-15T00:00:00.000Z", lang: "ko" },
+  ]));
+  render(<ReviewPage />);
+  // Korean is not a learning language: off by default.
+  await waitFor(() => expect(screen.getByRole("button", { name: "Xem nghĩa của 苹果" })).toBeInTheDocument());
+  expect(screen.queryByRole("button", { name: "Xem nghĩa của 사과" })).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: /中文/ }));
+  expect(screen.queryByRole("button", { name: "Xem nghĩa của 苹果" })).toBeNull();
+  expect(screen.getByRole("button", { name: "Xem nghĩa của apple" })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: /한국어/ }));
+  expect(screen.getByRole("button", { name: "Xem nghĩa của 사과" })).toBeInTheDocument();
+});
+
+test("one language due: no chips", async () => {
+  seedReviewWords(["one"]);
+  render(<ReviewPage />);
+  await waitFor(() => expect(screen.getByRole("button", { name: "Xem nghĩa của one" })).toBeInTheDocument());
+  expect(screen.queryByRole("group", { name: "Ngôn ngữ cần ôn" })).toBeNull();
+});

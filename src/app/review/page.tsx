@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { getWordsForReview, type LearnedWord } from "@/lib/storage";
 import { startSession, finishSession, cancelSession } from "@/lib/sessions";
 import Flashcard from "@/components/Flashcard";
+import { LANG_INFO, LEARN_LANGS, getLearningLanguages, langOf, type LearnLang } from "@/lib/languages";
 
 interface ReviewSummary {
   total: number;
@@ -20,6 +21,9 @@ interface ReviewSummary {
 export default function ReviewPage() {
   const router = useRouter();
   const [words, setWords] = useState<LearnedWord[]>([]);
+  // Languages with due words, and which of them are being reviewed (learning languages first).
+  const [dueLangs, setDueLangs] = useState<LearnLang[]>([]);
+  const [active, setActive] = useState<LearnLang[]>([]);
   const [summary, setSummary] = useState<ReviewSummary | null>(null);
   const sessionIdRef = useRef<string | null>(null);
   const startTimeRef = useRef(0);
@@ -28,7 +32,12 @@ export default function ReviewPage() {
   useEffect(() => setShortcutsOn(getProfile().shortcutsEnabled), []);
 
   useEffect(() => {
-    const due = getWordsForReview();
+    const present = LEARN_LANGS.filter((lang) => getWordsForReview([lang]).length > 0);
+    const learning = getLearningLanguages().filter((lang) => present.includes(lang));
+    const chosen = learning.length > 0 ? learning : present;
+    const due = getWordsForReview(chosen);
+    setDueLangs(present);
+    setActive(chosen);
     setWords(due);
     if (due.length > 0 && !sessionIdRef.current) {
       sessionIdRef.current = startSession("review");
@@ -49,10 +58,12 @@ export default function ReviewPage() {
     else if (quality === 4) countsRef.current.good++;
     else countsRef.current.easy++;
 
-    const remaining = getWordsForReview();
+    const remaining = getWordsForReview(active);
     setWords(remaining);
     if (remaining.length === 0 && sessionIdRef.current) {
       const counts = countsRef.current;
+      // Chips can change the queue mid-session, so the total is what was actually graded.
+      counts.total = counts.again + counts.hard + counts.good + counts.easy;
       finishSession(sessionIdRef.current, {
         totalItems: counts.total,
         correctItems: counts.good + counts.easy,
@@ -126,12 +137,38 @@ export default function ReviewPage() {
           )}
           <RetentionNotice className="mt-4 max-w-2xl" />
         </div>
+        {dueLangs.length > 1 && (
+          <div role="group" aria-label="Ngôn ngữ cần ôn" className="-mt-4 mb-6 flex flex-wrap gap-2">
+            {dueLangs.map((lang) => {
+              const on = active.includes(lang);
+              return (
+                <button
+                  key={lang}
+                  type="button"
+                  aria-pressed={on}
+                  disabled={on && active.length === 1}
+                  onClick={() => {
+                    const next = on ? active.filter((item) => item !== lang) : LEARN_LANGS.filter((item) => item === lang || active.includes(item));
+                    setActive(next);
+                    setWords(getWordsForReview(next));
+                  }}
+                  className={`chip ${on ? "chip-on" : ""}`}
+                >
+                  <span lang={LANG_INFO[lang].htmlLang}>{LANG_INFO[lang].native}</span>
+                  <span className="ml-1.5 tabular-nums opacity-80">{getWordsForReview([lang]).length}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {words.map((w, index) => (
             <Flashcard
               shortcuts={index === 0}
-              key={w.word}
+              key={`${langOf(w)}:${w.word}`}
               word={w.word}
+              lang={langOf(w)}
+              reading={w.reading}
               meaning={w.meaning}
               topic={w.topic}
               initialExample={w.example}
