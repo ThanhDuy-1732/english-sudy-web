@@ -6,6 +6,9 @@ import type { Scenario, ConversationTurn } from "@/lib/speech/types";
 import { saveLearnedWord } from "@/lib/storage";
 import { startSession, finishSession, cancelSession } from "@/lib/sessions";
 import { saveSpeaking } from "@/lib/speech/speaking-storage";
+import { LANG_INFO, type LearnLang } from "@/lib/languages";
+import { useLearningLanguages } from "@/lib/useLearningLanguages";
+import Segmented from "@/components/Segmented";
 
 const SCENARIOS: Record<string, Scenario> = {
   hotel: {
@@ -76,6 +79,10 @@ export default function RoleplayPage() {
   const scenario = SCENARIOS[id];
 
   const [turns, setTurns] = useState<ConversationTurn[]>([]);
+  // The conversation's language is chosen before the first message and then stays fixed.
+  const [learning] = useLearningLanguages();
+  const [chosenLang, setChosenLang] = useState<LearnLang | null>(null);
+  const lang: LearnLang = chosenLang && learning.includes(chosenLang) ? chosenLang : learning.includes("en") ? "en" : learning[0];
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [goalAchieved, setGoalAchieved] = useState(false);
@@ -107,6 +114,7 @@ export default function RoleplayPage() {
     saveSpeaking({
       id: crypto.randomUUID(),
       mode: "roleplay",
+      ...(lang === "en" ? {} : { lang }),
       prompt: scenario?.goal ?? id,
       transcript: turns.map((t) => `${t.role}: ${t.text}`).join("\n"),
       durationSec: turns.length * 30,
@@ -140,7 +148,7 @@ export default function RoleplayPage() {
       const res = await fetch("/api/speak/roleplay", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ scenario, history: turns, userText }),
+        body: JSON.stringify({ scenario, history: turns, userText, ...(lang === "en" ? {} : { lang }) }),
       });
       const data = await res.json();
       if (!res.ok || typeof data.reply !== "string") throw new Error("roleplay failed");
@@ -150,6 +158,7 @@ export default function RoleplayPage() {
         {
           role: "ai",
           text: data.reply,
+          ...(typeof data.reading === "string" && data.reading ? { reading: data.reading } : {}),
           correction: data.correction ?? null,
         },
       ]);
@@ -243,6 +252,16 @@ export default function RoleplayPage() {
       </div>
 
       <div className="chat-area">
+        {turns.length === 0 && learning.length > 1 && (
+          <div className="lang-choice">
+            <Segmented
+              label="Ngôn ngữ"
+              value={lang}
+              onChange={(value) => setChosenLang(value as LearnLang)}
+              options={learning.map((code) => ({ value: code, label: LANG_INFO[code].native }))}
+            />
+          </div>
+        )}
         {turns.length === 0 && (
           <div className="intro-message postcard">
             <p>Bạn đang đóng vai: <strong>{scenario.userRole}</strong></p>
@@ -253,7 +272,8 @@ export default function RoleplayPage() {
         {turns.map((t, i) => (
           <div key={i} className={`turn ${t.role}`}>
             <div className="bubble">
-              <p>{t.text}</p>
+              <p lang={LANG_INFO[lang].htmlLang}>{t.text}</p>
+              {t.reading && <p className="reading-line">{t.reading}</p>}
               {t.correction && (
                 <details className="correction">
                   <summary>Xem sửa lỗi</summary>
@@ -279,7 +299,8 @@ export default function RoleplayPage() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
-          placeholder="Nhập tin nhắn (Enter để gửi)"
+          placeholder={lang === "en" ? "Nhập tin nhắn (Enter để gửi)" : `Nhập tin nhắn bằng ${LANG_INFO[lang].label.toLowerCase()} (Enter để gửi)`}
+          lang={LANG_INFO[lang].htmlLang}
           disabled={loading}
         />
         <button onClick={sendMessage} disabled={loading || !input.trim()}>
@@ -310,6 +331,8 @@ export default function RoleplayPage() {
         .turn.user .bubble { background: rgb(var(--primary)); color: white; border-bottom-right-radius: 4px; }
         .turn.ai .bubble { background: rgb(var(--rule)); color: rgb(var(--ink)); border-bottom-left-radius: 4px; }
         .bubble p { margin: 0; }
+        .reading-line { margin-top: 0.25rem !important; font-size: 0.8rem; opacity: 0.8; }
+        .lang-choice { display: flex; justify-content: center; }
         .bubble.loading { color: rgb(var(--muted)); font-style: italic; }
         .correction { margin-top: 0.5rem; }
         .correction summary { display: inline-flex; align-items: center; min-height: 32px; cursor: pointer; color: rgb(var(--primary-text)); font-size: 0.8rem; font-weight: 600; text-decoration: underline; list-style: none; }

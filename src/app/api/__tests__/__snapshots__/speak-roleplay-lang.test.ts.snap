@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`english prompt unchanged without lang 1`] = `
+"You are playing the role of: hotel receptionist
+The user is: guest checking in
+Goal for this conversation: check in early and request a late checkout
+
+
+Conversation history:
+(conversation just started)
+
+User's latest message: "Hi, I want check in early."
+
+Instructions:
+1. Reply in-character as hotel receptionist. Keep the conversation natural and help move toward the goal.
+2. If the user made a grammar/vocabulary error, note it in "correction" — ONLY if it's significant. Null if no error.
+3. "goalAchieved": true only if the goal "check in early and request a late checkout" has been clearly completed in the conversation.
+4. "suggestedReplies": 2-3 natural next things the user could say (in English, as the user role).
+
+Return ONLY JSON:
+{
+  "reply": "your in-character response",
+  "correction": {"original": "user's error", "fixed": "corrected version", "note": "brief grammar note"} or null,
+  "goalAchieved": false,
+  "suggestedReplies": ["option 1", "option 2", "option 3"]
+}"
+`;

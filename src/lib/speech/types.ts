@@ -58,6 +58,7 @@ export interface Scenario {
 export interface ConversationTurn {
   role: "user" | "ai";
   text: string;
+  reading?: string;            // AI reply's pinyin / kana / romanization
   audioId?: string;
   correction?: { original: string; fixed: string; note: string } | null;
 }
