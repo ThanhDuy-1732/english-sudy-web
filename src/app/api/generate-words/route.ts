@@ -1,4 +1,5 @@
-import { generateWords } from "@/lib/gemini";
+import { generateConcepts, generateWords } from "@/lib/gemini";
+import { LEARN_LANGS, type LearnLang } from "@/lib/languages";
 import { callTask } from "@/lib/ai-tasks";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -34,9 +35,15 @@ function sanitizeExclude(value: unknown): string[] {
   return words;
 }
 
+// Requested learning languages, in the app's fixed order; unknown codes are dropped.
+function sanitizeLangs(value: unknown): LearnLang[] {
+  return Array.isArray(value) ? LEARN_LANGS.filter((lang) => value.includes(lang)) : [];
+}
+
 export async function POST(req: NextRequest) {
-  const { topic, exclude, count, knownCount, provider, disabledProviders } = (await req.json()) as {
+  const { topic, exclude, count, knownCount, provider, disabledProviders, langs: rawLangs } = (await req.json()) as {
     topic?: string;
+    langs?: unknown;
     exclude?: unknown;
     count?: unknown;
     knownCount?: unknown;
@@ -48,6 +55,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "topic is required" }, { status: 400, headers: NO_STORE });
   }
 
+  // No langs, or English only: the original request and response, unchanged.
+  const langs = rawLangs === undefined ? ["en" as const] : sanitizeLangs(rawLangs);
+  if (langs.length === 0) {
+    return NextResponse.json({ error: "langs has no supported language" }, { status: 400, headers: NO_STORE });
+  }
+  const multi = !(langs.length === 1 && langs[0] === "en");
+
   try {
     let resolvedProviderId = "";
     const generateFn = async (prompt: string) => {
@@ -55,6 +69,21 @@ export async function POST(req: NextRequest) {
       resolvedProviderId = result.providerId;
       return result.text;
     };
+
+    if (multi) {
+      const byLang = (exclude && typeof exclude === "object" && !Array.isArray(exclude) ? exclude : {}) as Record<string, unknown>;
+      const perLang: Partial<Record<LearnLang, string[]>> = {};
+      for (const lang of langs) {
+        const list = sanitizeExclude(byLang[lang]);
+        if (list.length) perLang[lang] = list;
+      }
+      const concepts = await generateConcepts(topic, langs, generateFn, {
+        exclude: perLang,
+        count: clampInt(count, 1, MAX_WORDS, 5),
+        knownCount: clampInt(knownCount, 0, 100_000, 0),
+      });
+      return NextResponse.json({ concepts }, { headers: { ...NO_STORE, "X-Provider-Used": resolvedProviderId } });
+    }
 
     const words = await generateWords(topic, generateFn, {
       exclude: sanitizeExclude(exclude),

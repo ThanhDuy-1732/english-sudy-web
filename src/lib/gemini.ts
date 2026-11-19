@@ -1,5 +1,6 @@
 // src/lib/gemini.ts
 import { RANDOM_TOPIC } from "./topics";
+import { LANG_INFO, type LearnLang } from "./languages";
 export interface GeneratedWord {
   word: string;
   meaning: string;
@@ -144,6 +145,74 @@ export async function generateFillBlank(
   } catch {
     throw new Error(`Gemini returned invalid JSON for generateFillBlank: ${text.slice(0, 100)}`);
   }
+}
+
+export interface GeneratedConcept {
+  meaning: string;
+  words: Partial<Record<LearnLang, { word: string; reading?: string }>>;
+}
+
+const READING_HINT: Record<LearnLang, string> = {
+  en: "",
+  zh: ' "reading" is pinyin with tone marks.',
+  ja: ' "reading" is the kana reading (hiragana; katakana for loanwords).',
+  ko: ' "reading" is the Revised Romanization.',
+};
+
+/** Concepts whose every requested language has a word; other languages and malformed items are dropped. */
+export function parseConcepts(text: string, langs: LearnLang[]): GeneratedConcept[] {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(stripJsonCodeFence(text));
+  } catch {
+    throw new Error(`Gemini returned invalid JSON: ${text.slice(0, 100)}`);
+  }
+  if (!Array.isArray(raw)) return [];
+  const concepts: GeneratedConcept[] = [];
+  for (const item of raw) {
+    const meaning = typeof item?.meaning === "string" ? item.meaning.trim() : "";
+    if (!meaning || !item.words || typeof item.words !== "object") continue;
+    const words: GeneratedConcept["words"] = {};
+    for (const lang of langs) {
+      const entry = item.words[lang];
+      const word = typeof entry?.word === "string" ? entry.word.trim() : "";
+      if (!word) break;
+      const reading = lang !== "en" && typeof entry.reading === "string" && entry.reading.trim() ? entry.reading.trim() : undefined;
+      words[lang] = reading ? { word, reading } : { word };
+    }
+    if (langs.every((lang) => words[lang])) concepts.push({ meaning, words });
+  }
+  return concepts;
+}
+
+/** Words for several languages at once: one Vietnamese meaning per item, one word per language. */
+export async function generateConcepts(
+  topic: string,
+  langs: LearnLang[],
+  generateContentFn: GenerateFn,
+  options: { count?: number; exclude?: Partial<Record<LearnLang, string[]>>; knownCount?: number } = {}
+): Promise<GeneratedConcept[]> {
+  const count = options.count ?? 5;
+  const exclude = options.exclude ?? {};
+  const blocked = new Set(langs.flatMap((lang) => (exclude[lang] ?? []).map((word) => `${lang}:${word.trim().toLowerCase()}`)));
+  const subject =
+    topic === RANDOM_TOPIC
+      ? "useful vocabulary picked at random from many different everyday topics (each item from a different area of life; mix nouns, verbs and adjectives; no shared theme)"
+      : `vocabulary for the topic "${topic}"`;
+  const languageLines = langs
+    .map((lang) => `- ${lang}: ${LANG_INFO[lang].native === "中文" ? "Simplified Chinese" : LANG_INFO[lang].native}.${READING_HINT[lang]}`)
+    .join("\n");
+  const avoid = langs
+    .filter((lang) => exclude[lang]?.length)
+    .map((lang) => `${lang}: ${exclude[lang]!.join(", ")}`)
+    .join("\n");
+  const known = options.knownCount ? `\nThe learner already knows ${options.knownCount} items on this topic; prefer less common ones.` : "";
+  const prompt = `Generate ${count} ${subject}. Each item is one meaning given in these languages:\n${languageLines}\nGive the Vietnamese meaning once per item.${known}${avoid ? `\nDo NOT use these words, the learner has seen them:\n${avoid}` : ""}\nReturn ONLY a JSON array with no markdown: [{"meaning": "<Vietnamese>", "words": {${langs.map((lang) => `"${lang}": {"word": "..."${lang === "en" ? "" : ', "reading": "..."'}}`).join(", ")}}}]`;
+
+  const concepts = parseConcepts(await generateContentFn(prompt), langs);
+  return concepts
+    .filter((concept) => !langs.some((lang) => blocked.has(`${lang}:${concept.words[lang]!.word.toLowerCase()}`)))
+    .slice(0, count);
 }
 
 export async function generateWordsBatch(

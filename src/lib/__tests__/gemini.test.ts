@@ -7,6 +7,8 @@ import {
   generateFillBlank,
   generateWordsBatch,
   generateReading,
+  generateConcepts,
+  parseConcepts,
 } from "../gemini";
 
 const mockFn = jest.fn<Promise<string>, [string]>();
@@ -141,4 +143,35 @@ test("generateWords with the random topic asks for a mix of everyday topics, not
   const prompt = mockFn.mock.calls[0][0];
   expect(prompt).toContain("many different everyday topics");
   expect(prompt).not.toContain('topic "Random"');
+});
+
+// Several languages: concepts
+test("parseConcepts drops concepts missing a selected language", () => {
+  const text = JSON.stringify([
+    { meaning: "hoá đơn", words: { en: { word: "invoice" }, zh: { word: "发票", reading: "fāpiào" } } },
+    { meaning: "hợp đồng", words: { en: { word: "contract" } } },
+  ]);
+  expect(parseConcepts(text, ["en", "zh"])).toEqual([
+    { meaning: "hoá đơn", words: { en: { word: "invoice" }, zh: { word: "发票", reading: "fāpiào" } } },
+  ]);
+});
+
+test("parseConcepts keeps a missing reading as undefined and ignores unasked languages", () => {
+  const text = "```json\n" + JSON.stringify([{ meaning: "nước", words: { ja: { word: "水" }, ko: { word: "물", reading: "mul" } } }]) + "\n```";
+  expect(parseConcepts(text, ["ja"])).toEqual([{ meaning: "nước", words: { ja: { word: "水" } } }]);
+});
+
+test("generateConcepts prompt names each language and excludes per language", async () => {
+  mockFn.mockResolvedValue(JSON.stringify([{ meaning: "hoá đơn", words: { en: { word: "invoice" }, zh: { word: "发票", reading: "fāpiào" } } }]));
+  const concepts = await generateConcepts("TOEIC", ["en", "zh"], mockFn, { count: 1, exclude: { zh: ["合同"] } });
+  const prompt = mockFn.mock.calls[0][0];
+  expect(prompt).toContain("pinyin");
+  expect(prompt).toContain("合同");
+  expect(prompt).toContain("Simplified");
+  expect(concepts).toHaveLength(1);
+});
+
+test("generateConcepts drops a concept whose word was excluded", async () => {
+  mockFn.mockResolvedValue(JSON.stringify([{ meaning: "hợp đồng", words: { en: { word: "contract" }, zh: { word: "合同" } } }]));
+  expect(await generateConcepts("TOEIC", ["en", "zh"], mockFn, { count: 1, exclude: { zh: ["合同"] } })).toEqual([]);
 });

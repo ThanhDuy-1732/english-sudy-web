@@ -3,12 +3,16 @@
  */
 
 import { NextRequest } from "next/server";
-import { generateWords } from "@/lib/gemini";
+import { generateConcepts, generateWords } from "@/lib/gemini";
 import { POST } from "../generate-words/route";
 
 jest.mock("@/lib/gemini", () => ({
   generateWords: jest.fn().mockResolvedValue([{ word: "negotiate", meaning: "đàm phán" }]),
+  generateConcepts: jest.fn().mockResolvedValue([{ meaning: "hoá đơn", words: { en: { word: "invoice" }, zh: { word: "发票", reading: "fāpiào" } } }]),
 }));
+
+const mockGenerateConcepts = generateConcepts as jest.MockedFunction<typeof generateConcepts>;
+const post = (body: unknown) => POST(new NextRequest("http://localhost/api/generate-words", { method: "POST", body: JSON.stringify(body), headers: { "Content-Type": "application/json" } }));
 
 const mockGenerateWords = generateWords as jest.MockedFunction<typeof generateWords>;
 
@@ -142,4 +146,22 @@ test("returns 5xx with JSON error body when generateWords throws", async () => {
   expect(data).toEqual({
     error: "Không thể sinh từ mới lúc này. Vui lòng thử lại.",
   });
+});
+
+test("english-only request body is unchanged", async () => {
+  const res = await post({ topic: "TOEIC", langs: ["en"], count: 5 });
+  expect(await res.json()).toEqual([{ word: "negotiate", meaning: "đàm phán" }]);
+  expect(mockGenerateConcepts).not.toHaveBeenCalled();
+});
+
+test("langs en+zh returns concepts with per-language excludes", async () => {
+  const res = await post({ topic: "TOEIC", langs: ["en", "zh", "fr"], count: 20, exclude: { zh: ["合同", "合同"], en: "bad" } });
+  expect(res.status).toBe(200);
+  expect(await res.json()).toEqual({ concepts: [{ meaning: "hoá đơn", words: { en: { word: "invoice" }, zh: { word: "发票", reading: "fāpiào" } } }] });
+  expect(mockGenerateConcepts).toHaveBeenCalledWith("TOEIC", ["en", "zh"], expect.any(Function), { exclude: { zh: ["合同"] }, count: 20, knownCount: 0 });
+});
+
+test("invalid langs → 400", async () => {
+  const res = await post({ topic: "TOEIC", langs: ["fr"] });
+  expect(res.status).toBe(400);
 });
