@@ -93,8 +93,9 @@ export function importData(json: string): { imported: number; skipped: number } 
 type Item = Record<string, unknown>;
 
 const IDENTITY: Record<string, (item: Item) => string> = {
-  learnedWords: (x) => String(x.word),
-  wordBank: (x) => String(x.word).trim().toLowerCase(),
+  // Language plus word: entries without lang come from before multi-language and are English.
+  learnedWords: (x) => `${x.lang ?? "en"}:${String(x.word)}`,
+  wordBank: (x) => `${x.lang ?? "en"}:${String(x.word).trim().toLowerCase()}`,
   dailyChallenge: (x) => String(x.date),
   reportedQuestions: (x) => String(x.questionId),
   grammarBookmarks: (x) => `${x.topicId}:${x.subRuleId}`,

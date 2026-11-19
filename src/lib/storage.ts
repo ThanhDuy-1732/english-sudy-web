@@ -1,3 +1,4 @@
+import { langOf, type LearnLang } from "./languages";
 export interface LearnedWord {
   word: string;
   meaning: string;
@@ -10,6 +11,10 @@ export interface LearnedWord {
   mastery?: number;
   synonyms?: string[];
   antonyms?: string[];
+  // Language of the word; missing means English (words saved before multi-language)
+  lang?: LearnLang;
+  reading?: string;            // pinyin / kana / romanization for zh, ja, ko
+  conceptId?: string;          // same meaning in other languages, generated together
   // FSRS memory state (src/lib/srs.ts)
   stability?: number;          // days until recall drops to 90%
   difficulty?: number;         // 1–10
@@ -39,9 +44,15 @@ export function getLearnedWords(): LearnedWord[] {
   }
 }
 
+/** Identity of a saved or bank word: the same characters in two languages (学生 zh / ja) are different words. */
+export function wordKey(lang: LearnLang, word: string): string {
+  return `${lang}:${word.trim().toLowerCase()}`;
+}
+
 export function saveLearnedWord(entry: LearnedWord): boolean {
   const words = getLearnedWords();
-  if (words.some((w) => w.word.toLowerCase() === entry.word.toLowerCase())) return false;
+  const key = wordKey(langOf(entry), entry.word);
+  if (words.some((w) => wordKey(langOf(w), w.word) === key)) return false;
 
   const withDefaults: LearnedWord = touch({
     reviewInterval: 1,
@@ -53,8 +64,8 @@ export function saveLearnedWord(entry: LearnedWord): boolean {
   return true;
 }
 
-export function deleteLearnedWord(word: string): void {
-  const words = getLearnedWords().filter((entry) => entry.word !== word);
+export function deleteLearnedWord(word: string, lang: LearnLang = "en"): void {
+  const words = getLearnedWords().filter((entry) => !(entry.word === word && langOf(entry) === lang));
   localStorage.setItem(KEY, JSON.stringify(words));
 }
 
@@ -62,11 +73,11 @@ export function deleteLearnedWord(word: string): void {
  * Records a review with FSRS. quality: 0 = Quên, 3 = Khó, 4 = Được, 5 = Dễ.
  * Cards scheduled by the old SM-2 code are converted on their first FSRS review.
  */
-export function reviewWord(word: string, quality: 0 | 3 | 4 | 5, now = new Date()): void {
+export function reviewWord(word: string, quality: 0 | 3 | 4 | 5, now = new Date(), lang: LearnLang = "en"): void {
   // Lazy import keeps storage.ts free of a circular import with srs.ts (which imports the LearnedWord type).
   const { fsrs, fsrsStateOf, stabilityToMastery } = require("./srs") as typeof import("./srs");
   const words = getLearnedWords().map((w) => {
-    if (w.word !== word) return w;
+    if (w.word !== word || langOf(w) !== lang) return w;
     const next = fsrs(fsrsStateOf(w), quality, now);
     return touch({
       ...w,
@@ -81,7 +92,8 @@ export function reviewWord(word: string, quality: 0 | 3 | 4 | 5, now = new Date(
   localStorage.setItem(KEY, JSON.stringify(words));
 }
 
-export function getWordsForReview(): LearnedWord[] {
+/** Due words, in every language unless `langs` narrows it. */
+export function getWordsForReview(langs?: LearnLang[]): LearnedWord[] {
   const now = new Date().toISOString();
-  return getLearnedWords().filter((w) => (w.nextReviewAt ?? now) <= now);
+  return getLearnedWords().filter((w) => (w.nextReviewAt ?? now) <= now && (!langs || langs.includes(langOf(w))));
 }

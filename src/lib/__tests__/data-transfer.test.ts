@@ -160,6 +160,13 @@ describe("mergeData", () => {
     expect(merged.map((w: { word: string; meaning: string }) => `${w.word}:${w.meaning}`)).toEqual(["alpha:file", "beta:local", "gamma:file"]);
   });
 
+  it("old backup without lang merges as English", () => {
+    localStorage.setItem("learnedWords", JSON.stringify([{ ...word("apple", "2026-11-10T00:00:00.000Z"), lang: "en" }]));
+    mergeData(makeBackup({ learnedWords: JSON.stringify([word("apple", "2026-11-01T00:00:00.000Z"), { ...word("学生", "2026-11-01T00:00:00.000Z"), lang: "zh" }, { ...word("学生", "2026-11-01T00:00:00.000Z"), lang: "ja" }]) }));
+    const merged = JSON.parse(localStorage.getItem("learnedWords")!);
+    expect(merged.map((w: { word: string; lang?: string }) => `${w.lang ?? "en"}:${w.word}`)).toEqual(["en:apple", "zh:学生", "ja:学生"]);
+  });
+
   it("unions sessions newest-first, takes the larger study time per day and keeps local settings", () => {
     localStorage.setItem("learningSessions", JSON.stringify([{ id: "a", startedAt: "2026-11-10T00:00:00.000Z" }]));
     localStorage.setItem("studyTime", JSON.stringify({ "2026-11-10": 600, "2026-11-11": 100 }));
