@@ -6,6 +6,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { DueBadge } from "@/components/DueBadge";
 import { ProviderBadge } from "@/components/ProviderBadge";
 import HeaderTimer from "@/components/HeaderTimer";
+import LanguagePicker from "@/components/LanguagePicker";
 import Image from "next/image";
 
 type NavLink = { href: string; label: string };
@@ -114,6 +115,7 @@ export default function AppNavigation() {
         <Link href="/today" aria-label="ThankZ English, trang Hôm nay" className="mb-4 flex min-h-11 items-center gap-2.5 px-3 text-[1.45rem]">
           <Brand size={40} />
         </Link>
+        <div className="mb-3 px-1"><LanguagePicker /></div>
         <div className="flex-1 space-y-4 overflow-y-auto">
           {GROUPS.map((group, index) => (
             <div key={group.title ?? index}>
@@ -133,7 +135,7 @@ export default function AppNavigation() {
       {/* Phone top bar */}
       <header className="app-topbar sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-rule bg-paper/95 pb-2 backdrop-blur lg:hidden">
         <Link href="/today" aria-label="ThankZ English, trang Hôm nay" className="inline-flex min-h-11 items-center gap-2 text-xl"><Brand size={34} /></Link>
-        <HeaderTimer />
+        <div className="flex items-center gap-1"><LanguagePicker align="right" /><HeaderTimer /></div>
       </header>
 
       {/* Phone tab bar */}
