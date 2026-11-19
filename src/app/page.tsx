@@ -27,6 +27,7 @@ import {
 } from "@/lib/word-bank";
 import ConceptCard from "@/components/ConceptCard";
 import { useLearningLanguages } from "@/lib/useLearningLanguages";
+import { LANG_INFO, type LearnLang } from "@/lib/languages";
 
 interface Word {
   word: string;
@@ -36,6 +37,9 @@ interface Word {
 interface ReadingData {
   passage: string;
   questions: { question: string; options: string[]; answer: string }[];
+  lang?: LearnLang;
+  words?: string[];
+  translation?: string;
 }
 
 function parseReadingData(payload: unknown): ReadingData | null {
@@ -170,15 +174,20 @@ export default function HomePage() {
     setReadingData(null);
   }
 
-  async function handleReadingMode() {
-    if (words.length === 0 || readingLoading) return;
+  // Several languages: the reading passage is in one chosen language, made from that language's words on screen.
+  const conceptWords = (lang: LearnLang) => concepts.flatMap((concept) => (concept.words[lang] ? [concept.words[lang]!.word] : []));
+
+  async function handleReadingMode(lang: LearnLang = "en") {
+    const list = multi ? conceptWords(lang) : words.map((word) => word.word);
+    if (list.length === 0 || readingLoading) return;
     setReadingLoading(true);
     try {
-      const response = await fetchWithProvider("/api/generate-reading", { words: words.map((word) => word.word) });
+      const response = await fetchWithProvider("/api/generate-reading", { words: list, ...(lang === "en" ? {} : { lang }) });
       if (!response.ok) throw new Error();
-      const parsed = parseReadingData(await response.json());
+      const payload = (await response.json()) as { translation?: unknown };
+      const parsed = parseReadingData(payload);
       if (!parsed) throw new Error();
-      setReadingData(parsed);
+      setReadingData({ ...parsed, lang, words: list, translation: typeof payload.translation === "string" ? payload.translation : undefined });
     } catch {
       setError("Không thể tạo bài đọc lúc này. Vui lòng thử lại.");
     } finally { setReadingLoading(false); }
@@ -271,6 +280,24 @@ export default function HomePage() {
             ))}
           </div>
         )}
+        {multi && concepts.length > 0 && flippedCount >= 3 && (
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <button type="button" onClick={() => setQuizOpen(true)} className="btn btn-primary">Kiểm tra kiến thức</button>
+            <span className="text-sm text-muted">Đọc hiểu:</span>
+            {langs.map((lang) => (
+              <button key={lang} type="button" onClick={() => handleReadingMode(lang)} disabled={readingLoading} className="chip">
+                <span lang={LANG_INFO[lang].htmlLang}>{LANG_INFO[lang].native}</span>
+              </button>
+            ))}
+            {readingLoading && <span className="text-sm text-muted">Đang tạo bài đọc...</span>}
+          </div>
+        )}
+        {multi && quizOpen && (
+          <QuizMode
+            words={concepts.flatMap((concept) => (Object.entries(concept.words) as [LearnLang, { word: string }][]).map(([lang, item]) => ({ word: item.word, meaning: concept.meaning, lang })))}
+            onClose={() => setQuizOpen(false)}
+          />
+        )}
 
         {!multi && words.length > 0 && (
           <>
@@ -286,7 +313,7 @@ export default function HomePage() {
                 </button>
                 <button
                   type="button"
-                  onClick={handleReadingMode}
+                  onClick={() => handleReadingMode()}
                   disabled={readingLoading}
                   className="min-h-11 rounded-xl border border-rule bg-card px-6 font-medium text-ink transition-colors hover:border-primary disabled:opacity-50"
                 >
@@ -302,7 +329,7 @@ export default function HomePage() {
             )}
           </>
         )}
-        {readingData && <ReadingMode passage={readingData.passage} questions={readingData.questions} highlightWords={words.map((word) => word.word)} onClose={() => setReadingData(null)} />}
+        {readingData && <ReadingMode passage={readingData.passage} questions={readingData.questions} highlightWords={readingData.words ?? words.map((word) => word.word)} lang={readingData.lang} translation={readingData.translation} onClose={() => setReadingData(null)} />}
       </section>
     </main>
   );

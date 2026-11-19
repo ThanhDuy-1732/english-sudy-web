@@ -1,6 +1,9 @@
 "use client";
 
+import { LANG_INFO, type LearnLang } from "@/lib/languages";
+
 interface Props {
+  lang?: LearnLang;
   question: string;
   options: string[];
   correctAnswer: string;
@@ -8,7 +11,7 @@ interface Props {
   disabled?: boolean;
 }
 
-export default function QuizCard({ question, options, correctAnswer, onAnswer, disabled = false }: Props) {
+export default function QuizCard({ lang = "en", question, options, correctAnswer, onAnswer, disabled = false }: Props) {
   return (
     <div className="postcard px-5 py-6">
       <p className="mb-2 text-center text-sm text-muted">Nghĩa của từ nào là:</p>
@@ -20,7 +23,8 @@ export default function QuizCard({ question, options, correctAnswer, onAnswer, d
             type="button"
             disabled={disabled}
             onClick={() => onAnswer(opt === correctAnswer)}
-            className="choice justify-center font-en text-lg font-medium disabled:cursor-not-allowed disabled:opacity-60"
+            lang={LANG_INFO[lang].htmlLang}
+            className={`choice justify-center ${lang === "en" ? "font-en" : "font-sans"} text-lg font-medium disabled:cursor-not-allowed disabled:opacity-60`}
           >
             {opt}
           </button>

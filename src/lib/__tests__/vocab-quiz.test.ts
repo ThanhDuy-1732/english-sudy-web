@@ -1,9 +1,18 @@
-import { buildMCQ, quizWords } from "../vocab-quiz";
+import { buildMCQ, quizLanguages, quizWords } from "../vocab-quiz";
 
 const w = (word: string, meaning: string, lang?: "en" | "zh") => ({ word, meaning, example: "", topic: "TOEIC", learnedAt: "2026-11-01T00:00:00.000Z", ...(lang ? { lang } : {}) });
 
-test("quizWords keeps only English words until per-language quizzes exist", () => {
-  expect(quizWords([w("student", "học sinh"), w("学生", "học sinh", "zh"), w("apple", "táo", "en")]).map((x) => x.word)).toEqual(["student", "apple"]);
+test("quizWords filters by language (English by default)", () => {
+  const all = [w("student", "học sinh"), w("学生", "học sinh", "zh"), w("apple", "táo", "en")];
+  expect(quizWords(all).map((x) => x.word)).toEqual(["student", "apple"]);
+  expect(quizWords(all, "zh").map((x) => x.word)).toEqual(["学生"]);
+});
+
+test("quizLanguages needs 4 words in a learning language (languages without saved words are not offered)", () => {
+  const zh = ["一", "二", "三", "四"].map((x) => w(x, x, "zh"));
+  const en = ["a", "b", "c"].map((x) => w(x, x));
+  expect(quizLanguages([...zh, ...en], ["en", "zh", "ja"])).toEqual(["zh"]);
+  expect(quizLanguages([...zh, ...en, w("d", "d")], ["en", "zh"])).toEqual(["en", "zh"]);
 });
 
 test("buildMCQ never offers the answer's meaning twice", () => {

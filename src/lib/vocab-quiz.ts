@@ -1,11 +1,16 @@
-import { langOf } from "./languages";
+import { LEARN_LANGS, langOf, type LearnLang } from "./languages";
 import type { LearnedWord } from "./storage";
 
 export interface MCQQuestion { type: "mcq"; word: string; meaning: string; options: string[]; answer: string }
 
-/** The vocabulary quiz is English-only until per-language quizzes (phase 2): its prompts and fill mode assume English. */
-export function quizWords(words: LearnedWord[]): LearnedWord[] {
-  return words.filter((w) => langOf(w) === "en");
+/** A quiz runs in one language: questions and distractors all come from that language's saved words. */
+export function quizWords(words: LearnedWord[], lang: LearnLang = "en"): LearnedWord[] {
+  return words.filter((w) => langOf(w) === lang);
+}
+
+/** Learning languages with enough saved words (4: one answer and three distractors) to run a quiz, in app order. */
+export function quizLanguages(words: LearnedWord[], learning: LearnLang[]): LearnLang[] {
+  return LEARN_LANGS.filter((lang) => learning.includes(lang) && quizWords(words, lang).length >= 4);
 }
 
 /** Meaning question with up to 3 distractors; each option appears once, so a word sharing the answer's meaning can't be a second right answer. */

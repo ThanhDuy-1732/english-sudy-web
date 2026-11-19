@@ -3,7 +3,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { getLearnedWords, type LearnedWord } from "@/lib/storage";
-import { buildMCQ, quizWords, type MCQQuestion } from "@/lib/vocab-quiz";
+import { buildMCQ, quizLanguages, quizWords, type MCQQuestion } from "@/lib/vocab-quiz";
+import { answersMatch } from "@/lib/answer-match";
+import { LANG_INFO, type LearnLang } from "@/lib/languages";
+import { useLearningLanguages } from "@/lib/useLearningLanguages";
+import Segmented from "@/components/Segmented";
 import { startSession, finishSession } from "@/lib/sessions";
 
 type QuizMode = "meaning" | "fill";
@@ -21,12 +25,24 @@ export default function VocabQuizPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const [results, setResults] = useState<{ correct: boolean }[]>([]);
-  const [allWords, setAllWords] = useState<LearnedWord[]>([]);
+  const [saved, setSaved] = useState<LearnedWord[]>([]);
+  const [learning] = useLearningLanguages();
+  const [chosenLang, setChosenLang] = useState<LearnLang | null>(null);
   const sessionIdRef = { current: "" };
 
   useEffect(() => {
-    setAllWords(quizWords(getLearnedWords()));
+    setSaved(getLearnedWords());
   }, []);
+
+  // Languages with enough words to quiz; English stays the default when it's one of them.
+  const offered = quizLanguages(saved, learning);
+  const quizLang: LearnLang = chosenLang && offered.includes(chosenLang) ? chosenLang : offered.includes("en") ? "en" : offered[0] ?? "en";
+  const allWords = quizWords(saved, quizLang);
+  const readingOf = (word: string) => allWords.find((w) => w.word === word)?.reading;
+  const matches = (a: string, b: string) => answersMatch(a, b, quizLang);
+  // English keeps its word-boundary match; Chinese/Japanese/Korean words are blanked as plain substrings.
+  const blankOut = (sentence: string, word: string) =>
+    quizLang === "en" ? sentence.replace(new RegExp(`\\b${word}\\b`, "i"), "______") : sentence.split(word).join("______");
 
   function startQuiz() {
     const pool = [...allWords].sort(() => Math.random() - 0.5).slice(0, count);
@@ -56,7 +72,7 @@ export default function VocabQuizPage() {
       const res = await fetch("/api/generate-fillblank", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ word }),
+        body: JSON.stringify({ word, ...(quizLang === "en" ? {} : { lang: quizLang }) }),
       });
       const data = await res.json() as { sentence?: string };
       setQuestions((prev) => prev.map((q, i) =>
@@ -83,13 +99,12 @@ export default function VocabQuizPage() {
     if (selected !== null) return;
     setSelected(answer);
     const q = questions[currentIdx];
-    const correct = answer.trim().toLowerCase() === q.answer.trim().toLowerCase();
+    const correct = matches(answer, q.answer);
     setResults((prev) => [...prev, { correct }]);
   }
 
   function handleNext() {
-    const lastCorrect = selected !== null &&
-      selected.trim().toLowerCase() === questions[currentIdx].answer.trim().toLowerCase();
+    const lastCorrect = selected !== null && matches(selected, questions[currentIdx].answer);
     if (currentIdx + 1 >= questions.length) {
       finishSession(sessionIdRef.current, {
         totalItems: results.length + 1,
@@ -108,6 +123,14 @@ export default function VocabQuizPage() {
       <main className="page">
         <h1 className="page-title mb-6">Quiz Từ vựng</h1>
         <div className="space-y-4">
+          {offered.length > 1 && (
+            <Segmented
+              label="Ngôn ngữ"
+              value={quizLang}
+              onChange={(value) => setChosenLang(value as LearnLang)}
+              options={offered.map((lang) => ({ value: lang, label: LANG_INFO[lang].native }))}
+            />
+          )}
           <div>
             <p className="mb-2 text-sm font-medium text-muted">Chế độ</p>
             <div className="flex gap-2 flex-wrap">
@@ -170,7 +193,7 @@ export default function VocabQuizPage() {
 
       {q.type === "mcq" && (
         <>
-          <div className="postcard mb-6 px-6 py-10 text-center"><p className="break-words font-en text-[2.25rem] font-semibold leading-tight">{q.word}</p></div>
+          <div className="postcard mb-6 px-6 py-10 text-center"><p lang={LANG_INFO[quizLang].htmlLang} className={`break-words ${quizLang === "en" ? "font-en" : "font-sans"} text-[2.25rem] font-semibold leading-tight`}>{q.word}</p>{readingOf(q.word) && <p className="mt-1 text-muted">{readingOf(q.word)}</p>}</div>
           <div className="space-y-2">
             {q.options.map((opt) => {
               const cls = `choice ${selected === null ? "" : opt === q.answer ? "choice-right" : opt === selected ? "choice-wrong" : "choice-dim"}`;
@@ -190,7 +213,7 @@ export default function VocabQuizPage() {
             <p className="py-8 text-center text-muted">Đang tạo câu hỏi...</p>
           ) : (
             <>
-              <p className="postcard mb-4 px-6 py-8 font-en text-xl leading-relaxed">{q.sentence.replace(new RegExp(`\\b${q.word}\\b`, "i"), "______")}</p>
+              <p lang={LANG_INFO[quizLang].htmlLang} className={`postcard mb-4 px-6 py-8 ${quizLang === "en" ? "font-en" : "font-sans"} text-xl leading-relaxed`}>{blankOut(q.sentence, q.word)}</p>
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -201,8 +224,8 @@ export default function VocabQuizPage() {
                 autoFocus
               />
               {selected !== null && (
-                <p className={`text-sm mt-2 ${input.toLowerCase() === q.answer.toLowerCase() ? "font-medium text-ok" : "font-medium text-margin"}`}>
-                  {input.toLowerCase() === q.answer.toLowerCase() ? "Đúng!" : `Đáp án: ${q.answer}`}
+                <p className={`text-sm mt-2 ${matches(input, q.answer) ? "font-medium text-ok" : "font-medium text-margin"}`}>
+                  {matches(input, q.answer) ? "Đúng!" : `Đáp án: ${q.answer}`}
                 </p>
               )}
             </>

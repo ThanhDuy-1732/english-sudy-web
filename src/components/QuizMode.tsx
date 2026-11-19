@@ -2,11 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getLearnedWords } from "@/lib/storage";
+import { langOf, type LearnLang } from "@/lib/languages";
 import QuizCard from "./QuizCard";
 
 interface WordPair {
   word: string;
   meaning: string;
+  lang?: LearnLang;
 }
 
 interface Props {
@@ -18,19 +20,21 @@ function shuffle<T>(arr: T[]): T[] {
   return [...arr].sort(() => Math.random() - 0.5);
 }
 
-function buildOptions(correct: string, allWords: WordPair[]): string[] {
+/** Distractors come from words of the question's own language, so another script can't give the answer away. */
+function buildOptions(correct: WordPair, allWords: WordPair[]): string[] {
+  const lang = langOf(correct);
   const distractors = shuffle(
-    allWords.filter((w) => w.word.toLowerCase() !== correct.toLowerCase()),
+    allWords.filter((w) => langOf(w) === lang && w.word.toLowerCase() !== correct.word.toLowerCase()),
   ).slice(0, 3);
-  return shuffle([correct, ...distractors.map((w) => w.word)]);
+  return shuffle([correct.word, ...distractors.map((w) => w.word)]);
 }
 
 export default function QuizMode({ words, onClose }: Props) {
   const [history] = useState(() => getLearnedWords());
   const allWords = useMemo(() => {
     const unique = new Map<string, WordPair>();
-    [...words, ...history.map((w) => ({ word: w.word, meaning: w.meaning }))].forEach((entry) => {
-      const key = entry.word.toLowerCase();
+    [...words, ...history.map((w) => ({ word: w.word, meaning: w.meaning, lang: langOf(w) }))].forEach((entry) => {
+      const key = `${langOf(entry)}:${entry.word.toLowerCase()}`;
       if (!unique.has(key)) unique.set(key, entry);
     });
     return Array.from(unique.values());
@@ -46,7 +50,7 @@ export default function QuizMode({ words, onClose }: Props) {
 
   const current = words[index];
   const options = useMemo(
-    () => (current ? buildOptions(current.word, allWords) : []),
+    () => (current ? buildOptions(current, allWords) : []),
     [allWords, current],
   );
 
@@ -120,6 +124,7 @@ export default function QuizMode({ words, onClose }: Props) {
           </div>
         )}
         <QuizCard
+          lang={langOf(current)}
           question={current.meaning}
           options={options}
           correctAnswer={current.word}
