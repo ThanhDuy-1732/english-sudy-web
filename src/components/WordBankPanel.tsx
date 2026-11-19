@@ -2,19 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { useWordJob } from "@/contexts/WordJobContext";
-import { countBank } from "@/lib/word-bank";
+import { countAvailable, isEnglishOnly } from "@/lib/word-bank";
+import type { LearnLang } from "@/lib/languages";
 
 const FORMAT = new Intl.NumberFormat("vi-VN");
 const TARGETS = [100, 300, 1000];
 
-export function WordBankPanel({ topic }: { topic: string }) {
+export function WordBankPanel({ topic, langs = ["en"] }: { topic: string; langs?: LearnLang[] }) {
   const { job, count, isOwner, startJob } = useWordJob();
   const [target, setTarget] = useState(1000);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
-  const available = mounted ? countBank(topic) : 0;
+  const available = mounted ? countAvailable(topic, langs) : 0;
+  // Several languages count meanings: one meaning is a word in each language.
+  const unit = isEnglishOnly(langs) ? "từ" : "nghĩa";
   const busy = Boolean(job && job.status === "running" && (!isOwner || job.topic !== topic));
   const done = job?.topic === topic && job.status === "done";
   const paused = job?.topic === topic && job.status === "paused";
@@ -27,7 +30,7 @@ export function WordBankPanel({ topic }: { topic: string }) {
       <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
         <p className="text-sm text-muted">
           Ngân hàng:{" "}
-          <span className="font-semibold tabular-nums text-ink">{FORMAT.format(available)}</span> từ chưa
+          <span className="font-semibold tabular-nums text-ink">{FORMAT.format(available)}</span> {unit} chưa
           học cho chủ đề này.
         </p>
 
@@ -49,7 +52,7 @@ export function WordBankPanel({ topic }: { topic: string }) {
           ))}
           <button
             type="button"
-            onClick={() => startJob(topic, target)}
+            onClick={() => startJob(topic, target, langs)}
             disabled={busy}
             className="btn btn-primary px-4 text-sm disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -65,12 +68,12 @@ export function WordBankPanel({ topic }: { topic: string }) {
       )}
       {done && (
         <p className="mt-2 text-sm text-ok">
-          Đã đủ {FORMAT.format(job.target)} từ cho chủ đề này.
+          Đã đủ {FORMAT.format(job.target)} {unit} cho chủ đề này.
         </p>
       )}
       {paused && (
         <p className="mt-2 text-sm text-muted">
-          Đang có {FORMAT.format(count)}/{FORMAT.format(job.target)} từ — dùng “Chạy tiếp” ở thanh trên.
+          Đang có {FORMAT.format(count)}/{FORMAT.format(job.target)} {unit} — dùng “Chạy tiếp” ở thanh trên.
           {job.lastError ? ` ${job.lastError}` : ""}
         </p>
       )}

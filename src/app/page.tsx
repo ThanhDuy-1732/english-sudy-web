@@ -13,12 +13,20 @@ import { useApiFetch } from "@/lib/useApiFetch";
 import { WordBankPanel } from "@/components/WordBankPanel";
 import {
   addBankWords,
+  addConcepts,
   countBank,
+  countConcepts,
   getUnseen,
+  getUnseenConcepts,
+  isEnglishOnly,
   markBankWordsSeen,
+  markConceptsSeen,
   pickExcludeSample,
   takeUnseen,
+  type Concept,
 } from "@/lib/word-bank";
+import ConceptCard from "@/components/ConceptCard";
+import { useLearningLanguages } from "@/lib/useLearningLanguages";
 
 interface Word {
   word: string;
@@ -42,6 +50,11 @@ export default function HomePage() {
   const { fetchWithProvider } = useApiFetch();
   const [topic, setTopic] = useState("Daily Communication");
   const [words, setWords] = useState<Word[]>([]);
+  const [langs] = useLearningLanguages();
+  const multi = !isEnglishOnly(langs);
+  // Several languages: one card per meaning, a word per language.
+  const [concepts, setConcepts] = useState<Concept[]>([]);
+  const cardCount = multi ? concepts.length : words.length;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [flippedCount, setFlippedCount] = useState(0);
@@ -50,7 +63,7 @@ export default function HomePage() {
   const [readingLoading, setReadingLoading] = useState(false);
   const [dailyCompleted, setDailyCompleted] = useState(false);
   const [streak, setStreak] = useState(0);
-  const progress = words.length > 0 ? Math.round((flippedCount / words.length) * 100) : 0;
+  const progress = cardCount > 0 ? Math.round((flippedCount / cardCount) * 100) : 0;
 
   useEffect(() => {
     const challenge = getDailyChallenge();
@@ -58,12 +71,54 @@ export default function HomePage() {
     setStreak(getStreak());
   }, []);
 
+  // A different set of languages makes the cards on screen stale.
+  useEffect(() => {
+    setWords([]);
+    setConcepts([]);
+    setFlippedCount(0);
+  }, [langs]);
+
+  async function generateConcepts() {
+    const ready = getUnseenConcepts(topic, langs, 5);
+    if (ready.length === 5) {
+      markConceptsSeen(ready);
+      setConcepts(ready);
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetchWithProvider("/api/generate-words", {
+        topic,
+        langs,
+        exclude: Object.fromEntries(langs.map((lang) => [lang, pickExcludeSample(topic, 200, lang)])),
+        count: 20,
+        knownCount: countConcepts(topic, langs),
+      });
+      if (!res.ok) throw new Error();
+      const data = (await res.json()) as { concepts?: Omit<Concept, "conceptId">[] };
+      addConcepts(topic, Array.isArray(data.concepts) ? data.concepts : []);
+      const picked = getUnseenConcepts(topic, langs, 5);
+      if (picked.length === 0) {
+        setError("Chủ đề này đã cạn từ mới. Thử chủ đề khác.");
+        return;
+      }
+      markConceptsSeen(picked);
+      setConcepts(picked);
+    } catch {
+      setError("Không thể sinh từ mới lúc này. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleGenerate() {
     setError(null);
     setWords([]);
+    setConcepts([]);
     setFlippedCount(0);
     setQuizOpen(false);
     setReadingData(null);
+    if (multi) return generateConcepts();
 
     // Peek first: taking words here would mark them seen and then lose them when the
     // fallback below only shows the freshly generated batch.
@@ -108,6 +163,7 @@ export default function HomePage() {
   function handleTopicChange(nextTopic: string) {
     setTopic(nextTopic);
     setWords([]);
+    setConcepts([]);
     setError(null);
     setFlippedCount(0);
     setQuizOpen(false);
@@ -129,8 +185,8 @@ export default function HomePage() {
   }
 
   function completeDailyChallenge() {
-    if (words.length === 0 || flippedCount < words.length || dailyCompleted) return;
-    const wordList = words.map((w) => w.word);
+    if (cardCount === 0 || flippedCount < cardCount || dailyCompleted) return;
+    const wordList = multi ? concepts.flatMap((concept) => Object.values(concept.words).map((item) => item!.word)) : words.map((w) => w.word);
     setDailyComplete(wordList);
     setDailyCompleted(true);
     setStreak(getStreak());
@@ -138,8 +194,8 @@ export default function HomePage() {
 
   const challengeLabel = dailyCompleted
     ? "Đã hoàn thành hôm nay"
-    : words.length > 0 && flippedCount < words.length
-      ? `Lật thêm ${words.length - flippedCount} thẻ để hoàn thành`
+    : cardCount > 0 && flippedCount < cardCount
+      ? `Lật thêm ${cardCount - flippedCount} thẻ để hoàn thành`
       : "Hoàn thành thử thách";
 
   return (
@@ -167,22 +223,22 @@ export default function HomePage() {
         </p>
       )}
 
-      <WordBankPanel topic={topic} />
+      <WordBankPanel topic={topic} langs={langs} />
 
       <section aria-label="Thử thách hằng ngày" className="panel mt-6 flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:gap-6">
         <p className="shrink-0 text-sm text-muted">
           Chuỗi ngày tưới vườn <span className="ml-1 rounded-full bg-marker px-2.5 py-0.5 font-display text-lg font-bold tabular-nums text-deep">{streak}</span>
         </p>
         <div className="flex min-w-0 flex-1 items-center gap-3">
-          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-rule" role="progressbar" aria-label="Thẻ đã lật" aria-valuemin={0} aria-valuemax={words.length || 5} aria-valuenow={flippedCount}>
+          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-rule" role="progressbar" aria-label="Thẻ đã lật" aria-valuemin={0} aria-valuemax={cardCount || 5} aria-valuenow={flippedCount}>
             <div className="h-full rounded-full bg-primary transition-[width] duration-300" style={{ width: `${progress}%` }} />
           </div>
-          <span className="shrink-0 text-sm tabular-nums text-muted">{Math.min(flippedCount, words.length)}/{words.length || 5} thẻ</span>
+          <span className="shrink-0 text-sm tabular-nums text-muted">{Math.min(flippedCount, cardCount)}/{cardCount || 5} thẻ</span>
         </div>
         <button
           type="button"
           onClick={completeDailyChallenge}
-          disabled={!words.length || flippedCount < words.length || dailyCompleted}
+          disabled={!cardCount || flippedCount < cardCount || dailyCompleted}
           className="btn btn-secondary shrink-0 text-sm disabled:opacity-100 disabled:text-muted"
         >
           {challengeLabel}
@@ -199,7 +255,7 @@ export default function HomePage() {
           </div>
         )}
 
-        {!loading && words.length === 0 && (
+        {!loading && cardCount === 0 && (
           <div className="postcard relative max-w-xl px-6 pb-7 pt-5">
             <span className="stamp absolute right-4 top-4 h-[5.25rem] w-[4.5rem]"><span><Plant stage={0} size={40} />hạt</span></span>
             <p className="pr-20 text-sm text-muted">{topicLabel(topic)}</p>
@@ -208,7 +264,15 @@ export default function HomePage() {
           </div>
         )}
 
-        {words.length > 0 && (
+        {multi && concepts.length > 0 && (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {concepts.map((concept) => (
+              <ConceptCard key={concept.conceptId} concept={concept} langs={langs} topic={topic} onFlip={() => setFlippedCount((c) => c + 1)} />
+            ))}
+          </div>
+        )}
+
+        {!multi && words.length > 0 && (
           <>
             <FlashcardGrid words={words} topic={topic} onFlip={() => setFlippedCount((c) => c + 1)} />
             {flippedCount >= 3 && (

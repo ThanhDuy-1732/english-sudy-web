@@ -1,3 +1,4 @@
+import type { LearnLang } from "./languages";
 export type WordJobStatus = "running" | "paused" | "done" | "error";
 
 export interface WordJobLock {
@@ -9,6 +10,7 @@ export interface WordJob {
   id: string;
   topic: string;
   target: number;
+  langs?: LearnLang[];          // missing = English only (jobs from before multi-language)
   status: WordJobStatus;
   createdAt: string;
   updatedAt: string;
@@ -21,12 +23,13 @@ export const LOCK_STALE_MS = 30_000;
 
 const STATUSES: WordJobStatus[] = ["running", "paused", "done", "error"];
 
-export function makeJob(topic: string, target: number, now = new Date()): WordJob {
+export function makeJob(topic: string, target: number, now = new Date(), langs?: LearnLang[]): WordJob {
   const iso = now.toISOString();
   return {
     id: globalThis.crypto?.randomUUID?.() ?? `job_${now.getTime()}_${Math.random().toString(36).slice(2)}`,
     topic,
     target,
+    ...(langs ? { langs } : {}),
     status: "running",
     createdAt: iso,
     updatedAt: iso,

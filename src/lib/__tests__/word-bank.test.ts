@@ -12,6 +12,7 @@ import {
   countConcepts,
   getUnseenConcepts,
   markConceptsSeen,
+  countAvailable,
   takeUnseen,
 } from "../word-bank";
 
@@ -180,4 +181,11 @@ describe("languages and concepts", () => {
     expect(countBank("TOEIC", "zh")).toBe(0);
     expect(countBank("TOEIC", "ja")).toBe(1);
   });
+});
+
+test("countAvailable counts words for English only and concepts otherwise", () => {
+  addBankWords([bankWord("invoice")]);
+  addConcepts("TOEIC", [{ meaning: "hoá đơn", words: { en: { word: "receipt" }, zh: { word: "发票" } } }]);
+  expect(countAvailable("TOEIC", ["en"])).toBe(2);
+  expect(countAvailable("TOEIC", ["en", "zh"])).toBe(1);
 });

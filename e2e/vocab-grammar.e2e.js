@@ -24,6 +24,18 @@ scenario("custom and TOEIC topics drive word generation", async ({ browser, chec
   check("TOEIC chip switches the topic", topics.at(-1) === "TOEIC", String(topics.at(-1)));
 });
 
+scenario("generates English and Chinese words", async ({ browser, check }) => {
+  const page = await newPage(browser, { seed: { ...baseSeed(), learningLanguages: JSON.stringify(["en", "zh"]) }, intercept: (req) => aiMocks(req, json, { "/api/generate-sentence": (r) => (/"lang":"zh"/.test(r.postData() || "") ? { sentence: "我们互相问候。", reading: "wǒmen hùxiāng wènhòu.", translation: "Chúng tôi chào hỏi nhau." } : { sentence: "A warm greeting." }) }) });
+  await goto(page, "/"); await clickText(page, "Gieo 5 từ mới"); await sleep(1200);
+  const cards = await page.evaluate(() => [...document.querySelectorAll("article.postcard")].map((a) => a.innerText));
+  check("five concept cards", cards.length === 5, String(cards.length));
+  check("cards show the Chinese word and pinyin", cards.some((t) => /问候/.test(t) && /wènhòu/.test(t)), cards[0]);
+  await page.evaluate(() => document.querySelector('button[aria-label^="Xem nghĩa của greeting"]')?.click()); await sleep(1200);
+  await clickText(page, "Gieo vào vườn"); await sleep(300);
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("learnedWords") || "[]").filter((w) => w.conceptId).map((w) => `${w.lang}:${w.word}`));
+  check("saving plants both languages", saved.includes("en:greeting") && saved.includes("zh:问候"), saved.join(","));
+});
+
 scenario("review study modes: fill-blank, write-sentence, dictation", async ({ browser, check }) => {
   const page = await newPage(browser, { seed: baseSeed(), intercept: (req) => aiMocks(req, json, { "/api/grade-sentence": { score: 10, feedback: "Câu đúng ngữ pháp và dùng từ đúng.", corrected: "I greet my teacher every morning." } }) });
   await openMode(page, "Điền từ");

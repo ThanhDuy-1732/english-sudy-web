@@ -22,11 +22,14 @@ const EXAM_ITEM = { id: "it1", kind: "TOEIC", part: "RC5", level: 3, topic: "bus
 
 const WORDS = [{ word: "greeting", meaning: "lời chào" }, { word: "small talk", meaning: "chuyện phiếm" }, { word: "exchange", meaning: "trao đổi" }, { word: "polite", meaning: "lịch sự" }, { word: "conversation", meaning: "cuộc trò chuyện" }];
 
+const CONCEPTS = WORDS.map(({ word, meaning }, i) => ({ meaning, words: { en: { word }, zh: { word: ["问候", "闲聊", "交换", "礼貌", "对话"][i], reading: ["wènhòu", "xiánliáo", "jiāohuàn", "lǐmào", "duìhuà"][i] } } }));
+
 /** Deterministic stand-ins for the AI endpoints used by many scenarios. Return true when a request was answered. */
 function aiMocks(req, json, extra = {}) {
   const u = req.url();
   const table = {
-    "/api/generate-words": WORDS,
+    // Several languages ask for concepts; English-only keeps the plain word list.
+    "/api/generate-words": (req) => (/"langs"/.test(req.postData() || "") ? { concepts: CONCEPTS } : WORDS),
     "/api/generate-sentence": { sentence: "She greeted everyone with a warm smile at the meeting." },
     "/api/generate-synonyms": { synonyms: ["hello", "welcome"], antonyms: ["farewell"] },
     "/api/generate-fillblank": { sentence: "I always ______ my neighbours." },

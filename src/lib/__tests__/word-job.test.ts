@@ -86,3 +86,8 @@ test("saveJob/getJob/clearJob roundtrip và bỏ qua JSON hỏng", () => {
   localStorage.setItem("wordJob", "{");
   expect(getJob()).toBeNull();
 });
+
+test("makeJob keeps the job's languages", () => {
+  expect(makeJob("TOEIC", 100, new Date(), ["en", "zh"]).langs).toEqual(["en", "zh"]);
+  expect(makeJob("TOEIC", 100).langs).toBeUndefined();
+});

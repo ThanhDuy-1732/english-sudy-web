@@ -35,7 +35,7 @@ test("bấm Bắt đầu gọi startJob với chủ đề và mốc đang chọn
   const startJob = mockJob();
   render(<WordBankPanel topic="TOEIC" />);
   fireEvent.click(screen.getByRole("button", { name: "Bắt đầu" }));
-  expect(startJob).toHaveBeenCalledWith("TOEIC", 1000);
+  expect(startJob).toHaveBeenCalledWith("TOEIC", 1000, ["en"]);
 });
 
 test("chọn mốc 300 rồi Bắt đầu dùng đúng mốc", () => {
@@ -43,5 +43,5 @@ test("chọn mốc 300 rồi Bắt đầu dùng đúng mốc", () => {
   render(<WordBankPanel topic="IELTS" />);
   fireEvent.click(screen.getByRole("button", { name: "300" }));
   fireEvent.click(screen.getByRole("button", { name: "Bắt đầu" }));
-  expect(startJob).toHaveBeenCalledWith("IELTS", 300);
+  expect(startJob).toHaveBeenCalledWith("IELTS", 300, ["en"]);
 });

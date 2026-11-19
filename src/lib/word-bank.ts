@@ -159,6 +159,15 @@ export function getUnseenConcepts(topic: string, langs: LearnLang[], limit: numb
     .map(({ concept }) => concept);
 }
 
+/** English only counts words (as before multi-language); several languages count complete concepts. */
+export function countAvailable(topic: string, langs: LearnLang[]): number {
+  return isEnglishOnly(langs) ? countBank(topic) : countConcepts(topic, langs);
+}
+
+export function isEnglishOnly(langs: LearnLang[]): boolean {
+  return langs.length === 1 && langs[0] === "en";
+}
+
 export function countConcepts(topic: string, langs: LearnLang[]): number {
   return getUnseenConcepts(topic, langs, Number.MAX_SAFE_INTEGER).length;
 }

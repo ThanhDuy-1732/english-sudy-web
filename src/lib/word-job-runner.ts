@@ -13,17 +13,18 @@ export interface JobWord {
 
 export type JobBatch = JobWord[];
 
-export interface JobRunnerDeps {
+/** Items are words (English) or concepts (several languages); exclude is a word list or one per language. */
+export interface JobRunnerDeps<T = JobWord, X = string[]> {
   topic: string;
   target: number;
   countBank(): number;
   fetchBatch(args: {
-    exclude: string[];
+    exclude: X;
     count: number;
     knownCount: number;
-  }): Promise<{ ok: true; words: JobBatch } | { ok: false; status?: number; retryAfterSec?: number }>;
-  addWords(words: JobBatch): { added: number; persisted: boolean };
-  pickExclude(): string[];
+  }): Promise<{ ok: true; words: T[] } | { ok: false; status?: number; retryAfterSec?: number }>;
+  addWords(words: T[]): { added: number; persisted: boolean };
+  pickExclude(): X;
   wait(ms: number): Promise<void>;
   shouldContinue(): boolean;
   onProgress?(state: { count: number; added: number }): void;
@@ -37,8 +38,8 @@ export type JobRunReason = "done" | "exhausted" | "error" | "cancelled" | "stora
 export const JOB_BATCH_SIZE = 20;
 const MAX_COOLDOWNS = 5;
 
-export async function runWordJob(
-  deps: JobRunnerDeps
+export async function runWordJob<T = JobWord, X = string[]>(
+  deps: JobRunnerDeps<T, X>
 ): Promise<{ reason: JobRunReason; wordsAdded: number }> {
   const rate = deps.rateWindow ?? createRateWindow(40, 60_000);
   let wordsAdded = 0;

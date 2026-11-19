@@ -10,7 +10,8 @@ import {
   type ReactNode,
 } from "react";
 import { useApiFetch } from "@/lib/useApiFetch";
-import { addBankWords, countBank, pickExcludeSample, WORD_BANK_KEY } from "@/lib/word-bank";
+import { addBankWords, addConcepts, countAvailable, isEnglishOnly, pickExcludeSample, WORD_BANK_KEY, type Concept } from "@/lib/word-bank";
+import type { LearnLang } from "@/lib/languages";
 import {
   clearJob,
   createRateWindow,
@@ -25,13 +26,19 @@ import {
 } from "@/lib/word-job";
 import { runWordJob, type JobRunReason, type JobWord } from "@/lib/word-job-runner";
 
+
+/** Words (English job) or complete concepts (several languages) available for a job's topic. */
+function jobCount(job: { topic: string; langs?: LearnLang[] }): number {
+  return countAvailable(job.topic, job.langs ?? ["en"]);
+}
+
 export interface WordJobContextValue {
   job: WordJob | null;
   count: number;
   wordsPerMinute: number;
   /** This tab may control the job (it holds the lock, or the job is not running). */
   isOwner: boolean;
-  startJob(topic: string, target: number): void;
+  startJob(topic: string, target: number, langs?: LearnLang[]): void;
   pauseJob(): void;
   resumeJob(): void;
   cancelJob(): void;
@@ -114,7 +121,7 @@ export function WordJobProvider({ children }: { children: ReactNode }) {
           updatedAt: new Date().toISOString(),
         };
         persist(next);
-        setCount(countBank(current.topic));
+        setCount(jobCount(current));
       };
 
       const heartbeat = window.setInterval(() => {
@@ -128,53 +135,23 @@ export function WordJobProvider({ children }: { children: ReactNode }) {
         });
       }, 5000);
 
-      void runWordJob({
+      const langs = initial.langs ?? ["en"];
+      // A failed response: keep throttling visible so the runner cools down instead of retrying blind.
+      const failure = (res: Response) => {
+        const retryAfter = Number(res.headers.get("Retry-After"));
+        return {
+          ok: false as const,
+          status: res.status,
+          retryAfterSec: Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : undefined,
+        };
+      };
+      const common = {
         topic: initial.topic,
         target: initial.target,
-        countBank: () => countBank(initial.topic),
-        fetchBatch: async ({ exclude, count: size, knownCount }) => {
-          try {
-            const res = await fetchWithProvider(
-              "/api/generate-words",
-              { topic: initial.topic, exclude, count: size, knownCount },
-              { signal: controller.signal }
-            );
-            if (!res.ok) {
-              const retryAfter = Number(res.headers.get("Retry-After"));
-              return {
-                ok: false as const,
-                status: res.status,
-                retryAfterSec: Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : undefined,
-              };
-            }
-            const data = (await res.json()) as unknown;
-            if (!Array.isArray(data)) return { ok: false as const, status: 502 };
-            const words: JobWord[] = data
-              .filter((entry): entry is { word: string; meaning?: unknown } =>
-                Boolean(entry) && typeof (entry as { word?: unknown }).word === "string"
-              )
-              .map((entry) => ({
-                word: entry.word,
-                meaning: typeof entry.meaning === "string" ? entry.meaning : "",
-              }));
-            return { ok: true as const, words };
-          } catch {
-            return { ok: false as const };
-          }
-        },
-        addWords: (words) =>
-          addBankWords(
-            words.map((word) => ({
-              ...word,
-              topic: initial.topic,
-              createdAt: new Date().toISOString(),
-            }))
-          ),
-        pickExclude: () => pickExcludeSample(initial.topic),
-        wait: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
-        shouldContinue: () =>
-          token === runToken.current && isSameRunningJob(getJob(), initial.id),
-        onProgress: ({ count: next, added }) => {
+        countBank: () => jobCount(initial),
+        wait: (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)),
+        shouldContinue: () => token === runToken.current && isSameRunningJob(getJob(), initial.id),
+        onProgress: ({ count: next, added }: { count: number; added: number }) => {
           setCount(next);
           const minutes = (Date.now() - startedAt) / 60_000;
           if (minutes > 0.01) setWordsPerMinute(Math.round(added / minutes));
@@ -190,7 +167,66 @@ export function WordJobProvider({ children }: { children: ReactNode }) {
           }
         },
         rateWindow: rate,
-      })
+      };
+
+      const running = isEnglishOnly(langs)
+        ? runWordJob({
+            ...common,
+            fetchBatch: async ({ exclude, count: size, knownCount }) => {
+              try {
+                const res = await fetchWithProvider(
+                  "/api/generate-words",
+                  { topic: initial.topic, exclude, count: size, knownCount },
+                  { signal: controller.signal }
+                );
+                if (!res.ok) return failure(res);
+                const data = (await res.json()) as unknown;
+                if (!Array.isArray(data)) return { ok: false as const, status: 502 };
+                const words: JobWord[] = data
+                  .filter((entry): entry is { word: string; meaning?: unknown } =>
+                    Boolean(entry) && typeof (entry as { word?: unknown }).word === "string"
+                  )
+                  .map((entry) => ({
+                    word: entry.word,
+                    meaning: typeof entry.meaning === "string" ? entry.meaning : "",
+                  }));
+                return { ok: true as const, words };
+              } catch {
+                return { ok: false as const };
+              }
+            },
+            addWords: (words) =>
+              addBankWords(
+                words.map((word) => ({
+                  ...word,
+                  topic: initial.topic,
+                  createdAt: new Date().toISOString(),
+                }))
+              ),
+            pickExclude: () => pickExcludeSample(initial.topic),
+          })
+        : runWordJob<Omit<Concept, "conceptId">, Partial<Record<LearnLang, string[]>>>({
+            ...common,
+            fetchBatch: async ({ exclude, count: size, knownCount }) => {
+              try {
+                const res = await fetchWithProvider(
+                  "/api/generate-words",
+                  { topic: initial.topic, langs, exclude, count: size, knownCount },
+                  { signal: controller.signal }
+                );
+                if (!res.ok) return failure(res);
+                const data = (await res.json()) as { concepts?: unknown };
+                if (!Array.isArray(data.concepts)) return { ok: false as const, status: 502 };
+                return { ok: true as const, words: data.concepts as Omit<Concept, "conceptId">[] };
+              } catch {
+                return { ok: false as const };
+              }
+            },
+            addWords: (concepts) => addConcepts(initial.topic, concepts),
+            pickExclude: () => Object.fromEntries(langs.map((lang) => [lang, pickExcludeSample(initial.topic, 200, lang)])),
+          });
+
+      void running
         .then((result) => finish(result.reason))
         .catch(() => finish("error"))
         .finally(() => {
@@ -202,11 +238,11 @@ export function WordJobProvider({ children }: { children: ReactNode }) {
   );
 
   const startJob = useCallback(
-    (topic: string, target: number) => {
+    (topic: string, target: number, langs?: LearnLang[]) => {
       const current = getJob();
       if (current && current.status === "running" && !isLockStale(current.lock)) return;
       const next: WordJob = {
-        ...makeJob(topic, target),
+        ...makeJob(topic, target, new Date(), langs && !isEnglishOnly(langs) ? langs : undefined),
         lock: { tabId: tabId.current, heartbeatAt: new Date().toISOString() },
       };
       setWordsPerMinute(0);
@@ -215,7 +251,7 @@ export function WordJobProvider({ children }: { children: ReactNode }) {
         setCount(0);
         return;
       }
-      setCount(countBank(topic));
+      setCount(countAvailable(topic, langs ?? ["en"]));
       run(next);
     },
     [persist, run]
@@ -279,7 +315,7 @@ export function WordJobProvider({ children }: { children: ReactNode }) {
     } else {
       setJob(existing);
     }
-    setCount(countBank(existing.topic));
+    setCount(jobCount(existing));
   }, []);
 
   // Follow a job run by another tab; take it over once its owner is gone.
@@ -293,7 +329,7 @@ export function WordJobProvider({ children }: { children: ReactNode }) {
       const next = reconcileFollowedJob(stored, tabId.current);
       if (next !== stored && next) saveJob(next);
       setJob(next);
-      setCount(countBank(next?.topic ?? activeTopic));
+      setCount(next ? jobCount(next) : activeTopic ? countAvailable(activeTopic, ["en"]) : 0);
     }, 5000);
     return () => window.clearInterval(timer);
   }, [activeId, activeTopic]);
@@ -312,7 +348,7 @@ export function WordJobProvider({ children }: { children: ReactNode }) {
       const next = reconcileFollowedJob(stored, tabId.current);
       if (next !== stored && next) saveJob(next);
       setJob(next);
-      setCount(next?.topic ? countBank(next.topic) : 0);
+      setCount(next?.topic ? jobCount(next) : 0);
     };
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
