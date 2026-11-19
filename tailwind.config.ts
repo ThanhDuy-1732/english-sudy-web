@@ -40,9 +40,10 @@ const config: Config = {
       },
       fontFamily: {
         // Lexend: interface text. Baloo 2: headings. Fraunces: English words on postcards and example sentences.
-        sans: ["var(--font-ui)", "ui-sans-serif", "system-ui", "sans-serif"],
+        // System CJK fonts after the Latin ones: Chinese, Japanese and Korean words use whatever the device has.
+        sans: ["var(--font-ui)", "PingFang SC", "Hiragino Sans", "Apple SD Gothic Neo", "Noto Sans CJK SC", "Noto Sans CJK JP", "Noto Sans CJK KR", "Microsoft YaHei", "Malgun Gothic", "ui-sans-serif", "system-ui", "sans-serif"],
         display: ["var(--font-display)", "ui-rounded", "system-ui", "sans-serif"],
-        en: ["var(--font-en)", "Georgia", "serif"],
+        en: ["var(--font-en)", "Georgia", "PingFang SC", "Hiragino Sans", "Apple SD Gothic Neo", "Noto Sans CJK SC", "Noto Sans CJK JP", "Noto Sans CJK KR", "Microsoft YaHei", "Malgun Gothic", "serif"],
       },
     },
   },
