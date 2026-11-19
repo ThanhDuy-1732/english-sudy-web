@@ -63,7 +63,8 @@ async function transcribeWith(language?: string) {
     form.append("audio", new Blob(["audio"], { type: "audio/webm" }), "r.webm");
     if (language) form.append("language", language);
     const response = await POST(new NextRequest("http://localhost/api/speech/transcribe", { method: "POST", body: form }));
-    return { sent: fetcher.mock.calls[0][1].body.get("language"), body: await response.json() };
+    const upstream = fetcher.mock.calls[0][1].body as FormData;
+    return { sent: upstream.get("language"), prompt: upstream.get("prompt"), body: await response.json() };
   } finally {
     global.fetch = previousFetch;
     if (previousKey === undefined) delete process.env.GROQ_API_KEY;
@@ -80,4 +81,10 @@ test("transcribe forwards language=zh to Whisper", async () => {
 test("transcribe without language keeps en, and rejects unknown codes to en", async () => {
   expect((await transcribeWith()).sent).toBe("en");
   expect((await transcribeWith("fr")).sent).toBe("en");
+});
+
+test("Chinese asks Whisper for simplified characters; other languages send no prompt", async () => {
+  expect((await transcribeWith("zh")).prompt).toBe("以下是普通话的句子。");
+  expect((await transcribeWith("ja")).prompt).toBeNull();
+  expect((await transcribeWith()).prompt).toBeNull();
 });

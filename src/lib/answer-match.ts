@@ -40,3 +40,16 @@ export function similarityPct(target: string, spoken: string, lang: LearnLang): 
   }
   return Math.round((matched / wanted.length) * 100);
 }
+
+/** Target tokens not found in what was spoken (same one-for-one matching as similarityPct), in target order. */
+export function missingTokens(target: string, spoken: string, lang: LearnLang): string[] {
+  const pool = new Map<string, number>();
+  for (const token of answerTokens(spoken, lang)) pool.set(token, (pool.get(token) ?? 0) + 1);
+  const missing: string[] = [];
+  for (const token of answerTokens(target, lang)) {
+    const left = pool.get(token) ?? 0;
+    if (left > 0) pool.set(token, left - 1);
+    else missing.push(token);
+  }
+  return missing;
+}

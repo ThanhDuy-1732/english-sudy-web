@@ -82,7 +82,8 @@ export default function RoleplayPage() {
   // The conversation's language is chosen before the first message and then stays fixed.
   const [learning] = useLearningLanguages();
   const [chosenLang, setChosenLang] = useState<LearnLang | null>(null);
-  const lang: LearnLang = chosenLang && learning.includes(chosenLang) ? chosenLang : learning.includes("en") ? "en" : learning[0];
+  const [lockedLang, setLockedLang] = useState<LearnLang | null>(null);
+  const lang: LearnLang = lockedLang ?? (chosenLang && learning.includes(chosenLang) ? chosenLang : learning.includes("en") ? "en" : learning[0]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [goalAchieved, setGoalAchieved] = useState(false);
@@ -137,6 +138,8 @@ export default function RoleplayPage() {
 
   async function sendMessage() {
     if (!input.trim() || loading) return;
+    // The first message fixes the conversation language, whatever the header picker does later.
+    if (!lockedLang) setLockedLang(lang);
     const userText = input.trim();
     setInput("");
 

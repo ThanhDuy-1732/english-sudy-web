@@ -1,4 +1,4 @@
-import { answerTokens, answersMatch, normalizeAnswer, similarityPct } from "../answer-match";
+import { answerTokens, answersMatch, missingTokens, normalizeAnswer, similarityPct } from "../answer-match";
 
 test("answersMatch ignores spaces and CJK punctuation for zh/ja", () => {
   expect(answersMatch("我 是 学生。", "我是学生", "zh")).toBe(true);
@@ -29,4 +29,10 @@ test("similarityPct handles empty spoken", () => {
 
 test("repeated characters count once each", () => {
   expect(similarityPct("谢谢", "谢", "zh")).toBe(50);
+});
+
+test("missingTokens lists target characters not spoken (zh), each counted once", () => {
+  expect(missingTokens("我是学生", "我是老师", "zh")).toEqual(["学", "生"]);
+  expect(missingTokens("谢谢", "谢", "zh")).toEqual(["谢"]);
+  expect(missingTokens("저는 학생입니다", "저는", "ko")).toEqual(["학생입니다"]);
 });

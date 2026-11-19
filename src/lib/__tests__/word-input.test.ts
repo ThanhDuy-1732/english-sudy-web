@@ -29,3 +29,7 @@ test("giới hạn số từ mỗi lần thêm", () => {
 test("giữ dấu gạch nối và nháy đơn", () => {
   expect(parseWordInput("well-known, don't, e-mail")).toEqual(["well-known", "don't", "e-mail"]);
 });
+
+test("Chinese, Japanese and Korean words are accepted and split on their own commas", () => {
+  expect(parseWordInput("学生，老师、朋友；水\n학생")).toEqual(["学生", "老师", "朋友", "水", "학생"]);
+});

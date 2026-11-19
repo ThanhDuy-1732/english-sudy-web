@@ -42,6 +42,8 @@ export async function POST(req: NextRequest) {
   // Whisper is told the language being practised; missing or unknown codes keep English.
   const language = form?.get("language");
   upstream.append("language", isLearnLang(language) ? language : "en");
+  // Whisper often writes Mandarin in traditional characters; a simplified-Chinese prompt steers it to simplified.
+  if (language === "zh") upstream.append("prompt", "以下是普通话的句子。");
 
   const res = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
     method: "POST",

@@ -11,8 +11,8 @@ function escapeRegExp(value: string) { return value.replace(/[.*+?^${}()|[\]\\]/
 function HighlightedPassage({ text, words, lang }: { text: string; words: string[]; lang: LearnLang }) {
   const validWords = words.filter(Boolean);
   if (validWords.length === 0) return <p className="leading-relaxed text-ink">{text}</p>;
-  // \b never matches between Chinese/Japanese characters, so only English and Korean use word boundaries.
-  const edge = lang === "zh" || lang === "ja" ? "" : "\\b";
+  // JavaScript's \b only knows ASCII letters, and Korean words carry particles (학생은): only English uses boundaries.
+  const edge = lang === "en" ? "\\b" : "";
   const pattern = new RegExp(`${edge}(${validWords.map(escapeRegExp).join("|")})${edge}`, "gi");
   return <p className="leading-relaxed text-ink">{text.split(pattern).map((part, index) => validWords.some((word) => word.toLowerCase() === part.toLowerCase()) ? <mark key={index} className="rounded-xl bg-yellow-200 px-0.5 font-medium">{part}</mark> : <span key={index}>{part}</span>)}</p>;
 }

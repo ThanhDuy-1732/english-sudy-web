@@ -11,10 +11,11 @@ export function parseWordInput(input: string): string[] {
   const seen = new Set<string>();
   const words: string[] = [];
 
-  for (const raw of input.split(/[,;\n]+/)) {
+  // ASCII separators plus the full-width ones Chinese/Japanese keyboards type (，、；).
+  for (const raw of input.split(/[,;，、；\n]+/)) {
     const word = raw.trim().replace(/\s+/g, " ");
     if (!word || word.length > MAX_WORD_LENGTH) continue;
-    if (!/[a-zA-Z]/.test(word)) continue;
+    if (!/\p{L}/u.test(word)) continue;
     const key = word.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);

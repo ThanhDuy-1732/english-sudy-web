@@ -23,3 +23,8 @@ test("ReadingMode highlights Chinese words and shows the translation", () => {
   expect(screen.getByText("学生").tagName).toBe("MARK");
   expect(screen.getByText("Tôi là học sinh.")).toBeInTheDocument();
 });
+
+test("ReadingMode highlights Korean words, even with a particle attached", () => {
+  render(<ReadingMode passage="저는 학생은 아닙니다." questions={[]} highlightWords={["학생"]} lang="ko" onClose={() => {}} />);
+  expect(screen.getByText("학생").tagName).toBe("MARK");
+});

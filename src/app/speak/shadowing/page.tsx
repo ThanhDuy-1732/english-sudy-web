@@ -6,7 +6,7 @@ import { createRecorder, audioFilename } from "@/lib/speech/recorder";
 import { saveSpeaking } from "@/lib/speech/speaking-storage";
 import { startSession, finishSession, cancelSession } from "@/lib/sessions";
 import { SHADOW_SENTENCES } from "@/lib/shadow-sentences";
-import { similarityPct } from "@/lib/answer-match";
+import { missingTokens, similarityPct } from "@/lib/answer-match";
 import { speakText } from "@/lib/speech-voice";
 import { LANG_INFO, type LearnLang } from "@/lib/languages";
 import { useLearningLanguages } from "@/lib/useLearningLanguages";
@@ -136,7 +136,8 @@ export default function ShadowingPage() {
     <main className="page">
       <Link href="/speak" className="back-link">← Luyện nói</Link>
       <h1 className="page-title mb-6">Shadowing</h1>
-      {learning.length > 1 && (
+      {/* Only between attempts: switching mid-recording would orphan the microphone. */}
+      {learning.length > 1 && (phase === "ready" || phase === "result") && (
         <div className="mb-4">
           <Segmented
             label="Ngôn ngữ"
@@ -198,9 +199,10 @@ export default function ShadowingPage() {
           </div>
 
           {transcript && (() => {
-            const missingWords = sentence.toLowerCase().replace(/[^a-z\s]/g, "").split(" ").filter(
-              (w) => !transcript.toLowerCase().includes(w)
-            );
+            // English keeps its word check; Chinese/Japanese list characters, Korean words.
+            const missingWords = lang === "en"
+              ? sentence.toLowerCase().replace(/[^a-z\s]/g, "").split(" ").filter((w) => !transcript.toLowerCase().includes(w))
+              : missingTokens(sentence, transcript, lang);
             return missingWords.length > 0 ? (
               <div className="text-sm mb-4">
                 <p className="text-xs font-medium text-muted mb-1">Từ còn thiếu:</p>
