@@ -1,7 +1,9 @@
 import { asArray } from "../safe-json";
+import type { LearnLang } from "../languages";
 import type { SpeakingFeedback } from "./types";
 
 export interface SpeakingRecord {
+  lang?: LearnLang;          // language practised; missing = English
   id: string;
   mode: "ielts_p1" | "ielts_p2" | "ielts_p3" | "roleplay" | "shadowing";
   prompt: string;

@@ -5,26 +5,14 @@ import Link from "next/link";
 import { createRecorder, audioFilename } from "@/lib/speech/recorder";
 import { saveSpeaking } from "@/lib/speech/speaking-storage";
 import { startSession, finishSession, cancelSession } from "@/lib/sessions";
-
-const SHADOW_SENTENCES = [
-  "The meeting has been postponed until next Thursday.",
-  "Could you please send me the report by end of day?",
-  "I'd like to schedule a conference call for tomorrow morning.",
-  "The quarterly results exceeded our expectations significantly.",
-  "We need to finalize the budget before the end of the month.",
-  "She apologized for the misunderstanding and offered a refund.",
-  "The proposal was well-received by the management team.",
-  "Please make sure to submit the application before the deadline.",
-];
+import { SHADOW_SENTENCES } from "@/lib/shadow-sentences";
+import { similarityPct } from "@/lib/answer-match";
+import { speakText } from "@/lib/speech-voice";
+import { LANG_INFO, type LearnLang } from "@/lib/languages";
+import { useLearningLanguages } from "@/lib/useLearningLanguages";
+import Segmented from "@/components/Segmented";
 
 type Phase = "ready" | "recording" | "processing" | "result";
-
-function similarity(target: string, spoken: string): number {
-  const targetWords = target.toLowerCase().replace(/[^a-z\s]/g, "").split(/\s+/);
-  const spokenSet = new Set(spoken.toLowerCase().replace(/[^a-z\s]/g, "").split(/\s+/));
-  const matches = targetWords.filter((w) => spokenSet.has(w)).length;
-  return Math.round((matches / Math.max(targetWords.length, 1)) * 100);
-}
 
 export default function ShadowingPage() {
   const [sentenceIdx, setSentenceIdx] = useState(0);
@@ -41,7 +29,20 @@ export default function ShadowingPage() {
     };
   }, []);
 
-  const sentence = SHADOW_SENTENCES[sentenceIdx % SHADOW_SENTENCES.length];
+  const [learning] = useLearningLanguages();
+  const [chosenLang, setChosenLang] = useState<LearnLang | null>(null);
+  const lang: LearnLang = chosenLang && learning.includes(chosenLang) ? chosenLang : learning.includes("en") ? "en" : learning[0];
+  const list = SHADOW_SENTENCES[lang];
+  const item = list[sentenceIdx % list.length];
+  const sentence = item.text;
+
+  function chooseLang(next: LearnLang) {
+    setChosenLang(next);
+    setSentenceIdx(0);
+    setPhase("ready");
+    setTranscript("");
+    setMatchPct(0);
+  }
 
   function discardSession() {
     if (sessionIdRef.current) cancelSession(sessionIdRef.current);
@@ -49,11 +50,8 @@ export default function ShadowingPage() {
   }
 
   function handleSpeak() {
-    if (typeof window === "undefined" || !window.speechSynthesis) return;
-    const utterance = new SpeechSynthesisUtterance(sentence);
-    utterance.lang = "en-US";
-    utterance.rate = 0.85;
-    window.speechSynthesis.speak(utterance);
+    // A little slower than normal speech, as before; in the sentence's own language.
+    speakText(sentence, lang, { voiceURI: null, rate: 0.85, pitch: 1, volume: 1 });
   }
 
   async function handleStartRecording() {
@@ -75,12 +73,14 @@ export default function ShadowingPage() {
       const blob = await recorderRef.current.stop();
       const form = new FormData();
       form.append("audio", blob, audioFilename(blob, "shadowing"));
+      form.append("language", lang);
       const res = await fetch("/api/speech/transcribe", { method: "POST", body: form });
       if (!res.ok) throw new Error("transcription failed");
       const result = await res.json() as { text?: string };
       const text = result.text ?? "";
       setTranscript(text);
-      const score = similarity(sentence, text);
+      // Characters for Chinese/Japanese, words for English/Korean.
+      const score = similarityPct(sentence, text, lang);
       setMatchPct(score);
 
       if (sessionIdRef.current) {
@@ -95,6 +95,7 @@ export default function ShadowingPage() {
       saveSpeaking({
         id: crypto.randomUUID(),
         mode: "shadowing",
+        ...(lang === "en" ? {} : { lang }),
         prompt: sentence,
         transcript: text,
         durationSec: 5,
@@ -135,10 +136,22 @@ export default function ShadowingPage() {
     <main className="page">
       <Link href="/speak" className="back-link">← Luyện nói</Link>
       <h1 className="page-title mb-6">Shadowing</h1>
+      {learning.length > 1 && (
+        <div className="mb-4">
+          <Segmented
+            label="Ngôn ngữ"
+            value={lang}
+            onChange={(value) => chooseLang(value as LearnLang)}
+            options={learning.map((code) => ({ value: code, label: LANG_INFO[code].native }))}
+          />
+        </div>
+      )}
 
       <div className="postcard mb-6 px-6 py-8 text-center">
-        <p className="mb-2 text-sm text-muted">Câu mẫu ({sentenceIdx % SHADOW_SENTENCES.length + 1}/{SHADOW_SENTENCES.length})</p>
-        <p className="font-en text-2xl font-semibold leading-snug">&ldquo;{sentence}&rdquo;</p>
+        <p className="mb-2 text-sm text-muted">Câu mẫu ({sentenceIdx % list.length + 1}/{list.length})</p>
+        <p lang={LANG_INFO[lang].htmlLang} className={`${lang === "en" ? "font-en" : "font-sans"} text-2xl font-semibold leading-snug`}>&ldquo;{sentence}&rdquo;</p>
+        {item.reading && <p className="mt-2 text-muted">{item.reading}</p>}
+        <p className="mt-2 text-sm text-muted">{item.translation}</p>
       </div>
 
       <div className="flex gap-3 mb-6 justify-center">
