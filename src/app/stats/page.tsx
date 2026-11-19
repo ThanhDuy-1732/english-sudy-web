@@ -29,6 +29,7 @@ import type { ExamAttempt } from "@/lib/exam/types";
 import Segmented from "@/components/Segmented";
 import StageCensus from "@/components/StageCensus";
 import { topicLabel } from "@/lib/topics";
+import { LANG_INFO, LEARN_LANGS, langOf, type LearnLang } from "@/lib/languages";
 
 const PANEL = "panel min-w-0 overflow-hidden p-5 sm:p-6";
 
@@ -59,14 +60,16 @@ export default function StatsPage() {
   const [totalWords, setTotalWords] = useState(0);
   const [activeDays, setActiveDays] = useState(0);
   const [averageMastery, setAverageMastery] = useState(0);
-  const [masteries, setMasteries] = useState<(number | undefined)[]>([]);
+  // Each saved word's stage and language, so the census and word count can follow the language filter.
+  const [learnedMeta, setLearnedMeta] = useState<{ mastery?: number; lang: LearnLang }[]>([]);
+  const [langFilter, setLangFilter] = useState<"all" | LearnLang>("all");
   const [weeklyReport, setWeeklyReport] = useState(() => computeWeeklyReport([], []));
   const [streakInfo, setStreakInfo] = useState(() => computeStreak([]));
 
   useEffect(() => {
     const daily = getWordsPerDay(30);
     const learned = getLearnedWords();
-    setMasteries(learned.map((w) => w.mastery));
+    setLearnedMeta(learned.map((w) => ({ mastery: w.mastery, lang: langOf(w) })));
     setWordsPerDay(daily);
     setTopicDistribution(getTopicDistribution());
     setCalendarData(getCalendarData(26));
@@ -88,6 +91,9 @@ export default function StatsPage() {
   }, []);
 
   const todayMinutes = Math.round(todaySeconds / 60);
+
+  const presentLangs = LEARN_LANGS.filter((lang) => learnedMeta.some((item) => item.lang === lang));
+  const shownMeta = learnedMeta.filter((item) => langFilter === "all" || item.lang === langFilter);
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 pb-16 pt-8 sm:px-8 lg:pt-12">
@@ -125,8 +131,16 @@ export default function StatsPage() {
 
       {activeTab === "overview" && (
         <div className="mt-6 space-y-6">
+          {presentLangs.length > 1 && (
+            <Segmented
+              label="Ngôn ngữ"
+              value={langFilter}
+              onChange={(value) => setLangFilter(value as "all" | LearnLang)}
+              options={[{ value: "all", label: "Tất cả" }, ...presentLangs.map((lang) => ({ value: lang, label: LANG_INFO[lang].native }))]}
+            />
+          )}
           <Figures items={[
-            [String(totalWords), "Từ đã học"],
+            [String(langFilter === "all" ? totalWords : shownMeta.length), "Từ đã học"],
             [String(activeDays), "Ngày học trong 30 ngày"],
             [`${averageMastery}/5`, "Mastery trung bình"],
             [`${todayMinutes} phút`, "Hôm nay"],
@@ -134,7 +148,7 @@ export default function StatsPage() {
           <section aria-labelledby="garden-census" className="rounded-3xl bg-gradient-to-b from-primary-soft/40 to-primary-soft px-4 pb-4 pt-5 sm:px-6">
             <h2 id="garden-census" className="section-title">Vườn theo giai đoạn</h2>
             <p className="mb-3 text-sm text-muted">Mỗi lần ôn đúng hạn, từ lớn thêm một bậc từ hạt đến hoa.</p>
-            <StageCensus masteries={masteries} />
+            <StageCensus masteries={shownMeta.map((item) => item.mastery)} />
           </section>
           <section className={PANEL}><WordsPerDayChart data={wordsPerDay} /></section>
           <section className={PANEL}><StudyTimeChart data={studyTimePerDay} /></section>

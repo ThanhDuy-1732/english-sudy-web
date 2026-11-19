@@ -7,6 +7,7 @@ import Segmented from "@/components/Segmented";
 import Plant, { STAGE_NAMES, growthStage } from "@/components/Plant";
 import StageCensus from "@/components/StageCensus";
 import { topicLabel } from "@/lib/topics";
+import { LANG_INFO, LEARN_LANGS, langOf, type LearnLang } from "@/lib/languages";
 import {
   deleteLearnedWord,
   getLearnedWords,
@@ -17,6 +18,7 @@ export default function HistoryPage() {
   const [words, setWords] = useState<LearnedWord[]>([]);
   const [filter, setFilter] = useState("Tất cả");
   const [masteryFilter, setMasteryFilter] = useState<"all" | "weak">("all");
+  const [langFilter, setLangFilter] = useState<"all" | LearnLang>("all");
   const [now, setNow] = useState(0);
 
   useEffect(() => {
@@ -24,9 +26,9 @@ export default function HistoryPage() {
     setNow(Date.now());
   }, []);
 
-  function handleDelete(word: string) {
-    deleteLearnedWord(word);
-    const nextWords = words.filter((w) => w.word !== word);
+  function handleDelete(word: string, lang: LearnLang) {
+    deleteLearnedWord(word, lang);
+    const nextWords = words.filter((w) => !(w.word === word && langOf(w) === lang));
     setWords(nextWords);
 
     if (filter !== "Tất cả" && !nextWords.some((entry) => entry.topic === filter)) {
@@ -35,7 +37,9 @@ export default function HistoryPage() {
   }
 
   const topics = ["Tất cả", ...Array.from(new Set(words.map((word) => word.topic)))];
+  const presentLangs = LEARN_LANGS.filter((lang) => words.some((word) => langOf(word) === lang));
   const filtered = words
+    .filter((word) => langFilter === "all" || langOf(word) === langFilter)
     .filter((word) => filter === "Tất cả" || word.topic === filter)
     .filter((word) => masteryFilter === "all" || (word.mastery ?? 0) < 3);
   const isDue = (word: LearnedWord) => now > 0 && new Date(word.nextReviewAt ?? 0).getTime() <= now;
@@ -58,10 +62,18 @@ export default function HistoryPage() {
             <p className="text-sm text-muted">Không có cây nào cần tưới</p>
           )}
         </div>
-        <div className="mt-3"><StageCensus masteries={words.map((w) => w.mastery)} /></div>
+        <div className="mt-3"><StageCensus masteries={words.filter((w) => langFilter === "all" || langOf(w) === langFilter).map((w) => w.mastery)} /></div>
       </section>
 
       <div className="mb-6 flex flex-wrap items-center gap-3">
+        {presentLangs.length > 1 && (
+          <Segmented
+            label="Ngôn ngữ"
+            value={langFilter}
+            onChange={(value) => setLangFilter(value as "all" | LearnLang)}
+            options={[{ value: "all", label: "Tất cả" }, ...presentLangs.map((lang) => ({ value: lang, label: LANG_INFO[lang].native }))]}
+          />
+        )}
         <Segmented label="Chủ đề" value={filter} onChange={setFilter} options={topics.map((topic) => ({ value: topic, label: topicLabel(topic) }))} />
         <button
           type="button"
@@ -83,17 +95,19 @@ export default function HistoryPage() {
             const stage = growthStage(entry.mastery);
             const due = isDue(entry);
             return (
-              <li key={entry.word} className="panel flex items-start gap-3 p-4">
+              <li key={`${langOf(entry)}:${entry.word}`} className="panel flex items-start gap-3 p-4">
                 <div className="flex w-14 shrink-0 flex-col items-center">
                   <Plant stage={stage} size={52} label={`Giai đoạn ${STAGE_NAMES[stage]} (${stage}/5)`} />
                   <span className="text-xs text-muted">{STAGE_NAMES[stage]}</span>
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="break-words [overflow-wrap:anywhere]">
-                    <span className="font-en text-lg font-semibold text-ink">{entry.word}</span>{" "}
+                    {langOf(entry) !== "en" && <span className="mr-1.5 text-xs font-semibold text-muted">{LANG_INFO[langOf(entry)].short}</span>}
+                    <span lang={LANG_INFO[langOf(entry)].htmlLang} className={`${langOf(entry) === "en" ? "font-en" : "font-sans"} text-lg font-semibold text-ink`}>{entry.word}</span>{" "}
+                    {entry.reading && <span className="mr-1 text-sm text-muted">{entry.reading}</span>}
                     <span className="text-muted">- {entry.meaning}</span>
                   </p>
-                  <p className="mt-1 break-words font-en text-sm italic text-ink/80 [overflow-wrap:anywhere]">{entry.example}</p>
+                  <p lang={LANG_INFO[langOf(entry)].htmlLang} className={`mt-1 break-words ${langOf(entry) === "en" ? "font-en italic" : "font-sans"} text-sm text-ink/80 [overflow-wrap:anywhere]`}>{entry.example}</p>
                   <p className="mt-1.5 flex flex-wrap items-center gap-2 break-words text-xs text-muted [overflow-wrap:anywhere]">
                     {due && <span className="rounded-full bg-marker px-2 py-0.5 font-semibold text-deep">Cần tưới</span>}
                     {topicLabel(entry.topic)} · {new Date(entry.learnedAt).toLocaleDateString("vi-VN")}
@@ -101,8 +115,8 @@ export default function HistoryPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => handleDelete(entry.word)}
-                  aria-label={`Xóa ${entry.word}`}
+                  onClick={() => handleDelete(entry.word, langOf(entry))}
+                  aria-label={langOf(entry) === "en" ? `Xóa ${entry.word}` : `Xóa ${entry.word} (${LANG_INFO[langOf(entry)].label})`}
                   className="inline-flex min-h-11 shrink-0 items-center rounded-full px-3 text-sm font-medium text-margin transition-colors hover:bg-margin-soft"
                 >
                   Xóa

@@ -4,19 +4,20 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getLearnedWords, type LearnedWord } from "@/lib/storage";
 import Plant, { STAGE_NAMES, growthStage } from "./Plant";
+import { LANG_INFO, langOf } from "@/lib/languages";
 
 const BED_SIZE = 12;
 
 /** The 12 most recently saved words as plants; the ones due for review are thirsty (sun drop, yellow rim). */
 export default function GardenBed() {
-  const [state, setState] = useState<{ words: LearnedWord[]; total: number; due: number; now: number } | null>(null);
+  const [state, setState] = useState<{ words: LearnedWord[]; total: number; due: number; now: number; multi: boolean } | null>(null);
 
   useEffect(() => {
     const all = getLearnedWords();
     const now = Date.now();
     const words = [...all].sort((a, b) => b.learnedAt.localeCompare(a.learnedAt)).slice(0, BED_SIZE);
     const due = all.filter((w) => !w.nextReviewAt || Date.parse(w.nextReviewAt) <= now).length;
-    setState({ words, total: all.length, due, now });
+    setState({ words, total: all.length, due, now, multi: new Set(all.map(langOf)).size > 1 });
   }, []);
 
   if (!state) return <section aria-label="Luống vườn" className="h-72 animate-pulse rounded-3xl bg-primary-soft/60" />;
@@ -45,11 +46,12 @@ export default function GardenBed() {
             const stage = growthStage(w.mastery);
             const dry = thirsty(w);
             return (
-              <li key={w.word} className="relative flex flex-col items-center" title={`${w.word}: ${STAGE_NAMES[stage].toLowerCase()}${dry ? ", cần tưới" : ""}`}>
+              <li key={`${langOf(w)}:${w.word}`} className="relative flex flex-col items-center" title={`${w.word}: ${STAGE_NAMES[stage].toLowerCase()}${dry ? ", cần tưới" : ""}`}>
                 {dry && <span aria-hidden="true" className="absolute right-[18%] top-1 z-10 h-[15px] w-3 rotate-180 rounded-[50%_50%_50%_50%/62%_62%_38%_38%] bg-marker ring-2 ring-white" />}
                 <Plant stage={stage} size={68} className="relative z-[1] h-auto w-full max-w-[68px]" />
                 <span className={`relative z-[1] -mt-1.5 w-full truncate rounded-[999px_999px_12px_12px] bg-soil px-1 pb-0.5 pt-1 text-center text-[11.5px] font-medium tracking-tight text-white ${dry ? "ring-[2.5px] ring-marker" : ""}`}>
-                  {w.word}
+                  {state.multi && <span className="mr-0.5 opacity-80">{LANG_INFO[langOf(w)].short}</span>}
+                  <span lang={LANG_INFO[langOf(w)].htmlLang}>{w.word}</span>
                 </span>
               </li>
             );
