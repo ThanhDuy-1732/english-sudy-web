@@ -107,11 +107,38 @@ export async function generateSentence(
   return (await generateContentFn(prompt)).trim();
 }
 
+const LANGUAGE_NAME: Record<LearnLang, string> = { en: "English", zh: "Simplified Chinese", ja: "Japanese", ko: "Korean" };
+
+export interface Example {
+  sentence: string;
+  reading?: string;
+  translation: string;
+}
+
+/** An example sentence for a Chinese, Japanese or Korean word, with its reading and a Vietnamese translation. */
+export async function generateExample(word: string, lang: LearnLang, generateContentFn: GenerateFn): Promise<Example> {
+  const prompt = `Write one short, natural ${LANGUAGE_NAME[lang]} example sentence using the word "${word}".${READING_HINT[lang].replace('"reading" is', "Also give its reading as")} Then translate it into Vietnamese.\nReturn JSON only: {"sentence": "...", "reading": "...", "translation": "<Vietnamese>"}`;
+  const text = stripJsonCodeFence(await generateContentFn(prompt));
+  let parsed: Partial<Example>;
+  try {
+    parsed = JSON.parse(text) as Partial<Example>;
+  } catch {
+    throw new Error(`Gemini returned invalid JSON for generateExample: ${text.slice(0, 100)}`);
+  }
+  if (typeof parsed.sentence !== "string" || !parsed.sentence.trim()) throw new Error("generateExample: no sentence");
+  return {
+    sentence: parsed.sentence.trim(),
+    ...(typeof parsed.reading === "string" && parsed.reading.trim() ? { reading: parsed.reading.trim() } : {}),
+    translation: typeof parsed.translation === "string" ? parsed.translation.trim() : "",
+  };
+}
+
 export async function generateSynonyms(
   word: string,
-  generateContentFn: GenerateFn
+  generateContentFn: GenerateFn,
+  lang: LearnLang = "en"
 ): Promise<{ synonyms: string[]; antonyms: string[] }> {
-  const prompt = `For the English word "${word}", provide:\n- 2-3 synonyms\n- 1-2 antonyms\nReturn JSON only: {"synonyms": ["word1", "word2"], "antonyms": ["word1"]}`;
+  const prompt = `For the ${LANGUAGE_NAME[lang]} word "${word}", provide (all in ${LANGUAGE_NAME[lang]}):\n- 2-3 synonyms\n- 1-2 antonyms\nReturn JSON only: {"synonyms": ["word1", "word2"], "antonyms": ["word1"]}`;
   const text = stripJsonCodeFence(await generateContentFn(prompt));
   try {
     return JSON.parse(text) as { synonyms: string[]; antonyms: string[] };

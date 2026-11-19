@@ -9,6 +9,7 @@ import {
   generateReading,
   generateConcepts,
   parseConcepts,
+  generateExample,
 } from "../gemini";
 
 const mockFn = jest.fn<Promise<string>, [string]>();
@@ -174,4 +175,26 @@ test("generateConcepts prompt names each language and excludes per language", as
 test("generateConcepts drops a concept whose word was excluded", async () => {
   mockFn.mockResolvedValue(JSON.stringify([{ meaning: "hợp đồng", words: { en: { word: "contract" }, zh: { word: "合同" } } }]));
   expect(await generateConcepts("TOEIC", ["en", "zh"], mockFn, { count: 1, exclude: { zh: ["合同"] } })).toEqual([]);
+});
+
+test("generateSentence uses English by default", async () => {
+  mockFn.mockResolvedValue("We need to negotiate.");
+  await generateSentence("negotiate", mockFn);
+  expect(mockFn.mock.calls[0][0]).toContain("English");
+});
+
+test("generateExample in Japanese asks for kana and a Vietnamese translation", async () => {
+  mockFn.mockResolvedValue(JSON.stringify({ sentence: "水を飲みます。", reading: "みずをのみます。", translation: "Tôi uống nước." }));
+  const example = await generateExample("水", "ja", mockFn);
+  const prompt = mockFn.mock.calls[0][0];
+  expect(prompt).toContain("Japanese");
+  expect(prompt).toContain("kana");
+  expect(prompt).toContain("Vietnamese");
+  expect(example).toEqual({ sentence: "水を飲みます。", reading: "みずをのみます。", translation: "Tôi uống nước." });
+});
+
+test("generateSynonyms names the word's language", async () => {
+  mockFn.mockResolvedValue(JSON.stringify({ synonyms: ["学子"], antonyms: [] }));
+  await generateSynonyms("学生", mockFn, "zh");
+  expect(mockFn.mock.calls[0][0]).toContain("Chinese");
 });

@@ -3,11 +3,12 @@
  */
 
 import { NextRequest } from "next/server";
-import { generateSentence } from "@/lib/gemini";
+import { generateExample, generateSentence } from "@/lib/gemini";
 import { POST } from "../generate-sentence/route";
 
 jest.mock("@/lib/gemini", () => ({
   generateSentence: jest.fn().mockResolvedValue("We need to negotiate."),
+  generateExample: jest.fn().mockResolvedValue({ sentence: "我是学生。", reading: "wǒ shì xuéshēng.", translation: "Tôi là học sinh." }),
 }));
 
 const mockGenerateSentence = generateSentence as jest.MockedFunction<typeof generateSentence>;
@@ -74,4 +75,16 @@ test("returns 5xx with JSON error body when generateSentence throws", async () =
   expect(data).toEqual({
     error: "Không thể tạo câu ví dụ lúc này. Vui lòng thử lại.",
   });
+});
+
+test("non-English word returns sentence, reading and translation", async () => {
+  const req = new NextRequest("http://localhost/api/generate-sentence", { method: "POST", body: JSON.stringify({ word: "学生", lang: "zh" }), headers: { "Content-Type": "application/json" } });
+  const res = await POST(req);
+  expect(await res.json()).toEqual({ sentence: "我是学生。", reading: "wǒ shì xuéshēng.", translation: "Tôi là học sinh." });
+  expect(generateExample).toHaveBeenCalledWith("学生", "zh", expect.any(Function));
+});
+
+test("unknown lang falls back to English", async () => {
+  const req = new NextRequest("http://localhost/api/generate-sentence", { method: "POST", body: JSON.stringify({ word: "negotiate", lang: "fr" }), headers: { "Content-Type": "application/json" } });
+  expect(await (await POST(req)).json()).toEqual({ sentence: "We need to negotiate." });
 });
