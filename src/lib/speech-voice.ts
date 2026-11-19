@@ -30,19 +30,24 @@ export function pickVoice(lang: LearnLang, savedVoiceURI: string | null): Speech
   );
 }
 
-/** Reads text aloud in a language with the learner's voice settings. False when the browser can't speak. */
-export function speakText(
+/** Reads text aloud with an explicit BCP-47 code (pinyin/Kana/Romance… code entry point for Vietnamese too). */
+export function speakCode(
   text: string,
-  lang: LearnLang,
+  voiceCode: string,
   settings: SpeechSettings,
-  events: { onstart?: () => void; onend?: () => void } = {}
+  events: { onstart?: () => void; onend?: () => void } = {},
+  options: { voice?: SpeechSynthesisVoice | null } = {}
 ): boolean {
   if (typeof window === "undefined" || !window.speechSynthesis) return false;
   window.speechSynthesis.cancel?.();
   const utterance = new SpeechSynthesisUtterance(text);
-  const voice = pickVoice(lang, settings.voiceURI);
+  const exact = normalized(voiceCode);
+  const voice =
+    options.voice ??
+    window.speechSynthesis.getVoices().find((candidate) => normalized(candidate.lang) === exact) ??
+    null;
   if (voice) utterance.voice = voice;
-  utterance.lang = LANG_INFO[lang].voice;
+  utterance.lang = voiceCode;
   utterance.rate = settings.rate;
   utterance.pitch = settings.pitch;
   utterance.volume = settings.volume;
@@ -53,4 +58,14 @@ export function speakText(
   }
   window.speechSynthesis.speak(utterance);
   return true;
+}
+
+/** Reads text aloud in a language with the learner's voice settings. False when the browser can't speak. */
+export function speakText(
+  text: string,
+  lang: LearnLang,
+  settings: SpeechSettings,
+  events: { onstart?: () => void; onend?: () => void } = {}
+): boolean {
+  return speakCode(text, LANG_INFO[lang].voice, settings, events, { voice: pickVoice(lang, settings.voiceURI) });
 }

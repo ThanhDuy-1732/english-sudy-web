@@ -1,4 +1,4 @@
-import { pickVoice, speakText, voicesFor } from "../speech-voice";
+import { pickVoice, speakCode, speakText, voicesFor } from "../speech-voice";
 
 type V = { voiceURI: string; lang: string };
 let voices: V[] = [];
@@ -26,4 +26,21 @@ test("speakText speaks in the language with the settings", () => {
   expect(utterance.lang).toBe("ja-JP");
   expect(utterance.voice.voiceURI).toBe("ja");
   expect(utterance.rate).toBe(0.8);
+});
+
+test("speakCode speaks Vietnamese with vi-VN", () => {
+  voices = [{ voiceURI: "vn", lang: "vi-VN" }];
+  const settings = { voiceURI: null, rate: 0.9, pitch: 1, volume: 1 };
+  expect(speakCode("Xin chào", "vi-VN", settings)).toBe(true);
+  const utterance = speak.mock.calls[0][0];
+  expect(utterance.lang).toBe("vi-VN");
+  expect(utterance.voice.voiceURI).toBe("vn");
+});
+
+test("speakCode vẫn đọc khi thiết bị không có giọng khớp chính xác", () => {
+  voices = [{ voiceURI: "us", lang: "en-US" }];
+  expect(speakCode("Xin chào", "vi-VN", { voiceURI: null, rate: 1, pitch: 1, volume: 1 })).toBe(true);
+  const utterance = speak.mock.calls[0][0];
+  expect(utterance.lang).toBe("vi-VN");
+  expect(utterance.voice).toBeNull();
 });
