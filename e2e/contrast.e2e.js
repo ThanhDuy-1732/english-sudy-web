@@ -6,7 +6,13 @@ const PAGES = ["/", "/today", "/review", "/exam", "/exam/mistakes", "/exam/mock"
 
 for (const theme of ["dark", "light"]) {
   scenario(`contrast and hydration on ${PAGES.length} pages (${theme} theme)`, async ({ browser, check }) => {
-    const page = await newPage(browser, { theme, seed: baseSeed(), intercept: (req) => aiMocks(req, json) });
+    // Chinese and Japanese words too (same characters, two languages), learning en + zh + ja: CJK text in every theme.
+    const seed = baseSeed();
+    const learned = seed.learnedWords ?? [];
+    const cjk = (word, lang, reading) => ({ word, lang, reading, meaning: "học sinh", example: "", topic: "TOEIC", learnedAt: "2026-11-01T00:00:00.000Z", nextReviewAt: "2026-11-02T00:00:00.000Z", conceptId: "cjk" });
+    seed.learnedWords = [...learned, cjk("学生", "zh", "xuéshēng"), cjk("学生", "ja", "がくせい")];
+    seed.learningLanguages = ["en", "zh", "ja"];
+    const page = await newPage(browser, { theme, seed, intercept: (req) => aiMocks(req, json) });
     for (const path of PAGES) {
       page.__errors.length = 0; page.__hydration.length = 0;
       await goto(page, path);

@@ -1,5 +1,7 @@
 "use client";
 
+import { LANG_INFO, langOf } from "@/lib/languages";
+import { wordKey } from "@/lib/storage";
 import { useEffect, useState } from "react";
 import { localDateKey } from "@/lib/date";
 import type { LearnedWord } from "@/lib/storage";
@@ -123,20 +125,20 @@ export default function DayDrawer({ date, words, studyMinutes, isOpen, onClose, 
               ) : (
                 <ul className="space-y-2">
                   {words.map((w) => (
-                    <li key={w.word} className="rounded-xl border border-rule overflow-hidden">
+                    <li key={wordKey(langOf(w), w.word)} className="rounded-xl border border-rule overflow-hidden">
                       <button
                         type="button"
-                        onClick={() => toggleWord(w.word)}
+                        onClick={() => toggleWord(wordKey(langOf(w), w.word))}
                         className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-primary-soft/50"
                       >
                         <div>
-                          <span className="font-medium text-ink">{w.word}</span>
+                          <span lang={LANG_INFO[langOf(w)].htmlLang} className="font-medium text-ink">{w.word}</span>
                           <span className="mx-2 text-muted">—</span>
                           <span className="text-sm text-muted">{w.meaning}</span>
                         </div>
-                        <span className="ml-2 text-muted text-xs">{expandedWords.has(w.word) ? "▲" : "▼"}</span>
+                        <span className="ml-2 text-muted text-xs">{expandedWords.has(wordKey(langOf(w), w.word)) ? "▲" : "▼"}</span>
                       </button>
-                      {expandedWords.has(w.word) && (
+                      {expandedWords.has(wordKey(langOf(w), w.word)) && (
                         <div className="border-t border-rule bg-ink/5 px-4 py-3 space-y-1">
                           {w.example && (
                             <p className="text-sm text-muted italic">&quot;{w.example}&quot;</p>

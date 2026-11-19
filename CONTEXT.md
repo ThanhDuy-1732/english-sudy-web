@@ -292,6 +292,7 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 | `mistakeLogBackup` | string | Bản sao nguyên văn `mistakeLog` trước migration |
 | `mistakeLogMigrated` · `mistakeLogRemoteMigrated` | `"1"` | Cờ migration local / remote (`mistake_log`) đã chạy |
 | `examSettings` | `ExamSettings` | Primary exam, target score, level, listening rate |
+| `learningLanguages` | `LearnLang[]` | Languages being studied (default `["en"]`, never empty); `LanguagePicker` |
 | `dailyPlan` | `{ date, blocks }` | Kế hoạch `/today` — regenerate mỗi ngày |
 | `lastSpeakingAt` | ISO string | Để /today nhắc luyện nói sau 2 ngày |
 | `lastWritingAt` | ISO string | Để /today nhắc luyện viết sau 5 ngày |
@@ -364,6 +365,18 @@ On first flip: fetches sentence + synonyms in parallel. Saved state is lazy (onl
 In **review mode** (`isReviewMode=true`): shows 4 review grade buttons — Quên (0), Khó (3), Được (4), Dễ (5) — instead of save. Prop `shortcuts` (set on the first card of `/review`, outlined in blue): Space/Enter flips, 1–4 grade; ignored while typing or when a button/link has focus; off when `learningProfile.shortcutsEnabled` is false. Optional prop `learned` (the `LearnedWord`): each grade button previews the stage and interval it would give (`fsrs(fsrsStateOf(learned), q)`). Updates the schedule via `reviewWord` and passes the quality to `onReviewed` for session tracking. `/review` cancels unfinished sessions on exit; its summary reports counts, accuracy (Được + Dễ), duration, and remaining due words.
 
 ---
+
+## Learning languages (`src/lib/languages.ts`)
+
+`LearnLang` = `en | zh | ja | ko` (Chinese is simplified). `LANG_INFO` has the Vietnamese label, native name, short code (EN, 中, 日, 한), voice code (`en-US`, `zh-CN`, `ja-JP`, `ko-KR`), HTML `lang` and reading name (pinyin, kana, romanization). localStorage `learningLanguages` (array, default `["en"]`, never empty) is set by `LanguagePicker` (sidebar + phone top bar) and read with `useLearningLanguages()`; `setLearningLanguages` fires a `learning-languages` window event.
+
+- Words: `LearnedWord` and `BankWord` have `lang?` (missing = English), `reading?`, `conceptId?` (same meaning in other languages, generated together). Identity is `wordKey(lang, word)` everywhere (saving, review, delete, bank dedupe, backup merge), so 学生 zh and 学生 ja are separate words. `deleteLearnedWord(word, lang="en")`, `reviewWord(word, q, now, lang="en")`, `getWordsForReview(langs?)`.
+- Bank: `getUnseen/countBank/markBankWordsSeen/pickExcludeSample` take a language (default `"en"`). Concepts: `addConcepts`, `getUnseenConcepts(topic, langs, n)` (only concepts complete in every language), `countConcepts`, `markConceptsSeen`, `countAvailable(topic, langs)` (words for English only, concepts otherwise), `isEnglishOnly`.
+- `/api/generate-words`: no `langs` or `["en"]` → the original word list; otherwise `{ concepts: [{ meaning, words: { en: {word}, zh: {word, reading} } }] }` with `exclude` per language. `/api/generate-sentence` with `lang` (not en) → `{ sentence, reading, translation }`; `/api/generate-synonyms` takes `lang`.
+- Từ mới: English only keeps `FlashcardGrid`; several languages show `ConceptCard` (front: each language's word via `LangText` + 🔊; back: meaning + an example per language; "Gieo vào vườn" saves one word per language). Quiz/Đọc hiểu stay English-only. The word job (`WordJob.langs`) generates concepts through the same generic `runWordJob`.
+- Review: `Flashcard` takes `lang`/`reading` (typing modes hidden for non-English; "Cũng là" shows sibling words). `/review` shows toggle chips per language with due words, preselected to the learning languages.
+- Vườn từ, Thống kê: a "Ngôn ngữ" filter when saved words span several languages; GardenBed labels get the short code.
+- `PronunciationButton({ word, lang })` speaks with that language's voice; disabled with a hint when the device has none. `LangText` sets `lang` (correct Han glyphs) and the reading; CJK uses system fonts (Tailwind `sans`/`en` stacks).
 
 ## Topics (`src/lib/topics.ts`)
 

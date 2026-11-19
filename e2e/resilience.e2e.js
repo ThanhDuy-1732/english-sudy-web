@@ -19,7 +19,7 @@ const CASES = [
   { name: "grammar add topic", api: "/api/grammar-generate", url: "/grammar", expect: /Không thể tạo chủ đề/, run: async (p) => { await p.type('input[placeholder^="Nhập chủ đề"]', "Gerunds"); await clickText(p, "+ Thêm chủ đề"); } },
   { name: "exam drill generation", api: "/api/exam/generate-item", url: "/exam/drill/RC5", expect: /Không thể tải câu hỏi/, run: async () => {}, wait: 6000 },
   { name: "write submit", api: "/api/write/grade", url: "/write/task/task2-opinion", expect: /Không thể chấm bài/, run: async (p) => { await clickContains(p, "Bắt đầu viết"); await sleep(300); await setValue(p, "textarea", words(262)); await sleep(300); await clickContains(p, "Nộp bài"); } },
-  { name: "roleplay message", api: "/api/speak/roleplay", url: "/speak/roleplay/hotel", expect: /Lỗi kết nối/, run: async (p) => { await p.evaluate(() => document.querySelector("input").focus()); await p.keyboard.type("Hello"); await p.keyboard.press("Enter"); } },
+  { name: "roleplay message", api: "/api/speak/roleplay", url: "/speak/roleplay/hotel", expect: /Lỗi kết nối/, run: async (p) => { await p.evaluate(() => document.querySelector('input[placeholder^="Nhập tin nhắn"]').focus()); await p.keyboard.type("Hello"); await p.keyboard.press("Enter"); } },
   { name: "rewrite grading", api: "/api/exam/grade-open", url: "/write/rewrite/rw1", seed: rwSeed, expect: /Không thể chấm/, run: async (p) => { await setValue(p, "textarea", "good"); await clickContains(p, "Kiểm tra"); } },
 ];
 const ABORT_TOO = new Set(["generate words", "grammar quiz question", "write submit", "roleplay message", "exam drill generation"]);

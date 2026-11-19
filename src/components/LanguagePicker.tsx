@@ -15,7 +15,7 @@ export default function LanguagePicker({ align = "left" }: { align?: "left" | "r
     <details className="relative">
       <summary
         aria-label={`Ngôn ngữ học: ${langs.map((lang) => LANG_INFO[lang].label).join(", ")}`}
-        className="inline-flex min-h-11 cursor-pointer list-none items-center gap-1.5 rounded-full border border-rule bg-card px-3 text-sm font-semibold text-ink hover:border-primary [&::-webkit-details-marker]:hidden"
+        className="inline-flex min-h-11 shrink-0 cursor-pointer list-none items-center gap-1.5 whitespace-nowrap rounded-full border border-rule bg-card px-3 text-sm font-semibold text-ink hover:border-primary [&::-webkit-details-marker]:hidden"
       >
         <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.5 2.5 3.5 5.5 3.5 9s-1 6.5-3.5 9c-2.5-2.5-3.5-5.5-3.5-9s1-6.5 3.5-9z" /></svg>
         {langs.map((lang) => LANG_INFO[lang].short).join(" · ")}

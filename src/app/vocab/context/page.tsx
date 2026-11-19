@@ -25,7 +25,8 @@ export default function ContextPracticePage() {
   const [draft, setDraft] = useState("");
 
   useEffect(() => {
-    setAllWords(getLearnedWords().map((w) => w.word));
+    // One chip per spelling: 学生 saved in Chinese and Japanese is one word to place in context.
+    setAllWords([...new Set(getLearnedWords().map((w) => w.word))]);
   }, []);
 
   const filtered = allWords.filter((w) => w.toLowerCase().includes(search.toLowerCase()));
