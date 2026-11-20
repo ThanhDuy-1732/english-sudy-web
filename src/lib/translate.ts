@@ -6,8 +6,11 @@ export type TranslateLang = "vi" | LearnLang;
 
 export const TRANSLATE_LANGS: TranslateLang[] = ["vi", "en", "zh", "ja", "ko"];
 
-export const TRANSLATE_INFO: Record<TranslateLang, { label: string; native: string; voice: string; htmlLang: string }> = {
-  vi: { label: "Tiếng Việt", native: "Tiếng Việt", voice: "vi-VN", htmlLang: "vi" },
+export const TRANSLATE_INFO: Record<
+  TranslateLang,
+  { label: string; native: string; short: string; voice: string; htmlLang: string }
+> = {
+  vi: { label: "Tiếng Việt", native: "Tiếng Việt", short: "VI", voice: "vi-VN", htmlLang: "vi" },
   en: LANG_INFO.en,
   zh: LANG_INFO.zh,
   ja: LANG_INFO.ja,
