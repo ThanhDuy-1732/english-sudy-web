@@ -9,6 +9,8 @@ export const BODY_LIMITS: Record<string, number> = {
   "/api/speak/roleplay": 64 * KB,
   "/api/speech/grade": 32 * KB,
   "/api/exam/generate-item": 8 * KB,
+  // Base64 photo (shrunk on the device); stays under Vercel's 4.5 MB request cap.
+  "/api/translate/image": 4 * 1024 * KB,
 };
 export const DEFAULT_BODY_LIMIT = 16 * KB;
 // Audio uploads have their own 25 MiB check in the route.

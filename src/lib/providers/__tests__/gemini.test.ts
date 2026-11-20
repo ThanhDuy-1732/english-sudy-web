@@ -36,3 +36,10 @@ test("provider has correct metadata", () => {
   expect(provider.id).toBe("gemini");
   expect(provider.model).toBe("gemini-flash-latest");
 });
+
+test("generateWithImage sends text and inline image parts", async () => {
+  mockGenerateContent.mockResolvedValue({ response: { text: () => "{}" } });
+  expect(await provider.generateWithImage("read it", { mimeType: "image/jpeg", base64: "QUJD" })).toBe("{}");
+  const req = mockGenerateContent.mock.calls[0][0];
+  expect(req.contents[0].parts).toEqual([{ text: "read it" }, { inlineData: { mimeType: "image/jpeg", data: "QUJD" } }]);
+});

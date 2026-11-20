@@ -1,8 +1,8 @@
 // src/lib/providers/gemini.ts
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import type { AIProvider, GenerateOpts } from "./types";
+import { GoogleGenerativeAI, type Part } from "@google/generative-ai";
+import type { AIProvider, GenerateOpts, ImageInput, VisionProvider } from "./types";
 
-export class GeminiProvider implements AIProvider {
+export class GeminiProvider implements AIProvider, VisionProvider {
   readonly id = "gemini";
   readonly name: string;
   readonly model: string;
@@ -15,9 +15,17 @@ export class GeminiProvider implements AIProvider {
     this.client = genAI.getGenerativeModel({ model });
   }
 
-  async generateContent(prompt: string, opts?: GenerateOpts): Promise<string> {
+  generateContent(prompt: string, opts?: GenerateOpts): Promise<string> {
+    return this.send([{ text: prompt }], opts);
+  }
+
+  generateWithImage(prompt: string, image: ImageInput, opts?: GenerateOpts): Promise<string> {
+    return this.send([{ text: prompt }, { inlineData: { mimeType: image.mimeType, data: image.base64 } }], opts);
+  }
+
+  private async send(parts: Part[], opts?: GenerateOpts): Promise<string> {
     const req = {
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      contents: [{ role: "user", parts }],
       ...(opts?.temperature !== undefined && { generationConfig: { temperature: opts.temperature } }),
     };
     try {

@@ -35,3 +35,8 @@ test("pruning many clients keeps the counters of active ones", () => {
   for (let i = 0; i < 1001; i++) checkApiRequest({ path: "/api/x", ip: `old-${i}`, contentLength: "1", now: now - RATE_WINDOW_MS });
   expect(checkApiRequest({ path: "/api/x", ip: "busy", contentLength: "1", now })).toMatchObject({ status: 429 });
 });
+
+test("photo translation allows a 4 MB body", () => {
+  expect(checkApiRequest({ path: "/api/translate/image", ip: "a", contentLength: String(3 * 1024 * 1024) })).toEqual({ ok: true });
+  expect(checkApiRequest({ path: "/api/translate/image", ip: "a", contentLength: String(4 * 1024 * 1024 + 1) })).toMatchObject({ status: 413 });
+});

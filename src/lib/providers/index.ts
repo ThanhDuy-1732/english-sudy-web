@@ -1,6 +1,6 @@
 import { GeminiProvider } from "./gemini";
 import { OpenAICompatProvider } from "./openai-compat";
-import type { AIProvider, GenerateOpts, ProviderInfo } from "./types";
+import type { AIProvider, GenerateOpts, ProviderInfo, VisionProvider } from "./types";
 
 const PROVIDER_TIMEOUT_MS = Number(process.env.AI_PROVIDER_TIMEOUT_MS) || 25_000;
 
@@ -159,4 +159,9 @@ export function getRegisteredProviders(): ProviderInfo[] {
 
 export function getProviderById(id: string): AIProvider | undefined {
   return registry.find((p) => p.id === id);
+}
+
+/** The provider that can read images (Gemini), when its key is configured. */
+export function getVisionProvider(): VisionProvider | undefined {
+  return registry.find((p): p is GeminiProvider => p instanceof GeminiProvider);
 }

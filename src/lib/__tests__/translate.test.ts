@@ -1,4 +1,5 @@
 import {
+  parseImageTranslation,
   whisperLang,
   TONES,
   TRANSLATE_INFO,
@@ -113,4 +114,23 @@ test("whisper language names map to codes", () => {
   expect(whisperLang("ZH")).toBe("zh");
   expect(whisperLang("french")).toBeNull();
   expect(whisperLang(undefined)).toBeNull();
+});
+
+test("parseImageTranslation drops empty lines and returns null when none remain", () => {
+  expect(
+    parseImageTranslation({
+      detected: "zh",
+      lines: [
+        { text: "出口", translation: "Lối ra", reading: "chūkǒu" },
+        { text: "", translation: "x" },
+        { text: "入口", translation: " " },
+      ],
+    })
+  ).toEqual({ detected: "zh", lines: [{ text: "出口", translation: "Lối ra", reading: "chūkǒu" }] });
+  expect(parseImageTranslation({ detected: "fr", lines: [{ text: "a", translation: "b" }] })).toEqual({
+    detected: null,
+    lines: [{ text: "a", translation: "b" }],
+  });
+  expect(parseImageTranslation({ detected: "zh", lines: [] })).toBeNull();
+  expect(parseImageTranslation(null)).toBeNull();
 });

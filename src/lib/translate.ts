@@ -163,3 +163,35 @@ export function whisperLang(name: unknown): TranslateLang | null {
   const key = name.trim().toLowerCase();
   return WHISPER_NAMES[key] ?? (isTranslateLang(key) ? key : null);
 }
+
+export interface ImageLine {
+  text: string;
+  translation: string;
+  /** Reading of the translation (pinyin, kana, romanization) when the target is zh/ja/ko. */
+  reading?: string;
+}
+
+export interface ImageTranslation {
+  detected: TranslateLang | null;
+  lines: ImageLine[];
+}
+
+/** Keeps lines that have both the original and the translation; null when none remain. */
+export function parseImageTranslation(raw: unknown): ImageTranslation | null {
+  if (!raw || typeof raw !== "object") return null;
+  const { detected, lines } = raw as { detected?: unknown; lines?: unknown };
+  if (!Array.isArray(lines)) return null;
+  const kept: ImageLine[] = [];
+  for (const item of lines) {
+    if (!item || typeof item !== "object") continue;
+    const { text, translation, reading } = item as Record<string, unknown>;
+    if (typeof text !== "string" || typeof translation !== "string") continue;
+    if (!text.trim() || !translation.trim()) continue;
+    kept.push({
+      text: text.trim(),
+      translation: translation.trim(),
+      ...(typeof reading === "string" && reading.trim() ? { reading: reading.trim() } : {}),
+    });
+  }
+  return kept.length > 0 ? { detected: isTranslateLang(detected) ? detected : null, lines: kept } : null;
+}
