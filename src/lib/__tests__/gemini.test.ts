@@ -231,3 +231,12 @@ test("generateReading in Japanese asks for a Japanese passage and a translation"
   expect(prompt).toContain("Japanese");
   expect(prompt).toContain("translation");
 });
+
+test("generateConcepts names Japanese and Korean in English", async () => {
+  mockFn.mockResolvedValue(JSON.stringify([{ meaning: "nước", words: { ja: { word: "水", reading: "みず" }, ko: { word: "물", reading: "mul" } } }]));
+  await generateConcepts("TOEIC", ["ja", "ko"], mockFn, { count: 1 });
+  const prompt = mockFn.mock.calls.at(-1)![0];
+  expect(prompt).toContain("- ja: Japanese.");
+  expect(prompt).toContain("- ko: Korean.");
+  expect(prompt).not.toContain("日本語");
+});

@@ -24,6 +24,7 @@ import {
   pickExcludeSample,
   takeUnseen,
   type Concept,
+  emptyBatchMessage,
 } from "@/lib/word-bank";
 import ConceptCard from "@/components/ConceptCard";
 import { useLearningLanguages } from "@/lib/useLearningLanguages";
@@ -100,10 +101,11 @@ export default function HomePage() {
       });
       if (!res.ok) throw new Error();
       const data = (await res.json()) as { concepts?: Omit<Concept, "conceptId">[] };
-      addConcepts(topic, Array.isArray(data.concepts) ? data.concepts : []);
+      const received = Array.isArray(data.concepts) ? data.concepts : [];
+      const { persisted } = addConcepts(topic, received);
       const picked = getUnseenConcepts(topic, langs, 5);
       if (picked.length === 0) {
-        setError("Chủ đề này đã cạn từ mới. Thử chủ đề khác.");
+        setError(emptyBatchMessage(received.length, persisted));
         return;
       }
       markConceptsSeen(picked);
@@ -147,13 +149,14 @@ export default function HomePage() {
       }
 
       const data = (await res.json()) as Word[];
-      addBankWords(
-        data.map((entry) => ({ ...entry, topic, createdAt: new Date().toISOString() }))
+      const received = Array.isArray(data) ? data : [];
+      const { persisted } = addBankWords(
+        received.map((entry) => ({ ...entry, topic, createdAt: new Date().toISOString() }))
       );
 
       const picked = takeUnseen(topic, 5);
       if (picked.length === 0) {
-        setError("Chủ đề này đã cạn từ mới. Thử chủ đề khác.");
+        setError(emptyBatchMessage(received.length, persisted));
         return;
       }
       setWords(picked.map(({ word, meaning }) => ({ word, meaning })));

@@ -1,4 +1,5 @@
 import {
+  emptyBatchMessage,
   WORD_BANK_LIMIT,
   addBankWords,
   countBank,
@@ -210,4 +211,10 @@ describe("addConcepts stores whole concepts only", () => {
     expect(getUnseenConcepts("TOEIC", ["en", "zh"], 5).map((c) => c.words.en!.word)).toEqual(["invoice"]);
     expect(getBank().some((e) => e.word === "老师" || e.word === "receipt")).toBe(false);
   });
+});
+
+test("an empty batch explains the real cause", () => {
+  expect(emptyBatchMessage(0, true)).toBe("Không thể sinh từ mới lúc này. Vui lòng thử lại.");
+  expect(emptyBatchMessage(20, false)).toBe("Bộ nhớ trình duyệt đã đầy nên chưa lưu được từ mới. Hãy xuất file sao lưu rồi xoá bớt dữ liệu trong Cài đặt.");
+  expect(emptyBatchMessage(20, true)).toBe("Chủ đề này đã cạn từ mới. Thử chủ đề khác.");
 });

@@ -43,3 +43,29 @@ test("flipping back and forth while examples load counts one flip", async () => 
   await act(async () => {});
   expect(onFlip).toHaveBeenCalledTimes(1);
 });
+
+test("saving waits for the examples so none is stored empty", () => {
+  render(<ConceptCard concept={concept} langs={["en", "zh"]} topic="TOEIC" />);
+  fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của invoice, 发票" }));
+  expect(screen.getByRole("button", { name: "Đang tải ví dụ…" })).toBeDisabled();
+});
+
+test("words already in the garden say so", async () => {
+  localStorage.setItem("learnedWords", JSON.stringify([{ word: "invoice", meaning: "x", example: "", topic: "t", learnedAt: "" }, { word: "发票", meaning: "x", example: "", topic: "t", learnedAt: "", lang: "zh" }]));
+  render(<ConceptCard concept={concept} langs={["en", "zh"]} topic="TOEIC" />);
+  await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của invoice, 发票" })); });
+  fireEvent.click(await screen.findByRole("button", { name: "Gieo vào vườn" }));
+  expect(screen.getByRole("button", { name: "Đã có trong vườn" })).toBeDisabled();
+});
+
+test("a storage failure is reported and can be retried", async () => {
+  render(<ConceptCard concept={concept} langs={["en", "zh"]} topic="TOEIC" />);
+  await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của invoice, 发票" })); });
+  const setItem = jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+    throw new Error("QuotaExceededError");
+  });
+  fireEvent.click(await screen.findByRole("button", { name: "Gieo vào vườn" }));
+  setItem.mockRestore();
+  expect(screen.getByRole("status")).toHaveTextContent("Không lưu được");
+  expect(screen.getByRole("button", { name: "Gieo vào vườn" })).toBeEnabled();
+});

@@ -65,7 +65,9 @@ export function saveLearnedWord(entry: LearnedWord): boolean {
 }
 
 export function deleteLearnedWord(word: string, lang: LearnLang = "en"): void {
-  const words = getLearnedWords().filter((entry) => !(entry.word === word && langOf(entry) === lang));
+  // Same key as saveLearnedWord: case and surrounding spaces don't make a different word.
+  const key = wordKey(lang, word);
+  const words = getLearnedWords().filter((entry) => wordKey(langOf(entry), entry.word) !== key);
   localStorage.setItem(KEY, JSON.stringify(words));
 }
 
@@ -76,8 +78,9 @@ export function deleteLearnedWord(word: string, lang: LearnLang = "en"): void {
 export function reviewWord(word: string, quality: 0 | 3 | 4 | 5, now = new Date(), lang: LearnLang = "en"): void {
   // Lazy import keeps storage.ts free of a circular import with srs.ts (which imports the LearnedWord type).
   const { fsrs, fsrsStateOf, stabilityToMastery } = require("./srs") as typeof import("./srs");
+  const key = wordKey(lang, word);
   const words = getLearnedWords().map((w) => {
-    if (w.word !== word || langOf(w) !== lang) return w;
+    if (wordKey(langOf(w), w.word) !== key) return w;
     const next = fsrs(fsrsStateOf(w), quality, now);
     return touch({
       ...w,

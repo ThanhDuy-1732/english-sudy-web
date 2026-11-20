@@ -43,3 +43,12 @@ test("words without lang are English", () => {
   deleteLearnedWord("apple");
   expect(getLearnedWords()).toEqual([]);
 });
+
+test("review and delete find a word however its case or spacing was typed", () => {
+  localStorage.clear();
+  saveLearnedWord(entry("Invoice"));
+  reviewWord("  invoice ", 5);
+  expect(getLearnedWords()[0].lastReviewedAt).toBeDefined();
+  deleteLearnedWord("INVOICE");
+  expect(getLearnedWords()).toHaveLength(0);
+});

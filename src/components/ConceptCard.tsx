@@ -19,7 +19,8 @@ export default function ConceptCard({ concept, langs, topic, onFlip }: { concept
   const { fetchWithProvider } = useApiFetch();
   const [flipped, setFlipped] = useState(false);
   const [examples, setExamples] = useState<Partial<Record<LearnLang, Example | null>>>({});
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState<"new" | "exists" | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
   // Examples are requested (and the flip counted) once, even if the card is flipped back before they arrive.
   const requested = useRef(false);
   const shown = langs.filter((lang) => concept.words[lang]);
@@ -44,11 +45,16 @@ export default function ConceptCard({ concept, langs, topic, onFlip }: { concept
     setExamples(Object.fromEntries(results));
   }
 
+  // Saving waits for every example: a word saved mid-load would keep an empty example for good.
+  const examplesLoading = shown.some((lang) => examples[lang] === undefined);
+
   function save() {
     const learnedAt = new Date().toISOString();
-    for (const lang of shown) {
-      const item = concept.words[lang]!;
-      saveLearnedWord({
+    let added = 0;
+    try {
+      for (const lang of shown) {
+        const item = concept.words[lang]!;
+        if (saveLearnedWord({
         word: item.word,
         meaning: concept.meaning,
         example: examples[lang]?.sentence ?? "",
@@ -57,9 +63,15 @@ export default function ConceptCard({ concept, langs, topic, onFlip }: { concept
         lang,
         conceptId: concept.conceptId,
         ...(item.reading ? { reading: item.reading } : {}),
-      });
+        }))
+          added += 1;
+      }
+    } catch {
+      setStatus("Không lưu được");
+      return;
     }
-    setSaved(true);
+    setStatus(null);
+    setSaved(added > 0 ? "new" : "exists");
   }
 
   return (
@@ -110,7 +122,10 @@ export default function ConceptCard({ concept, langs, topic, onFlip }: { concept
           </ul>
           <div className="mt-4 flex flex-wrap gap-2">
             <button type="button" onClick={flip} className="btn btn-secondary">Lật lại</button>
-            <button type="button" onClick={save} disabled={saved} className="btn btn-primary">{saved ? "Đã gieo" : "Gieo vào vườn"}</button>
+            <button type="button" onClick={save} disabled={saved !== null || examplesLoading} className="btn btn-primary">
+              {saved === "new" ? "Đã gieo" : saved === "exists" ? "Đã có trong vườn" : examplesLoading ? "Đang tải ví dụ…" : "Gieo vào vườn"}
+            </button>
+            {status && <span role="status" className="self-center text-sm text-margin">{status}</span>}
           </div>
         </>
       )}

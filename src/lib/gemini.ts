@@ -1,6 +1,6 @@
 // src/lib/gemini.ts
 import { RANDOM_TOPIC } from "./topics";
-import { LANG_INFO, type LearnLang } from "./languages";
+import type { LearnLang } from "./languages";
 export interface GeneratedWord {
   word: string;
   meaning: string;
@@ -233,7 +233,7 @@ export async function generateConcepts(
       ? "useful vocabulary picked at random from many different everyday topics (each item from a different area of life; mix nouns, verbs and adjectives; no shared theme)"
       : `vocabulary for the topic "${topic}"`;
   const languageLines = langs
-    .map((lang) => `- ${lang}: ${LANG_INFO[lang].native === "中文" ? "Simplified Chinese" : LANG_INFO[lang].native}.${READING_HINT[lang]}`)
+    .map((lang) => `- ${lang}: ${LANGUAGE_NAME[lang]}.${READING_HINT[lang]}`)
     .join("\n");
   const avoid = langs
     .filter((lang) => exclude[lang]?.length)

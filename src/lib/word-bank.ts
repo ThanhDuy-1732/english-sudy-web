@@ -240,3 +240,10 @@ export function pickExcludeSample(topic: string, max = DEFAULT_EXCLUDE_MAX, lang
 
   return [...recent, ...rest].slice(0, max);
 }
+
+/** Why a generation left nothing new to show: no answer from the AI, a full browser storage, or a used-up topic. */
+export function emptyBatchMessage(received: number, persisted: boolean): string {
+  if (!persisted) return "Bộ nhớ trình duyệt đã đầy nên chưa lưu được từ mới. Hãy xuất file sao lưu rồi xoá bớt dữ liệu trong Cài đặt.";
+  if (received === 0) return "Không thể sinh từ mới lúc này. Vui lòng thử lại.";
+  return "Chủ đề này đã cạn từ mới. Thử chủ đề khác.";
+}
