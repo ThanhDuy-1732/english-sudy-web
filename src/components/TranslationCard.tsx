@@ -19,7 +19,7 @@ export function TranslationCard({
 }) {
   const { settings } = useVoiceSettings();
   const [status, setStatus] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState<"new" | "exists" | null>(null);
   const info = TRANSLATE_INFO[to];
   const toneLabel = TONES.find((tone) => tone.tone === result.tone)?.label ?? result.tone;
 
@@ -34,16 +34,22 @@ export function TranslationCard({
   }
 
   function save() {
-    saveLearnedWord({
-      word: result.text,
-      meaning: vietnamese,
-      example: "",
-      topic: "Dịch",
-      learnedAt: new Date().toISOString(),
-      lang: isLearnLang(to) ? to : undefined,
-      reading: result.reading,
-    });
-    setSaved(true);
+    let added: boolean;
+    try {
+      added = saveLearnedWord({
+        word: result.text,
+        meaning: vietnamese,
+        example: "",
+        topic: "Dịch",
+        learnedAt: new Date().toISOString(),
+        lang: isLearnLang(to) ? to : undefined,
+        reading: result.reading,
+      });
+    } catch {
+      setStatus("Không lưu được");
+      return;
+    }
+    setSaved(added ? "new" : "exists");
   }
 
   return (
@@ -83,8 +89,8 @@ export function TranslationCard({
           </span>
         )}
         {isLearnLang(to) && (
-          <button type="button" onClick={save} disabled={saved} className="btn btn-secondary ml-auto text-sm disabled:opacity-60">
-            {saved ? "Đã gieo" : "Gieo vào vườn"}
+          <button type="button" onClick={save} disabled={saved !== null} className="btn btn-secondary ml-auto text-sm disabled:opacity-60">
+            {saved === "new" ? "Đã gieo" : saved === "exists" ? "Đã có trong vườn" : "Gieo vào vườn"}
           </button>
         )}
       </div>

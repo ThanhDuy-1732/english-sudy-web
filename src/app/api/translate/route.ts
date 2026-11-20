@@ -35,9 +35,17 @@ const LANGUAGE_NAME: Record<TranslateLang, string> = {
   ko: "Korean",
 };
 
+// Vietnamese and English results must be Latin script: kana, Han or Hangul means the AI echoed the source.
+const NON_LATIN = /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/;
+const wrongScript = (to: TranslateLang, results: { text: string }[]) =>
+  (to === "vi" || to === "en") && results.some((result) => NON_LATIN.test(result.text));
+
 function buildPrompt(text: string, from: TranslateLang | "auto", to: TranslateLang): string {
-  const source = from === "auto" ? `detect the language of the text` : `the text is in ${LANGUAGE_NAME[from]}`;
   const target = LANGUAGE_NAME[to];
+  const task =
+    from === "auto"
+      ? `Detect the language of the text, then translate it into ${target}.`
+      : `Translate the text from ${LANGUAGE_NAME[from]} into ${target}.`;
   const reading =
     to === "zh"
       ? 'For "reading": pinyin with tone marks.'
@@ -47,8 +55,9 @@ function buildPrompt(text: string, from: TranslateLang | "auto", to: TranslateLa
           ? 'For "reading": Revised Romanization.'
           : 'Omit "reading".';
 
-  return `You are a translator between Vietnamese speakers and ${target} speakers.
-${source}. Translate the text into ${target}.
+  return `You are a translator helping a Vietnamese learner.
+${task}
+Every result "text" must be written in ${target}, never in the source language.
 
 Produce exactly one translation per tone, in this order:
 1. "casual" — how friends or close family would say it.
@@ -69,7 +78,7 @@ ${text}
 }
 
 export async function POST(req: NextRequest) {
-  const body: Partial<{ text: unknown; from: unknown; to: unknown }> | null = await req
+  const body: Partial<{ text: unknown; from: unknown; to: unknown; provider: string; disabledProviders: string[] }> | null = await req
     .json()
     .catch(() => null);
   const { text, from, to } = body ?? {};
@@ -88,24 +97,37 @@ export async function POST(req: NextRequest) {
   }
 
   const prompt = buildPrompt(text.trim(), from as TranslateLang | "auto", to as TranslateLang);
-  try {
-    const { text: raw, providerId } = await callTask({ task: "translation", prompt });
-    const shaped = await parseAiJson(raw, ResponseSchema, {
-      repair: (err) =>
-        callTask({ task: "translation", prompt: `${prompt}\n\nSchema error: ${err}\nReturn valid JSON only.`, provider: providerId }).then(
-          (result) => result.text
-        ),
+  const failed = () => NextResponse.json({ error: "Không dịch được lúc này. Vui lòng thử lại." }, { status: 503 });
+  let providerUsed = "";
+  const askRaw = (content: string, provider: string | undefined) =>
+    callTask({ task: "translation", prompt: content, provider, disabledProviders: body?.disabledProviders }).then((result) => {
+      providerUsed = result.providerId;
+      return result.text;
     });
-    const parsed = parseTranslation(shaped);
-    if (!parsed) {
-      return NextResponse.json({ error: "Không dịch được lúc này. Vui lòng thử lại." }, { status: 503 });
+  const ask = async (content: string, provider = body?.provider) => {
+    const raw = await askRaw(content, provider);
+    const shaped = await parseAiJson(raw, ResponseSchema, {
+      repair: (err) => askRaw(`${content}\n\nSchema error: ${err}\nReturn valid JSON only.`, providerUsed),
+    });
+    return parseTranslation(shaped);
+  };
+
+  try {
+    let parsed = await ask(prompt);
+    if (parsed && wrongScript(to as TranslateLang, parsed.results)) {
+      parsed = await ask(
+        `${prompt}\n\nYour previous answer was not in ${LANGUAGE_NAME[to as TranslateLang]}. Write every "text" in ${LANGUAGE_NAME[to as TranslateLang]}.`,
+        providerUsed
+      );
     }
-    if (parsed.detected === to) {
+    if (!parsed || wrongScript(to as TranslateLang, parsed.results)) return failed();
+    // Only auto-detect can land on the target; a chosen source wins (学生 is the same in zh and ja).
+    if (from === "auto" && parsed.detected === to) {
       return NextResponse.json({ error: "Ngôn ngữ nguồn và đích giống nhau." }, { status: 400 });
     }
-    return NextResponse.json(parsed);
+    return NextResponse.json(parsed, { headers: { "X-Provider-Used": providerUsed } });
   } catch (error) {
     console.error("Failed to translate", error);
-    return NextResponse.json({ error: "Không dịch được lúc này. Vui lòng thử lại." }, { status: 503 });
+    return failed();
   }
 }

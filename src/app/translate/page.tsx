@@ -15,6 +15,7 @@ import {
   type TranslationResult,
 } from "@/lib/translate";
 import { TranslationCard } from "@/components/TranslationCard";
+import { useApiFetch } from "@/lib/useApiFetch";
 
 export default function TranslatePage() {
   // localStorage is read in effects only: server HTML renders the defaults, hydration then applies the stored pair.
@@ -25,7 +26,10 @@ export default function TranslatePage() {
   const [detected, setDetected] = useState<TranslateLang | null>(null);
   const [vietnamese, setVietnamese] = useState("");
   const [results, setResults] = useState<TranslationResult[]>([]);
+  // The pair the shown results came from: the selectors can change before the next translation.
+  const [resultPair, setResultPair] = useState<TranslatePair>(pair);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const { fetchWithProvider } = useApiFetch();
 
   useEffect(() => {
     setPair(getTranslatePair());
@@ -44,11 +48,7 @@ export default function TranslatePage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/translate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, from: pair.from, to: pair.to }),
-      });
+      const res = await fetchWithProvider("/api/translate", { text, from: pair.from, to: pair.to });
       const data = (await res.json()) as {
         error?: string;
         detected?: TranslateLang;
@@ -62,6 +62,7 @@ export default function TranslatePage() {
       setDetected(data.detected);
       setVietnamese(data.vietnamese ?? "");
       setResults(data.results);
+      setResultPair(pair);
       setTranslatePair(pair);
       addHistory({
         id: globalThis.crypto?.randomUUID?.() ?? `tr_${Date.now()}_${Math.random().toString(36).slice(2)}`,
@@ -85,6 +86,7 @@ export default function TranslatePage() {
     setDetected(entry.translation.detected);
     setVietnamese(entry.translation.vietnamese);
     setResults(entry.translation.results);
+    setResultPair({ from: entry.from, to: entry.to });
     setError(null);
   }
 
@@ -163,12 +165,17 @@ export default function TranslatePage() {
 
       {results.length > 0 && (
         <section aria-label="Kết quả" className="mb-6">
-          {pair.from === "auto" && detected && (
+          {resultPair.from === "auto" && detected && (
             <p className="mb-3 text-sm text-muted">Đã nhận: {TRANSLATE_INFO[detected].label}</p>
           )}
           <div className="grid gap-4 sm:grid-cols-2">
             {results.map((result) => (
-              <TranslationCard key={result.tone} result={result} to={pair.to} vietnamese={vietnamese} />
+              <TranslationCard
+                key={`${resultPair.to}-${result.tone}-${result.text}`}
+                result={result}
+                to={resultPair.to}
+                vietnamese={vietnamese}
+              />
             ))}
           </div>
         </section>
@@ -178,21 +185,28 @@ export default function TranslatePage() {
         <section aria-label="Gần đây">
           <h2 className="section-title mb-2">Gần đây</h2>
           <ul className="panel divide-y divide-rule p-0">
-            {history.map((entry) => (
-              <li key={entry.id}>
-                <button
-                  type="button"
-                  onClick={() => restore(entry)}
-                  className="block w-full px-4 py-3 text-left hover:bg-primary/5"
-                >
-                  <span className="block truncate font-en">{entry.text}</span>
-                  <span className="text-xs text-muted">
-                    {TRANSLATE_INFO[entry.from === "auto" ? entry.translation.detected : entry.from].label} →{" "}
-                    {TRANSLATE_INFO[entry.to].label}
-                  </span>
-                </button>
-              </li>
-            ))}
+            {history.map((entry) => {
+              const source = entry.from === "auto" ? entry.translation.detected : entry.from;
+              return (
+                <li key={entry.id}>
+                  <button
+                    type="button"
+                    onClick={() => restore(entry)}
+                    className="block w-full px-4 py-3 text-left hover:bg-primary/5"
+                  >
+                    <span
+                      lang={TRANSLATE_INFO[source].htmlLang}
+                      className={`block truncate ${source === "en" || source === "vi" ? "font-en" : "font-sans"}`}
+                    >
+                      {entry.text}
+                    </span>
+                    <span className="text-xs text-muted">
+                      {TRANSLATE_INFO[source].label} → {TRANSLATE_INFO[entry.to].label}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}

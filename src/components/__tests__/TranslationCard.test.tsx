@@ -94,3 +94,21 @@ test("sau khi gieo, nút chuyển thành Đã gieo và khoá lại", () => {
   expect(screen.getByRole("button", { name: "Đã gieo" })).toBeDisabled();
   expect(JSON.parse(localStorage.getItem("learnedWords") ?? "[]")).toHaveLength(1);
 });
+
+test("câu đã có trong vườn thì báo Đã có trong vườn", () => {
+  localStorage.setItem("learnedWords", JSON.stringify([{ word: "您好", meaning: "x", example: "", topic: "t", learnedAt: "", lang: "zh" }]));
+  render(<TranslationCard result={result} to="zh" vietnamese="Xin chào" />);
+  fireEvent.click(screen.getByRole("button", { name: "Gieo vào vườn" }));
+  expect(screen.getByRole("button", { name: "Đã có trong vườn" })).toBeDisabled();
+});
+
+test("lưu thất bại thì báo lỗi và cho thử lại", () => {
+  const setItem = jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+    throw new Error("QuotaExceeded");
+  });
+  render(<TranslationCard result={result} to="zh" vietnamese="Xin chào" />);
+  fireEvent.click(screen.getByRole("button", { name: "Gieo vào vườn" }));
+  setItem.mockRestore();
+  expect(screen.getByRole("status")).toHaveTextContent("Không lưu được");
+  expect(screen.getByRole("button", { name: "Gieo vào vườn" })).toBeEnabled();
+});

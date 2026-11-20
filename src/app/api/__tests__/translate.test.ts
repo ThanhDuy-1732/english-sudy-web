@@ -59,6 +59,10 @@ test("nguồn và đích giống nhau → 400, không gọi AI", async () => {
 });
 
 test("ngôn ngữ nhận diện trùng đích (auto) → 400", async () => {
+  mockCallTask.mockResolvedValue({
+    text: JSON.stringify({ detected: "vi", vietnamese: "Xin chào", results: [{ tone: "casual", text: "Chào", note: "" }] }),
+    providerId: "opencode",
+  });
   const res = await post({ text: "Xin chào", from: "auto", to: "vi" });
 
   expect(res.status).toBe(400);
@@ -92,4 +96,59 @@ test("AI lỗi → 503", async () => {
 
   expect(res.status).toBe(503);
   await expect(res.json()).resolves.toEqual({ error: "Không dịch được lúc này. Vui lòng thử lại." });
+});
+
+test("nguồn chọn rõ thì không chặn khi AI nhận diện trùng đích (学生 zh→ja)", async () => {
+  mockCallTask.mockResolvedValue({
+    text: JSON.stringify({
+      detected: "ja",
+      vietnamese: "Học sinh",
+      results: [{ tone: "polite", text: "学生です", reading: "がくせいです", note: "Lịch sự." }],
+    }),
+    providerId: "opencode",
+  });
+  const res = await post({ text: "学生", from: "zh", to: "ja" });
+  expect(res.status).toBe(200);
+});
+
+test("lời nhắc nói rõ dịch từ nguồn sang đích, không có 'Vietnamese speakers and Vietnamese'", async () => {
+  await post({ text: "안녕하세요", from: "auto", to: "vi" });
+  const prompt = mockCallTask.mock.calls[0][0].prompt;
+  expect(prompt).not.toContain("Vietnamese speakers and Vietnamese");
+  expect(prompt).toContain("into Vietnamese");
+  expect(prompt).toContain("written in Vietnamese");
+});
+
+const KOREAN_AS_VI = JSON.stringify({
+  detected: "ko",
+  vietnamese: "Xin chào",
+  results: [{ tone: "casual", text: "안녕", note: "Thân mật." }],
+});
+const VIETNAMESE_OK = JSON.stringify({
+  detected: "ko",
+  vietnamese: "Xin chào",
+  results: [{ tone: "casual", text: "Chào nhé", note: "Thân mật." }],
+});
+
+test("đích tiếng Việt mà kết quả là chữ Hàn → hỏi lại AI một lần", async () => {
+  mockCallTask
+    .mockResolvedValueOnce({ text: KOREAN_AS_VI, providerId: "opencode" })
+    .mockResolvedValueOnce({ text: VIETNAMESE_OK, providerId: "opencode" });
+  const res = await post({ text: "안녕하세요", from: "auto", to: "vi" });
+  expect(res.status).toBe(200);
+  expect((await res.json()).results[0].text).toBe("Chào nhé");
+  expect(mockCallTask).toHaveBeenCalledTimes(2);
+});
+
+test("hỏi lại vẫn sai chữ → 503", async () => {
+  mockCallTask.mockResolvedValue({ text: KOREAN_AS_VI, providerId: "opencode" });
+  const res = await post({ text: "안녕하세요", from: "auto", to: "vi" });
+  expect(res.status).toBe(503);
+});
+
+test("chuyển provider người dùng chọn và báo X-Provider-Used", async () => {
+  mockCallTask.mockResolvedValue({ text: TRANSLATION_JSON, providerId: "gemini" });
+  const res = await post({ text: "Xin chào", from: "vi", to: "zh", provider: "gemini", disabledProviders: ["groq"] });
+  expect(mockCallTask.mock.calls[0][0]).toMatchObject({ provider: "gemini", disabledProviders: ["groq"] });
+  expect(res.headers.get("X-Provider-Used")).toBe("gemini");
 });

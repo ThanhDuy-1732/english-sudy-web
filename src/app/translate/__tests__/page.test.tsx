@@ -1,6 +1,13 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import TranslatePage from "../page";
 
+jest.mock("@/lib/useApiFetch", () => ({
+  useApiFetch: () => ({
+    fetchWithProvider: (url: string, body: Record<string, unknown>) =>
+      fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }),
+  }),
+}));
+
 const originalFetch = global.fetch;
 
 const TRANSLATION = {
@@ -119,4 +126,55 @@ test("lịch sử khôi phục bản dịch cũ mà không gọi AI", async () =
   expect(screen.getByLabelText("Ngôn ngữ đích")).toHaveValue("zh");
   expect(await screen.findByText("谢谢")).toBeInTheDocument();
   expect(global.fetch).not.toHaveBeenCalled();
+});
+
+test("đổi ngôn ngữ đích sau khi dịch không đổi nhãn hay ngôn ngữ lưu của thẻ", async () => {
+  mockFetch(TRANSLATION);
+  localStorage.setItem("translatePair", JSON.stringify({ from: "vi", to: "zh" }));
+  render(<TranslatePage />);
+  type("Xin chào");
+  fireEvent.click(screen.getByRole("button", { name: "Dịch" }));
+  await screen.findByText("Thân mật");
+
+  fireEvent.change(screen.getByLabelText("Ngôn ngữ đích"), { target: { value: "ja" } });
+  expect(screen.getByText("你好，我想订两个人的位子。")).toHaveAttribute("lang", "zh-CN");
+
+  fireEvent.click(screen.getAllByRole("button", { name: "Gieo vào vườn" })[0]);
+  const words = JSON.parse(localStorage.getItem("learnedWords") ?? "[]");
+  expect(words[0].lang).toBe("zh");
+});
+
+test("bản dịch mới không giữ trạng thái Đã gieo của bản cũ", async () => {
+  mockFetch(TRANSLATION);
+  localStorage.setItem("translatePair", JSON.stringify({ from: "vi", to: "zh" }));
+  render(<TranslatePage />);
+  type("Xin chào");
+  fireEvent.click(screen.getByRole("button", { name: "Dịch" }));
+  await screen.findByText("Thân mật");
+  fireEvent.click(screen.getAllByRole("button", { name: "Gieo vào vườn" })[0]);
+  expect(screen.getByRole("button", { name: "Đã gieo" })).toBeInTheDocument();
+
+  mockFetch({ ...TRANSLATION, results: [{ tone: "casual", text: "谢谢", reading: "xiè xie", note: "Thân mật." }] });
+  type("Cảm ơn");
+  fireEvent.click(screen.getByRole("button", { name: "Dịch" }));
+  await screen.findByText("谢谢");
+  expect(screen.queryByRole("button", { name: "Đã gieo" })).not.toBeInTheDocument();
+});
+
+test("lịch sử gắn lang cho câu tiếng Trung", () => {
+  localStorage.setItem(
+    "translationHistory",
+    JSON.stringify([
+      {
+        id: "h2",
+        from: "zh",
+        to: "vi",
+        text: "谢谢",
+        translation: { detected: "zh", vietnamese: "Cảm ơn", results: [{ tone: "polite", text: "Cảm ơn", note: "" }] },
+        at: new Date().toISOString(),
+      },
+    ])
+  );
+  render(<TranslatePage />);
+  expect(screen.getByText("谢谢")).toHaveAttribute("lang", "zh-CN");
 });
