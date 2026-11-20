@@ -92,3 +92,18 @@ test("không có job thì không render gì", () => {
   );
   expect(container).toBeEmptyDOMElement();
 });
+
+test("job nhiều ngôn ngữ đếm theo nghĩa", () => {
+  render(
+    <WordJobStrip
+      job={{ ...base, status: "running", langs: ["en", "zh"] }}
+      count={42}
+      isOwner
+      wordsPerMinute={12}
+      onPause={jest.fn()}
+      onResume={jest.fn()}
+      onCancel={jest.fn()}
+    />
+  );
+  expect(screen.getByText(/42\/1\.000 nghĩa · 12 nghĩa\/phút/)).toBeInTheDocument();
+});

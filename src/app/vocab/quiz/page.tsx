@@ -36,7 +36,7 @@ export default function VocabQuizPage() {
 
   // Languages with enough words to quiz; English stays the default when it's one of them.
   const offered = quizLanguages(saved, learning);
-  const quizLang: LearnLang = chosenLang && offered.includes(chosenLang) ? chosenLang : offered.includes("en") ? "en" : offered[0] ?? "en";
+  const quizLang: LearnLang = chosenLang && offered.includes(chosenLang) ? chosenLang : offered.includes("en") ? "en" : offered[0] ?? learning[0] ?? "en";
   const allWords = quizWords(saved, quizLang);
   const readingOf = (word: string) => allWords.find((w) => w.word === word)?.reading;
   const matches = (a: string, b: string) => answersMatch(a, b, quizLang, readingOf(b));

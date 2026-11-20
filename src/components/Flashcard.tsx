@@ -270,7 +270,7 @@ export default function Flashcard({
                 ))}
               </p>
             )}
-            {synonymData && <div className="text-sm leading-7 text-muted">{synonymData.synonyms.length > 0 && <p><span className="font-medium text-ink">Đồng nghĩa</span>{" "}<span className="font-en">{synonymData.synonyms.join(", ")}</span></p>}{synonymData.antonyms.length > 0 && <p><span className="font-medium text-ink">Trái nghĩa</span>{" "}<span className="font-en">{synonymData.antonyms.join(", ")}</span></p>}</div>}
+            {synonymData && <div className="text-sm leading-7 text-muted">{synonymData.synonyms.length > 0 && <p><span className="font-medium text-ink">Đồng nghĩa</span>{" "}<span lang={LANG_INFO[lang].htmlLang} className={lang === "en" ? "font-en" : "font-sans"}>{synonymData.synonyms.join(", ")}</span></p>}{synonymData.antonyms.length > 0 && <p><span className="font-medium text-ink">Trái nghĩa</span>{" "}<span lang={LANG_INFO[lang].htmlLang} className={lang === "en" ? "font-en" : "font-sans"}>{synonymData.antonyms.join(", ")}</span></p>}</div>}
           </div>}
           {mode === "write" && <WritingChallenge word={word} lang={lang} />}
           {mode === "fill" && (fillSentence ? <FillBlank word={word} sentence={fillSentence} lang={lang} reading={fillExtra.reading} translation={fillExtra.translation} wordReading={reading} /> : <p className="text-sm text-muted">{fillLoading ? "Đang tạo câu điền từ..." : "Chưa có câu điền từ."}</p>)}

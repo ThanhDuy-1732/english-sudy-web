@@ -1,18 +1,37 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { LANG_INFO, LEARN_LANGS, type LearnLang } from "@/lib/languages";
 import { useLearningLanguages } from "@/lib/useLearningLanguages";
 
 /** Which languages are studied, as a pill showing their short codes; the last checked one can't be unchecked. */
 export default function LanguagePicker({ align = "left" }: { align?: "left" | "right" }) {
   const [langs, setLangs] = useLearningLanguages();
+  const menu = useRef<HTMLDetailsElement>(null);
+
+  // <details> only closes from its own summary: also close on Escape and on a tap anywhere else.
+  useEffect(() => {
+    const close = () => {
+      if (menu.current) menu.current.open = false;
+    };
+    const onKey = (event: KeyboardEvent) => event.key === "Escape" && close();
+    const onPointer = (event: PointerEvent) => {
+      if (menu.current && !menu.current.contains(event.target as Node)) close();
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onPointer);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onPointer);
+    };
+  }, []);
 
   function toggle(lang: LearnLang) {
     setLangs(langs.includes(lang) ? langs.filter((item) => item !== lang) : [...langs, lang]);
   }
 
   return (
-    <details className="relative">
+    <details ref={menu} className="relative">
       <summary
         aria-label={`Ngôn ngữ học: ${langs.map((lang) => LANG_INFO[lang].label).join(", ")}`}
         className="inline-flex min-h-11 shrink-0 cursor-pointer list-none items-center gap-1.5 whitespace-nowrap rounded-full border border-rule bg-card px-3 text-sm font-semibold text-ink hover:border-primary [&::-webkit-details-marker]:hidden"

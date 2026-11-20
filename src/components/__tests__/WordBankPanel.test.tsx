@@ -45,3 +45,21 @@ test("chọn mốc 300 rồi Bắt đầu dùng đúng mốc", () => {
   fireEvent.click(screen.getByRole("button", { name: "Bắt đầu" }));
   expect(startJob).toHaveBeenCalledWith("IELTS", 300, ["en"]);
 });
+
+test("job cùng chủ đề nhưng khác ngôn ngữ không được coi là của bảng này", () => {
+  mockJob({ job: { id: "j1", topic: "TOEIC", target: 300, status: "done", langs: ["en", "zh"], createdAt: "", updatedAt: "" } });
+  render(<WordBankPanel topic="TOEIC" />);
+  expect(screen.queryByText(/Đã đủ/)).not.toBeInTheDocument();
+});
+
+test("job đang chạy cùng chủ đề nhưng khác ngôn ngữ thì chặn job mới", () => {
+  mockJob({ job: { id: "j1", topic: "TOEIC", target: 300, status: "running", langs: ["en", "zh"], createdAt: "", updatedAt: "" } });
+  render(<WordBankPanel topic="TOEIC" />);
+  expect(screen.getByRole("button", { name: "Bắt đầu" })).toBeDisabled();
+});
+
+test("job đúng chủ đề và ngôn ngữ (thứ tự khác) vẫn là của bảng này", () => {
+  mockJob({ job: { id: "j1", topic: "TOEIC", target: 300, status: "done", langs: ["zh", "en"], createdAt: "", updatedAt: "" } });
+  render(<WordBankPanel topic="TOEIC" langs={["en", "zh"]} />);
+  expect(screen.getByText(/Đã đủ 300 nghĩa/)).toBeInTheDocument();
+});

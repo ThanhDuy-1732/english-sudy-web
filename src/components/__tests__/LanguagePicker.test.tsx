@@ -26,3 +26,25 @@ test("more than two languages: the pill shows two codes and a count, so it fits 
   const pill = screen.getByLabelText("Ngôn ngữ học: Tiếng Anh, Tiếng Trung, Tiếng Nhật, Tiếng Hàn");
   expect(pill.textContent).toBe("EN · 中 +2");
 });
+
+test("the menu closes on Escape and on a tap outside", async () => {
+  render(
+    <div>
+      <LanguagePicker />
+      <p>ngoài</p>
+    </div>
+  );
+  await act(async () => {});
+  const menu = screen.getByLabelText(/^Ngôn ngữ học:/).closest("details")!;
+  menu.open = true;
+  fireEvent.keyDown(document, { key: "Escape" });
+  expect(menu.open).toBe(false);
+
+  menu.open = true;
+  fireEvent.pointerDown(screen.getByText("ngoài"));
+  expect(menu.open).toBe(false);
+
+  menu.open = true;
+  fireEvent.pointerDown(screen.getByRole("checkbox", { name: /中文/ }));
+  expect(menu.open).toBe(true);
+});

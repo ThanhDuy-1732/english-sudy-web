@@ -43,3 +43,11 @@ test("choosing 日本語 lists only Japanese words and sends lang=ja; 学生 sho
   expect(errors.mock.calls.some((call) => String(call[0]).includes("same key"))).toBe(false);
   errors.mockRestore();
 });
+
+test("a Japanese-only learner with no Japanese words is not shown English words", async () => {
+  localStorage.setItem("learningLanguages", JSON.stringify(["ja"]));
+  localStorage.setItem("learnedWords", JSON.stringify([w("apple"), w("pear")]));
+  render(<VocabContextPage />);
+  await waitFor(() => expect(screen.queryByRole("button", { name: "apple" })).toBeNull());
+  expect(screen.queryByRole("button", { name: "pear" })).toBeNull();
+});

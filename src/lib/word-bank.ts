@@ -247,3 +247,9 @@ export function emptyBatchMessage(received: number, persisted: boolean): string 
   if (received === 0) return "Không thể sinh từ mới lúc này. Vui lòng thử lại.";
   return "Chủ đề này đã cạn từ mới. Thử chủ đề khác.";
 }
+
+/** Same set of languages, in any order (a job's `langs` is absent for English-only). */
+export function sameLangs(a: LearnLang[] | undefined, b: LearnLang[] | undefined): boolean {
+  const left = [...(a ?? ["en"])].sort().join(",");
+  return left === [...(b ?? ["en"])].sort().join(",");
+}

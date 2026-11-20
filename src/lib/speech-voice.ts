@@ -69,3 +69,14 @@ export function speakText(
 ): boolean {
   return speakCode(text, LANG_INFO[lang].voice, settings, events, { voice: pickVoice(lang, settings.voiceURI) });
 }
+
+/**
+ * Why read-aloud may be silent for this language, or null. An empty voice list means the browser is still loading
+ * voices (Chrome fills it asynchronously), so it says nothing then.
+ */
+export function voiceHint(lang: LearnLang): string | null {
+  if (typeof window === "undefined") return null;
+  if (!window.speechSynthesis) return "Trình duyệt này không đọc to được.";
+  if (window.speechSynthesis.getVoices().length === 0 || voicesFor(lang).length > 0) return null;
+  return `Máy này chưa có giọng đọc ${LANG_INFO[lang].label}. Hãy cài thêm giọng trong cài đặt của máy (iPhone: Cài đặt › Trợ năng › Nội dung được đọc › Giọng nói).`;
+}

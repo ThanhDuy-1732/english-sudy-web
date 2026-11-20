@@ -36,7 +36,7 @@ export default function ContextPracticePage() {
 
   // The content is written in one language, from that language's saved words (each spelling once).
   const offered = LEARN_LANGS.filter((lang) => learning.includes(lang) && saved.some((w) => langOf(w) === lang));
-  const contextLang: LearnLang = chosenLang && offered.includes(chosenLang) ? chosenLang : offered.includes("en") ? "en" : offered[0] ?? "en";
+  const contextLang: LearnLang = chosenLang && offered.includes(chosenLang) ? chosenLang : offered.includes("en") ? "en" : offered[0] ?? learning[0] ?? "en";
   const allWords = [...new Set(saved.filter((w) => langOf(w) === contextLang).map((w) => w.word))];
 
   function chooseLang(lang: LearnLang) {

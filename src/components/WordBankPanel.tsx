@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useWordJob } from "@/contexts/WordJobContext";
-import { countAvailable, isEnglishOnly } from "@/lib/word-bank";
+import { countAvailable, isEnglishOnly, sameLangs } from "@/lib/word-bank";
 import type { LearnLang } from "@/lib/languages";
 
 const FORMAT = new Intl.NumberFormat("vi-VN");
@@ -18,9 +18,11 @@ export function WordBankPanel({ topic, langs = ["en"] }: { topic: string; langs?
   const available = mounted ? countAvailable(topic, langs) : 0;
   // Several languages count meanings: one meaning is a word in each language.
   const unit = isEnglishOnly(langs) ? "từ" : "nghĩa";
-  const busy = Boolean(job && job.status === "running" && (!isOwner || job.topic !== topic));
-  const done = job?.topic === topic && job.status === "done";
-  const paused = job?.topic === topic && job.status === "paused";
+  // A job belongs to this panel only for the same topic and the same languages.
+  const mine = Boolean(job && job.topic === topic && sameLangs(job.langs, langs));
+  const busy = Boolean(job && job.status === "running" && (!isOwner || !mine));
+  const done = mine && job?.status === "done";
+  const paused = mine && job?.status === "paused";
 
   return (
     <section

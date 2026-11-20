@@ -59,7 +59,6 @@ export default function StatsPage() {
   const [radarData, setRadarData] = useState<SkillRadarPoint[]>([]);
   const [totalWords, setTotalWords] = useState(0);
   const [activeDays, setActiveDays] = useState(0);
-  const [averageMastery, setAverageMastery] = useState(0);
   // Each saved word's stage and language, so the census and word count can follow the language filter.
   const [learnedMeta, setLearnedMeta] = useState<{ mastery?: number; lang: LearnLang }[]>([]);
   const [langFilter, setLangFilter] = useState<"all" | LearnLang>("all");
@@ -83,17 +82,15 @@ export default function StatsPage() {
     setStreakInfo(computeStreak(allSessions));
     setTotalWords(learned.length);
     setActiveDays(daily.filter((day) => day.count > 0).length);
-    setAverageMastery(
-      learned.length
-        ? Math.round((learned.reduce((total, word) => total + (word.mastery ?? 0), 0) / learned.length) * 10) / 10
-        : 0
-    );
   }, []);
 
   const todayMinutes = Math.round(todaySeconds / 60);
 
   const presentLangs = LEARN_LANGS.filter((lang) => learnedMeta.some((item) => item.lang === lang));
   const shownMeta = learnedMeta.filter((item) => langFilter === "all" || item.lang === langFilter);
+  const averageMastery = shownMeta.length
+    ? Math.round((shownMeta.reduce((total, item) => total + (item.mastery ?? 0), 0) / shownMeta.length) * 10) / 10
+    : 0;
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 pb-16 pt-8 sm:px-8 lg:pt-12">

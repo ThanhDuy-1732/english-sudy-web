@@ -7,7 +7,7 @@ import { saveSpeaking } from "@/lib/speech/speaking-storage";
 import { startSession, finishSession, cancelSession } from "@/lib/sessions";
 import { SHADOW_SENTENCES } from "@/lib/shadow-sentences";
 import { missingTokens, similarityPct } from "@/lib/answer-match";
-import { speakText } from "@/lib/speech-voice";
+import { speakText, voiceHint } from "@/lib/speech-voice";
 import { LANG_INFO, type LearnLang } from "@/lib/languages";
 import { useLearningLanguages } from "@/lib/useLearningLanguages";
 import Segmented from "@/components/Segmented";
@@ -15,6 +15,8 @@ import Segmented from "@/components/Segmented";
 type Phase = "ready" | "recording" | "processing" | "result";
 
 export default function ShadowingPage() {
+  // The note belongs to the language it was checked for; switching language hides it.
+  const [voiceNote, setVoiceNote] = useState<{ lang: LearnLang; text: string | null } | null>(null);
   const [sentenceIdx, setSentenceIdx] = useState(0);
   const [phase, setPhase] = useState<Phase>("ready");
   const [transcript, setTranscript] = useState("");
@@ -50,6 +52,7 @@ export default function ShadowingPage() {
   }
 
   function handleSpeak() {
+    setVoiceNote({ lang, text: voiceHint(lang) });
     // A little slower than normal speech, as before; in the sentence's own language.
     speakText(sentence, lang, { voiceURI: null, rate: 0.85, pitch: 1, volume: 1 });
   }
@@ -155,6 +158,9 @@ export default function ShadowingPage() {
         <p className="mt-2 text-sm text-muted">{item.translation}</p>
       </div>
 
+      {voiceNote?.lang === lang && voiceNote.text && (
+        <p role="status" className="-mt-2 mb-4 text-center text-xs text-muted">{voiceNote.text}</p>
+      )}
       <div className="flex gap-3 mb-6 justify-center">
         <button
           onClick={handleSpeak}

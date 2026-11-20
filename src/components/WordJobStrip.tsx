@@ -2,6 +2,7 @@
 
 import { useWordJob } from "@/contexts/WordJobContext";
 import type { WordJob } from "@/lib/word-job";
+import { isEnglishOnly } from "@/lib/word-bank";
 
 const FORMAT = new Intl.NumberFormat("vi-VN");
 
@@ -28,6 +29,8 @@ export function WordJobStrip({
 
   const percent = job.target > 0 ? Math.min(100, Math.round((count / job.target) * 100)) : 0;
   const progress = `${FORMAT.format(count)}/${FORMAT.format(job.target)}`;
+  // Several languages count meanings (one meaning is a word in each language), as the bank panel does.
+  const unit = isEnglishOnly(job.langs ?? ["en"]) ? "từ" : "nghĩa";
 
   return (
     <div className="border-b border-rule bg-marker/15 px-4 py-2" aria-live="polite">
@@ -35,14 +38,14 @@ export function WordJobStrip({
         <p className="min-w-0 flex-1 text-ink">
           {job.status === "running" && isOwner && (
             <>
-              Đang tạo {progress} từ
-              {wordsPerMinute > 0 ? ` · ${wordsPerMinute} từ/phút` : ""}
+              Đang tạo {progress} {unit}
+              {wordsPerMinute > 0 ? ` · ${wordsPerMinute} ${unit}/phút` : ""}
             </>
           )}
           {job.status === "running" && !isOwner && <>Đang chạy ở tab khác · {progress}</>}
           {job.status === "paused" && (
             <>
-              Đã dừng ở {progress} từ
+              Đã dừng ở {progress} {unit}
               {job.lastError ? ` — ${job.lastError}` : ""}
             </>
           )}

@@ -1,4 +1,4 @@
-import { pickVoice, speakCode, speakText, voicesFor } from "../speech-voice";
+import { pickVoice, voiceHint, speakCode, speakText, voicesFor } from "../speech-voice";
 
 type V = { voiceURI: string; lang: string };
 let voices: V[] = [];
@@ -43,4 +43,17 @@ test("speakCode vẫn đọc khi thiết bị không có giọng khớp chính x
   const utterance = speak.mock.calls[0][0];
   expect(utterance.lang).toBe("vi-VN");
   expect(utterance.voice).toBeNull();
+});
+
+test("voiceHint explains a missing voice, and stays quiet while voices load", () => {
+  voices = [{ voiceURI: "en", lang: "en-US" }];
+  expect(voiceHint("zh")).toBe("Máy này chưa có giọng đọc Tiếng Trung. Hãy cài thêm giọng trong cài đặt của máy (iPhone: Cài đặt › Trợ năng › Nội dung được đọc › Giọng nói).");
+  expect(voiceHint("en")).toBeNull();
+  voices = [];
+  expect(voiceHint("zh")).toBeNull();
+});
+
+test("voiceHint says when the browser cannot read aloud at all", () => {
+  Object.defineProperty(window, "speechSynthesis", { configurable: true, value: undefined });
+  expect(voiceHint("en")).toBe("Trình duyệt này không đọc to được.");
 });

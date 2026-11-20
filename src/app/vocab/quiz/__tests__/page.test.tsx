@@ -64,3 +64,10 @@ test("Japanese fill mode accepts the kana reading", async () => {
   fireEvent.keyDown(screen.getByPlaceholderText("Nhập từ..."), { key: "Enter" });
   expect(await screen.findByText("Đúng!")).toBeInTheDocument();
 });
+
+test("a Chinese-only learner with too few Chinese words is not quizzed in English", async () => {
+  localStorage.setItem("learningLanguages", JSON.stringify(["zh"]));
+  localStorage.setItem("learnedWords", JSON.stringify([...en, zh[0], zh[1]]));
+  render(<VocabQuizPage />);
+  expect(await screen.findByRole("button", { name: "Cần ít nhất 4 từ" })).toBeDisabled();
+});

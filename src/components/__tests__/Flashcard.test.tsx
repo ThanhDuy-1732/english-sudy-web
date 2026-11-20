@@ -181,6 +181,15 @@ describe("languages", () => {
     expect(screen.getByRole("button", { name: "Nghe" })).toBeInTheDocument();
   });
 
+  test("Chinese synonyms carry the language and the CJK font", async () => {
+    render(<Flashcard word="学生" meaning="học sinh" topic="TOEIC" lang="zh" initialExample="我是学生。" initialSynonymData={{ synonyms: ["学员"], antonyms: ["老师"] }} />);
+    fireEvent.click(screen.getByRole("button", { name: "Xem nghĩa của 学生" }));
+    const synonym = await screen.findByText("学员");
+    expect(synonym).toHaveAttribute("lang", "zh-CN");
+    expect(synonym).not.toHaveClass("font-en");
+    expect(screen.getByText("老师")).toHaveAttribute("lang", "zh-CN");
+  });
+
   test("shows sibling words of the same meaning", async () => {
     (getLearnedWords as jest.Mock).mockReturnValueOnce([zhWord, { ...zhWord, word: "学生", lang: "ja", reading: "がくせい" }, { ...zhWord, word: "student", lang: "en", reading: undefined }]);
     render(<Flashcard word="学生" meaning="học sinh" topic="TOEIC" lang="zh" initialExample="我是学生。" initialSynonymData={{ synonyms: [], antonyms: [] }} isReviewMode learned={zhWord} />);

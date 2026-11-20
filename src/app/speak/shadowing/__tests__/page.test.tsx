@@ -39,3 +39,13 @@ test("the language selector hides while recording, and missed Chinese characters
   expect(screen.getByText("很")).toBeInTheDocument();
   expect(screen.getByRole("radiogroup", { name: "Ngôn ngữ" })).toBeInTheDocument();
 });
+
+test("Nghe câu mẫu without a voice for the language shows how to add one", async () => {
+  localStorage.setItem("learningLanguages", JSON.stringify(["en", "ko"]));
+  Object.defineProperty(window, "speechSynthesis", { configurable: true, value: { getVoices: () => [{ voiceURI: "en", lang: "en-US" }], speak: jest.fn(), cancel: jest.fn() } });
+  (window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance = class { constructor(public text: string) {} };
+  render(<ShadowingPage />);
+  fireEvent.click(await screen.findByRole("radio", { name: "한국어" }));
+  fireEvent.click(screen.getByRole("button", { name: "Nghe câu mẫu" }));
+  expect(screen.getByRole("status")).toHaveTextContent("Máy này chưa có giọng đọc Tiếng Hàn.");
+});

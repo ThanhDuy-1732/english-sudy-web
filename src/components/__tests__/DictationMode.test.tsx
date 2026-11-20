@@ -39,3 +39,11 @@ test("DictationMode speaks with zh-CN", () => {
   fireEvent.click(screen.getByRole("button", { name: "▶ Nghe câu" }));
   expect(speak.mock.calls[0][0].lang).toBe("zh-CN");
 });
+
+test("playing without a Chinese voice shows how to add one", () => {
+  Object.defineProperty(window, "speechSynthesis", { configurable: true, value: { getVoices: () => [{ voiceURI: "en", lang: "en-US" }], speak: jest.fn(), cancel: jest.fn() } });
+  (window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance = class { constructor(public text: string) {} };
+  render(<DictationMode sentence="我是学生。" lang="zh" />);
+  fireEvent.click(screen.getByRole("button", { name: "▶ Nghe câu" }));
+  expect(screen.getByRole("status")).toHaveTextContent("Máy này chưa có giọng đọc Tiếng Trung.");
+});
