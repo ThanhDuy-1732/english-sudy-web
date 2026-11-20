@@ -341,7 +341,7 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 - `OPENROUTER_API_KEY` → `nvidia/nemotron-3-ultra-550b-a55b:free`
 - `MISTRAL_API_KEY` → `mistral-small-latest`
 - `COHERE_API_KEY` → `command-r7b-12-2024`
-- `OPENCODE_API_KEY` → `deepseek-v4.1-flash` (OpenCode Go gateway `https://opencode.ai/inference/go/openai/v1`; sends `x-opencode-session` from `OPENCODE_SESSION_ID` or a per-process generated id; override the API base with `OPENCODE_BASE_URL` — pay-as-you-go uses `https://opencode.ai/inference/openai/v1`)
+- `OPENCODE_API_KEY` → `glm-5.3-flash` (OpenCode Go gateway `https://opencode.ai/inference/go/openai/v1`; sends `x-opencode-session` from `OPENCODE_SESSION_ID` or a per-process generated id; override the API base with `OPENCODE_BASE_URL` — pay-as-you-go uses `https://opencode.ai/inference/openai/v1`)
 - HuggingFace đã bị bỏ khỏi registry: account hiện tại không có credit (`canPay:false`, không PRO) nên mọi call trả 402. Thêm lại block trong `buildRegistry` nếu mua credit.
 
 Model can be overridden via env: `GEMINI_MODEL`, `GROQ_MODEL`, etc.

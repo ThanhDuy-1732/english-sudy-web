@@ -17,7 +17,7 @@ const ALL_PROVIDERS = [
   { id: "openrouter", name: "OpenRouter", model: "nvidia/nemotron-3-nano-30b-a3b:free", envKey: "OPENROUTER_API_KEY" },
   { id: "mistral", name: "Mistral", model: "mistral-small-latest", envKey: "MISTRAL_API_KEY" },
   { id: "cohere", name: "Cohere", model: "command-r7b-12-2024", envKey: "COHERE_API_KEY" },
-  { id: "opencode", name: "OpenCode Go", model: "deepseek-v4.1-flash", envKey: "OPENCODE_API_KEY" },
+  { id: "opencode", name: "OpenCode Go", model: "glm-5.3-flash", envKey: "OPENCODE_API_KEY" },
 ];
 
 type TestResult = "loading" | { ok: boolean; latency?: number; error?: string };
