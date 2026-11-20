@@ -120,7 +120,8 @@ scenario("grammar page: bookmarking a rule", async ({ browser, check }) => {
   check("the button reflects the saved state", /Đã lưu/.test(await bodyText(page)));
 });
 
-scenario("context practice accepts words typed by the learner", async ({ browser, check }) => {  const bodies = [];
+scenario("context practice accepts words typed by the learner", async ({ browser, check }) => {
+  const bodies = [];
   const page = await newPage(browser, {
     intercept: (req) => {
       if (req.url().endsWith("/api/vocab/context")) {
@@ -174,4 +175,17 @@ scenario("translate vi→zh and save a tone", async ({ browser, check }) => {
     /"lang":"zh"/.test((await page.evaluate(() => localStorage.getItem("learnedWords"))) || "") &&
       /"topic":"Dịch"/.test((await page.evaluate(() => localStorage.getItem("learnedWords"))) || "")
   );
+});
+
+scenario("a remembered pair hydrates without mismatch", async ({ browser, check }) => {
+  const page = await newPage(browser, {
+    seed: { translatePair: { from: "auto", to: "zh" } },
+    intercept: (req) => aiMocks(req, json),
+  });
+  await goto(page, "/translate");
+  check(
+    "hydrated select keeps the remembered pair",
+    (await page.evaluate(() => document.querySelector('select[aria-label="Ngôn ngữ nguồn"]')?.value)) === "auto"
+  );
+  check("no hydration mismatch", page.__hydration.length === 0, page.__hydration.join("; "));
 });

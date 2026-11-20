@@ -17,7 +17,8 @@ import {
 import { TranslationCard } from "@/components/TranslationCard";
 
 export default function TranslatePage() {
-  const [pair, setPair] = useState<TranslatePair>(() => getTranslatePair());
+  // localStorage is read in effects only: server HTML renders the defaults, hydration then applies the stored pair.
+  const [pair, setPair] = useState<TranslatePair>({ from: "vi", to: "en" });
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,6 +28,7 @@ export default function TranslatePage() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
 
   useEffect(() => {
+    setPair(getTranslatePair());
     setHistory(getHistory());
   }, []);
 

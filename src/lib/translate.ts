@@ -115,8 +115,24 @@ export interface HistoryEntry {
 export const TRANSLATION_HISTORY_KEY = "translationHistory";
 const HISTORY_LIMIT = 20;
 
+function isValidEntry(entry: unknown): entry is HistoryEntry {
+  if (!entry || typeof entry !== "object") return false;
+  const item = entry as HistoryEntry;
+  if (typeof item.id !== "string" || typeof item.text !== "string" || item.text === "") return false;
+  if (typeof item.at !== "string") return false;
+  if (!(item.from === "auto" || isTranslateLang(item.from))) return false;
+  if (!isTranslateLang(item.to)) return false;
+  const translation = item.translation;
+  if (!translation || typeof translation !== "object") return false;
+  return (
+    isTranslateLang(translation.detected) &&
+    typeof translation.vietnamese === "string" &&
+    Array.isArray(translation.results)
+  );
+}
+
 export function getHistory(): HistoryEntry[] {
-  return readStored<HistoryEntry[]>(TRANSLATION_HISTORY_KEY, []);
+  return readStored<HistoryEntry[]>(TRANSLATION_HISTORY_KEY, []).filter(isValidEntry);
 }
 
 /** Newest first, keeps HISTORY_LIMIT entries, and replaces an entry with the same text + target. */

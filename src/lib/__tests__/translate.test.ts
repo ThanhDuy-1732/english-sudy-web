@@ -56,8 +56,28 @@ test("parseTranslation giữ cách đọc và ghi chú khi hợp lệ", () => {
   });
 });
 
-test("lịch sử giữ 20 mục mới nhất trước và thay thế cùng văn bản + đích", () => {
-  const entry = (i: number): HistoryEntry => ({
+test("lịch sử bỏ qua mục hỏng thay vì làm sập trang", () => {
+  localStorage.setItem(
+    "translationHistory",
+    JSON.stringify([
+      {
+        id: "ok",
+        from: "vi",
+        to: "zh",
+        text: "Xin chào",
+        translation: { detected: "vi", vietnamese: "v", results: [] },
+        at: new Date().toISOString(),
+      },
+      { id: "bad-lang", from: "fr", to: "zh", text: "x", translation: { detected: "vi", vietnamese: "", results: [] }, at: "" },
+      null,
+      { id: "bad-detected", from: "auto", to: "zh", text: "y", translation: { detected: 5, vietnamese: "", results: [] }, at: "" },
+      { id: "bad-text", from: "vi", to: "zh", text: "", translation: { detected: "vi", vietnamese: "", results: [] }, at: "" },
+    ])
+  );
+  expect(getHistory().map((entry) => entry.id)).toEqual(["ok"]);
+});
+
+test("lịch sử giữ 20 mục mới nhất trước và thay thế cùng văn bản + đích", () => {  const entry = (i: number): HistoryEntry => ({
     id: `id${i}`,
     from: "vi",
     to: "en",
