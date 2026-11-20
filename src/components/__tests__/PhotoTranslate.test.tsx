@@ -54,3 +54,15 @@ test("a server error is shown", async () => {
 
   expect(await screen.findByRole("alert")).toHaveTextContent("Không thấy chữ trong ảnh.");
 });
+
+test("a non-JSON error page shows the Vietnamese message", async () => {
+  global.fetch = jest.fn().mockResolvedValue({
+    ok: false,
+    json: async () => {
+      throw new SyntaxError("Unexpected token 'A'");
+    },
+  }) as unknown as typeof fetch;
+  render(<PhotoTranslate to="vi" />);
+  pick();
+  expect(await screen.findByRole("alert")).toHaveTextContent("Không dịch được lúc này. Vui lòng thử lại.");
+});

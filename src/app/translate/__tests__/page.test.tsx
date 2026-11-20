@@ -230,3 +230,13 @@ test("links to the two-way conversation", () => {
   render(<TranslatePage />);
   expect(screen.getByRole("link", { name: "Hội thoại hai chiều" })).toHaveAttribute("href", "/translate/conversation");
 });
+
+test("dictation over 1000 characters says why it is not translated", async () => {
+  micTranscript = "a".repeat(1001);
+  mockFetch(TRANSLATION);
+  render(<TranslatePage />);
+  fireEvent.click(screen.getByRole("button", { name: "Nói" }));
+
+  expect(await screen.findByRole("alert")).toHaveTextContent("Tối đa 1.000 ký tự.");
+  expect(global.fetch).not.toHaveBeenCalled();
+});

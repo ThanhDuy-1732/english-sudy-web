@@ -139,3 +139,27 @@ test("only one side can record at a time", () => {
   expect(screen.getByRole("button", { name: "Họ nói" })).toBeDisabled();
   expect(screen.getByRole("button", { name: "Tôi nói" })).toBeEnabled();
 });
+
+test("a non-JSON error page shows the Vietnamese message", async () => {
+  global.fetch = jest.fn().mockResolvedValue({
+    ok: false,
+    json: async () => {
+      throw new SyntaxError("Unexpected token 'A'");
+    },
+  }) as unknown as typeof fetch;
+  render(<ConversationPage />);
+  fireEvent.click(screen.getByRole("button", { name: "Tôi nói" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("Không dịch được lúc này. Vui lòng thử lại.");
+});
+
+test("starting a new recording clears the old error and locks the languages", async () => {
+  transcripts["Tôi nói"] = " ";
+  render(<ConversationPage />);
+  fireEvent.click(screen.getByRole("button", { name: "Tôi nói" }));
+  await screen.findByRole("alert");
+
+  fireEvent.click(screen.getByRole("button", { name: "ghi âm Họ nói" }));
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(screen.getByLabelText("Ngôn ngữ của tôi")).toBeDisabled();
+  expect(screen.getByLabelText("Ngôn ngữ của họ")).toBeDisabled();
+});

@@ -27,7 +27,8 @@ export function PhotoTranslate({ to }: { to: TranslateLang }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image, to }),
       });
-      const data = (await res.json()) as Partial<ImageTranslation> & { error?: string };
+      // A platform error page (timeout, 413) is not JSON: fall back to the generic message.
+      const data = (await res.json().catch(() => ({}))) as Partial<ImageTranslation> & { error?: string };
       if (!res.ok || !data.lines) throw new Error(data.error ?? "Không dịch được lúc này. Vui lòng thử lại.");
       setResult({ detected: data.detected ?? null, lines: data.lines, to });
     } catch (caught) {

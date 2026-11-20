@@ -29,14 +29,19 @@ export function MicButton({
   const [elapsed, setElapsed] = useState(0);
   const recorderRef = useRef<Recorder | null>(null);
   const timerRef = useRef<number | null>(null);
+  // The 60 s timer and the transcript arrive after later renders: they read the latest props from here.
+  const latest = useRef({ language, onText, onError, onActiveChange });
+  latest.current = { language, onText, onError, onActiveChange };
+  const mounted = useRef(true);
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
       if (timerRef.current !== null) window.clearInterval(timerRef.current);
       recorderRef.current?.dispose();
-    },
-    []
-  );
+    };
+  }, []);
 
   async function begin() {
     if (state !== "idle") return;
@@ -70,23 +75,31 @@ export function MicButton({
     const recorder = recorderRef.current;
     if (!recorder) return;
     setState("sending");
+    let outcome: { text: string; lang: TranslateLang | null } | { error: string };
     try {
       const blob = await recorder.stop();
-      const form = new FormData();
-      form.append("audio", blob, audioFilename(blob));
-      form.append("language", language);
-      const res = await fetch("/api/speech/transcribe", { method: "POST", body: form });
-      if (!res.ok) throw new Error("transcription failed");
-      const data = (await res.json()) as { text?: string; lang?: TranslateLang | null; noSpeech?: boolean };
-      const text = data.noSpeech ? "" : (data.text ?? "").trim();
-      if (text) onText(text, data.lang ?? null);
-      else onError("Không nghe rõ, nói lại nhé.");
+      if (blob.size === 0) {
+        outcome = { error: "Không nghe rõ, nói lại nhé." };
+      } else {
+        const form = new FormData();
+        form.append("audio", blob, audioFilename(blob));
+        form.append("language", latest.current.language);
+        const res = await fetch("/api/speech/transcribe", { method: "POST", body: form });
+        if (!res.ok) throw new Error("transcription failed");
+        const data = (await res.json()) as { text?: string; lang?: TranslateLang | null; noSpeech?: boolean };
+        const text = data.noSpeech ? "" : (data.text ?? "").trim();
+        outcome = text ? { text, lang: data.lang ?? null } : { error: "Không nghe rõ, nói lại nhé." };
+      }
     } catch {
-      onError("Không nhận được giọng nói. Vui lòng thử lại.");
-    } finally {
-      setState("idle");
-      onActiveChange?.(false);
+      outcome = { error: "Không nhận được giọng nói. Vui lòng thử lại." };
     }
+    // The person left the screen: the transcript belongs to nothing any more.
+    if (!mounted.current) return;
+    setState("idle");
+    const { onText: deliver, onError: report, onActiveChange: activeChange } = latest.current;
+    activeChange?.(false);
+    if ("text" in outcome) deliver(outcome.text, outcome.lang);
+    else report(outcome.error);
   }
 
   const recording = state === "recording";

@@ -151,3 +151,51 @@ test("a failed start reports inactive again", async () => {
   fireEvent.click(screen.getByRole("button", { name: "Nói" }));
   await waitFor(() => expect(onActiveChange).toHaveBeenLastCalledWith(false));
 });
+
+test("the 60 s auto-stop uses the latest language and callback", async () => {
+  jest.useFakeTimers();
+  mockTranscript({ text: "hello", lang: "en" });
+  const first = jest.fn();
+  const latest = jest.fn();
+  const { rerender } = render(<MicButton language="vi" onText={first} onError={jest.fn()} />);
+  fireEvent.click(screen.getByRole("button", { name: "Nói" }));
+  await screen.findByRole("button", { name: "Dừng" });
+
+  rerender(<MicButton language="en" onText={latest} onError={jest.fn()} />);
+  await act(async () => {
+    jest.advanceTimersByTime(60_000);
+  });
+
+  await waitFor(() => expect(latest).toHaveBeenCalledWith("hello", "en"));
+  expect(first).not.toHaveBeenCalled();
+  expect(((global.fetch as jest.Mock).mock.calls[0][1].body as FormData).get("language")).toBe("en");
+});
+
+test("leaving while the transcript is on its way reports nothing", async () => {
+  let answer: (value: unknown) => void = () => {};
+  global.fetch = jest.fn().mockReturnValue(new Promise((resolve) => (answer = resolve))) as unknown as typeof fetch;
+  const onText = jest.fn();
+  const onError = jest.fn();
+  const { unmount } = render(<MicButton language="vi" onText={onText} onError={onError} />);
+  fireEvent.click(screen.getByRole("button", { name: "Nói" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Dừng" }));
+  await waitFor(() => expect(global.fetch).toHaveBeenCalled());
+
+  unmount();
+  await act(async () => answer({ ok: true, json: async () => ({ text: "xin chào", lang: "vi" }) }));
+
+  expect(onText).not.toHaveBeenCalled();
+  expect(onError).not.toHaveBeenCalled();
+});
+
+test("a very short tap says nothing was heard without uploading", async () => {
+  mockTranscript({ text: "x" });
+  stop.mockResolvedValueOnce(new Blob([], { type: "audio/webm" }));
+  const onError = jest.fn();
+  render(<MicButton language="vi" onText={jest.fn()} onError={onError} />);
+  fireEvent.click(screen.getByRole("button", { name: "Nói" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Dừng" }));
+
+  await waitFor(() => expect(onError).toHaveBeenCalledWith("Không nghe rõ, nói lại nhé."));
+  expect(global.fetch).not.toHaveBeenCalled();
+});

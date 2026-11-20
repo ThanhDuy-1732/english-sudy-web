@@ -21,7 +21,7 @@ const LANGUAGE_NAME: Record<TranslateLang, string> = {
 
 const ResponseSchema = z.object({
   detected: z.string().nullable().optional(),
-  lines: z.array(z.object({ text: z.string(), translation: z.string(), reading: z.string().optional() })),
+  lines: z.array(z.object({ text: z.string(), translation: z.string(), reading: z.string().nullish() })),
 });
 
 function buildPrompt(to: TranslateLang): string {

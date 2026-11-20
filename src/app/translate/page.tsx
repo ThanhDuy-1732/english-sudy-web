@@ -50,7 +50,11 @@ export default function TranslatePage() {
   }
 
   async function translateText(value: string) {
-    if (!value.trim() || value.length > MAX_TRANSLATE_CHARS || loading) return;
+    if (!value.trim() || loading) return;
+    if (value.length > MAX_TRANSLATE_CHARS) {
+      setError("Tối đa 1.000 ký tự.");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {

@@ -81,3 +81,10 @@ test("AI failure → 503", async () => {
   expect(res.status).toBe(503);
   await expect(res.json()).resolves.toEqual({ error: "Không dịch được lúc này. Vui lòng thử lại." });
 });
+
+test("a null reading is accepted without a repair call", async () => {
+  generateWithImage.mockResolvedValue(JSON.stringify({ detected: null, lines: [{ text: "EXIT", translation: "Lối ra", reading: null }] }));
+  const res = await post({ image: dataUrl("image/jpeg"), to: "vi" });
+  expect(res.status).toBe(200);
+  expect(generateWithImage).toHaveBeenCalledTimes(1);
+});

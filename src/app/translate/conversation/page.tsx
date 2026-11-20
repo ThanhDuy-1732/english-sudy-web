@@ -45,6 +45,12 @@ export default function ConversationPage() {
 
   useEffect(() => setPair(getConversationPair()), []);
 
+  function activate(side: Side | null) {
+    setActive(side);
+    // A new recording replaces whatever went wrong last time.
+    if (side) setError(null);
+  }
+
   function choose(side: Side, lang: TranslateLang) {
     const other: Side = side === "me" ? "them" : "me";
     // Picking the other side's language swaps the two, so both sides never speak the same language.
@@ -60,7 +66,7 @@ export default function ConversationPage() {
     setError(null);
     try {
       const res = await fetchWithProvider("/api/translate", { text, from, to, tone: "polite" });
-      const data = (await res.json()) as { error?: string; results?: TranslationResult[] };
+      const data = (await res.json().catch(() => ({}))) as { error?: string; results?: TranslationResult[] };
       const result = data.results?.[0];
       if (!res.ok || !result) throw new Error(data.error ?? "Không dịch được lúc này. Vui lòng thử lại.");
       setTurns((prev) => [
@@ -84,6 +90,7 @@ export default function ConversationPage() {
       aria-label={label}
       value={pair[side]}
       onChange={(event) => choose(side, event.target.value as TranslateLang)}
+      disabled={busy || active !== null}
       className="field w-auto"
     >
       {TRANSLATE_LANGS.map((lang) => (
@@ -123,7 +130,7 @@ export default function ConversationPage() {
           language={pair.them}
           label="Họ nói"
           disabled={busy || active === "me"}
-          onActiveChange={(on) => setActive(on ? "them" : null)}
+          onActiveChange={(on) => activate(on ? "them" : null)}
           onText={(text) => void turn("them", text)}
           onError={setError}
           className="btn btn-primary min-h-16 w-full text-2xl"
@@ -164,7 +171,7 @@ export default function ConversationPage() {
           language={pair.me}
           label="Tôi nói"
           disabled={busy || active === "them"}
-          onActiveChange={(on) => setActive(on ? "me" : null)}
+          onActiveChange={(on) => activate(on ? "me" : null)}
           onText={(text) => void turn("me", text)}
           onError={setError}
           className="btn btn-primary min-h-16 w-full text-2xl"

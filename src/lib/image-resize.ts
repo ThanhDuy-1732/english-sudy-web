@@ -21,6 +21,9 @@ export async function shrinkImage(file: File): Promise<string> {
   canvas.height = height;
   const context = canvas.getContext("2d");
   if (!context) throw new Error("Không đọc được ảnh này.");
+  // JPEG has no transparency: without a white background, transparent pixels turn black and hide dark text.
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, width, height);
   context.drawImage(bitmap, 0, 0, width, height);
   bitmap.close?.();
   return canvas.toDataURL("image/jpeg", JPEG_QUALITY);
