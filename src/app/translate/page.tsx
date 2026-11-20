@@ -15,6 +15,7 @@ import {
   type TranslationResult,
 } from "@/lib/translate";
 import { TranslationCard } from "@/components/TranslationCard";
+import { MicButton } from "@/components/MicButton";
 import { useApiFetch } from "@/lib/useApiFetch";
 
 export default function TranslatePage() {
@@ -43,12 +44,12 @@ export default function TranslatePage() {
     setPair({ from: pair.to, to: pair.from });
   }
 
-  async function translate() {
-    if (!text.trim() || overLimit || loading) return;
+  async function translateText(value: string) {
+    if (!value.trim() || value.length > MAX_TRANSLATE_CHARS || loading) return;
     setLoading(true);
     setError(null);
     try {
-      const res = await fetchWithProvider("/api/translate", { text, from: pair.from, to: pair.to });
+      const res = await fetchWithProvider("/api/translate", { text: value, from: pair.from, to: pair.to });
       const data = (await res.json()) as {
         error?: string;
         detected?: TranslateLang;
@@ -68,7 +69,7 @@ export default function TranslatePage() {
         id: globalThis.crypto?.randomUUID?.() ?? `tr_${Date.now()}_${Math.random().toString(36).slice(2)}`,
         from: pair.from,
         to: pair.to,
-        text,
+        text: value,
         translation: { detected: data.detected, vietnamese: data.vietnamese ?? "", results: data.results },
         at: new Date().toISOString(),
       });
@@ -78,6 +79,11 @@ export default function TranslatePage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function onSpoken(spoken: string) {
+    setText(spoken);
+    void translateText(spoken);
   }
 
   function restore(entry: HistoryEntry) {
@@ -144,13 +150,14 @@ export default function TranslatePage() {
         className="field mb-2 w-full"
         placeholder="Nhập nội dung cần dịch…"
       />
-      <p className={`mb-4 text-xs tabular-nums ${overLimit ? "text-margin" : "text-muted"}`}>
-        {text.length}/1.000
-      </p>
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <p className={`text-xs tabular-nums ${overLimit ? "text-margin" : "text-muted"}`}>{text.length}/1.000</p>
+        <MicButton language={pair.from} onText={onSpoken} onError={setError} disabled={loading} />
+      </div>
 
       <button
         type="button"
-        onClick={() => void translate()}
+        onClick={() => void translateText(text)}
         disabled={!text.trim() || overLimit || loading}
         className="btn btn-primary mb-4 w-full"
       >

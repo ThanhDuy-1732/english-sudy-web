@@ -1,6 +1,16 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import TranslatePage from "../page";
 
+// The mic is tested on its own; here a click hands the page a transcript (or an error when the transcript is empty).
+let micTranscript = "Xin chào";
+jest.mock("@/components/MicButton", () => ({
+  MicButton: ({ onText, onError }: { onText: (t: string, l: null) => void; onError: (m: string) => void }) => (
+    <button type="button" onClick={() => (micTranscript.trim() ? onText(micTranscript, null) : onError("Không nghe rõ, nói lại nhé."))}>
+      Nói
+    </button>
+  ),
+}));
+
 jest.mock("@/lib/useApiFetch", () => ({
   useApiFetch: () => ({
     fetchWithProvider: (url: string, body: Record<string, unknown>) =>
@@ -177,4 +187,26 @@ test("lịch sử gắn lang cho câu tiếng Trung", () => {
   );
   render(<TranslatePage />);
   expect(screen.getByText("谢谢")).toHaveAttribute("lang", "zh-CN");
+});
+
+test("spoken text fills the box and translates", async () => {
+  micTranscript = "Xin chào";
+  mockFetch(TRANSLATION);
+  render(<TranslatePage />);
+  fireEvent.click(screen.getByRole("button", { name: "Nói" }));
+
+  expect(await screen.findByText("Thân mật")).toBeInTheDocument();
+  expect(screen.getByLabelText("Nội dung cần dịch")).toHaveValue("Xin chào");
+  const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body as string);
+  expect(body.text).toBe("Xin chào");
+});
+
+test("empty transcript does not translate", async () => {
+  micTranscript = "  ";
+  mockFetch(TRANSLATION);
+  render(<TranslatePage />);
+  fireEvent.click(screen.getByRole("button", { name: "Nói" }));
+
+  expect(await screen.findByRole("alert")).toHaveTextContent("Không nghe rõ, nói lại nhé.");
+  expect(global.fetch).not.toHaveBeenCalled();
 });
