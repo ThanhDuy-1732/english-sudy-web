@@ -15,6 +15,7 @@ type NavLink = { href: string; label: string };
 const GROUPS: { title?: string; links: NavLink[] }[] = [
   { links: [
     { href: "/today", label: "Hôm nay" },
+    { href: "/translate", label: "Dịch" },
     { href: "/review", label: "Ôn tập" },
   ] },
   { title: "Học", links: [
@@ -44,7 +45,7 @@ const TABS: NavLink[] = [
   { href: "/today", label: "Hôm nay" },
   { href: "/", label: "Từ mới" },
   { href: "/review", label: "Ôn tập" },
-  { href: "/exam", label: "Luyện thi" },
+  { href: "/translate", label: "Dịch" },
 ];
 
 
@@ -53,6 +54,16 @@ const ICONS: Record<string, ReactNode> = {
   "/today": <><circle cx="12" cy="12" r="4" /><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4" /></>,
   "/": <><path d="M12 20v-8" /><path d="M12 13c-4 0-6-2-6-6 4 0 6 2 6 6z" /><path d="M12 11c3 0 5-2 5-5-3 0-5 2-5 5z" /></>,
   "/review": <><path d="M4 11h11v6a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z" /><path d="M15 13l5-4" /><path d="M7 11c0-3 1.5-5 4-5s4 2 4 5" /></>,
+  "/translate": (
+    <>
+      {/* Bong bóng phía sau (dưới phải): "A" */}
+      <path d="M19 9.5h.5a2 2 0 0 1 2 2v5.5a2 2 0 0 1-2 2h-.5l-4.5 3.5V19H11a2 2 0 0 1-2-2v-5.5a2 2 0 0 1 2-2z" />
+      <text x="14" y="16.2" fontSize="7" fill="currentColor" stroke="none">A</text>
+      {/* Bong bóng phía trước (trên trái): "文" */}
+      <path d="M5 4.5h9a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9.5L5 18.5v-4h-.5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2z" />
+      <text x="6" y="11.2" fontSize="7" fill="currentColor" stroke="none">文</text>
+    </>
+  ),
   "/exam": <><path d="M9 4h6M9 4a2 2 0 0 0-2 2v0H6a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-1a2 2 0 0 0-2-2" /><path d="m9 13 2 2 4-4" /></>,
   more: <><circle cx="6" cy="12" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="18" cy="12" r="1.2" /></>,
 };
