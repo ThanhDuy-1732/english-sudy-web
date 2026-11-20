@@ -12,6 +12,8 @@ export interface GrammarTopic {
   rules: SubRule[];
   isUserGenerated?: boolean;
   createdAt?: string;
+  /** What the learner typed to generate this topic; lets a repeat request reuse it. */
+  request?: string;
 }
 
 export const STATIC_GRAMMAR_TOPICS: GrammarTopic[] = [

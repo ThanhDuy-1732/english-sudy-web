@@ -27,3 +27,14 @@ export function saveUserGrammarTopic(topic: GrammarTopic): void {
   }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(topics));
 }
+
+const norm = (s: string) => s.trim().toLowerCase().replace(/\s+/g, " ");
+
+/** An existing topic matching a learner's request, so asking again skips the ~10 s AI call. */
+export function findGrammarTopicForRequest(request: string): GrammarTopic | undefined {
+  const wanted = norm(request);
+  const slug = wanted.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return getAllGrammarTopics().find(
+    (t) => (t.request && norm(t.request) === wanted) || norm(t.name) === wanted || t.id === slug
+  );
+}

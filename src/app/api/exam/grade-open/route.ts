@@ -17,10 +17,10 @@ Decide if the student's answer is correct. Allow minor spelling mistakes (1-2 ch
 
 Return ONLY JSON: {"correct": true/false, "feedback": "one sentence explanation"}`;
 
-  const { text } = await callTask({ task: "exam-grade", prompt });
+  const { text, providerId } = await callTask({ task: "exam-grade", prompt });
   try {
     const result = JSON.parse(text.replace(/```(?:json)?/gi, "").trim());
-    return NextResponse.json(result);
+    return NextResponse.json(result, { headers: { "X-Provider-Used": providerId } });
   } catch {
     return NextResponse.json({ correct: false, feedback: "Could not grade" }, { status: 200 });
   }

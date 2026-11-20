@@ -29,6 +29,8 @@ export class OpenAICompatProvider implements AIProvider {
       apiKey: config.apiKey,
       baseURL: config.baseURL,
       ...(config.defaultHeaders && { defaultHeaders: config.defaultHeaders }),
+      // SDK default is 2 hidden retries with backoff; the provider fallback chain already retries elsewhere.
+      maxRetries: Number(process.env.AI_MAX_RETRIES ?? 1),
       dangerouslyAllowBrowser: process.env.NODE_ENV === "test",
       fetch: testFetch,
     });

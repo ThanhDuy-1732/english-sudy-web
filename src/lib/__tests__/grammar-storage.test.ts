@@ -1,4 +1,4 @@
-import { getUserGrammarTopics, saveUserGrammarTopic } from "../grammar-storage";
+import { findGrammarTopicForRequest, getUserGrammarTopics, saveUserGrammarTopic } from "../grammar-storage";
 
 const mockTopic = {
   id: "test-topic",
@@ -50,4 +50,13 @@ describe("grammar-storage", () => {
     localStorage.setItem("grammarTopics", "not-json");
     expect(getUserGrammarTopics()).toEqual([]);
   });
+});
+
+test("findGrammarTopicForRequest reuses topics by request, name or id", () => {
+  localStorage.clear();
+  saveUserGrammarTopic({ id: "inversion", name: "Inversion for Emphasis", rules: [], request: "đảo ngữ" });
+  expect(findGrammarTopicForRequest("  Đảo   ngữ ")?.id).toBe("inversion");
+  expect(findGrammarTopicForRequest("inversion for emphasis")?.id).toBe("inversion");
+  expect(findGrammarTopicForRequest("Tenses")?.id).toBe("tenses");
+  expect(findGrammarTopicForRequest("relative clauses with whom")).toBeUndefined();
 });

@@ -39,7 +39,8 @@ export function createCallWithFallback(providers: AIProvider[]) {
     prompt: string,
     preferredId?: string,
     disabledIds?: string[],
-    opts: GenerateOpts = {}
+    opts: GenerateOpts = {},
+    onFail?: (providerId: string, error: unknown) => void
   ): Promise<{ text: string; providerId: string }> {
     const active = disabledIds?.length
       ? providers.filter((p) => !disabledIds.includes(p.id))
@@ -62,6 +63,7 @@ export function createCallWithFallback(providers: AIProvider[]) {
         const text = await withTimeout(provider.generateContent(prompt, opts), provider.id);
         return { text, providerId: provider.id };
       } catch (error) {
+        onFail?.(provider.id, error);
         if (!isRetryableError(error)) throw error;
         lastError = error;
       }

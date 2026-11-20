@@ -2,7 +2,7 @@
 
 import { useReducer, useCallback, useEffect, useRef, useState } from "react";
 import type { ExamItem, ExamQuestion, AnswerRecord, ExamAttempt, ExamPart, ExamKind } from "@/lib/exam/types";
-import { saveAttempt, addMistake, addItemToBank, getItemsFromBank } from "@/lib/exam/exam-storage";
+import { saveAttempt, addMistake, addItemToBank, getItemsFromBank, takeUnseenBankItem } from "@/lib/exam/exam-storage";
 import { computeScore, isCompletionCorrect, withJudgementOptions } from "@/lib/exam/scoring";
 import { recordTagResult } from "@/lib/exam/exam-tags";
 import { getProfile } from "@/lib/profile";
@@ -132,29 +132,48 @@ export default function ExamRunner({
     if (preloadedItems || state.phase !== "loading") return;
     let cancelled = false;
 
-    async function loadItems() {
-      const fetched: ExamItem[] = [];
-      for (const part of parts) {
-        if (cancelled) return;
-        try {
-          if (!navigator.onLine) throw new Error("offline");
-          const res = await fetch("/api/exam/generate-item", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ kind, part, level, topic }),
-          });
-          if (!res.ok) throw new Error("generation failed");
-          const item = await res.json();
-          if (!item.id || !Array.isArray(item.questions)) throw new Error("invalid item");
-          fetched.push(item);
-          addItemToBank(item);
-        } catch {
-          // Only reuse the general bank when no specific topic was requested.
-          const cached = !topic ? getItemsFromBank(kind, part, level)[0] : undefined;
-          if (cached) fetched.push(cached);
-        }
+    async function generate(part: ExamPart): Promise<ExamItem> {
+      if (!navigator.onLine) throw new Error("offline");
+      const res = await fetch("/api/exam/generate-item", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind, part, level, topic }),
+      });
+      if (!res.ok) throw new Error("generation failed");
+      const item = await res.json();
+      if (!item.id || !Array.isArray(item.questions)) throw new Error("invalid item");
+      addItemToBank(item);
+      return item;
+    }
+
+    // Generating an item takes ~8 s, so keep one unseen item banked per part:
+    // this session uses it instantly and a background call refills the bank for the next one.
+    // ponytail: refills one item per part per session; topic drills skip the bank since items are topic-specific.
+    function refill(part: ExamPart) {
+      if (!topic && navigator.onLine) generate(part).catch(() => {});
+    }
+
+    async function loadPart(part: ExamPart): Promise<ExamItem | undefined> {
+      const ready = !topic ? takeUnseenBankItem(kind, part, level) : undefined;
+      if (ready) {
+        refill(part);
+        return ready;
       }
+      try {
+        const item = await generate(part);
+        refill(part);
+        return item;
+      } catch {
+        // Only reuse the general bank when no specific topic was requested.
+        return !topic ? getItemsFromBank(kind, part, level)[0] : undefined;
+      }
+    }
+
+    async function loadItems() {
+      // Parts load in parallel; a mock test used to wait for each part in turn.
+      const loaded = await Promise.all(parts.map(loadPart));
       if (cancelled) return;
+      const fetched = loaded.filter((item): item is ExamItem => item !== undefined);
       if (fetched.length > 0) {
         dispatch({ type: "LOAD_ITEMS", items: fetched.map(withJudgementOptions) });
       } else {

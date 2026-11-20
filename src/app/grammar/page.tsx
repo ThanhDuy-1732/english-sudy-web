@@ -5,7 +5,7 @@ import Link from "next/link";
 import GrammarContent from "@/components/GrammarContent";
 import GrammarSidebar from "@/components/GrammarSidebar";
 import { STATIC_GRAMMAR_TOPICS, type GrammarTopic } from "@/lib/grammar-data";
-import { getUserGrammarTopics, saveUserGrammarTopic } from "@/lib/grammar-storage";
+import { findGrammarTopicForRequest, getUserGrammarTopics, saveUserGrammarTopic } from "@/lib/grammar-storage";
 import { getTopicProgress } from "@/lib/grammar-progress";
 import { isBookmarked, toggleBookmark } from "@/lib/grammar-bookmarks";
 
@@ -34,6 +34,12 @@ export default function GrammarPage() {
   const selectedTopic = allTopics.find((topic) => topic.id === selectedId) ?? allTopics[0];
 
   async function handleAddTopic(request: string) {
+    const existing = findGrammarTopicForRequest(request);
+    if (existing) {
+      setError("");
+      setSelectedId(existing.id);
+      return;
+    }
     setIsAdding(true);
     setError("");
     try {
@@ -47,6 +53,7 @@ export default function GrammarPage() {
       const normalizedTopic = {
         ...topic,
         isUserGenerated: true,
+        request: request.trim(),
         createdAt: topic.createdAt ?? new Date().toISOString(),
       };
       saveUserGrammarTopic(normalizedTopic);

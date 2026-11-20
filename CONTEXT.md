@@ -65,7 +65,7 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 | `/api/grammar-generate` | `{ request, provider?, disabledProviders? }` | `GrammarTopic` JSON for a user-requested grammar topic |
 | `/api/grammar-examples` | `{ topic, subRule, provider?, disabledProviders? }` | `{ examples: string[] }` |
 | `/api/grammar-exercise` | `{ topic, subRule, provider?, disabledProviders? }` | `{ type: "fill"|"mcq", question, options?, answer }` |
-| `/api/providers` | GET | `{ id, name, model }[]` of configured providers |
+| `/api/providers` | GET | `{ id, name, model }[]` of configured providers; CDN cache `s-maxage=86400` (đổi khi deploy) |
 | `/api/providers/test` | `{ providerId }` | `{ ok, latency, error? }` |
 | `/api/exam/generate-item` | `{ kind, part, level, topic? }` | `ExamItem` (zod validated, 1 auto-repair) |
 | `/api/exam/grade-open` | `{ question, userAnswer, correctAnswer }` | `{ correct, feedback }` |
@@ -77,9 +77,9 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 | `/api/vocab/context` | `{ words: string[], format?: "mini_story"\|"dialogue"\|"email"\|"workplace" }` | `{ text }` (từ mục tiêu in **đậm**); 400 nếu `words` rỗng |
 | `/api/translate` | `{ text, from: TranslateLang\|"auto", to: TranslateLang, tone?: Tone, provider?, disabledProviders? }` (`tone` → chỉ dịch sắc thái đó; lạ → 400 "Sắc thái không hợp lệ.") | `Translation` `{ detected, vietnamese, results: [{ tone, text, reading?, note }] }` + header `X-Provider-Used`; 400 "Nhập nội dung cần dịch." / "Tối đa 1.000 ký tự." / ngôn ngữ lạ / "Ngôn ngữ nguồn và đích giống nhau." (cả khi Tự nhận ra `detected === to`; nguồn chọn rõ thì không chặn); đích vi/en mà kết quả có kana/Hán/Hangul → hỏi lại AI 1 lần, vẫn sai → 503; 503 khi AI lỗi; zod + `parseTranslation`, 1 lần repair |
 | `/api/translate/image` | `{ image: data URL (image/jpeg\|png\|webp, base64), to: TranslateLang }` | `ImageTranslation` `{ detected: TranslateLang\|null, lines: [{ text, translation, reading? }] }` qua `getVisionProvider()` (chỉ Gemini); 415 "Ảnh không hợp lệ." / 400 ngôn ngữ lạ / 413 "Ảnh quá lớn." (> 2,9 MB sau giải mã) / 503 "Dịch ảnh cần khoá Gemini." / 422 "Không thấy chữ trong ảnh." / 503 AI lỗi; zod + `parseImageTranslation`, 1 lần repair |
-| `/api/admin/metrics` | GET, header `x-admin-secret` = `ADMIN_SECRET` | Metrics AI tổng hợp theo task; 503 nếu chưa set `ADMIN_SECRET`, 401 nếu sai |
+| `/api/admin/metrics` | GET, header `x-admin-secret` = `ADMIN_SECRET` | Metrics AI tổng hợp theo task: `count`, `avg/p50/p95LatencyMs`, `successRate`, `fallbackRate`, `repairRate`, `avgOutChars`, `byProvider{p50,p95}`; 503 nếu chưa set `ADMIN_SECRET`, 401 nếu sai |
 
-Mọi route gọi AI đều đi qua `callTask` (task router, có metrics) — kể cả lần gọi sửa JSON (`repair`). Chúng set header `X-Provider-Used`. Lời gọi AI thật nằm ở `src/lib/providers/`.
+Mọi route gọi AI đều đi qua `callTask` (task router, có metrics) — kể cả lần gọi sửa JSON (truyền `repair: true`). Chúng set header `X-Provider-Used`. Mỗi lời gọi ghi 1 dòng JSON ra log (`evt:"ai_call"`, `task`, `provider`, `ms`, `ok`, `failed` = provider lỗi trước đó `id:status`, `outChars`, `promptChars`, `repair`) — lọc trên Vercel logs bằng `ai_call`. OpenAI SDK `maxRetries` = `AI_MAX_RETRIES` (mặc định 1). Lời gọi AI thật nằm ở `src/lib/providers/`.
 
 `/api/generate-words` nhận `exclude` (từ đã có, tối đa 200, khử trùng), `count` (1–30, mặc định 5) và `knownCount` (số từ đã biết của chủ đề, thêm vào prompt). Prompt yêu cầu model tránh các từ đó; kết quả bị lọc lại và gọi bổ sung một lần nếu model vẫn trả từ trùng.
 
@@ -286,11 +286,11 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 | `dailyChallenge` | `DailyChallenge[]` | Full history |
 | `customTopics` | `string[]` | User-added topics |
 | `studyTime` | `Record<string, number>` | Daily study seconds — `{ "YYYY-MM-DD": seconds }` |
-| `grammarTopics` | `GrammarTopic[]` | User-generated grammar topics |
+| `grammarTopics` | `GrammarTopic[]` | User-generated grammar topics; `request` = câu người dùng gõ. `findGrammarTopicForRequest` khớp theo request/tên/id → `/grammar` chọn chủ đề sẵn có thay vì gọi AI lại |
 | `voiceSettings` | `VoiceSettings` | TTS settings |
 | `preferredProvider` | `string` | Provider id (e.g. `"gemini"`) |
 | `disabledProviders` | `string[]` | Opt-out provider ids |
-| `examBank` | `Record<string, ExamItem[]>` | Cache đề exam, key = `"TOEIC:RC5:3"`. Max 30/key |
+| `examBank` | `Record<string, ExamItem[]>` | Cache đề exam, key = `"TOEIC:RC5:3"`. Max 30/key. `ExamRunner` (không có `topic`) dùng ngay item chưa làm (`takeUnseenBankItem`, so với `examAttempts`) rồi sinh nền 1 item bù; các part tải song song |
 | `examAttempts` | `ExamAttempt[]` | 100 attempts gần nhất |
 | `mistakeLog` | `MistakeEntry[]` | **Legacy**: chỉ đọc để migration một lần, không còn ghi |
 | `mistakeLogBackup` | string | Bản sao nguyên văn `mistakeLog` trước migration |
@@ -339,7 +339,7 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 
 **Task router** (`src/lib/ai-tasks.ts`): `callTask({ task, prompt, provider?, disabledProviders?, temperature? })` → `{ text, providerId }`. Bọc `callWithFallback`, chọn provider theo `TASK_PROVIDER_MAP` (bảng tĩnh; chỉ `speaking-grade` và `writing-grade` ghim theo `GRADING_PROVIDER`) và ghi metric mỗi lần gọi. `AITaskName` → route: `word-generation` (generate-words), `vocab-batch` (generate-batch), `sentence-generation` (generate-sentence), `vocab-exercise` (generate-synonyms, generate-fillblank), `reading-generation` (generate-reading), `sentence-grade` (grade-sentence), `grammar-generation` (grammar-generate), `grammar-explanation` (grammar-examples), `grammar-exercise`, `exam-generation` (exam/generate-item), `exam-explanation` (exam/explain), `exam-grade` (exam/grade-open), `speaking-roleplay`, `speaking-grade`, `writing-grade`, `vocab-context`; `writing-feedback` chưa dùng.
 - `ai-prompts.ts` — `PROMPTS: Partial<Record<AITaskName, PromptDefinition>>`, `getPrompt(task)`; chưa phủ hết task.
-- `ai-metrics.ts` — `recordMetric`, `getMetrics`, `getAggregatedMetrics`, `clearMetrics`; **in-memory theo server instance**, mất khi cold start. Đọc qua `GET /api/admin/metrics`.
+- `ai-metrics.ts` — `recordMetric` (`attempts`, `outChars`, `repair`), `getMetrics`, `getAggregatedMetrics` (p50/p95, theo provider), `clearMetrics`; **in-memory theo server instance**, mất khi cold start — log `ai_call` là nguồn bền. Đọc qua `GET /api/admin/metrics`.
 - `ai-json.ts` — `stripFences`, `parseAiJson(schema, …)` (Zod validate; dùng cho exam item).
 
 **Supported providers** (env key → default model):

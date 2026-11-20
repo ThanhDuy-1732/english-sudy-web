@@ -76,8 +76,8 @@ Return ONLY JSON:
   const { text, providerId } = await callTask({ task: "writing-grade", prompt, temperature: GRADING_OPTS.temperature });
   const parsed = await parseAiJson(text, WritingFeedbackSchema, {
     repair: (err) =>
-      callTask({ task: "writing-grade", prompt: `${prompt}\n\nSchema error: ${err}\nReturn valid JSON only.`, provider: providerId, temperature: GRADING_OPTS.temperature }).then((r) => r.text),
+      callTask({ task: "writing-grade", prompt: `${prompt}\n\nSchema error: ${err}\nReturn valid JSON only.`, provider: providerId, temperature: GRADING_OPTS.temperature, repair: true }).then((r) => r.text),
   });
 
-  return NextResponse.json({ ...parsed, gradedBy: providerId });
+  return NextResponse.json({ ...parsed, gradedBy: providerId }, { headers: { "X-Provider-Used": providerId } });
 }

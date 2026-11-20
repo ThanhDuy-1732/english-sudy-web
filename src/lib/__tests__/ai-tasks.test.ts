@@ -17,7 +17,8 @@ test("callTask calls callWithFallback with the prompt", async () => {
     "generate 10 words about business",
     undefined,
     undefined,
-    {}
+    {},
+    expect.any(Function)
   );
   expect(result.text).toBe("mock response");
 });

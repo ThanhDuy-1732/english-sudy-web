@@ -18,11 +18,11 @@ Give a clear, concise explanation (2-4 sentences) of why the correct answer is r
 
 Return ONLY JSON: {"explanation": "your explanation here"}`;
 
-  const { text } = await callTask({ task: "exam-explanation", prompt });
+  const { text, providerId } = await callTask({ task: "exam-explanation", prompt });
   try {
     const result = JSON.parse(text.replace(/```(?:json)?/gi, "").trim());
-    return NextResponse.json(result);
+    return NextResponse.json(result, { headers: { "X-Provider-Used": providerId } });
   } catch {
-    return NextResponse.json({ explanation: explanation ?? "See correct answer above." });
+    return NextResponse.json({ explanation: explanation ?? "See correct answer above." }, { headers: { "X-Provider-Used": providerId } });
   }
 }

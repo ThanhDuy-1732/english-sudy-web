@@ -158,3 +158,13 @@ test("callWithFallback abandons a provider that hangs and falls back", async () 
     jest.useRealTimers();
   }
 });
+
+test("callWithFallback reports each failed provider to onFail", async () => {
+  const failures: string[] = [];
+  const bad = jest.fn().mockRejectedValue({ status: 429 });
+  const ok = jest.fn().mockResolvedValue("ok");
+  const call = createCallWithFallback([makeProvider("a", bad), makeProvider("b", ok)]);
+  const result = await call("hi", undefined, undefined, {}, (id) => failures.push(id));
+  expect(result.providerId).toBe("b");
+  expect(failures).toEqual(["a"]);
+});

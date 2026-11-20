@@ -82,6 +82,12 @@ export function addItemToBank(item: ExamItem) {
   lsSet(BANK_KEY, pruneBank(bank));
 }
 
+/** A banked item the learner has not answered in any saved attempt yet. */
+export function takeUnseenBankItem(kind: ExamKind, part: ExamPart, level: number): ExamItem | undefined {
+  const seen = new Set(getAttempts().flatMap((a) => a.answers.map((r) => r.itemId)));
+  return getItemsFromBank(kind, part, level).find((item) => !seen.has(item.id));
+}
+
 // ─── Attempts ────────────────────────────────────────────────────────────────
 export function getAttempts(): ExamAttempt[] {
   return ls<ExamAttempt[]>(ATTEMPTS_KEY, []);

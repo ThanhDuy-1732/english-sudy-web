@@ -95,8 +95,8 @@ Return ONLY JSON:
   const { text, providerId } = await callTask({ task: "speaking-roleplay", prompt });
   const parsed = await parseAiJson(text, ResponseSchema, {
     repair: (err) =>
-      callTask({ task: "speaking-roleplay", prompt: `${prompt}\n\nSchema error: ${err}\nReturn valid JSON only.`, provider: providerId }).then((r) => r.text),
+      callTask({ task: "speaking-roleplay", prompt: `${prompt}\n\nSchema error: ${err}\nReturn valid JSON only.`, provider: providerId, repair: true }).then((r) => r.text),
   });
 
-  return NextResponse.json(parsed);
+  return NextResponse.json(parsed, { headers: { "X-Provider-Used": providerId } });
 }

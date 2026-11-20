@@ -40,6 +40,6 @@ After each line, add its reading (${READINGS[lang]}) in parentheses on its own l
 End with a blank line and a Vietnamese translation of the whole text, starting with "Dịch:".
 Return only the text, no explanation.`;
 
-  const { text } = await callTask({ task: "vocab-context", prompt });
-  return NextResponse.json({ text });
+  const { text, providerId } = await callTask({ task: "vocab-context", prompt });
+  return NextResponse.json({ text }, { headers: { "X-Provider-Used": providerId } });
 }

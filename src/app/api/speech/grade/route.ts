@@ -77,7 +77,7 @@ Return ONLY JSON:
 
   const parsed = await parseAiJson(text, FeedbackSchema, {
     repair: (err) =>
-      callTask({ task: "speaking-grade", prompt: `${prompt}\n\nOutput trước bị lỗi schema: ${err}\nTrả lại JSON hợp lệ.`, provider: providerId, temperature: GRADING_OPTS.temperature }).then((r) => r.text),
+      callTask({ task: "speaking-grade", prompt: `${prompt}\n\nOutput trước bị lỗi schema: ${err}\nTrả lại JSON hợp lệ.`, provider: providerId, temperature: GRADING_OPTS.temperature, repair: true }).then((r) => r.text),
   });
 
   return NextResponse.json({
@@ -87,5 +87,5 @@ Return ONLY JSON:
     wordsPerMinute: wpm,
     fillerCount,
     gradedBy: providerId,
-  });
+  }, { headers: { "X-Provider-Used": providerId } });
 }

@@ -116,15 +116,15 @@ export async function POST(req: NextRequest) {
   const prompt = buildPrompt(text.trim(), from as TranslateLang | "auto", to as TranslateLang, wanted);
   const failed = () => NextResponse.json({ error: "Không dịch được lúc này. Vui lòng thử lại." }, { status: 503 });
   let providerUsed = "";
-  const askRaw = (content: string, provider: string | undefined) =>
-    callTask({ task: "translation", prompt: content, provider, disabledProviders: body?.disabledProviders }).then((result) => {
+  const askRaw = (content: string, provider: string | undefined, repair = false) =>
+    callTask({ task: "translation", prompt: content, provider, disabledProviders: body?.disabledProviders, repair }).then((result) => {
       providerUsed = result.providerId;
       return result.text;
     });
   const ask = async (content: string, provider = body?.provider) => {
     const raw = await askRaw(content, provider);
     const shaped = await parseAiJson(raw, ResponseSchema, {
-      repair: (err) => askRaw(`${content}\n\nSchema error: ${err}\nReturn valid JSON only.`, providerUsed),
+      repair: (err) => askRaw(`${content}\n\nSchema error: ${err}\nReturn valid JSON only.`, providerUsed, true),
     });
     const parsed = parseTranslation(shaped);
     // A single-tone request keeps only that tone, whatever else the AI added.

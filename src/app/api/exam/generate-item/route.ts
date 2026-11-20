@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
   const parsed = await parseAiJson(text, ExamItemSchema, {
     // retry once: send zod error back to the model to self-correct
     repair: (err) =>
-      callTask({ task: "exam-generation", prompt: `${prompt}\n\nOutput trước bị lỗi schema: ${err}\nTrả lại JSON hợp lệ, KHÔNG giải thích.`, provider: providerId, disabledProviders: disabledProviders }).then((r) => r.text),
+      callTask({ task: "exam-generation", prompt: `${prompt}\n\nOutput trước bị lỗi schema: ${err}\nTrả lại JSON hợp lệ, KHÔNG giải thích.`, provider: providerId, disabledProviders: disabledProviders, repair: true }).then((r) => r.text),
   });
 
   const item = { ...parsed, providerUsed: providerId };
