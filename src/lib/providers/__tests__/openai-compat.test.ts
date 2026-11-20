@@ -27,7 +27,7 @@ test("generateContent returns message content", async () => {
   expect(mockCreate).toHaveBeenCalledWith({
     model: "llama-3.3-70b-versatile",
     messages: [{ role: "user", content: "test prompt" }],
-  });
+  }, { signal: undefined });
 });
 
 test("generateContent returns empty string when content is null", async () => {

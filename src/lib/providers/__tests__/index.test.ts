@@ -168,3 +168,22 @@ test("callWithFallback reports each failed provider to onFail", async () => {
   expect(result.providerId).toBe("b");
   expect(failures).toEqual(["a"]);
 });
+
+test("callWithFallback aborts a provider that runs past its timeout", async () => {
+  jest.useFakeTimers();
+  try {
+    let signal: AbortSignal | undefined;
+    const hang = jest.fn((_p: string, opts?: { signal?: AbortSignal }) => {
+      signal = opts?.signal;
+      return new Promise<string>(() => {});
+    });
+    const ok = jest.fn<Promise<string>, [string, object?]>().mockResolvedValue("ok");
+    const pending = createCallWithFallback([makeProvider("a", hang as unknown as jest.Mock), makeProvider("b", ok)])("hello", undefined, undefined, { timeoutMs: 10_000 });
+    await jest.advanceTimersByTimeAsync(10_000);
+    expect(await pending).toEqual({ text: "ok", providerId: "b" });
+    expect(signal?.aborted).toBe(true);
+    expect(ok.mock.calls[0][1]).not.toHaveProperty("timeoutMs");
+  } finally {
+    jest.useRealTimers();
+  }
+});

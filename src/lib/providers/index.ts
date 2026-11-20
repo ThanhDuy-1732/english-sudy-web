@@ -12,8 +12,8 @@ const OPENCODE_SESSION_ID =
 
 class ProviderTimeoutError extends Error {
   status = 503;
-  constructor(id: string) {
-    super(`${id} timed out after ${PROVIDER_TIMEOUT_MS}ms`);
+  constructor(id: string, ms: number) {
+    super(`${id} timed out after ${ms}ms`);
   }
 }
 
@@ -25,13 +25,17 @@ function isRetryableError(error: unknown): boolean {
   return status === 402 || status === 404 || status === 408 || status === 429 || status >= 500;
 }
 
-// ponytail: the losing request is not aborted, only abandoned; add AbortSignal support in the providers if it matters.
-function withTimeout<T>(promise: Promise<T>, id: string): Promise<T> {
+// Aborts the provider call on timeout so an abandoned request stops (and stops retrying) instead of running on.
+function withTimeout<T>(run: (signal: AbortSignal) => Promise<T>, id: string, ms: number): Promise<T> {
+  const controller = new AbortController();
   let timer: ReturnType<typeof setTimeout>;
   const timeout = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => reject(new ProviderTimeoutError(id)), PROVIDER_TIMEOUT_MS);
+    timer = setTimeout(() => {
+      controller.abort();
+      reject(new ProviderTimeoutError(id, ms));
+    }, ms);
   });
-  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+  return Promise.race([run(controller.signal), timeout]).finally(() => clearTimeout(timer));
 }
 
 export function createCallWithFallback(providers: AIProvider[]) {
@@ -39,7 +43,7 @@ export function createCallWithFallback(providers: AIProvider[]) {
     prompt: string,
     preferredId?: string,
     disabledIds?: string[],
-    opts: GenerateOpts = {},
+    opts: GenerateOpts & { timeoutMs?: number } = {},
     onFail?: (providerId: string, error: unknown) => void
   ): Promise<{ text: string; providerId: string }> {
     const active = disabledIds?.length
@@ -57,10 +61,11 @@ export function createCallWithFallback(providers: AIProvider[]) {
       throw new Error("No AI providers configured");
     }
 
+    const { timeoutMs = PROVIDER_TIMEOUT_MS, ...genOpts } = opts;
     let lastError: unknown;
     for (const provider of ordered) {
       try {
-        const text = await withTimeout(provider.generateContent(prompt, opts), provider.id);
+        const text = await withTimeout((signal) => provider.generateContent(prompt, { ...genOpts, signal }), provider.id, timeoutMs);
         return { text, providerId: provider.id };
       } catch (error) {
         onFail?.(provider.id, error);
@@ -75,6 +80,11 @@ export function createCallWithFallback(providers: AIProvider[]) {
 function buildRegistry(): AIProvider[] {
   const providers: AIProvider[] = [];
 
+  // Fallback order = measured speed for a short prompt (p50, Nov 2026): groq ~0.9 s, cohere ~0.5 s
+  // (fast, but a small model), openrouter ~1.4 s (free models, slow on longer output),
+  // gemini ~7 s (queue on the free tier; it stays registered mainly for photo translation),
+  // mistral last (402 on this account until billing is set up).
+
   if (process.env.OPENCODE_API_KEY) {
     providers.push(
       new OpenAICompatProvider({
@@ -88,15 +98,6 @@ function buildRegistry(): AIProvider[] {
     );
   }
 
-  if (process.env.GEMINI_API_KEY) {
-    providers.push(
-      new GeminiProvider(
-        process.env.GEMINI_API_KEY,
-        process.env.GEMINI_MODEL ?? "gemini-flash-lite-latest"
-      )
-    );
-  }
-
   if (process.env.GROQ_API_KEY) {
     providers.push(
       new OpenAICompatProvider({
@@ -105,6 +106,18 @@ function buildRegistry(): AIProvider[] {
         apiKey: process.env.GROQ_API_KEY,
         model: process.env.GROQ_MODEL ?? "openai/gpt-oss-120b",
         baseURL: "https://api.groq.com/openai/v1",
+      })
+    );
+  }
+
+  if (process.env.COHERE_API_KEY) {
+    providers.push(
+      new OpenAICompatProvider({
+        id: "cohere",
+        name: "Cohere",
+        apiKey: process.env.COHERE_API_KEY,
+        model: process.env.COHERE_MODEL ?? "command-r7b-12-2024",
+        baseURL: "https://api.cohere.com/compatibility/v1",
       })
     );
   }
@@ -121,6 +134,15 @@ function buildRegistry(): AIProvider[] {
     );
   }
 
+  if (process.env.GEMINI_API_KEY) {
+    providers.push(
+      new GeminiProvider(
+        process.env.GEMINI_API_KEY,
+        process.env.GEMINI_MODEL ?? "gemini-flash-lite-latest"
+      )
+    );
+  }
+
   if (process.env.MISTRAL_API_KEY) {
     providers.push(
       new OpenAICompatProvider({
@@ -129,18 +151,6 @@ function buildRegistry(): AIProvider[] {
         apiKey: process.env.MISTRAL_API_KEY,
         model: process.env.MISTRAL_MODEL ?? "mistral-small-latest",
         baseURL: "https://api.mistral.ai/v1",
-      })
-    );
-  }
-
-  if (process.env.COHERE_API_KEY) {
-    providers.push(
-      new OpenAICompatProvider({
-        id: "cohere",
-        name: "Cohere",
-        apiKey: process.env.COHERE_API_KEY,
-        model: process.env.COHERE_MODEL ?? "command-r7b-12-2024",
-        baseURL: "https://api.cohere.com/compatibility/v1",
       })
     );
   }

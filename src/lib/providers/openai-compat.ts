@@ -29,8 +29,9 @@ export class OpenAICompatProvider implements AIProvider {
       apiKey: config.apiKey,
       baseURL: config.baseURL,
       ...(config.defaultHeaders && { defaultHeaders: config.defaultHeaders }),
-      // SDK default is 2 hidden retries with backoff; the provider fallback chain already retries elsewhere.
-      maxRetries: Number(process.env.AI_MAX_RETRIES ?? 1),
+      // No hidden SDK retries: the fallback chain is the retry, and the SDK would honour an uncapped
+      // retry-after (a 429 with retry-after: 20 eats the whole timeout).
+      maxRetries: Number(process.env.AI_MAX_RETRIES ?? 0),
       dangerouslyAllowBrowser: process.env.NODE_ENV === "test",
       fetch: testFetch,
     });
@@ -41,7 +42,7 @@ export class OpenAICompatProvider implements AIProvider {
       model: this.model,
       messages: [{ role: "user", content: prompt }],
       ...(opts?.temperature !== undefined && { temperature: opts.temperature }),
-    });
+    }, { signal: opts?.signal });
     return response.choices[0]?.message?.content ?? "";
   }
 }

@@ -53,6 +53,22 @@ const TASK_PROVIDER_MAP: Record<AITaskName, string> = {
   translation: "",
 };
 
+// Per-provider timeout before the fallback chain moves on. Short tasks answer in 1–3 s (p95 ~6 s),
+// so a stuck call should not hold the learner for the 25 s default. Writing grading runs 14–20 s.
+const SHORT_TIMEOUT_MS = 10_000;
+const TASK_TIMEOUT_MS: Partial<Record<AITaskName, number>> = {
+  "sentence-generation": SHORT_TIMEOUT_MS,
+  "vocab-exercise": SHORT_TIMEOUT_MS,
+  "sentence-grade": SHORT_TIMEOUT_MS,
+  "grammar-exercise": SHORT_TIMEOUT_MS,
+  "grammar-explanation": SHORT_TIMEOUT_MS,
+  "exam-explanation": SHORT_TIMEOUT_MS,
+  "exam-grade": SHORT_TIMEOUT_MS,
+  "vocab-context": SHORT_TIMEOUT_MS,
+  "speaking-roleplay": SHORT_TIMEOUT_MS,
+  "writing-grade": 40_000,
+};
+
 export function getTaskProviderMap(): Record<AITaskName, string> {
   return { ...TASK_PROVIDER_MAP };
 }
@@ -66,7 +82,11 @@ export async function callTask(opts: CallTaskOptions): Promise<{ text: string; p
   const failed: string[] = [];
 
   try {
-    const callOpts = opts.temperature !== undefined ? { temperature: opts.temperature } : {};
+    const timeoutMs = TASK_TIMEOUT_MS[opts.task];
+    const callOpts = {
+      ...(opts.temperature !== undefined && { temperature: opts.temperature }),
+      ...(timeoutMs !== undefined && { timeoutMs }),
+    };
     const result = await callWithFallback(opts.prompt, preferred, opts.disabledProviders, callOpts, (id, err) => {
       const status = (err as { status?: number }).status;
       failed.push(status ? `${id}:${status}` : id);

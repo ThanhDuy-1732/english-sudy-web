@@ -7,6 +7,8 @@ export interface ProviderInfo {
 
 export interface GenerateOpts {
   temperature?: number;
+  /** Aborted by the fallback chain when the provider runs past its timeout. */
+  signal?: AbortSignal;
 }
 
 export interface AIProvider extends ProviderInfo {

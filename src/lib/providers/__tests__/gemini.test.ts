@@ -18,11 +18,17 @@ test("generateContent returns response text", async () => {
   expect(mockGenerateContent).toHaveBeenCalledTimes(1);
 });
 
-test("generateContent retries once on 429", async () => {
+test("generateContent does not retry on 429; the fallback chain moves on", async () => {
+  mockGenerateContent.mockRejectedValue({ status: 429 });
+  await expect(provider.generateContent("test")).rejects.toMatchObject({ status: 429 });
+  expect(mockGenerateContent).toHaveBeenCalledTimes(1);
+});
+
+test("generateWithImage retries once on 429", async () => {
   mockGenerateContent
     .mockRejectedValueOnce({ status: 429 })
     .mockResolvedValueOnce({ response: { text: () => "hello after retry" } });
-  expect(await provider.generateContent("test")).toBe("hello after retry");
+  expect(await provider.generateWithImage("test", { mimeType: "image/jpeg", base64: "QUJD" })).toBe("hello after retry");
   expect(mockGenerateContent).toHaveBeenCalledTimes(2);
 });
 
