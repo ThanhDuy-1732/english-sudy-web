@@ -27,6 +27,7 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 | `/exam/drill/[part]` | `src/app/exam/drill/[part]/page.tsx` | Luyện 1 part (TOEIC RC5/RC6/RC7/LC2/LC3/LC4; IELTS READ_P1/READ_P2/READ_P3, LISTEN_S1–S4; prompt từng part trong `lib/exam/prompts.ts`); records an exam session with part metadata and result totals |
 | `/exam/mock` | `src/app/exam/mock/page.tsx` | Full mock test rút gọn với countdown timer; records an exam session with mock metadata and result totals |
 | `/exam/mistakes` | `src/app/exam/mistakes/page.tsx` | Sổ lỗi exam: `getExamMistakes()` (unified, `source` `exam:*`), filter, resolve dùng chung với `/mistakes`, badge "sai N lần", drill lại; chạy `runMistakeMigration()` khi tải |
+| `/translate` | `src/app/translate/page.tsx` | "Dịch": chọn cặp nguồn (có Tự nhận)/đích, nút ⇄, giới hạn 1.000 ký tự; 3 thẻ sắc thái, 🔊, ⧉, "Gieo vào vườn", lịch sử 20 mục |
 | `/speak` | `src/app/speak/page.tsx` | Chọn scenario giao tiếp hoặc IELTS Speaking part |
 | `/speak/roleplay/[id]` | `src/app/speak/roleplay/[id]/page.tsx` | Roleplay hội thoại đa lượt với AI; speaking session ends on user/end-of-turn completion |
 | `/speak/ielts/[part]` | `src/app/speak/ielts/[part]/page.tsx` | IELTS Speaking P1/P2/P3 — mic hoặc nhập text; speaking session ends when grading returns, retry starts a new session |
@@ -45,7 +46,7 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 | `/write/history` | `src/app/write/history/page.tsx` | Lịch sử bài viết; mở rewrite |
 | `/write/rewrite/[id]` | `src/app/write/rewrite/[id]/page.tsx` | Viết lại đoạn sai; chấm qua `/api/exam/grade-open`; lỗi → `unifiedMistakes` |
 
-**Navigation** (`AppNavigation.tsx`, mounted in `layout.tsx`): desktop (`lg+`) = sticky left sidebar grouped Hôm nay/Ôn tập · Học · Luyện · Tiến độ, with Cài đặt, `HeaderTimer` and `ProviderBadge` at the bottom; phones = top bar (brand + timer) and a fixed bottom tab bar (Hôm nay, Từ mới, Ôn tập, Luyện thi, Thêm). "Thêm" is a `<details>` sheet with every other link (≥44px targets, backdrop closes it, closes on route change). Active link uses `usePathname` + `aria-current`. `.app-content` reserves the tab bar height below `lg`. No footer.
+**Navigation** (`AppNavigation.tsx`, mounted in `layout.tsx`): desktop (`lg+`) = sticky left sidebar grouped Hôm nay/Dịch/Ôn tập · Học · Luyện · Tiến độ, with Cài đặt, `HeaderTimer` and `ProviderBadge` at the bottom; phones = top bar (brand + timer) and a fixed bottom tab bar (Hôm nay, Từ mới, Ôn tập, Dịch, Thêm). "Luyện thi" stays in the sidebar and moved under the "Thêm" sheet (nhóm Luyện). "Thêm" is a `<details>` sheet with every other link (≥44px targets, backdrop closes it, closes on route change). Active link uses `usePathname` + `aria-current`. `.app-content` reserves the tab bar height below `lg`. No footer.
 
 ---
 
@@ -73,6 +74,7 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 | `/api/speak/roleplay` | `{ scenario, history, userText }` | `{ reply, correction, goalAchieved, suggestedReplies }` |
 | `/api/write/grade` | `{ kind, prompt, content, chartData? }` | `WritingFeedback` (4 bands + annotations + model answer) |
 | `/api/vocab/context` | `{ words: string[], format?: "mini_story"\|"dialogue"\|"email"\|"workplace" }` | `{ text }` (từ mục tiêu in **đậm**); 400 nếu `words` rỗng |
+| `/api/translate` | `{ text, from: TranslateLang\|"auto", to: TranslateLang }` | `Translation` `{ detected, vietnamese, results: [{ tone, text, reading?, note }] }`; 400 "Nhập nội dung cần dịch." / "Tối đa 1.000 ký tự." / ngôn ngữ lạ / "Ngôn ngữ nguồn và đích giống nhau." (cả khi `detected === to`); 503 khi AI lỗi; zod + `parseTranslation`, 1 lần repair |
 | `/api/admin/metrics` | GET, header `x-admin-secret` = `ADMIN_SECRET` | Metrics AI tổng hợp theo task; 503 nếu chưa set `ADMIN_SECRET`, 401 nếu sai |
 
 Mọi route gọi AI đều đi qua `callTask` (task router, có metrics) — kể cả lần gọi sửa JSON (`repair`). Chúng set header `X-Provider-Used`. Lời gọi AI thật nằm ở `src/lib/providers/`.
@@ -293,6 +295,8 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 | `mistakeLogMigrated` · `mistakeLogRemoteMigrated` | `"1"` | Cờ migration local / remote (`mistake_log`) đã chạy |
 | `examSettings` | `ExamSettings` | Primary exam, target score, level, listening rate |
 | `learningLanguages` | `LearnLang[]` | Languages being studied (default `["en"]`, never empty); `LanguagePicker` |
+| `translatePair` | `{ from: TranslateLang\|"auto", to: TranslateLang }` | Cặp ngôn ngữ dịch dùng lần cuối (mặc định vi→en) |
+| `translationHistory` | `HistoryEntry[]` | 20 bản dịch gần nhất trên máy (text, pair, Translation) |
 | `dailyPlan` | `{ date, blocks }` | Kế hoạch `/today` — regenerate mỗi ngày |
 | `lastSpeakingAt` | ISO string | Để /today nhắc luyện nói sau 2 ngày |
 | `lastWritingAt` | ISO string | Để /today nhắc luyện viết sau 5 ngày |
@@ -379,6 +383,7 @@ In **review mode** (`isReviewMode=true`): shows 4 review grade buttons — Quên
 - Practice (phase 2): `lib/answer-match.ts` (`normalizeAnswer`, `answersMatch`, `answerTokens`, `similarityPct`; zh/ja compare without spaces/punctuation, en/ko by words) and `lib/speech-voice.ts` (`voicesFor`, `pickVoice`, `speakText` with optional onstart/onend; saved voice if it speaks the language, else exact match, else browser default). Routes taking `lang` (English prompt unchanged when absent): `generate-fillblank` (non-en → `{sentence, reading, translation}`), `grade-sentence`, `generate-reading` (non-en adds `translation`), `vocab/context`, `speak/roleplay` (non-en adds `reading`; English prompt pinned by a Jest snapshot); `speech/transcribe` takes form field `language` and returns Whisper's `language`.
 - Card modes (`WritingChallenge`, `FillBlank`, `DictationMode`) take `lang` for every language. `/vocab/quiz`, `/vocab/context`, `/speak/shadowing` and roleplay show a "Ngôn ngữ" `Segmented` when more than one language qualifies (quiz: ≥4 saved words, context: any saved word, shadowing/roleplay: learning languages); roleplay's language locks after the first message (later header-picker changes don't affect it); Shadowing hides its selector while recording or processing. `speech/transcribe` sends Whisper a simplified-Chinese prompt for `zh`. `parseWordInput` accepts any letters and CJK separators (，、；). `lib/vocab-quiz.ts`: `quizWords(words, lang)`, `quizLanguages`, `buildMCQ` (unique options). `lib/shadow-sentences.ts`: 8 sentences per language with reading and Vietnamese translation (English set unchanged). Từ mới with several languages: "Kiểm tra kiến thức" quizzes all shown words (distractors from the same language) and "Đọc hiểu" has one chip per language. `SpeakingRecord.lang`, `ConversationTurn.reading`.
 - `PronunciationButton({ word, lang })` speaks with that language's voice; disabled with a hint when the device has none. `LangText` sets `lang` (correct Han glyphs) and the reading; CJK uses system fonts (Tailwind `sans`/`en` stacks).
+- Translator (phase 3): `lib/translate.ts` — `TranslateLang` (`vi|en|zh|ja|ko`), `TRANSLATE_INFO` (adds `vi`), `TONES` (casual/polite/formal = Thân mật/Lịch sự/Trang trọng), `parseTranslation` (keeps known tones in order, one per tone, drops empty texts; null when none left), `getTranslatePair`/`setTranslatePair` (default vi→en), `addHistory`/`getHistory` (20, newest first, replaces same text+to), `MAX_TRANSLATE_CHARS = 1000`. `/api/translate` (task `translation`): the AI detects the source, translates in three tones with culture-correct register (honorifics ja/ko, 您 vs 你 zh), `reading` for zh/ja/ko, `note` in Vietnamese, `vietnamese` meaning. `speakCode(text, voiceCode, settings)` reads any BCP-47 code (`speakText` delegates with `pickVoice`). `TranslationCard` (postcard per tone: text with `lang`, reading, note, 🔊, ⧉ copy status, "Gieo vào vườn" only for learn languages, saves `{ lang, reading, topic: "Dịch" }`). Page remembers the pair per translation; history restores text, pair and results without an AI call.
 
 ## Topics (`src/lib/topics.ts`)
 
@@ -516,6 +521,7 @@ Không cần server. `studyNudge(reminderTime, now?)` trả `{ dueWords, streak 
 | `ImportWords` · `QuizCard` | Bulk import từ; thẻ quiz dùng chung |
 | `WordBankPanel` | Trang chủ: số từ chưa học, chọn mốc 100/300/1.000 và bắt đầu job; khoá khi job khác đang chạy |
 | `WordJobStrip` | Dải tiến trình job trên mọi trang (`Dừng`/`Chạy tiếp`/`Huỷ`); `WordJobStripConnected` mount trong `layout.tsx` |
+| `TranslationCard` | Bưu thiếp một sắc thái dịch: câu + `lang`, cách đọc, ghi chú, 🔊, ⧉, "Gieo vào vườn" |
 
 ---
 

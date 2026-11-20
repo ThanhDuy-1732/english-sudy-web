@@ -36,6 +36,15 @@ function aiMocks(req, json, extra = {}) {
     "/api/generate-fillblank": (req) => (/"lang":"zh"/.test(req.postData() || "") ? { sentence: "我是_____。", reading: "wǒ shì _____.", translation: "Tôi là học sinh." } : { sentence: "I always ______ my neighbours." }),
     "/api/exam/generate-item": EXAM_ITEM,
     "/api/grammar-exercise": { type: "mcq", question: "She ______ to school every day.", options: ["go", "goes", "going", "gone"], answer: "goes" },
+    "/api/translate": {
+      detected: "vi",
+      vietnamese: "Xin chào",
+      results: [
+        { tone: "casual", text: "你好", reading: "nǐ hǎo", note: "Thân mật, dùng với bạn bè." },
+        { tone: "polite", text: "您好", reading: "nín hǎo", note: "Lịch sự hằng ngày." },
+        { tone: "formal", text: "您好", reading: "nín hǎo", note: "Trang trọng, công việc." },
+      ],
+    },
     ...extra,
   };
   for (const [path, body] of Object.entries(table)) if (u.endsWith(path)) return json(req, typeof body === "function" ? body(req) : body);

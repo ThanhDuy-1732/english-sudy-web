@@ -2,7 +2,7 @@
 const { scenario, newPage, goto, scanContrast, sleep, json } = require("./harness");
 const { baseSeed, aiMocks } = require("./fixtures");
 
-const PAGES = ["/", "/today", "/review", "/exam", "/exam/mistakes", "/exam/mock", "/exam/drill/RC5", "/speak", "/speak/shadowing", "/speak/ielts/1", "/speak/roleplay/hotel", "/speak/history", "/write", "/write/task/task2-opinion", "/write/history", "/write/result/r1", "/write/rewrite/r1", "/grammar", "/grammar/quiz", "/vocab/quiz", "/vocab/context", "/mistakes", "/stats", "/history", "/diary", "/activity", "/library", "/import", "/settings", "/path"];
+const PAGES = ["/", "/today", "/translate", "/review", "/exam", "/exam/mistakes", "/exam/mock", "/exam/drill/RC5", "/speak", "/speak/shadowing", "/speak/ielts/1", "/speak/roleplay/hotel", "/speak/history", "/write", "/write/task/task2-opinion", "/write/history", "/write/result/r1", "/write/rewrite/r1", "/grammar", "/grammar/quiz", "/vocab/quiz", "/vocab/context", "/mistakes", "/stats", "/history", "/diary", "/activity", "/library", "/import", "/settings", "/path"];
 
 for (const theme of ["dark", "light"]) {
   scenario(`contrast and hydration on ${PAGES.length} pages (${theme} theme)`, async ({ browser, check }) => {

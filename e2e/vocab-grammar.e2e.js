@@ -120,8 +120,7 @@ scenario("grammar page: bookmarking a rule", async ({ browser, check }) => {
   check("the button reflects the saved state", /Đã lưu/.test(await bodyText(page)));
 });
 
-scenario("context practice accepts words typed by the learner", async ({ browser, check }) => {
-  const bodies = [];
+scenario("context practice accepts words typed by the learner", async ({ browser, check }) => {  const bodies = [];
   const page = await newPage(browser, {
     intercept: (req) => {
       if (req.url().endsWith("/api/vocab/context")) {
@@ -139,4 +138,40 @@ scenario("context practice accepts words typed by the learner", async ({ browser
   await clickText(page, "Tạo nội dung");
   check("request carries the typed words", JSON.stringify(bodies.at(-1)?.words) === JSON.stringify(["invoice", "deadline"]), JSON.stringify(bodies.at(-1)?.words));
   check("result renders with the words", /invoice/.test(await bodyText(page)) && /deadline/.test(await bodyText(page)));
+});
+
+scenario("translate vi→zh and save a tone", async ({ browser, check }) => {
+  const page = await newPage(browser, { intercept: (req) => aiMocks(req, json) });
+  await goto(page, "/");
+  await clickText(page, "Dịch");
+  await waitText(page, "Tự nhận", 8000);
+  await setValue(page, 'textarea[aria-label="Nội dung cần dịch"]', "Xin chào");
+
+  await clickIn(page, "main", "Dịch");
+  check("three tone cards render", await waitText(page, "Trang trọng", 8000));
+  check("reading is shown", /nǐ hǎo/.test(await bodyText(page)));
+  // Cặp mặc định được ghi nhớ ngay sau lần dịch đầu.
+  check(
+    "default pair Việt → Anh",
+    /"from":"vi"/.test((await page.evaluate(() => localStorage.getItem("translatePair"))) || "") &&
+      /"to":"en"/.test((await page.evaluate(() => localStorage.getItem("translatePair"))) || "")
+  );
+
+  await page.evaluate(() => {
+    const select = document.querySelector('select[aria-label="Ngôn ngữ đích"]');
+    select.value = "zh";
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  await sleep(300);
+  await clickIn(page, "main", "Dịch");
+  check("history is kept on device", /Gần đây/.test(await bodyText(page)) && /Xin chào/.test(await bodyText(page)));
+  check("pair is remembered", /"from":"vi"/.test((await page.evaluate(() => localStorage.getItem("translatePair"))) || ""));
+
+  await clickContains(page, "Gieo vào vườn");
+  check("tone is saved to the garden", await waitText(page, "Đã gieo", 8000));
+  check(
+    "garden entry keeps lang, reading and Vietnamese meaning",
+    /"lang":"zh"/.test((await page.evaluate(() => localStorage.getItem("learnedWords"))) || "") &&
+      /"topic":"Dịch"/.test((await page.evaluate(() => localStorage.getItem("learnedWords"))) || "")
+  );
 });
