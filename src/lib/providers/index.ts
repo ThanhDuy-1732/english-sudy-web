@@ -79,7 +79,7 @@ function buildRegistry(): AIProvider[] {
         id: "opencode",
         name: "OpenCode Go",
         apiKey: process.env.OPENCODE_API_KEY,
-        model: process.env.OPENCODE_MODEL ?? "deepseek-v4.1-flash",
+        model: process.env.OPENCODE_MODEL ?? "glm-5.3-flash",
         baseURL: process.env.OPENCODE_BASE_URL ?? "https://opencode.ai/inference/go/openai/v1",
         defaultHeaders: { "x-opencode-session": OPENCODE_SESSION_ID },
       })

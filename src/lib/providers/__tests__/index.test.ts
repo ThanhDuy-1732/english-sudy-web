@@ -87,7 +87,7 @@ test("registers the opencode provider when OPENCODE_API_KEY is set", () => {
     expect(opencode).toEqual({
       id: "opencode",
       name: "OpenCode Go",
-      model: "deepseek-v4.1-flash",
+      model: "glm-5.3-flash",
     });
   } finally {
     delete process.env.OPENCODE_API_KEY;
