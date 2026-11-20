@@ -133,6 +133,10 @@ export default function SettingsPage() {
             Mỗi mô hình được bật khi có API key tương ứng trong <code className="rounded-md bg-ink/[0.06] px-1">.env.local</code>. Mô hình đang dùng được thử trước; nếu lỗi, app chuyển sang mô hình bật tiếp theo.
           </p>
 
+          {!isActive("gemini") && (
+            <p className="mb-4 text-sm text-muted">Dịch ảnh cần khoá Gemini (GEMINI_API_KEY).</p>
+          )}
+
           <ul className="panel divide-y divide-rule">
             {ALL_PROVIDERS.map((provider) => {
               const active = isActive(provider.id);

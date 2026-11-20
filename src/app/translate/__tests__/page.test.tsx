@@ -11,6 +11,10 @@ jest.mock("@/components/MicButton", () => ({
   ),
 }));
 
+let providers: { id: string }[] = [];
+jest.mock("@/contexts/ProviderContext", () => ({ useProvider: () => ({ availableProviders: providers }) }));
+jest.mock("@/components/PhotoTranslate", () => ({ PhotoTranslate: () => <p>photo-translate</p> }));
+
 jest.mock("@/lib/useApiFetch", () => ({
   useApiFetch: () => ({
     fetchWithProvider: (url: string, body: Record<string, unknown>) =>
@@ -209,4 +213,15 @@ test("empty transcript does not translate", async () => {
 
   expect(await screen.findByRole("alert")).toHaveTextContent("Không nghe rõ, nói lại nhé.");
   expect(global.fetch).not.toHaveBeenCalled();
+});
+
+test("photo button hidden without Gemini, shown with it", () => {
+  providers = [{ id: "opencode" }];
+  const { unmount } = render(<TranslatePage />);
+  expect(screen.queryByText("photo-translate")).not.toBeInTheDocument();
+  unmount();
+
+  providers = [{ id: "gemini" }];
+  render(<TranslatePage />);
+  expect(screen.getByText("photo-translate")).toBeInTheDocument();
 });

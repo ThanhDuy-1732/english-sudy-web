@@ -16,6 +16,8 @@ import {
 } from "@/lib/translate";
 import { TranslationCard } from "@/components/TranslationCard";
 import { MicButton } from "@/components/MicButton";
+import { PhotoTranslate } from "@/components/PhotoTranslate";
+import { useProvider } from "@/contexts/ProviderContext";
 import { useApiFetch } from "@/lib/useApiFetch";
 
 export default function TranslatePage() {
@@ -31,6 +33,8 @@ export default function TranslatePage() {
   const [resultPair, setResultPair] = useState<TranslatePair>(pair);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const { fetchWithProvider } = useApiFetch();
+  // Photos need Gemini (the only provider that reads images); without its key the button is hidden.
+  const canReadPhotos = useProvider().availableProviders.some((provider) => provider.id === "gemini");
 
   useEffect(() => {
     setPair(getTranslatePair());
@@ -163,6 +167,8 @@ export default function TranslatePage() {
       >
         {loading ? "Đang dịch…" : "Dịch"}
       </button>
+
+      {canReadPhotos && <PhotoTranslate to={pair.to} />}
 
       {error && (
         <p role="alert" className="mb-4 rounded-xl border border-margin/30 bg-margin/10 px-4 py-3 text-sm text-ink">
