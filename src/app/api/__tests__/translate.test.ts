@@ -152,3 +152,19 @@ test("chuyển provider người dùng chọn và báo X-Provider-Used", async (
   expect(mockCallTask.mock.calls[0][0]).toMatchObject({ provider: "gemini", disabledProviders: ["groq"] });
   expect(res.headers.get("X-Provider-Used")).toBe("gemini");
 });
+
+test("tone=polite asks for one tone and returns only it", async () => {
+  const res = await post({ text: "Xin chào", from: "vi", to: "zh", tone: "polite" });
+  expect(res.status).toBe(200);
+  expect((await res.json()).results.map((r: { tone: string }) => r.tone)).toEqual(["polite"]);
+  const prompt = mockCallTask.mock.calls[0][0].prompt;
+  expect(prompt).toContain('"polite"');
+  expect(prompt).not.toContain('"casual"');
+});
+
+test("unknown tone → 400", async () => {
+  const res = await post({ text: "Xin chào", from: "vi", to: "zh", tone: "slang" });
+  expect(res.status).toBe(400);
+  await expect(res.json()).resolves.toEqual({ error: "Sắc thái không hợp lệ." });
+  expect(mockCallTask).not.toHaveBeenCalled();
+});

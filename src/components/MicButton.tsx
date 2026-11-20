@@ -14,6 +14,7 @@ export function MicButton({
   disabled = false,
   label = "Nói",
   className = "chip",
+  onActiveChange,
 }: {
   language: TranslateLang | "auto";
   onText: (text: string, lang: TranslateLang | null) => void;
@@ -21,6 +22,8 @@ export function MicButton({
   disabled?: boolean;
   label?: string;
   className?: string;
+  /** true from the start of a recording until its transcript is back; lets a screen allow one recording at a time. */
+  onActiveChange?: (active: boolean) => void;
 }) {
   const [state, setState] = useState<"idle" | "recording" | "sending">("idle");
   const [elapsed, setElapsed] = useState(0);
@@ -45,6 +48,7 @@ export function MicButton({
     }
     setElapsed(0);
     setState("recording");
+    onActiveChange?.(true);
     const startedAt = Date.now();
     timerRef.current = window.setInterval(() => {
       const seconds = Math.floor((Date.now() - startedAt) / 1000);
@@ -74,6 +78,7 @@ export function MicButton({
       onError("Không nhận được giọng nói. Vui lòng thử lại.");
     } finally {
       setState("idle");
+      onActiveChange?.(false);
     }
   }
 

@@ -1,4 +1,6 @@
 import {
+  getConversationPair,
+  setConversationPair,
   parseImageTranslation,
   whisperLang,
   TONES,
@@ -133,4 +135,13 @@ test("parseImageTranslation drops empty lines and returns null when none remain"
   });
   expect(parseImageTranslation({ detected: "zh", lines: [] })).toBeNull();
   expect(parseImageTranslation(null)).toBeNull();
+});
+
+test("conversation pair defaults to vi and en and is remembered", () => {
+  localStorage.clear();
+  expect(getConversationPair()).toEqual({ me: "vi", them: "en" });
+  setConversationPair({ me: "vi", them: "ko" });
+  expect(getConversationPair()).toEqual({ me: "vi", them: "ko" });
+  localStorage.setItem("conversationPair", JSON.stringify({ me: "fr", them: "ko" }));
+  expect(getConversationPair()).toEqual({ me: "vi", them: "ko" });
 });

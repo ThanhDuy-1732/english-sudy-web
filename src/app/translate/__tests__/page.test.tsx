@@ -225,3 +225,8 @@ test("photo button hidden without Gemini, shown with it", () => {
   render(<TranslatePage />);
   expect(screen.getByText("photo-translate")).toBeInTheDocument();
 });
+
+test("links to the two-way conversation", () => {
+  render(<TranslatePage />);
+  expect(screen.getByRole("link", { name: "Hội thoại hai chiều" })).toHaveAttribute("href", "/translate/conversation");
+});

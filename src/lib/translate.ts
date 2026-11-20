@@ -195,3 +195,26 @@ export function parseImageTranslation(raw: unknown): ImageTranslation | null {
   }
   return kept.length > 0 ? { detected: isTranslateLang(detected) ? detected : null, lines: kept } : null;
 }
+
+export interface ConversationPair {
+  me: TranslateLang;
+  them: TranslateLang;
+}
+
+export const CONVERSATION_PAIR_KEY = "conversationPair";
+
+export function getConversationPair(): ConversationPair {
+  const stored = readStored<Partial<ConversationPair> | null>(CONVERSATION_PAIR_KEY, null);
+  const me = stored && isTranslateLang(stored.me) ? stored.me : "vi";
+  const them = stored && isTranslateLang(stored.them) && stored.them !== me ? stored.them : me === "en" ? "vi" : "en";
+  return { me, them };
+}
+
+export function setConversationPair(pair: ConversationPair): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(CONVERSATION_PAIR_KEY, JSON.stringify(pair));
+  } catch {
+    // Storage full or blocked: the pair is only a convenience.
+  }
+}

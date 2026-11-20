@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   MAX_TRANSLATE_CHARS,
@@ -102,7 +103,12 @@ export default function TranslatePage() {
 
   return (
     <main className="page">
-      <h1 className="page-title mb-4">Dịch</h1>
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <h1 className="page-title">Dịch</h1>
+        <Link href="/translate/conversation" className="chip">
+          Hội thoại hai chiều
+        </Link>
+      </div>
 
       <section aria-label="Ngôn ngữ" className="mb-4 flex flex-wrap items-center gap-2">
         <select

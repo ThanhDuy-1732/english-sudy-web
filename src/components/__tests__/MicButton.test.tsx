@@ -92,3 +92,15 @@ test("transcription failure reports an error", async () => {
 
   await waitFor(() => expect(onError).toHaveBeenCalledWith("Không nhận được giọng nói. Vui lòng thử lại."));
 });
+
+test("reports when it starts and stops being active", async () => {
+  mockTranscript({ text: "xin chào", lang: "vi" });
+  const onActiveChange = jest.fn();
+  render(<MicButton language="vi" onText={jest.fn()} onError={jest.fn()} onActiveChange={onActiveChange} />);
+
+  fireEvent.click(screen.getByRole("button", { name: "Nói" }));
+  await screen.findByRole("button", { name: "Dừng" });
+  expect(onActiveChange).toHaveBeenLastCalledWith(true);
+  fireEvent.click(screen.getByRole("button", { name: "Dừng" }));
+  await waitFor(() => expect(onActiveChange).toHaveBeenLastCalledWith(false));
+});
