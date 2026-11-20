@@ -13,7 +13,7 @@ import { startSession, finishSession } from "@/lib/sessions";
 type QuizMode = "meaning" | "fill";
 type Phase = "setup" | "quiz" | "done";
 
-interface FillQuestion { type: "fill"; word: string; sentence: string; answer: string; isLoading: boolean }
+interface FillQuestion { type: "fill"; word: string; sentence: string; answer: string; isLoading: boolean; reading?: string; translation?: string }
 type Question = MCQQuestion | FillQuestion;
 
 export default function VocabQuizPage() {
@@ -39,7 +39,7 @@ export default function VocabQuizPage() {
   const quizLang: LearnLang = chosenLang && offered.includes(chosenLang) ? chosenLang : offered.includes("en") ? "en" : offered[0] ?? "en";
   const allWords = quizWords(saved, quizLang);
   const readingOf = (word: string) => allWords.find((w) => w.word === word)?.reading;
-  const matches = (a: string, b: string) => answersMatch(a, b, quizLang);
+  const matches = (a: string, b: string) => answersMatch(a, b, quizLang, readingOf(b));
   // English keeps its word-boundary match; Chinese/Japanese/Korean words are blanked as plain substrings.
   const blankOut = (sentence: string, word: string) =>
     quizLang === "en" ? sentence.replace(new RegExp(`\\b${word}\\b`, "i"), "______") : sentence.split(word).join("______");
@@ -74,10 +74,10 @@ export default function VocabQuizPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ word, ...(quizLang === "en" ? {} : { lang: quizLang }) }),
       });
-      const data = await res.json() as { sentence?: string };
+      const data = await res.json() as { sentence?: string; reading?: string; translation?: string };
       setQuestions((prev) => prev.map((q, i) =>
         i === idx && q.type === "fill"
-          ? { ...q, sentence: data.sentence ?? word, isLoading: false }
+          ? { ...q, sentence: data.sentence ?? word, reading: data.reading, translation: data.translation, isLoading: false }
           : q
       ));
     } catch {
@@ -214,7 +214,14 @@ export default function VocabQuizPage() {
           ) : (
             <>
               <p lang={LANG_INFO[quizLang].htmlLang} className={`postcard mb-4 px-6 py-8 ${quizLang === "en" ? "font-en" : "font-sans"} text-xl leading-relaxed`}>{blankOut(q.sentence, q.word)}</p>
+              {(q.reading || q.translation) && (
+                <div className="mb-4 space-y-1 text-sm text-muted">
+                  {q.reading && <p>{q.reading}</p>}
+                  {q.translation && <p>{q.translation}</p>}
+                </div>
+              )}
               <input
+                lang={LANG_INFO[quizLang].htmlLang}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 disabled={selected !== null}

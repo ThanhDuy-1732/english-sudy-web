@@ -273,7 +273,7 @@ export default function Flashcard({
             {synonymData && <div className="text-sm leading-7 text-muted">{synonymData.synonyms.length > 0 && <p><span className="font-medium text-ink">Đồng nghĩa</span>{" "}<span className="font-en">{synonymData.synonyms.join(", ")}</span></p>}{synonymData.antonyms.length > 0 && <p><span className="font-medium text-ink">Trái nghĩa</span>{" "}<span className="font-en">{synonymData.antonyms.join(", ")}</span></p>}</div>}
           </div>}
           {mode === "write" && <WritingChallenge word={word} lang={lang} />}
-          {mode === "fill" && (fillSentence ? <FillBlank word={word} sentence={fillSentence} lang={lang} reading={fillExtra.reading} translation={fillExtra.translation} /> : <p className="text-sm text-muted">{fillLoading ? "Đang tạo câu điền từ..." : "Chưa có câu điền từ."}</p>)}
+          {mode === "fill" && (fillSentence ? <FillBlank word={word} sentence={fillSentence} lang={lang} reading={fillExtra.reading} translation={fillExtra.translation} wordReading={reading} /> : <p className="text-sm text-muted">{fillLoading ? "Đang tạo câu điền từ..." : "Chưa có câu điền từ."}</p>)}
           {mode === "dictation" && (example ? <DictationMode sentence={example} lang={lang} /> : <p className="text-sm text-muted">Đang tạo câu ví dụ...</p>)}
           <div className="mt-auto flex flex-wrap items-center justify-end gap-2 pt-1">
             <button

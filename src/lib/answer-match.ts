@@ -1,20 +1,27 @@
 import type { LearnLang } from "./languages";
 
 // ASCII and CJK punctuation (full-width forms included); never part of an answer.
-const PUNCTUATION = /[.,!?;:'"()\[\]{}…。，、！？；：「」『』（）【】《》〈〉“”‘’～·-]/g;
+// NFKC first folds full-width forms (．，ｈｅｌｌｏ) to ASCII; the wave dash 〜 has no ASCII form and is listed.
+const PUNCTUATION = /[.,!?;:'"()\[\]{}…。，、！？；：「」『』（）【】《》〈〉“”‘’～〜~·-]/g;
 
 /** Chinese and Japanese write words without spaces, so their answers compare character by character. */
 const noSpaces = (lang: LearnLang) => lang === "zh" || lang === "ja";
 
 /** Lowercase, no punctuation; zh/ja also drop all whitespace, en/ko collapse it to single spaces. */
 export function normalizeAnswer(text: string, lang: LearnLang): string {
-  const stripped = text.toLowerCase().replace(PUNCTUATION, " ");
+  const stripped = text.normalize("NFKC").toLowerCase().replace(PUNCTUATION, " ");
   return noSpaces(lang) ? stripped.replace(/\s+/g, "") : stripped.replace(/\s+/g, " ").trim();
 }
 
-export function answersMatch(input: string, expected: string, lang: LearnLang): boolean {
+/** Katakana → hiragana, so ガクセイ and がくせい compare equal. */
+const toHiragana = (text: string) => text.replace(/[\u30a1-\u30f6]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+
+/** For Japanese, `reading` (the word's kana) is also accepted: learners often type がくせい for 学生. */
+export function answersMatch(input: string, expected: string, lang: LearnLang, reading?: string): boolean {
   const a = normalizeAnswer(input, lang);
-  return a.length > 0 && a === normalizeAnswer(expected, lang);
+  if (a.length === 0) return false;
+  if (a === normalizeAnswer(expected, lang)) return true;
+  return lang === "ja" && Boolean(reading) && toHiragana(a) === toHiragana(normalizeAnswer(reading!, lang));
 }
 
 /** Units to compare: characters for zh/ja, words for en/ko. */

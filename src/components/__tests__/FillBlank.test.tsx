@@ -16,3 +16,11 @@ test("FillBlank accepts 学生 typed with a trailing space and 。, and shows re
   fireEvent.click(screen.getByRole("button", { name: "Kiểm tra" }));
   expect(screen.getByText("Đúng rồi! ✓")).toBeInTheDocument();
 });
+
+test("FillBlank accepts the kana reading of a Japanese word", () => {
+  render(<FillBlank word="学生" lang="ja" wordReading="がくせい" sentence="私は_____です。" />);
+  fireEvent.change(screen.getByPlaceholderText("____"), { target: { value: "がくせい" } });
+  fireEvent.click(screen.getByRole("button", { name: "Kiểm tra" }));
+  expect(screen.getByText("Đúng rồi! ✓")).toBeInTheDocument();
+  expect(screen.getByPlaceholderText("____")).toHaveAttribute("lang", "ja");
+});

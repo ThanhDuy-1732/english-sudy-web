@@ -36,3 +36,17 @@ test("missingTokens lists target characters not spoken (zh), each counted once",
   expect(missingTokens("谢谢", "谢", "zh")).toEqual(["谢"]);
   expect(missingTokens("저는 학생입니다", "저는", "ko")).toEqual(["학생입니다"]);
 });
+
+test("full-width ． and the wave dash 〜 are ignored", () => {
+  expect(answersMatch("学生．", "学生", "zh")).toBe(true);
+  expect(answersMatch("〜です", "です", "ja")).toBe(true);
+  expect(answersMatch("ｈｅｌｌｏ", "hello", "en")).toBe(true);
+});
+
+test("a Japanese word accepts its kana reading, hiragana or katakana", () => {
+  expect(answersMatch("がくせい", "学生", "ja", "がくせい")).toBe(true);
+  expect(answersMatch("ガクセイ", "学生", "ja", "がくせい")).toBe(true);
+  expect(answersMatch("がくせい", "学生", "ja")).toBe(false);
+  expect(answersMatch("せんせい", "学生", "ja", "がくせい")).toBe(false);
+  expect(answersMatch("xuésheng", "学生", "zh", "xuésheng")).toBe(false);
+});
