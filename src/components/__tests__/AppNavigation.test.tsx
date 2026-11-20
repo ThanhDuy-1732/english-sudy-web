@@ -8,7 +8,7 @@ jest.mock("next/link", () => ({
 }));
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: ({ priority: _priority, ...props }: Record<string, unknown>) => <img alt="" {...props} />,
+  default: () => <span data-testid="brand-image" />,
 }));
 jest.mock("@/components/LanguagePicker", () => ({ __esModule: true, default: () => null }));
 jest.mock("@/components/DueBadge", () => ({ DueBadge: () => null }));
