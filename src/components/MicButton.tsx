@@ -25,7 +25,7 @@ export function MicButton({
   /** true from the start of a recording until its transcript is back; lets a screen allow one recording at a time. */
   onActiveChange?: (active: boolean) => void;
 }) {
-  const [state, setState] = useState<"idle" | "recording" | "sending">("idle");
+  const [state, setState] = useState<"idle" | "starting" | "recording" | "sending">("idle");
   const [elapsed, setElapsed] = useState(0);
   const recorderRef = useRef<Recorder | null>(null);
   const timerRef = useRef<number | null>(null);
@@ -39,16 +39,23 @@ export function MicButton({
   );
 
   async function begin() {
+    if (state !== "idle") return;
+    // Claim the screen before the mic opens, so a second tap (here or on another mic) cannot start a second recording.
+    setState("starting");
+    onActiveChange?.(true);
+    // Stop the app's own read-aloud, or the mic records it as the speaker's words.
+    window.speechSynthesis?.cancel();
     const recorder = (recorderRef.current ??= createRecorder());
     try {
       await recorder.start();
     } catch (error) {
+      setState("idle");
+      onActiveChange?.(false);
       onError(error instanceof Error ? error.message : "Không thể ghi âm.");
       return;
     }
     setElapsed(0);
     setState("recording");
-    onActiveChange?.(true);
     const startedAt = Date.now();
     timerRef.current = window.setInterval(() => {
       const seconds = Math.floor((Date.now() - startedAt) / 1000);
@@ -70,8 +77,8 @@ export function MicButton({
       form.append("language", language);
       const res = await fetch("/api/speech/transcribe", { method: "POST", body: form });
       if (!res.ok) throw new Error("transcription failed");
-      const data = (await res.json()) as { text?: string; lang?: TranslateLang | null };
-      const text = (data.text ?? "").trim();
+      const data = (await res.json()) as { text?: string; lang?: TranslateLang | null; noSpeech?: boolean };
+      const text = data.noSpeech ? "" : (data.text ?? "").trim();
       if (text) onText(text, data.lang ?? null);
       else onError("Không nghe rõ, nói lại nhé.");
     } catch {
@@ -87,7 +94,7 @@ export function MicButton({
     <button
       type="button"
       onClick={() => void (recording ? finish() : begin())}
-      disabled={disabled || state === "sending"}
+      disabled={disabled || state === "sending" || state === "starting"}
       aria-label={recording ? "Dừng" : label}
       aria-pressed={recording}
       className={`${className} disabled:opacity-40`}

@@ -104,3 +104,50 @@ test("reports when it starts and stops being active", async () => {
   fireEvent.click(screen.getByRole("button", { name: "Dừng" }));
   await waitFor(() => expect(onActiveChange).toHaveBeenLastCalledWith(false));
 });
+
+test("noSpeech transcript is treated as silence", async () => {
+  mockTranscript({ text: "Cảm ơn các bạn đã theo dõi", lang: "vi", noSpeech: true });
+  const onText = jest.fn();
+  const onError = jest.fn();
+  render(<MicButton language="vi" onText={onText} onError={onError} />);
+
+  fireEvent.click(screen.getByRole("button", { name: "Nói" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Dừng" }));
+
+  await waitFor(() => expect(onError).toHaveBeenCalledWith("Không nghe rõ, nói lại nhé."));
+  expect(onText).not.toHaveBeenCalled();
+});
+
+test("recording stops the app's own read-aloud first", async () => {
+  const cancel = jest.fn();
+  Object.defineProperty(window, "speechSynthesis", { configurable: true, value: { cancel } });
+  render(<MicButton language="vi" onText={jest.fn()} onError={jest.fn()} />);
+  fireEvent.click(screen.getByRole("button", { name: "Nói" }));
+  await screen.findByRole("button", { name: "Dừng" });
+  expect(cancel).toHaveBeenCalled();
+});
+
+test("a double tap while the mic opens starts one recording and reports active at once", async () => {
+  let open: () => void = () => {};
+  start.mockReturnValue(new Promise<void>((resolve) => (open = resolve)));
+  const onActiveChange = jest.fn();
+  const onError = jest.fn();
+  render(<MicButton language="vi" onText={jest.fn()} onError={onError} onActiveChange={onActiveChange} />);
+
+  fireEvent.click(screen.getByRole("button", { name: "Nói" }));
+  expect(onActiveChange).toHaveBeenLastCalledWith(true);
+  fireEvent.click(screen.getByRole("button", { name: "Nói" }));
+  expect(start).toHaveBeenCalledTimes(1);
+
+  await act(async () => open());
+  expect(await screen.findByRole("button", { name: "Dừng" })).toBeEnabled();
+  expect(onError).not.toHaveBeenCalled();
+});
+
+test("a failed start reports inactive again", async () => {
+  start.mockRejectedValueOnce(new Error("Permission denied"));
+  const onActiveChange = jest.fn();
+  render(<MicButton language="vi" onText={jest.fn()} onError={jest.fn()} onActiveChange={onActiveChange} />);
+  fireEvent.click(screen.getByRole("button", { name: "Nói" }));
+  await waitFor(() => expect(onActiveChange).toHaveBeenLastCalledWith(false));
+});

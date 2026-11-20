@@ -100,3 +100,30 @@ test("language=auto omits language so Whisper detects it", async () => {
 test("response carries lang as a code", async () => {
   expect((await transcribeWith("auto")).body.lang).toBe("zh");
 });
+
+async function transcribeSegments(segments: { no_speech_prob: number }[]) {
+  const previousKey = process.env.GROQ_API_KEY;
+  const previousFetch = global.fetch;
+  process.env.GROQ_API_KEY = "test-key";
+  global.fetch = jest.fn().mockResolvedValue({
+    ok: true,
+    json: async () => ({ text: "Cảm ơn các bạn đã theo dõi", language: "vietnamese", duration: 2, segments: segments.map((s) => ({ start: 0, end: 1, text: "x", ...s })) }),
+  });
+  try {
+    const form = new FormData();
+    form.append("audio", new Blob(["audio"], { type: "audio/webm" }), "r.webm");
+    form.append("language", "vi");
+    const response = await POST(new NextRequest("http://localhost/api/speech/transcribe", { method: "POST", body: form }));
+    return response.json();
+  } finally {
+    global.fetch = previousFetch;
+    if (previousKey === undefined) delete process.env.GROQ_API_KEY;
+    else process.env.GROQ_API_KEY = previousKey;
+  }
+}
+
+test("silence flags noSpeech so filler text is not used", async () => {
+  expect((await transcribeSegments([{ no_speech_prob: 0.9 }, { no_speech_prob: 0.8 }])).noSpeech).toBe(true);
+  expect((await transcribeSegments([{ no_speech_prob: 0.9 }, { no_speech_prob: 0.1 }])).noSpeech).toBe(false);
+  expect((await transcribeSegments([])).noSpeech).toBe(false);
+});

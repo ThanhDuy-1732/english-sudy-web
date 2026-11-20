@@ -60,6 +60,11 @@ export async function POST(req: NextRequest) {
     text: data.text,
     language: data.language,
     lang: whisperLang(data.language),
+    // Whisper invents filler ("Thank you.") for silence; every segment likely being no speech marks it.
+    noSpeech:
+      Array.isArray(data.segments) &&
+      data.segments.length > 0 &&
+      data.segments.every((segment: { no_speech_prob?: number }) => (segment.no_speech_prob ?? 0) > 0.6),
     durationSec: data.duration,
     segments: (data.segments ?? []).map((s: { start: number; end: number; text: string }) => ({
       start: s.start,
