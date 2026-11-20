@@ -88,3 +88,15 @@ test("Chinese asks Whisper for simplified characters; other languages send no pr
   expect((await transcribeWith("ja")).prompt).toBeNull();
   expect((await transcribeWith()).prompt).toBeNull();
 });
+
+test("language=vi is passed to Whisper", async () => {
+  expect((await transcribeWith("vi")).sent).toBe("vi");
+});
+
+test("language=auto omits language so Whisper detects it", async () => {
+  expect((await transcribeWith("auto")).sent).toBeNull();
+});
+
+test("response carries lang as a code", async () => {
+  expect((await transcribeWith("auto")).body.lang).toBe("zh");
+});

@@ -1,4 +1,5 @@
 import {
+  whisperLang,
   TONES,
   TRANSLATE_INFO,
   TRANSLATE_LANGS,
@@ -101,4 +102,15 @@ test("cặp ngôn ngữ mặc định Việt → Anh và được ghi nhớ", ()
   expect(getTranslatePair()).toEqual({ from: "vi", to: "en" });
   setTranslatePair({ from: "auto", to: "zh" });
   expect(getTranslatePair()).toEqual({ from: "auto", to: "zh" });
+});
+
+test("whisper language names map to codes", () => {
+  expect(whisperLang("vietnamese")).toBe("vi");
+  expect(whisperLang("english")).toBe("en");
+  expect(whisperLang("chinese")).toBe("zh");
+  expect(whisperLang("japanese")).toBe("ja");
+  expect(whisperLang("korean")).toBe("ko");
+  expect(whisperLang("ZH")).toBe("zh");
+  expect(whisperLang("french")).toBeNull();
+  expect(whisperLang(undefined)).toBeNull();
 });

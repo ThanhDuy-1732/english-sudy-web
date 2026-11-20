@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isLearnLang } from "@/lib/languages";
+import { isTranslateLang, whisperLang } from "@/lib/translate";
 import { audioFilename } from "@/lib/speech/recorder";
 
 export const runtime = "nodejs";
@@ -39,9 +39,9 @@ export async function POST(req: NextRequest) {
   upstream.append("file", audio, audioFilename(audio));
   upstream.append("model", model);
   upstream.append("response_format", "verbose_json");
-  // Whisper is told the language being practised; missing or unknown codes keep English.
+  // Whisper is told the language being spoken; "auto" lets it detect; missing or unknown codes keep English.
   const language = form?.get("language");
-  upstream.append("language", isLearnLang(language) ? language : "en");
+  if (language !== "auto") upstream.append("language", isTranslateLang(language) ? language : "en");
   // Whisper often writes Mandarin in traditional characters; a simplified-Chinese prompt steers it to simplified.
   if (language === "zh") upstream.append("prompt", "以下是普通话的句子。");
 
@@ -59,6 +59,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     text: data.text,
     language: data.language,
+    lang: whisperLang(data.language),
     durationSec: data.duration,
     segments: (data.segments ?? []).map((s: { start: number; end: number; text: string }) => ({
       start: s.start,

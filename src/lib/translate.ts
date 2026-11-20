@@ -148,3 +148,18 @@ export function addHistory(entry: HistoryEntry): void {
 }
 
 export const MAX_TRANSLATE_CHARS = 1000;
+
+const WHISPER_NAMES: Record<string, TranslateLang> = {
+  vietnamese: "vi",
+  english: "en",
+  chinese: "zh",
+  japanese: "ja",
+  korean: "ko",
+};
+
+/** Whisper reports the language as an English name ("korean"); codes are accepted too. */
+export function whisperLang(name: unknown): TranslateLang | null {
+  if (typeof name !== "string") return null;
+  const key = name.trim().toLowerCase();
+  return WHISPER_NAMES[key] ?? (isTranslateLang(key) ? key : null);
+}
