@@ -137,6 +137,8 @@ scenario("context practice accepts words typed by the learner", async ({ browser
   check("both typed words are selected", /Đã chọn: 2 từ/.test(await bodyText(page)));
 
   await clickText(page, "Tạo nội dung");
+  // The request is sent after the click returns: wait for its answer before reading what it carried.
+  await waitText(page, "are due", 8000);
   check("request carries the typed words", JSON.stringify(bodies.at(-1)?.words) === JSON.stringify(["invoice", "deadline"]), JSON.stringify(bodies.at(-1)?.words));
   check("result renders with the words", /invoice/.test(await bodyText(page)) && /deadline/.test(await bodyText(page)));
 });
@@ -188,4 +190,90 @@ scenario("a remembered pair hydrates without mismatch", async ({ browser, check 
     (await page.evaluate(() => document.querySelector('select[aria-label="Ngôn ngữ nguồn"]')?.value)) === "auto"
   );
   check("no hydration mismatch", page.__hydration.length === 0, page.__hydration.join("; "));
+});
+
+// Headless Chrome has no microphone: a stub getUserMedia/MediaRecorder hands the app a tiny webm blob on stop().
+const fakeMic = (page) =>
+  page.evaluateOnNewDocument(() => {
+    navigator.mediaDevices.getUserMedia = async () => ({ getTracks: () => [{ stop() {} }] });
+    window.MediaRecorder = class {
+      static isTypeSupported(type) { return type.startsWith("audio/webm"); }
+      constructor(stream) { this.stream = stream; this.state = "inactive"; this.mimeType = "audio/webm"; }
+      start() { this.state = "recording"; }
+      stop() {
+        this.state = "inactive";
+        this.ondataavailable?.({ data: new Blob(["a"], { type: "audio/webm" }) });
+        setTimeout(() => this.onstop?.(), 0);
+      }
+    };
+  });
+const clickLabel = (page, label) =>
+  page.evaluate((label) => { const b = document.querySelector(`button[aria-label="${label}"]`); if (!b || b.disabled) return false; b.click(); return true; }, label);
+
+scenario("speak into the translator", async ({ browser, check }) => {
+  const page = await newPage(browser, {
+    init: fakeMic,
+    intercept: (req) => (req.url().endsWith("/api/speech/transcribe") ? json(req, { text: "Xin chào", lang: "vi" }) : aiMocks(req, json)),
+  });
+  await goto(page, "/translate");
+  await waitText(page, "Tự nhận", 8000);
+  check("mic starts", await clickLabel(page, "Nói"));
+  await sleep(300);
+  check("mic stops", await clickLabel(page, "Dừng"));
+  check("spoken text is translated", await waitText(page, "Trang trọng", 8000));
+  check("box holds the transcript", (await page.$eval('textarea[aria-label="Nội dung cần dịch"]', (t) => t.value)) === "Xin chào");
+});
+
+scenario("translate a photo", async ({ browser, check }) => {
+  const page = await newPage(browser, {
+    intercept: (req) =>
+      aiMocks(req, json, {
+        "/api/providers": [{ id: "gemini", name: "Gemini Flash", model: "m" }],
+        "/api/translate/image": { detected: "zh", lines: [{ text: "出口", translation: "Lối ra" }] },
+      }),
+  });
+  await goto(page, "/translate");
+  await waitText(page, "Dịch ảnh", 8000);
+  const input = await page.$('input[type="file"][aria-label="Dịch ảnh"]');
+  check("photo input is offered with Gemini", Boolean(input));
+  const png = require("path").join(__dirname, "fixtures-photo.png");
+  require("fs").writeFileSync(png, Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64"));
+  try {
+    await input.uploadFile(png);
+    check("lines render", await waitText(page, "Lối ra", 8000));
+  } finally {
+    require("fs").unlinkSync(png);
+  }
+  check("photo is not added to history", !(await page.evaluate(() => localStorage.getItem("translationHistory"))));
+});
+
+scenario("two-way conversation", async ({ browser, check }) => {
+  const bodies = [];
+  const page = await newPage(browser, {
+    init: fakeMic,
+    viewport: { width: 375, height: 812 },
+    intercept: (req) => {
+      const u = req.url();
+      if (u.endsWith("/api/speech/transcribe")) return json(req, { text: bodies.length ? "Thank you" : "Xin chào", lang: null });
+      if (u.endsWith("/api/translate")) {
+        const body = JSON.parse(req.postData() || "{}");
+        bodies.push(body);
+        return json(req, { detected: body.from, vietnamese: "", results: [{ tone: "polite", text: body.from === "vi" ? "Hello" : "Cảm ơn", note: "" }] });
+      }
+      return aiMocks(req, json);
+    },
+  });
+  await goto(page, "/translate/conversation");
+  await waitText(page, "Xoay phía họ", 8000);
+  check("my mic starts", await clickLabel(page, "Tôi nói"));
+  check("their mic waits while I record", (await page.$eval('button[aria-label="Họ nói"]', (b) => b.disabled)) === true);
+  await clickLabel(page, "Dừng");
+  check("my line is translated", await waitText(page, "Hello", 8000));
+  await sleep(300);
+  check("their mic starts", await clickLabel(page, "Họ nói"));
+  await clickLabel(page, "Dừng");
+  check("their line is translated", await waitText(page, "Cảm ơn", 8000));
+  check("turns ask for the polite tone", bodies.length === 2 && bodies.every((b) => b.tone === "polite"), JSON.stringify(bodies));
+  await clickText(page, "Xoay phía họ");
+  check("their half rotates", await page.$eval('section[aria-label="Phía họ"]', (s) => s.classList.contains("rotate-180")));
 });
