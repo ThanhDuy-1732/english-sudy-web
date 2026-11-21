@@ -180,14 +180,21 @@ const KOREAN_OK = JSON.stringify({
   results: [{ tone: "polite", text: "안녕하세요", note: "Lịch sự." }],
 });
 
-test("đích tiếng Hàn mà kết quả vẫn là chữ Việt → hỏi lại provider khác", async () => {
+test("đích tiếng Hàn mà kết quả vẫn là chữ Việt → hỏi lại cùng provider, rồi đổi provider khác", async () => {
   mockCallTask
+    .mockResolvedValueOnce({ text: VIETNAMESE_ECHO, providerId: "cohere" })
     .mockResolvedValueOnce({ text: VIETNAMESE_ECHO, providerId: "cohere" })
     .mockResolvedValueOnce({ text: KOREAN_OK, providerId: "opencode" });
   const res = await post({ text: "Xin chào", from: "vi", to: "ko", tone: "polite" });
   expect(res.status).toBe(200);
   expect((await res.json()).results[0].text).toBe("안녕하세요");
-  expect(mockCallTask.mock.calls[1][0].disabledProviders).toEqual(["cohere"]);
+  expect(mockCallTask.mock.calls[1][0].provider).toBe("cohere");
+  expect(mockCallTask.mock.calls[2][0].disabledProviders).toEqual(["cohere"]);
+});
+
+test("mẫu JSON trong lời nhắc ghi rõ ngôn ngữ đích (opencode hay viết lại bằng ngôn ngữ nguồn nếu để \"...\")", async () => {
+  await post({ text: "안녕하세요", from: "auto", to: "vi" });
+  expect(mockCallTask.mock.calls[0][0].prompt).toContain('"text": "<Vietnamese>"');
 });
 
 test("đích tiếng Hàn mà mọi provider đều trả chữ Việt → 503", async () => {

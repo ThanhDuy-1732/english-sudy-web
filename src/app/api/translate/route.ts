@@ -90,7 +90,7 @@ ${reading}
 Each result gets a "note": one sentence in Vietnamese explaining when to use that tone.
 Also return "vietnamese": the meaning of the source text in Vietnamese (the text itself if it is already Vietnamese).
 Return ONLY JSON, no explanation:
-{"detected": "source language code (vi, en, zh, ja or ko)", "vietnamese": "...", "results": [{"tone": "${tone ?? "casual"}", "text": "...", "reading": "...", "note": "..."}${tone ? "" : ", …"}]}
+{"detected": "source language code (vi, en, zh, ja or ko)", "vietnamese": "...", "results": [{"tone": "${tone ?? "casual"}", "text": "<${target}>", "reading": "...", "note": "..."}${tone ? "" : ", …"}]}
 
 Text:
 """
@@ -145,13 +145,11 @@ export async function POST(req: NextRequest) {
 
   try {
     let parsed = await ask(prompt);
-    if (parsed && wrongScript(to as TranslateLang, parsed.results)) {
-      parsed = await ask(
-        `${prompt}\n\nYour previous answer was not in ${LANGUAGE_NAME[to as TranslateLang]}. Write every "text" in ${LANGUAGE_NAME[to as TranslateLang]}.`,
-        undefined,
-        [providerUsed] // the provider that just got it wrong is not asked again
-      );
-    }
+    const fixLanguage = `${prompt}\n\nYour previous answer was not in ${LANGUAGE_NAME[to as TranslateLang]}. Write every "text" in ${LANGUAGE_NAME[to as TranslateLang]}.`;
+    // One more try on the same provider (the usual cause is a slip, e.g. opencode paraphrasing in the source language),
+    // then a different provider if it is still wrong (Cohere echoes the source every time).
+    if (parsed && wrongScript(to as TranslateLang, parsed.results)) parsed = await ask(fixLanguage, providerUsed);
+    if (parsed && wrongScript(to as TranslateLang, parsed.results)) parsed = await ask(fixLanguage, undefined, [providerUsed]);
     if (!parsed || wrongScript(to as TranslateLang, parsed.results)) return failed();
     // Only auto-detect can land on the target; a chosen source wins (学生 is the same in zh and ja).
     if (from === "auto" && parsed.detected === to) {

@@ -66,7 +66,8 @@ const TASK_TIMEOUT_MS: Partial<Record<AITaskName, number>> = {
   "grammar-explanation": SHORT_TIMEOUT_MS,
   "exam-explanation": SHORT_TIMEOUT_MS,
   "exam-grade": SHORT_TIMEOUT_MS,
-  translation: SHORT_TIMEOUT_MS,
+  // Long phrase, three tones on opencode (the fallback behind Groq) measured up to 8.9 s.
+  translation: 15_000,
   "vocab-context": SHORT_TIMEOUT_MS,
   "speaking-roleplay": SHORT_TIMEOUT_MS,
   "writing-grade": 40_000,
