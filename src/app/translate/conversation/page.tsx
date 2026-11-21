@@ -65,7 +65,7 @@ export default function ConversationPage() {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetchWithProvider("/api/translate", { text, from, to, tone: "polite" });
+      const res = await fetchWithProvider("/api/translate", { text, from, to, tone: "polite" }, undefined, { auto: true });
       const data = (await res.json().catch(() => ({}))) as { error?: string; results?: TranslationResult[] };
       const result = data.results?.[0];
       if (!res.ok || !result) throw new Error(data.error ?? "Không dịch được lúc này. Vui lòng thử lại.");

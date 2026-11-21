@@ -168,3 +168,29 @@ test("unknown tone → 400", async () => {
   await expect(res.json()).resolves.toEqual({ error: "Sắc thái không hợp lệ." });
   expect(mockCallTask).not.toHaveBeenCalled();
 });
+
+const VIETNAMESE_ECHO = JSON.stringify({
+  detected: "vi",
+  vietnamese: "Xin chào",
+  results: [{ tone: "polite", text: "Xin chào bạn", note: "Lịch sự." }],
+});
+const KOREAN_OK = JSON.stringify({
+  detected: "vi",
+  vietnamese: "Xin chào",
+  results: [{ tone: "polite", text: "안녕하세요", note: "Lịch sự." }],
+});
+
+test("đích tiếng Hàn mà kết quả vẫn là chữ Việt → hỏi lại provider khác", async () => {
+  mockCallTask
+    .mockResolvedValueOnce({ text: VIETNAMESE_ECHO, providerId: "cohere" })
+    .mockResolvedValueOnce({ text: KOREAN_OK, providerId: "opencode" });
+  const res = await post({ text: "Xin chào", from: "vi", to: "ko", tone: "polite" });
+  expect(res.status).toBe(200);
+  expect((await res.json()).results[0].text).toBe("안녕하세요");
+  expect(mockCallTask.mock.calls[1][0].disabledProviders).toEqual(["cohere"]);
+});
+
+test("đích tiếng Hàn mà mọi provider đều trả chữ Việt → 503", async () => {
+  mockCallTask.mockResolvedValue({ text: VIETNAMESE_ECHO, providerId: "cohere" });
+  expect((await post({ text: "Xin chào", from: "vi", to: "ko", tone: "polite" })).status).toBe(503);
+});

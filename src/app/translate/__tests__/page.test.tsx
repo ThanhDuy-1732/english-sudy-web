@@ -53,25 +53,31 @@ afterEach(() => {
   global.fetch = originalFetch;
 });
 
-test("dịch và hiện ba thẻ sắc thái", async () => {
-  mockFetch(TRANSLATION);
+test("dịch trước sắc thái lịch sự, bấm nút để xem đủ ba thẻ", async () => {
+  const polite = { ...TRANSLATION, results: [TRANSLATION.results[1]] };
+  global.fetch = jest
+    .fn()
+    .mockResolvedValueOnce({ ok: true, status: 200, json: async () => polite })
+    .mockResolvedValueOnce({ ok: true, status: 200, json: async () => TRANSLATION }) as unknown as typeof fetch;
   localStorage.setItem("translatePair", JSON.stringify({ from: "vi", to: "zh" }));
 
   render(<TranslatePage />);
   type("Xin chào, tôi muốn đặt bàn cho 2 người");
   fireEvent.click(screen.getByRole("button", { name: "Dịch" }));
 
-  expect(await screen.findByText("Thân mật")).toBeInTheDocument();
-  expect(screen.getByText("Lịch sự")).toBeInTheDocument();
-  expect(screen.getByText("Trang trọng")).toBeInTheDocument();
-  expect(screen.getByText("你好，我想订两个人的位子。")).toHaveAttribute("lang", "zh-CN");
+  expect(await screen.findByText("Lịch sự")).toBeInTheDocument();
+  expect(screen.getByText("您好，我想订两个人的位子。")).toHaveAttribute("lang", "zh-CN");
+  expect(screen.queryByText("Thân mật")).not.toBeInTheDocument();
   expect(screen.queryByText("Đã nhận:")).not.toBeInTheDocument();
-  expect(global.fetch).toHaveBeenCalledWith(
-    "/api/translate",
-    expect.objectContaining({ method: "POST" })
-  );
-  const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body as string);
-  expect(body).toEqual({ text: "Xin chào, tôi muốn đặt bàn cho 2 người", from: "vi", to: "zh" });
+  const first = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body as string);
+  expect(first).toEqual({ text: "Xin chào, tôi muốn đặt bàn cho 2 người", from: "vi", to: "zh", tone: "polite" });
+
+  fireEvent.click(screen.getByRole("button", { name: /Xem thêm sắc thái/ }));
+  expect(await screen.findByText("Thân mật")).toBeInTheDocument();
+  expect(screen.getByText("Trang trọng")).toBeInTheDocument();
+  const second = JSON.parse((global.fetch as jest.Mock).mock.calls[1][1].body as string);
+  expect(second).toEqual({ text: "Xin chào, tôi muốn đặt bàn cho 2 người", from: "vi", to: "zh" });
+  expect(screen.queryByRole("button", { name: /Xem thêm sắc thái/ })).not.toBeInTheDocument();
 });
 
 test("bộ đếm chặn trên 1.000 ký tự", () => {

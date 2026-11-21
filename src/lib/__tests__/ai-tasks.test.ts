@@ -38,3 +38,13 @@ test("short tasks get a short provider timeout", async () => {
   await callTask({ task: "exam-generation", prompt: "p" });
   expect(callWithFallback.mock.calls[1][3]).toEqual({});
 });
+
+test("translation prefers the fastest provider (groq) unless a provider is passed", async () => {
+  const { callWithFallback } = jest.requireMock("../providers") as { callWithFallback: jest.Mock };
+  callWithFallback.mockClear();
+  await callTask({ task: "translation", prompt: "p" });
+  expect(callWithFallback.mock.calls[0][1]).toBe("groq");
+  expect(callWithFallback.mock.calls[0][3]).toEqual({ timeoutMs: 10_000 });
+  await callTask({ task: "translation", prompt: "p", provider: "gemini" });
+  expect(callWithFallback.mock.calls[1][1]).toBe("gemini");
+});

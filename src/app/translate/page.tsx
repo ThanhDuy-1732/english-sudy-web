@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   MAX_TRANSLATE_CHARS,
+  TONES,
   TRANSLATE_INFO,
   TRANSLATE_LANGS,
   addHistory,
@@ -32,6 +33,9 @@ export default function TranslatePage() {
   const [results, setResults] = useState<TranslationResult[]>([]);
   // The pair the shown results came from: the selectors can change before the next translation.
   const [resultPair, setResultPair] = useState<TranslatePair>(pair);
+  // The source text behind the shown results, for "more tones" (the textarea may have been edited since).
+  const [resultText, setResultText] = useState("");
+  const [moreLoading, setMoreLoading] = useState(false);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const { fetchWithProvider } = useApiFetch();
   // Photos need Gemini (the only provider that reads images); without its key the button is hidden.
@@ -49,6 +53,45 @@ export default function TranslatePage() {
     setPair({ from: pair.to, to: pair.from });
   }
 
+  type Fetched = { error: string } | { data: { detected: TranslateLang; vietnamese: string; results: TranslationResult[] } };
+
+  // The server picks the provider (translation prefers the fastest one) and leaves the learner's choice alone.
+  async function fetchTranslation(value: string, from: TranslatePair["from"], to: TranslateLang, tone?: "polite"): Promise<Fetched> {
+    const generic = "Không dịch được lúc này. Vui lòng thử lại.";
+    try {
+      const res = await fetchWithProvider("/api/translate", { text: value, from, to, ...(tone && { tone }) }, undefined, { auto: true });
+      const data = (await res.json()) as {
+        error?: string;
+        detected?: TranslateLang;
+        vietnamese?: string;
+        results?: TranslationResult[];
+      };
+      if (!res.ok || !data.results || !data.detected) return { error: data.error ?? generic };
+      return { data: { detected: data.detected, vietnamese: data.vietnamese ?? "", results: data.results } };
+    } catch {
+      return { error: generic };
+    }
+  }
+
+  function showTranslation(value: string, used: TranslatePair, data: { detected: TranslateLang; vietnamese: string; results: TranslationResult[] }) {
+    setDetected(data.detected);
+    setVietnamese(data.vietnamese);
+    setResults(data.results);
+    setResultPair(used);
+    setResultText(value);
+    setTranslatePair(used);
+    addHistory({
+      id: globalThis.crypto?.randomUUID?.() ?? `tr_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+      from: used.from,
+      to: used.to,
+      text: value,
+      translation: data,
+      at: new Date().toISOString(),
+    });
+    setHistory(getHistory());
+  }
+
+  // Only the polite tone first (~2 s); casual and formal take ~2x longer and most phrases never need them.
   async function translateText(value: string) {
     if (!value.trim() || loading) return;
     if (value.length > MAX_TRANSLATE_CHARS) {
@@ -57,37 +100,20 @@ export default function TranslatePage() {
     }
     setLoading(true);
     setError(null);
-    try {
-      const res = await fetchWithProvider("/api/translate", { text: value, from: pair.from, to: pair.to });
-      const data = (await res.json()) as {
-        error?: string;
-        detected?: TranslateLang;
-        vietnamese?: string;
-        results?: TranslationResult[];
-      };
-      if (!res.ok || !data.results || !data.detected) {
-        setError(data.error ?? "Không dịch được lúc này. Vui lòng thử lại.");
-        return;
-      }
-      setDetected(data.detected);
-      setVietnamese(data.vietnamese ?? "");
-      setResults(data.results);
-      setResultPair(pair);
-      setTranslatePair(pair);
-      addHistory({
-        id: globalThis.crypto?.randomUUID?.() ?? `tr_${Date.now()}_${Math.random().toString(36).slice(2)}`,
-        from: pair.from,
-        to: pair.to,
-        text: value,
-        translation: { detected: data.detected, vietnamese: data.vietnamese ?? "", results: data.results },
-        at: new Date().toISOString(),
-      });
-      setHistory(getHistory());
-    } catch {
-      setError("Không dịch được lúc này. Vui lòng thử lại.");
-    } finally {
-      setLoading(false);
-    }
+    const fetched = await fetchTranslation(value, pair.from, pair.to, "polite");
+    if ("error" in fetched) setError(fetched.error);
+    else showTranslation(value, pair, fetched.data);
+    setLoading(false);
+  }
+
+  async function showAllTones() {
+    if (moreLoading || !resultText) return;
+    setMoreLoading(true);
+    setError(null);
+    const fetched = await fetchTranslation(resultText, resultPair.from, resultPair.to);
+    if ("error" in fetched) setError(fetched.error);
+    else showTranslation(resultText, resultPair, fetched.data);
+    setMoreLoading(false);
   }
 
   function onSpoken(spoken: string) {
@@ -102,6 +128,7 @@ export default function TranslatePage() {
     setVietnamese(entry.translation.vietnamese);
     setResults(entry.translation.results);
     setResultPair({ from: entry.from, to: entry.to });
+    setResultText(entry.text);
     setError(null);
   }
 
@@ -201,6 +228,11 @@ export default function TranslatePage() {
               />
             ))}
           </div>
+          {results.length < TONES.length && (
+            <button type="button" onClick={() => void showAllTones()} disabled={moreLoading} className="chip mt-3">
+              {moreLoading ? "Đang tải…" : "Xem thêm sắc thái (thân mật, trang trọng)"}
+            </button>
+          )}
         </section>
       )}
 

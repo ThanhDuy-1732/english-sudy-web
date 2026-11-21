@@ -39,8 +39,17 @@ const LANGUAGE_NAME: Record<TranslateLang, string> = {
 
 // Vietnamese and English results must be Latin script: kana, Han or Hangul means the AI echoed the source.
 const NON_LATIN = /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/;
-const wrongScript = (to: TranslateLang, results: { text: string }[]) =>
-  (to === "vi" || to === "en") && results.some((result) => NON_LATIN.test(result.text));
+// Japanese, Korean and Chinese results must contain their own script: a provider that echoes the Vietnamese source
+// (Cohere does) would otherwise be shown as a "translation".
+const TARGET_SCRIPT: Partial<Record<TranslateLang, RegExp>> = {
+  ja: /[\u3040-\u30ff\u3400-\u9fff]/,
+  ko: /[\uac00-\ud7af]/,
+  zh: /[\u3400-\u9fff]/,
+};
+const wrongScript = (to: TranslateLang, results: { text: string }[]) => {
+  const script = TARGET_SCRIPT[to];
+  return script ? results.some((result) => !script.test(result.text)) : results.some((result) => NON_LATIN.test(result.text));
+};
 
 const TONE_GUIDE: Record<Tone, string> = {
   casual: "how friends or close family would say it",
@@ -116,13 +125,15 @@ export async function POST(req: NextRequest) {
   const prompt = buildPrompt(text.trim(), from as TranslateLang | "auto", to as TranslateLang, wanted);
   const failed = () => NextResponse.json({ error: "Không dịch được lúc này. Vui lòng thử lại." }, { status: 503 });
   let providerUsed = "";
-  const askRaw = (content: string, provider: string | undefined, repair = false) =>
-    callTask({ task: "translation", prompt: content, provider, disabledProviders: body?.disabledProviders, repair }).then((result) => {
+  const askRaw = (content: string, provider: string | undefined, repair = false, skip: string[] = []) => {
+    const disabled = [...(body?.disabledProviders ?? []), ...skip];
+    return callTask({ task: "translation", prompt: content, provider, disabledProviders: disabled.length ? disabled : undefined, repair }).then((result) => {
       providerUsed = result.providerId;
       return result.text;
     });
-  const ask = async (content: string, provider = body?.provider) => {
-    const raw = await askRaw(content, provider);
+  };
+  const ask = async (content: string, provider = body?.provider, skip: string[] = []) => {
+    const raw = await askRaw(content, provider, false, skip);
     const shaped = await parseAiJson(raw, ResponseSchema, {
       repair: (err) => askRaw(`${content}\n\nSchema error: ${err}\nReturn valid JSON only.`, providerUsed, true),
     });
@@ -137,7 +148,8 @@ export async function POST(req: NextRequest) {
     if (parsed && wrongScript(to as TranslateLang, parsed.results)) {
       parsed = await ask(
         `${prompt}\n\nYour previous answer was not in ${LANGUAGE_NAME[to as TranslateLang]}. Write every "text" in ${LANGUAGE_NAME[to as TranslateLang]}.`,
-        providerUsed
+        undefined,
+        [providerUsed] // the provider that just got it wrong is not asked again
       );
     }
     if (!parsed || wrongScript(to as TranslateLang, parsed.results)) return failed();
