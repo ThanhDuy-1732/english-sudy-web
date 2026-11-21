@@ -68,3 +68,12 @@ test("omits defaultHeaders when none are configured", () => {
   const options = OpenAIMock.mock.calls.at(-1)?.[0];
   expect("defaultHeaders" in options).toBe(false);
 });
+
+test("sends reasoning_effort only to providers that support it", async () => {
+  mockCreate.mockResolvedValue({ choices: [{ message: { content: "ok" } }] });
+  const base = { id: "x", name: "X", apiKey: "k", model: "m", baseURL: "https://x" };
+  await new OpenAICompatProvider({ ...base, supportsEffort: true }).generateContent("p", { effort: "low" });
+  expect(mockCreate.mock.calls.at(-1)?.[0]).toMatchObject({ reasoning_effort: "low" });
+  await new OpenAICompatProvider(base).generateContent("p", { effort: "low" });
+  expect(mockCreate.mock.calls.at(-1)?.[0]).not.toHaveProperty("reasoning_effort");
+});

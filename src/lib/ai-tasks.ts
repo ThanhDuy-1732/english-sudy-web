@@ -72,6 +72,10 @@ const TASK_TIMEOUT_MS: Partial<Record<AITaskName, number>> = {
   "writing-grade": 40_000,
 };
 
+// Tasks where a quick answer matters more than deep reasoning. Groq's gpt-oss at "low" effort measured
+// 2.5 s → 1.1 s (one tone) and 4.9 s → 2.3 s (three tones) with ~50% fewer tokens (Nov 2026).
+const LOW_EFFORT_TASKS = new Set<AITaskName>(["translation"]);
+
 export function getTaskProviderMap(): Record<AITaskName, string> {
   return { ...TASK_PROVIDER_MAP };
 }
@@ -89,6 +93,7 @@ export async function callTask(opts: CallTaskOptions): Promise<{ text: string; p
     const callOpts = {
       ...(opts.temperature !== undefined && { temperature: opts.temperature }),
       ...(timeoutMs !== undefined && { timeoutMs }),
+      ...(LOW_EFFORT_TASKS.has(opts.task) && { effort: "low" as const }),
     };
     const result = await callWithFallback(opts.prompt, preferred, opts.disabledProviders, callOpts, (id, err) => {
       const status = (err as { status?: number }).status;

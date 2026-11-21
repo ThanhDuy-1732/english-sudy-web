@@ -7,6 +7,8 @@ export interface ProviderInfo {
 
 export interface GenerateOpts {
   temperature?: number;
+  /** Asks reasoning models for little thinking: faster and ~half the tokens. Ignored by providers without the knob. */
+  effort?: "low";
   /** Aborted by the fallback chain when the provider runs past its timeout. */
   signal?: AbortSignal;
 }

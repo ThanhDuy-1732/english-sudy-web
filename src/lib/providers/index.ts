@@ -99,13 +99,15 @@ function buildRegistry(): AIProvider[] {
   }
 
   if (process.env.GROQ_API_KEY) {
+    const groqModel = process.env.GROQ_MODEL ?? "openai/gpt-oss-120b";
     providers.push(
       new OpenAICompatProvider({
         id: "groq",
         name: "Groq",
         apiKey: process.env.GROQ_API_KEY,
-        model: process.env.GROQ_MODEL ?? "openai/gpt-oss-120b",
+        model: groqModel,
         baseURL: "https://api.groq.com/openai/v1",
+        supportsEffort: /gpt-oss/.test(groqModel),
       })
     );
   }

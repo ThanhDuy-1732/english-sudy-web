@@ -44,7 +44,7 @@ test("translation prefers the fastest provider (groq) unless a provider is passe
   callWithFallback.mockClear();
   await callTask({ task: "translation", prompt: "p" });
   expect(callWithFallback.mock.calls[0][1]).toBe("groq");
-  expect(callWithFallback.mock.calls[0][3]).toEqual({ timeoutMs: 10_000 });
+  expect(callWithFallback.mock.calls[0][3]).toEqual({ timeoutMs: 10_000, effort: "low" });
   await callTask({ task: "translation", prompt: "p", provider: "gemini" });
   expect(callWithFallback.mock.calls[1][1]).toBe("gemini");
 });

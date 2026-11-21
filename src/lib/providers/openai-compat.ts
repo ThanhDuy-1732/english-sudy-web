@@ -9,6 +9,8 @@ export interface OpenAICompatConfig {
   model: string;
   baseURL: string;
   defaultHeaders?: Record<string, string>;
+  /** The model accepts `reasoning_effort` (Groq's gpt-oss); other providers could reject the unknown field. */
+  supportsEffort?: boolean;
 }
 
 export class OpenAICompatProvider implements AIProvider {
@@ -16,6 +18,7 @@ export class OpenAICompatProvider implements AIProvider {
   readonly name: string;
   readonly model: string;
   private client: OpenAI;
+  private supportsEffort: boolean;
 
   constructor(config: OpenAICompatConfig) {
     const testFetch = process.env.NODE_ENV === "test" && typeof globalThis.fetch === "undefined"
@@ -25,6 +28,7 @@ export class OpenAICompatProvider implements AIProvider {
     this.id = config.id;
     this.name = config.name;
     this.model = config.model;
+    this.supportsEffort = config.supportsEffort ?? false;
     this.client = new OpenAI({
       apiKey: config.apiKey,
       baseURL: config.baseURL,
@@ -42,6 +46,7 @@ export class OpenAICompatProvider implements AIProvider {
       model: this.model,
       messages: [{ role: "user", content: prompt }],
       ...(opts?.temperature !== undefined && { temperature: opts.temperature }),
+      ...(opts?.effort && this.supportsEffort && { reasoning_effort: opts.effort }),
     }, { signal: opts?.signal });
     return response.choices[0]?.message?.content ?? "";
   }
