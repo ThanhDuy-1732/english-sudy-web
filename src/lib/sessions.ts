@@ -1,3 +1,5 @@
+import { track } from "./track";
+
 export type LearningActivityType =
   | "vocabulary" | "review" | "grammar" | "exam" | "speaking" | "writing";
 
@@ -69,6 +71,7 @@ export function finishSession(
   if (totals?.totalItems !== undefined) session.totalItems = totals.totalItems;
   if (totals?.correctItems !== undefined) session.correctItems = totals.correctItems;
   save(sessions);
+  track("done", session.type);
 }
 
 export function cancelSession(id: string): void {

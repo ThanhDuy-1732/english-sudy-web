@@ -9,6 +9,7 @@ import AppNavigation from "@/components/AppNavigation";
 import BackupReminder from "@/components/BackupReminder";
 import StudyReminder from "@/components/StudyReminder";
 import DataRetention from "@/components/DataRetention";
+import UsageTracker from "@/components/UsageTracker";
 import { WordJobStripConnected } from "@/components/WordJobStrip";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
@@ -71,6 +72,7 @@ export default function RootLayout({
               </div>
               <FirebaseInitializer />
               <DataRetention />
+              <UsageTracker />
               <ServiceWorkerRegistration />
             </TimerContextProvider>
           </WordJobProvider>

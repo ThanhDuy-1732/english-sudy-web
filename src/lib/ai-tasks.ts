@@ -1,5 +1,6 @@
 import { callWithFallback } from "./providers";
 import { recordMetric } from "./ai-metrics";
+import { logEventAfter } from "./db-events";
 
 export type AITaskName =
   | "word-generation"
@@ -101,6 +102,7 @@ export async function callTask(opts: CallTaskOptions): Promise<{ text: string; p
     const latencyMs = Date.now() - start;
     const repair = opts.repair ?? false;
     recordMetric({ task: opts.task, latencyMs, success, usedFallback: failed.length > 0, provider: providerId || undefined, attempts: failed.length + (success ? 1 : 0), outChars, repair });
+    logEventAfter({ kind: "ai", name: opts.task, ms: latencyMs, ok: success, provider: providerId || null, fallback: failed.length > 0, repair });
     // One JSON line per AI call so Vercel logs can be filtered/aggregated (`evt:"ai_call"`).
     // ponytail: output size in chars (≈ tokens × 4); read usage.completion_tokens from the providers if exact counts matter.
     const line = JSON.stringify({ evt: "ai_call", task: opts.task, provider: providerId || null, ms: latencyMs, ok: success, failed, outChars, promptChars: opts.prompt.length, repair });
