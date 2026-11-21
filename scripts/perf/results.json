@@ -1,0 +1,1297 @@
+{
+  "pages": [
+    {
+      "path": "/",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 37546,
+      "ttfbMedian": 166,
+      "ttfbMin": 103,
+      "ttfbMax": 474,
+      "ttfbSamples": [
+        103,
+        104,
+        166,
+        437,
+        474
+      ],
+      "totalMedian": 175,
+      "totalMin": 104,
+      "totalMax": 477,
+      "totalSamples": [
+        104,
+        112,
+        175,
+        438,
+        477
+      ]
+    },
+    {
+      "path": "/today",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 34991,
+      "ttfbMedian": 125,
+      "ttfbMin": 107,
+      "ttfbMax": 471,
+      "ttfbSamples": [
+        107,
+        122,
+        125,
+        394,
+        471
+      ],
+      "totalMedian": 126,
+      "totalMin": 109,
+      "totalMax": 475,
+      "totalSamples": [
+        109,
+        125,
+        126,
+        400,
+        475
+      ]
+    },
+    {
+      "path": "/review",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 33852,
+      "ttfbMedian": 169,
+      "ttfbMin": 90,
+      "ttfbMax": 459,
+      "ttfbSamples": [
+        90,
+        94,
+        169,
+        207,
+        459
+      ],
+      "totalMedian": 173,
+      "totalMin": 92,
+      "totalMax": 461,
+      "totalSamples": [
+        92,
+        101,
+        173,
+        207,
+        461
+      ]
+    },
+    {
+      "path": "/history",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 38605,
+      "ttfbMedian": 404,
+      "ttfbMin": 106,
+      "ttfbMax": 867,
+      "ttfbSamples": [
+        106,
+        136,
+        404,
+        518,
+        867
+      ],
+      "totalMedian": 405,
+      "totalMin": 107,
+      "totalMax": 868,
+      "totalSamples": [
+        107,
+        137,
+        405,
+        524,
+        868
+      ]
+    },
+    {
+      "path": "/activity",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 33359,
+      "ttfbMedian": 129,
+      "ttfbMin": 106,
+      "ttfbMax": 410,
+      "ttfbSamples": [
+        106,
+        124,
+        129,
+        195,
+        410
+      ],
+      "totalMedian": 131,
+      "totalMin": 107,
+      "totalMax": 413,
+      "totalSamples": [
+        107,
+        125,
+        131,
+        213,
+        413
+      ]
+    },
+    {
+      "path": "/stats",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 43771,
+      "ttfbMedian": 143,
+      "ttfbMin": 110,
+      "ttfbMax": 894,
+      "ttfbSamples": [
+        110,
+        128,
+        143,
+        310,
+        894
+      ],
+      "totalMedian": 144,
+      "totalMin": 112,
+      "totalMax": 895,
+      "totalSamples": [
+        112,
+        130,
+        144,
+        311,
+        895
+      ]
+    },
+    {
+      "path": "/diary",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 35395,
+      "ttfbMedian": 119,
+      "ttfbMin": 107,
+      "ttfbMax": 148,
+      "ttfbSamples": [
+        107,
+        115,
+        119,
+        147,
+        148
+      ],
+      "totalMedian": 126,
+      "totalMin": 107,
+      "totalMax": 154,
+      "totalSamples": [
+        107,
+        120,
+        126,
+        150,
+        154
+      ]
+    },
+    {
+      "path": "/grammar",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 46453,
+      "ttfbMedian": 127,
+      "ttfbMin": 107,
+      "ttfbMax": 403,
+      "ttfbSamples": [
+        107,
+        116,
+        127,
+        157,
+        403
+      ],
+      "totalMedian": 127,
+      "totalMin": 117,
+      "totalMax": 410,
+      "totalSamples": [
+        117,
+        126,
+        127,
+        181,
+        410
+      ]
+    },
+    {
+      "path": "/import",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 33839,
+      "ttfbMedian": 137,
+      "ttfbMin": 91,
+      "ttfbMax": 200,
+      "ttfbSamples": [
+        91,
+        114,
+        137,
+        146,
+        200
+      ],
+      "totalMedian": 137,
+      "totalMin": 99,
+      "totalMax": 207,
+      "totalSamples": [
+        99,
+        120,
+        137,
+        147,
+        207
+      ]
+    },
+    {
+      "path": "/settings",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 39467,
+      "ttfbMedian": 142,
+      "ttfbMin": 100,
+      "ttfbMax": 250,
+      "ttfbSamples": [
+        100,
+        101,
+        142,
+        161,
+        250
+      ],
+      "totalMedian": 148,
+      "totalMin": 102,
+      "totalMax": 252,
+      "totalSamples": [
+        102,
+        102,
+        148,
+        168,
+        252
+      ]
+    },
+    {
+      "path": "/exam",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 44471,
+      "ttfbMedian": 168,
+      "ttfbMin": 108,
+      "ttfbMax": 873,
+      "ttfbSamples": [
+        108,
+        117,
+        168,
+        387,
+        873
+      ],
+      "totalMedian": 174,
+      "totalMin": 121,
+      "totalMax": 874,
+      "totalSamples": [
+        121,
+        123,
+        174,
+        388,
+        874
+      ]
+    },
+    {
+      "path": "/exam/mock",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 34194,
+      "ttfbMedian": 414,
+      "ttfbMin": 130,
+      "ttfbMax": 488,
+      "ttfbSamples": [
+        130,
+        169,
+        414,
+        437,
+        488
+      ],
+      "totalMedian": 416,
+      "totalMin": 131,
+      "totalMax": 506,
+      "totalSamples": [
+        131,
+        178,
+        416,
+        446,
+        506
+      ]
+    },
+    {
+      "path": "/exam/mistakes",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 34632,
+      "ttfbMedian": 126,
+      "ttfbMin": 105,
+      "ttfbMax": 216,
+      "ttfbSamples": [
+        105,
+        106,
+        126,
+        143,
+        216
+      ],
+      "totalMedian": 128,
+      "totalMin": 106,
+      "totalMax": 217,
+      "totalSamples": [
+        106,
+        115,
+        128,
+        144,
+        217
+      ]
+    },
+    {
+      "path": "/translate",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 34207,
+      "ttfbMedian": 129,
+      "ttfbMin": 92,
+      "ttfbMax": 893,
+      "ttfbSamples": [
+        92,
+        123,
+        129,
+        140,
+        893
+      ],
+      "totalMedian": 130,
+      "totalMin": 95,
+      "totalMax": 895,
+      "totalSamples": [
+        95,
+        124,
+        130,
+        143,
+        895
+      ]
+    },
+    {
+      "path": "/speak",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 53547,
+      "ttfbMedian": 118,
+      "ttfbMin": 108,
+      "ttfbMax": 435,
+      "ttfbSamples": [
+        108,
+        110,
+        118,
+        195,
+        435
+      ],
+      "totalMedian": 119,
+      "totalMin": 111,
+      "totalMax": 438,
+      "totalSamples": [
+        111,
+        118,
+        119,
+        200,
+        438
+      ]
+    },
+    {
+      "path": "/speak/shadowing",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 34280,
+      "ttfbMedian": 422,
+      "ttfbMin": 92,
+      "ttfbMax": 627,
+      "ttfbSamples": [
+        92,
+        118,
+        422,
+        471,
+        627
+      ],
+      "totalMedian": 422,
+      "totalMin": 92,
+      "totalMax": 627,
+      "totalSamples": [
+        92,
+        121,
+        422,
+        472,
+        627
+      ]
+    },
+    {
+      "path": "/speak/history",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 34233,
+      "ttfbMedian": 481,
+      "ttfbMin": 98,
+      "ttfbMax": 868,
+      "ttfbSamples": [
+        98,
+        127,
+        481,
+        493,
+        868
+      ],
+      "totalMedian": 482,
+      "totalMin": 110,
+      "totalMax": 868,
+      "totalSamples": [
+        110,
+        135,
+        482,
+        494,
+        868
+      ]
+    },
+    {
+      "path": "/write",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 46825,
+      "ttfbMedian": 355,
+      "ttfbMin": 122,
+      "ttfbMax": 463,
+      "ttfbSamples": [
+        122,
+        128,
+        355,
+        427,
+        463
+      ],
+      "totalMedian": 362,
+      "totalMin": 123,
+      "totalMax": 470,
+      "totalSamples": [
+        123,
+        131,
+        362,
+        428,
+        470
+      ]
+    },
+    {
+      "path": "/write/history",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 33796,
+      "ttfbMedian": 140,
+      "ttfbMin": 93,
+      "ttfbMax": 510,
+      "ttfbSamples": [
+        93,
+        120,
+        140,
+        155,
+        510
+      ],
+      "totalMedian": 141,
+      "totalMin": 100,
+      "totalMax": 521,
+      "totalSamples": [
+        100,
+        121,
+        141,
+        157,
+        521
+      ]
+    },
+    {
+      "path": "/path",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 33854,
+      "ttfbMedian": 172,
+      "ttfbMin": 108,
+      "ttfbMax": 442,
+      "ttfbSamples": [
+        108,
+        154,
+        172,
+        176,
+        442
+      ],
+      "totalMedian": 174,
+      "totalMin": 111,
+      "totalMax": 444,
+      "totalSamples": [
+        111,
+        155,
+        174,
+        178,
+        444
+      ]
+    },
+    {
+      "path": "/mistakes",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 35942,
+      "ttfbMedian": 135,
+      "ttfbMin": 91,
+      "ttfbMax": 1460,
+      "ttfbSamples": [
+        91,
+        118,
+        135,
+        249,
+        1460
+      ],
+      "totalMedian": 138,
+      "totalMin": 95,
+      "totalMax": 1468,
+      "totalSamples": [
+        95,
+        119,
+        138,
+        253,
+        1468
+      ]
+    },
+    {
+      "path": "/library",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 33497,
+      "ttfbMedian": 133,
+      "ttfbMin": 101,
+      "ttfbMax": 458,
+      "ttfbSamples": [
+        101,
+        114,
+        133,
+        215,
+        458
+      ],
+      "totalMedian": 134,
+      "totalMin": 103,
+      "totalMax": 459,
+      "totalSamples": [
+        103,
+        116,
+        134,
+        216,
+        459
+      ]
+    },
+    {
+      "path": "/vocab/quiz",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 34292,
+      "ttfbMedian": 151,
+      "ttfbMin": 97,
+      "ttfbMax": 940,
+      "ttfbSamples": [
+        97,
+        101,
+        151,
+        205,
+        940
+      ],
+      "totalMedian": 152,
+      "totalMin": 98,
+      "totalMax": 941,
+      "totalSamples": [
+        98,
+        109,
+        152,
+        208,
+        941
+      ]
+    },
+    {
+      "path": "/vocab/context",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 35122,
+      "ttfbMedian": 133,
+      "ttfbMin": 108,
+      "ttfbMax": 193,
+      "ttfbSamples": [
+        108,
+        132,
+        133,
+        172,
+        193
+      ],
+      "totalMedian": 137,
+      "totalMin": 109,
+      "totalMax": 199,
+      "totalSamples": [
+        109,
+        135,
+        137,
+        175,
+        199
+      ]
+    },
+    {
+      "path": "/grammar/quiz",
+      "status": 200,
+      "cache": "HIT",
+      "bytes": 34525,
+      "ttfbMedian": 127,
+      "ttfbMin": 96,
+      "ttfbMax": 418,
+      "ttfbSamples": [
+        96,
+        114,
+        127,
+        292,
+        418
+      ],
+      "totalMedian": 135,
+      "totalMin": 104,
+      "totalMax": 419,
+      "totalSamples": [
+        104,
+        116,
+        135,
+        294,
+        419
+      ]
+    }
+  ],
+  "measuredAt": "2026-11-20T07:24:22.945Z",
+  "base": "https://english-sudy-web-taupe.vercel.app",
+  "api": [
+    {
+      "feature": "Từ mới – sinh từ vựng",
+      "path": "/api/generate-words",
+      "samples": [
+        {
+          "ttfb": 3049,
+          "total": 3058,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        },
+        {
+          "ttfb": 1938,
+          "total": 1939,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        }
+      ],
+      "status": 200,
+      "provider": "opencode",
+      "totalMs": 3058,
+      "ttfbMs": 3049,
+      "totalSamples": [
+        1939,
+        3058
+      ],
+      "snippet": ""
+    },
+    {
+      "feature": "Flashcard – câu ví dụ",
+      "path": "/api/generate-sentence",
+      "samples": [
+        {
+          "ttfb": 2184,
+          "total": 2186,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        },
+        {
+          "ttfb": 1527,
+          "total": 1528,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        }
+      ],
+      "status": 200,
+      "provider": "opencode",
+      "totalMs": 2186,
+      "ttfbMs": 2184,
+      "totalSamples": [
+        1528,
+        2186
+      ],
+      "snippet": ""
+    },
+    {
+      "feature": "Flashcard – từ đồng/trái nghĩa",
+      "path": "/api/generate-synonyms",
+      "samples": [
+        {
+          "ttfb": 1553,
+          "total": 1555,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        },
+        {
+          "ttfb": 1798,
+          "total": 1799,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        }
+      ],
+      "status": 200,
+      "provider": "opencode",
+      "totalMs": 1799,
+      "ttfbMs": 1798,
+      "totalSamples": [
+        1555,
+        1799
+      ],
+      "snippet": ""
+    },
+    {
+      "feature": "Flashcard – sinh hàng loạt",
+      "path": "/api/generate-batch",
+      "samples": [
+        {
+          "ttfb": 2179,
+          "total": 2180,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        },
+        {
+          "ttfb": 3081,
+          "total": 3082,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        }
+      ],
+      "status": 200,
+      "provider": "opencode",
+      "totalMs": 3082,
+      "ttfbMs": 3081,
+      "totalSamples": [
+        2180,
+        3082
+      ],
+      "snippet": ""
+    },
+    {
+      "feature": "Flashcard – điền từ",
+      "path": "/api/generate-fillblank",
+      "samples": [
+        {
+          "ttfb": 1829,
+          "total": 1832,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        },
+        {
+          "ttfb": 1853,
+          "total": 1854,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        }
+      ],
+      "status": 200,
+      "provider": "opencode",
+      "totalMs": 1854,
+      "ttfbMs": 1853,
+      "totalSamples": [
+        1832,
+        1854
+      ],
+      "snippet": ""
+    },
+    {
+      "feature": "Đọc hiểu – sinh đoạn đọc",
+      "path": "/api/generate-reading",
+      "samples": [
+        {
+          "ttfb": 3511,
+          "total": 3513,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        },
+        {
+          "ttfb": 4108,
+          "total": 4110,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        }
+      ],
+      "status": 200,
+      "provider": "opencode",
+      "totalMs": 4110,
+      "ttfbMs": 4108,
+      "totalSamples": [
+        3513,
+        4110
+      ],
+      "snippet": ""
+    },
+    {
+      "feature": "Flashcard – chấm câu viết",
+      "path": "/api/grade-sentence",
+      "samples": [
+        {
+          "ttfb": 3299,
+          "total": 3302,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        },
+        {
+          "ttfb": 2134,
+          "total": 2135,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        }
+      ],
+      "status": 200,
+      "provider": "opencode",
+      "totalMs": 3302,
+      "ttfbMs": 3299,
+      "totalSamples": [
+        2135,
+        3302
+      ],
+      "snippet": ""
+    },
+    {
+      "feature": "Ngữ pháp – tạo chủ đề",
+      "path": "/api/grammar-generate",
+      "samples": [
+        {
+          "ttfb": 10758,
+          "total": 10759,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        },
+        {
+          "ttfb": 13018,
+          "total": 13020,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        }
+      ],
+      "status": 200,
+      "provider": "opencode",
+      "totalMs": 13020,
+      "ttfbMs": 13018,
+      "totalSamples": [
+        10759,
+        13020
+      ],
+      "snippet": ""
+    },
+    {
+      "feature": "Ngữ pháp – ví dụ",
+      "path": "/api/grammar-examples",
+      "samples": [
+        {
+          "ttfb": 3194,
+          "total": 3195,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        },
+        {
+          "ttfb": 2357,
+          "total": 2358,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        }
+      ],
+      "status": 200,
+      "provider": "opencode",
+      "totalMs": 3195,
+      "ttfbMs": 3194,
+      "totalSamples": [
+        2358,
+        3195
+      ],
+      "snippet": ""
+    },
+    {
+      "feature": "Ngữ pháp – bài tập",
+      "path": "/api/grammar-exercise",
+      "samples": [
+        {
+          "ttfb": 2257,
+          "total": 2261,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        },
+        {
+          "ttfb": 1820,
+          "total": 1821,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        }
+      ],
+      "status": 200,
+      "provider": "opencode",
+      "totalMs": 2261,
+      "ttfbMs": 2257,
+      "totalSamples": [
+        1821,
+        2261
+      ],
+      "snippet": ""
+    },
+    {
+      "feature": "Exam – sinh câu hỏi",
+      "path": "/api/exam/generate-item",
+      "samples": [
+        {
+          "ttfb": 9103,
+          "total": 9105,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        },
+        {
+          "ttfb": 8062,
+          "total": 8064,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        }
+      ],
+      "status": 200,
+      "provider": "opencode",
+      "totalMs": 9105,
+      "ttfbMs": 9103,
+      "totalSamples": [
+        8064,
+        9105
+      ],
+      "snippet": ""
+    },
+    {
+      "feature": "Exam – chấm câu trả lời mở",
+      "path": "/api/exam/grade-open",
+      "samples": [
+        {
+          "ttfb": 1100,
+          "total": 1101,
+          "status": 200,
+          "provider": null,
+          "snippet": ""
+        },
+        {
+          "ttfb": 1658,
+          "total": 1660,
+          "status": 200,
+          "provider": null,
+          "snippet": ""
+        }
+      ],
+      "status": 200,
+      "provider": null,
+      "totalMs": 1660,
+      "ttfbMs": 1658,
+      "totalSamples": [
+        1101,
+        1660
+      ],
+      "snippet": ""
+    },
+    {
+      "feature": "Exam – giải thích đáp án",
+      "path": "/api/exam/explain",
+      "samples": [
+        {
+          "ttfb": 3656,
+          "total": 3657,
+          "status": 200,
+          "provider": null,
+          "snippet": ""
+        },
+        {
+          "ttfb": 2369,
+          "total": 2370,
+          "status": 200,
+          "provider": null,
+          "snippet": ""
+        }
+      ],
+      "status": 200,
+      "provider": null,
+      "totalMs": 3657,
+      "ttfbMs": 3656,
+      "totalSamples": [
+        2370,
+        3657
+      ],
+      "snippet": ""
+    },
+    {
+      "feature": "Dịch – 3 sắc thái",
+      "path": "/api/translate",
+      "samples": [
+        {
+          "ttfb": 3478,
+          "total": 3479,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        },
+        {
+          "ttfb": 4822,
+          "total": 4823,
+          "status": 200,
+          "provider": "opencode",
+          "snippet": ""
+        }
+      ],
+      "status": 200,
+      "provider": "opencode",
+      "totalMs": 4823,
+      "ttfbMs": 4822,
+      "totalSamples": [
+        3479,
+        4823
+      ],
+      "snippet": ""
+    },
+    {
+      "feature": "Từ trong ngữ cảnh",
+      "path": "/api/vocab/context",
+      "samples": [
+        {
+          "ttfb": 3546,
+          "total": 3548,
+          "status": 200,
+          "provider": null,
+          "snippet": ""
+        },
+        {
+          "ttfb": 2577,
+          "total": 2580,
+          "status": 200,
+          "provider": null,
+          "snippet": ""
+        }
+      ],
+      "status": 200,
+      "provider": null,
+      "totalMs": 3548,
+      "ttfbMs": 3546,
+      "totalSamples": [
+        2580,
+        3548
+      ],
+      "snippet": ""
+    },
+    {
+      "feature": "Speaking – roleplay",
+      "path": "/api/speak/roleplay",
+      "samples": [
+        {
+          "ttfb": 2543,
+          "total": 2543,
+          "status": 200,
+          "provider": null,
+          "snippet": ""
+        },
+        {
+          "ttfb": 2302,
+          "total": 2304,
+          "status": 200,
+          "provider": null,
+          "snippet": ""
+        }
+      ],
+      "status": 200,
+      "provider": null,
+      "totalMs": 2543,
+      "ttfbMs": 2543,
+      "totalSamples": [
+        2304,
+        2543
+      ],
+      "snippet": ""
+    },
+    {
+      "feature": "Speaking – chấm IELTS",
+      "path": "/api/speech/grade",
+      "samples": [
+        {
+          "ttfb": 9410,
+          "total": 9411,
+          "status": 200,
+          "provider": null,
+          "snippet": ""
+        },
+        {
+          "ttfb": 9865,
+          "total": 9866,
+          "status": 200,
+          "provider": null,
+          "snippet": ""
+        }
+      ],
+      "status": 200,
+      "provider": null,
+      "totalMs": 9866,
+      "ttfbMs": 9865,
+      "totalSamples": [
+        9411,
+        9866
+      ],
+      "snippet": ""
+    },
+    {
+      "feature": "Writing – chấm bài IELTS",
+      "path": "/api/write/grade",
+      "samples": [
+        {
+          "ttfb": 14337,
+          "total": 14339,
+          "status": 200,
+          "provider": null,
+          "snippet": ""
+        },
+        {
+          "ttfb": 13864,
+          "total": 13866,
+          "status": 200,
+          "provider": null,
+          "snippet": ""
+        }
+      ],
+      "status": 200,
+      "provider": null,
+      "totalMs": 14339,
+      "ttfbMs": 14337,
+      "totalSamples": [
+        13866,
+        14339
+      ],
+      "snippet": ""
+    },
+    {
+      "feature": "Cấu hình – danh sách provider",
+      "path": "/api/providers",
+      "samples": [
+        {
+          "ttfb": 413,
+          "total": 414,
+          "status": 200,
+          "provider": null,
+          "snippet": ""
+        },
+        {
+          "ttfb": 406,
+          "total": 406,
+          "status": 200,
+          "provider": null,
+          "snippet": ""
+        },
+        {
+          "ttfb": 812,
+          "total": 813,
+          "status": 200,
+          "provider": null,
+          "snippet": ""
+        }
+      ],
+      "status": 200,
+      "provider": null,
+      "totalMs": 414,
+      "ttfbMs": 413,
+      "totalSamples": [
+        406,
+        414,
+        813
+      ],
+      "snippet": ""
+    },
+    {
+      "feature": "Cấu hình – test provider",
+      "path": "/api/providers/test",
+      "samples": [
+        {
+          "ttfb": 1026,
+          "total": 1027,
+          "status": 200,
+          "provider": null,
+          "snippet": ""
+        },
+        {
+          "ttfb": 5489,
+          "total": 5493,
+          "status": 200,
+          "provider": null,
+          "snippet": ""
+        }
+      ],
+      "status": 200,
+      "provider": null,
+      "totalMs": 5493,
+      "ttfbMs": 5489,
+      "totalSamples": [
+        1027,
+        5493
+      ],
+      "snippet": ""
+    },
+    {
+      "feature": "Speaking – Whisper transcribe",
+      "path": "/api/speech/transcribe",
+      "status": 200,
+      "provider": null,
+      "totalMs": 2541,
+      "ttfbMs": 2534,
+      "snippet": ""
+    }
+  ],
+  "assets": [
+    {
+      "path": "/",
+      "htmlBytes": 37546,
+      "htmlTotalMs": 625,
+      "assetCount": 15,
+      "assetBytes": 699492,
+      "assetTotalMs": 1544
+    },
+    {
+      "path": "/today",
+      "htmlBytes": 34991,
+      "htmlTotalMs": 107,
+      "assetCount": 15,
+      "assetBytes": 682758,
+      "assetTotalMs": 471
+    },
+    {
+      "path": "/exam",
+      "htmlBytes": 44471,
+      "htmlTotalMs": 110,
+      "assetCount": 14,
+      "assetBytes": 662984,
+      "assetTotalMs": 529
+    },
+    {
+      "path": "/translate",
+      "htmlBytes": 34207,
+      "htmlTotalMs": 128,
+      "assetCount": 14,
+      "assetBytes": 663856,
+      "assetTotalMs": 604
+    },
+    {
+      "path": "/write",
+      "htmlBytes": 46825,
+      "htmlTotalMs": 92,
+      "assetCount": 14,
+      "assetBytes": 648603,
+      "assetTotalMs": 1119
+    }
+  ]
+}
