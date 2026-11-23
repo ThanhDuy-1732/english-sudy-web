@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { clearFailures, clientIp, recordFailure, retryAfter } from "@/lib/unlock-limit";
+import { clearAttempts, clientKey, countAttempt } from "@/lib/unlock-limit";
 import { UNLOCK_COOKIE, UNLOCK_MAX_AGE_S, blockedProviderIds, checkPassword, unlockToken } from "@/lib/provider-lock";
 
 const NO_STORE = { "Cache-Control": "no-store" };
@@ -14,8 +14,9 @@ export async function POST(req: Request) {
   if (!process.env.OPENCODE_LOCK_PASSWORD) {
     return NextResponse.json({ error: "Chưa cấu hình OPENCODE_LOCK_PASSWORD." }, { status: 503, headers: NO_STORE });
   }
-  const ip = clientIp(req);
-  const wait = await retryAfter(ip);
+  // Counted before the password is checked, so a burst of parallel guesses cannot slip past the cap.
+  const key = clientKey(req);
+  const wait = await countAttempt(key);
   if (wait > 0) {
     return NextResponse.json(
       { error: `Thử sai quá nhiều lần. Thử lại sau ${Math.ceil(wait / 60)} phút.` },
@@ -24,10 +25,9 @@ export async function POST(req: Request) {
   }
   const body = (await req.json().catch(() => null)) as { password?: unknown } | null;
   if (!checkPassword(body?.password)) {
-    await recordFailure(ip).catch((err) => console.error("unlock limit record failed", err));
     return NextResponse.json({ error: "Sai mật khẩu." }, { status: 401, headers: NO_STORE });
   }
-  await clearFailures(ip).catch(() => {});
+  await clearAttempts(key).catch(() => {});
   const res = NextResponse.json({ unlocked: true }, { headers: NO_STORE });
   res.cookies.set(UNLOCK_COOKIE, unlockToken(), {
     httpOnly: true,

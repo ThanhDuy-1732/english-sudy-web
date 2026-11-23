@@ -1,71 +1,74 @@
 /**
  * @jest-environment node
  */
-type Row = { key: string; fails: number; since: string };
-let rows: Row[] = [];
+// In-memory stand-in for the Neon client: INSERT … ON CONFLICT bumps `fails[key]` and returns it, DELETE resets it.
+let fails: Record<string, number> = {};
 let failing = false;
-const queries: string[] = [];
-// Tagged-template stand-in for the Neon client: SELECT returns `rows`, other statements are recorded.
-const sql = async (strings: TemplateStringsArray) => {
-  const text = strings.join("?");
-  queries.push(text.trim().split(/\s+/)[0]);
+const sql = async (strings: TemplateStringsArray, ...values: unknown[]) => {
   if (failing) throw new Error("db down");
-  return text.trim().startsWith("SELECT") ? rows : [];
+  const key = values[0] as string;
+  if (strings[0].trim().startsWith("DELETE")) {
+    delete fails[key];
+    return [];
+  }
+  fails[key] = (fails[key] ?? 0) + 1;
+  return [{ fails: fails[key], since: new Date().toISOString() }];
 };
 jest.mock("../db-events", () => ({ db: async () => sql }));
 jest.mock("next/headers", () => ({ cookies: async () => ({ get: () => undefined }) }));
 
-import { MAX_GLOBAL, MAX_PER_IP, clientIp, retryAfter } from "../unlock-limit";
+import { MAX_PER_IP, clientKey, countAttempt } from "../unlock-limit";
 import { POST } from "@/app/api/providers/unlock/route";
 
-const now = () => new Date().toISOString();
-const post = (password: string) =>
+const post = (password: string, ip = "1.2.3.4") =>
   POST(new Request("http://localhost/api/providers/unlock", {
     method: "POST",
-    headers: { "x-forwarded-for": "1.2.3.4, 10.0.0.1" },
+    headers: { "x-forwarded-for": `${ip}, 10.0.0.1` },
     body: JSON.stringify({ password }),
   }));
 
 beforeEach(() => {
-  rows = [];
+  fails = {};
   failing = false;
-  queries.length = 0;
   process.env.OPENCODE_LOCK_PASSWORD = "right";
 });
 afterAll(() => delete process.env.OPENCODE_LOCK_PASSWORD);
 
-test("clientIp takes the first forwarded hop", () => {
-  const req = new Request("http://x", { headers: { "x-forwarded-for": "1.2.3.4, 10.0.0.1" } });
-  expect(clientIp(req)).toBe("1.2.3.4");
+test("clientKey takes the first forwarded hop and cuts IPv6 to its /64", () => {
+  const key = (ip: string) => clientKey(new Request("http://x", { headers: { "x-forwarded-for": `${ip}, 10.0.0.1` } }));
+  expect(key("1.2.3.4")).toBe("ip:1.2.3.4");
+  expect(key("2001:db8:1:2:aaaa::1")).toBe(key("2001:db8:1:2:bbbb::9"));
+  expect(key("2001:db8:1:2:aaaa::1")).toBe("ip6:2001:db8:1:2");
 });
 
-test("blocks at the per-IP and global caps, not below", async () => {
-  rows = [{ key: "ip:1.2.3.4", fails: MAX_PER_IP - 1, since: now() }];
-  expect(await retryAfter("1.2.3.4")).toBe(0);
-  rows = [{ key: "ip:1.2.3.4", fails: MAX_PER_IP, since: now() }];
-  expect(await retryAfter("1.2.3.4")).toBeGreaterThan(14 * 60);
-  rows = [{ key: "global", fails: MAX_GLOBAL, since: now() }];
-  expect(await retryAfter("9.9.9.9")).toBeGreaterThan(0);
+test("blocks after MAX_PER_IP attempts, not before", async () => {
+  for (let i = 0; i < MAX_PER_IP; i++) expect(await countAttempt("ip:a")).toBe(0);
+  expect(await countAttempt("ip:a")).toBeGreaterThan(14 * 60);
+  expect(await countAttempt("ip:b")).toBe(0);
+});
+
+test("parallel guesses cannot all pass: each attempt is counted before the password check", async () => {
+  const statuses = await Promise.all(Array.from({ length: 20 }, (_, i) => post("wrong" + i).then((r) => r.status)));
+  expect(statuses.filter((s) => s === 401)).toHaveLength(MAX_PER_IP);
+  expect(statuses.filter((s) => s === 429)).toHaveLength(20 - MAX_PER_IP);
 });
 
 test("fails closed when the database errors", async () => {
   failing = true;
-  expect(await retryAfter("1.2.3.4")).toBeGreaterThan(0);
+  expect(await countAttempt("ip:a")).toBeGreaterThan(0);
 });
 
-test("route: wrong password records a failure; blocked IP gets 429 even with the right password", async () => {
-  expect((await post("wrong")).status).toBe(401);
-  expect(queries).toContain("INSERT");
-
-  rows = [{ key: "ip:1.2.3.4", fails: MAX_PER_IP, since: now() }];
+test("a blocked IP gets 429 even with the right password; other IPs are unaffected", async () => {
+  for (let i = 0; i < MAX_PER_IP; i++) await post("wrong");
   const res = await post("right");
   expect(res.status).toBe(429);
   expect(Number(res.headers.get("Retry-After"))).toBeGreaterThan(0);
   expect(res.cookies.get("provider_unlock")).toBeUndefined();
+  expect((await post("right", "5.6.7.8")).status).toBe(200);
 });
 
-test("route: right password clears this IP's count", async () => {
-  const res = await post("right");
-  expect(res.status).toBe(200);
-  expect(queries).toContain("DELETE");
+test("a right password clears the count", async () => {
+  await post("wrong");
+  expect((await post("right")).status).toBe(200);
+  expect(fails["ip:1.2.3.4"]).toBeUndefined();
 });

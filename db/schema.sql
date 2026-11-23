@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS events (
 );
 CREATE INDEX IF NOT EXISTS events_kind_at ON events (kind, at);
 
--- Failed /api/providers/unlock attempts per key ('ip:<addr>' or 'global'), reset after the window (src/lib/unlock-limit.ts).
+-- /api/providers/unlock attempts per client ('ip:<addr>' or 'ip6:<first 64 bits>'), reset after the window or a right password (src/lib/unlock-limit.ts).
 CREATE TABLE IF NOT EXISTS unlock_attempts (
   key text PRIMARY KEY,
   fails integer NOT NULL,
