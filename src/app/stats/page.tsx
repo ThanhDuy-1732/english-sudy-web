@@ -64,6 +64,8 @@ export default function StatsPage() {
   const [langFilter, setLangFilter] = useState<"all" | LearnLang>("all");
   const [weeklyReport, setWeeklyReport] = useState(() => computeWeeklyReport([], []));
   const [streakInfo, setStreakInfo] = useState(() => computeStreak([]));
+  // Server HTML has no localStorage: show nothing rather than "0 từ" until the saved data is read.
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const daily = getWordsPerDay(30);
@@ -82,6 +84,7 @@ export default function StatsPage() {
     setStreakInfo(computeStreak(allSessions));
     setTotalWords(learned.length);
     setActiveDays(daily.filter((day) => day.count > 0).length);
+    setLoaded(true);
   }, []);
 
   const todayMinutes = Math.round(todaySeconds / 60);
@@ -102,7 +105,9 @@ export default function StatsPage() {
           options={[{ value: "overview", label: "Tổng quan" }, { value: "weekly", label: "Tuần này" }]} />
       </div>
 
-      {activeTab === "weekly" && (
+      {!loaded && <p className="mt-6 text-sm text-muted" role="status">Đang tải thống kê…</p>}
+
+      {loaded && activeTab === "weekly" && (
         <div className="mt-6 space-y-6">
           <Figures items={[
             [String(streakInfo.currentStreak), "Chuỗi ngày học"],
@@ -126,7 +131,7 @@ export default function StatsPage() {
         </div>
       )}
 
-      {activeTab === "overview" && (
+      {loaded && activeTab === "overview" && (
         <div className="mt-6 space-y-6">
           {presentLangs.length > 1 && (
             <Segmented

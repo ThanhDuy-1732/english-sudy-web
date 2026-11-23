@@ -14,11 +14,11 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 
 | Route | File | Purpose |
 |---|---|---|
-| `/` | `src/app/page.tsx` | Generate & study flashcards; serves unseen words from the local word bank before calling AI, plus a "Tạo trước" job panel |
+| `/` | `src/app/page.tsx` | Generate & study flashcards; serves unseen words from the local word bank before calling AI, plus a "Tạo trước" job panel. The cards on screen are kept in `currentCards` (restored when the languages match, flip progress restarts at 0); saving a card logs a `vocabulary` activity |
 | `/history` | `src/app/history/page.tsx` | Browse saved words, filter by topic/mastery |
-| `/activity` | `src/app/activity/page.tsx` | Completed learning sessions grouped by local date, with type, duration, and accuracy |
+| `/activity` | `src/app/activity/page.tsx` | Completed learning sessions grouped by local date, with type, duration, and accuracy; shows "Đang tải…" until localStorage is read (never the empty state from server HTML) |
 | `/review` | `src/app/review/page.tsx` | "Tưới vườn": spaced-repetition review of due words (passes `learned` to `Flashcard`); records a learning session and shows a quality-count summary after the last card |
-| `/stats` | `src/app/stats/page.tsx` | Learning analytics — 4 stat tiles (words, active days, mastery, today's study minutes), words-per-day chart, study-time chart, topic distribution, streak calendar, exam accuracy chart (weekly), weakness radar (by question type) |
+| `/stats` | `src/app/stats/page.tsx` | Learning analytics — 4 stat tiles (words, active days, mastery, today's study minutes), words-per-day chart, study-time chart, topic distribution, streak calendar, exam accuracy chart (weekly), weakness radar (by question type). Shows "Đang tải thống kê…" until localStorage is read, so server HTML never shows 0 words |
 | `/diary` | `src/app/diary/page.tsx` | Daily learning journal — interactive 26-week heatmap, click a day to see words learned and study time in a slide-in drawer |
 | `/grammar` | `src/app/grammar/page.tsx` | Grammar study page — desktop sidebar/mobile selector, static grammar rules, AI examples/exercises, user-generated grammar topics |
 | `/import` | `src/app/import/page.tsx` | Bulk import words |
@@ -43,7 +43,7 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 | `/library` | `src/app/library/page.tsx` | Tìm kiếm xuyên từ vựng / lỗi / speaking / writing |
 | `/vocab/quiz` | `src/app/vocab/quiz/page.tsx` | Quiz điền từ trên từ đã học (`/api/generate-fillblank`); ghi session |
 | `/vocab/context` | `src/app/vocab/context/page.tsx` | Luyện từ trong ngữ cảnh (story/dialogue/email/workplace) qua `/api/vocab/context`; chọn từ đã lưu hoặc tự nhập từ (`parseWordInput`, tối đa 20, chỉ dùng cho lần tạo) |
-| `/grammar/quiz` | `src/app/grammar/quiz/page.tsx` | Quiz ngữ pháp nhiều câu; ghi `grammarAttempts`, lỗi → `unifiedMistakes`, session; ưu tiên sub-rule yếu/bookmark |
+| `/grammar/quiz` | `src/app/grammar/quiz/page.tsx` | Quiz ngữ pháp nhiều câu; ghi `grammarAttempts`, lỗi → `unifiedMistakes`, session; ưu tiên sub-rule yếu/bookmark. Sau khi chọn: nút ghi "✓ Đáp án đúng"/"✗ Bạn chọn", vùng `aria-live` báo "Đúng!"/"Sai. Đáp án đúng: …" kèm `explanation` của sub-rule (quiz từ vựng cũng có chữ + `aria-live`) |
 | `/speak/shadowing` | `src/app/speak/shadowing/page.tsx` | Nghe–nhắc lại: ghi âm → Whisper → lưu `SpeakingRecord` (mode `shadowing`); transcribe lỗi thì huỷ session, và session cũ luôn bị huỷ trước khi tạo session mới |
 | `/speak/history` | `src/app/speak/history/page.tsx` | "Bài nói đã làm": lịch sử speaking + nghe lại audio (IndexedDB); bản ghi âm cũ hơn 90 ngày bị xoá |
 | `/write/history` | `src/app/write/history/page.tsx` | Lịch sử bài viết; mở rewrite |
@@ -69,7 +69,7 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 | `/api/grammar-exercise` | `{ topic, subRule, provider?, disabledProviders? }` | `{ type: "fill"|"mcq", question, options?, answer }` |
 | `/api/providers` | GET | `{ id, name, model }[]` of configured providers; CDN cache `s-maxage=86400` (đổi khi deploy) |
 | `/api/providers/test` | `{ providerId }` | `{ ok, latency, error? }` |
-| `/api/exam/generate-item` | `{ kind, part, level, topic? }` | `ExamItem` (zod validated, 1 auto-repair) |
+| `/api/exam/generate-item` | `{ kind, part, level, topic? }` | `ExamItem` (zod validated, 1 auto-repair); provider or schema failure → 502 `{ error }` |
 | `/api/exam/grade-open` | `{ question, userAnswer, correctAnswer }` | `{ correct, feedback }` |
 | `/api/exam/explain` | `{ question, userAnswer, correctAnswer, explanation? }` | `{ explanation }` |
 | `/api/speech/transcribe` | FormData `audio` (WebM/MP4/M4A/Ogg; nonempty, max 25 MiB; `Content-Length` > 25 MiB + 64 KiB bị từ chối 413 trước khi đọc body) + `language` (`TranslateLang` → gửi Whisper; `"auto"` → để Whisper tự nhận; thiếu/lạ → `en`) | `{ text, language, lang: TranslateLang\|null, noSpeech, durationSec, segments[] }` (`noSpeech` = mọi segment có `no_speech_prob > 0.6`, Whisper bịa câu khi im lặng) via Groq Whisper (`lang` = `whisperLang(language)`) |
@@ -100,7 +100,7 @@ Mọi route gọi AI đều đi qua `callTask` (task router, có metrics) — k�
 
 ### LearningSession (`src/lib/sessions.ts`)
 
-`LearningSession` records an activity (`vocabulary`, `review`, `grammar`, `exam`, `speaking`, or `writing`) with an ID, ISO start/end times, duration in seconds, optional item totals, and optional metadata. `startSession`, `updateSession`, `finishSession`, and `cancelSession` manage records; `getSessions`, `getSessionsForDate`, and `getRecentSessions` read them. Records are stored newest-first, capped at 500; date filtering uses the local calendar date. `finishSession` is idempotent.
+`LearningSession` records an activity (`vocabulary`, `review`, `grammar`, `exam`, `speaking`, or `writing`) with an ID, ISO start/end times, duration in seconds, optional item totals, and optional metadata. `startSession`, `updateSession`, `finishSession`, and `cancelSession` manage records; `getSessions`, `getSessionsForDate`, and `getRecentSessions` read them. Records are stored newest-first, capped at 500; date filtering uses the local calendar date. `finishSession` is idempotent. Types include `translation`. `logActivity(type, source)` records one item of work with no start/finish of its own (flashcard save, translation): within 30 minutes of the last one from the same `source` it extends that session (`totalItems + 1`), otherwise starts a finished one.
 
 ### LearnedWord (`src/lib/storage.ts`)
 ```ts
@@ -283,7 +283,8 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 
 | Key | Type | Purpose |
 |---|---|---|
-| `learningSessions` | `LearningSession[]` | Recent activity sessions from review, exam, speaking, and writing; newest-first, max 500 |
+| `learningSessions` | `LearningSession[]` | Recent activity sessions from review, quizzes, exam, speaking (roleplay left after ≥1 turn counts as finished), writing, flashcard saves and translations; newest-first, max 500 |
+| `currentCards` | `{ langs, topic, words, concepts }` | Thẻ đang hiện ở `/`, khôi phục khi quay lại trang |
 | `learnedWords` | `LearnedWord[]` | All saved words |
 | `wordBank` | `BankWord[]` | Từ đã sinh, tối đa 5.000; nguồn chặn trùng (bank + `learnedWords`), có `seenAt` |
 | `wordJob` | `WordJob \| null` | Job sinh trước đang chạy/dở; runtime, không vào backup, `clearAllData` xoá |
@@ -515,7 +516,7 @@ Không cần server. `studyNudge(reminderTime, now?)` trả `{ dueWords, streak 
 | `charts/WeaknessRadar` | Radar chart — exam accuracy % grouped by QuestionType |
 | `charts/BandTimelineChart` | Line chart — weekly speaking/writing/listening/reading band scores (last 12 weeks) |
 | `charts/SkillRadar` | Radar chart — L/R/S/W skill accuracy % from recent sessions |
-| `ExamRunner` | Items are passed through `withJudgementOptions` (`lib/exam/scoring.ts`) on load, so True/False/Not Given and Yes/No/Not Given questions get three choice buttons with a canonical answer. Stateful exam engine — phases: `loading → ready → running → reviewing → done` (+ `error`); falls back to the local bank when offline/API fails (without a topic filter), or displays an error rather than leaving a loading spinner; accepts `forceComplete` prop to transition directly to reviewing on timer expiry (mock mode); dispatches `LOADING_ERROR` when all API fetches fail |
+| `ExamRunner` | Items are passed through `withJudgementOptions` (`lib/exam/scoring.ts`) on load, so True/False/Not Given and Yes/No/Not Given questions get three choice buttons with a canonical answer. Stateful exam engine — phases: `loading → ready → running → reviewing → done` (+ `error`); falls back to the local bank when offline/API fails (without a topic filter), or displays an error rather than leaving a loading spinner; accepts `forceComplete` prop to transition directly to reviewing on timer expiry (mock mode); dispatches `LOADING_ERROR` when all API fetches fail; the ready screen names parts whose fresh generation failed (served from the bank, or left out) |
 | `DueBadge` | Client component — live SRS-due word count badge next to "Ôn tập" nav link, updates every 60 s |
 | `DiaryCalendar` | Interactive 26-week heatmap calendar for /diary; purple color levels 0–3; click cell opens DayDrawer |
 | `DayDrawer` | Slide-in right drawer for /diary; shows daily word list (expandable) + study minutes + prev/next nav |

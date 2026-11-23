@@ -4,6 +4,7 @@ import { topicLabel } from "@/lib/topics";
 import { LANG_INFO, langOf, type LearnLang } from "@/lib/languages";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { getProfile } from "@/lib/profile";
+import { logActivity } from "@/lib/sessions";
 import { saveLearnedWord, reviewWord, getLearnedWords, type LearnedWord } from "@/lib/storage";
 import { fsrs, fsrsStateOf, stabilityToMastery } from "@/lib/srs";
 import Plant, { STAGE_NAMES, growthStage } from "./Plant";
@@ -169,6 +170,7 @@ export default function Flashcard({
     });
     if (didSave) {
       setSaved(true);
+      logActivity("vocabulary", "flashcards");
     }
   }
 

@@ -108,6 +108,8 @@ export default function ExamRunner({
   const timer = useTimer();
   const savedRef = useRef(false);
   const [reporting, setReporting] = useState<{ questionId: string; itemId: string } | null>(null);
+  // Parts whose fresh generation failed: served from the local bank, or left out of this test.
+  const [fallback, setFallback] = useState<{ bank: ExamPart[]; missing: ExamPart[] }>({ bank: [], missing: [] });
 
   const [state, dispatch] = useReducer(reducer, {
     phase: preloadedItems ? "ready" : "loading",
@@ -165,7 +167,11 @@ export default function ExamRunner({
         return item;
       } catch {
         // Only reuse the general bank when no specific topic was requested.
-        return !topic ? getItemsFromBank(kind, part, level)[0] : undefined;
+        const banked = !topic ? getItemsFromBank(kind, part, level)[0] : undefined;
+        if (!cancelled) {
+          setFallback((f) => (banked ? { ...f, bank: [...f.bank, part] } : { ...f, missing: [...f.missing, part] }));
+        }
+        return banked;
       }
     }
 
@@ -331,11 +337,19 @@ export default function ExamRunner({
       <div className="runner-ready">
         <h2>Sẵn sàng chưa?</h2>
         <p>{state.flatQuestions.length} câu hỏi · {parts.join(", ")}</p>
+        {(fallback.bank.length > 0 || fallback.missing.length > 0) && (
+          <p role="status" className="fallback-note">
+            Không tạo được câu mới cho {[...fallback.bank, ...fallback.missing].join(", ")}.
+            {fallback.bank.length > 0 && ` Đã dùng câu đã lưu cho ${fallback.bank.join(", ")}.`}
+            {fallback.missing.length > 0 && ` Bài này bỏ qua ${fallback.missing.join(", ")}.`}
+          </p>
+        )}
         <button onClick={() => dispatch({ type: "START" })} className="start-btn">
           Bắt đầu
         </button>
         <style jsx>{`
           .runner-ready { text-align: center; padding: 3rem; }
+          .fallback-note { margin: 0.75rem auto 0; max-width: 32rem; font-size: 0.875rem; color: rgb(var(--margin)); }
           .start-btn { padding: 0.75rem 2rem; background: rgb(var(--primary)); color: white; border: none; border-radius: 999px; min-height: 44px; font-size: 1rem; cursor: pointer; }
           .start-btn:hover { background: rgb(var(--primary-strong)); }
         `}</style>

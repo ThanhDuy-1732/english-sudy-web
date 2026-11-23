@@ -5,6 +5,7 @@ import LangText from "./LangText";
 import PronunciationButton from "./PronunciationButton";
 import { LANG_INFO, type LearnLang } from "@/lib/languages";
 import { saveLearnedWord } from "@/lib/storage";
+import { logActivity } from "@/lib/sessions";
 import { topicLabel } from "@/lib/topics";
 import { useApiFetch } from "@/lib/useApiFetch";
 import type { Concept } from "@/lib/word-bank";
@@ -72,6 +73,7 @@ export default function ConceptCard({ concept, langs, topic, onFlip }: { concept
     }
     setStatus(null);
     setSaved(added > 0 ? "new" : "exists");
+    if (added > 0) logActivity("vocabulary", "flashcards");
   }
 
   return (

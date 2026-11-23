@@ -90,6 +90,8 @@ export default function RoleplayPage() {
   const [done, setDone] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const sessionIdRef = useRef<string | null>(null);
+  const turnCountRef = useRef(0);
+  turnCountRef.current = turns.length;
 
   useEffect(() => {
     if (scenario && !sessionIdRef.current) {
@@ -97,7 +99,9 @@ export default function RoleplayPage() {
     }
     return () => {
       if (sessionIdRef.current) {
-        cancelSession(sessionIdRef.current);
+        // Leaving after chatting still counts as practice; only an untouched scenario is dropped.
+        if (turnCountRef.current > 0) finishSession(sessionIdRef.current);
+        else cancelSession(sessionIdRef.current);
         sessionIdRef.current = null;
       }
     };

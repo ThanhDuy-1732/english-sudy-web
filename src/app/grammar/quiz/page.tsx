@@ -15,6 +15,7 @@ interface QuizItem {
   subRuleId: string;
   topicName: string;
   subRuleName: string;
+  explanation?: string;
 }
 
 interface QuizQuestion extends QuizItem {
@@ -37,7 +38,7 @@ function selectItems(mode: QuizMode, count: number): QuizItem[] {
       const topic = allTopics.find((t) => t.id === w.topicId);
       const rule = topic?.rules?.find((r) => r.id === w.subRuleId);
       if (!topic || !rule) return null;
-      return { topicId: w.topicId, subRuleId: w.subRuleId, topicName: topic.name, subRuleName: rule.name };
+      return { topicId: w.topicId, subRuleId: w.subRuleId, topicName: topic.name, subRuleName: rule.name, explanation: rule.explanation };
     }).filter(Boolean) as QuizItem[];
   } else if (mode === "bookmarks") {
     const bm = getBookmarks();
@@ -45,12 +46,12 @@ function selectItems(mode: QuizMode, count: number): QuizItem[] {
       const topic = allTopics.find((t) => t.id === b.topicId);
       const rule = topic?.rules?.find((r) => r.id === b.subRuleId);
       if (!topic || !rule) return null;
-      return { topicId: b.topicId, subRuleId: b.subRuleId, topicName: topic.name, subRuleName: rule.name };
+      return { topicId: b.topicId, subRuleId: b.subRuleId, topicName: topic.name, subRuleName: rule.name, explanation: rule.explanation };
     }).filter(Boolean) as QuizItem[];
   } else {
     for (const topic of allTopics) {
       for (const rule of topic.rules ?? []) {
-        pool.push({ topicId: topic.id, subRuleId: rule.id, topicName: topic.name, subRuleName: rule.name });
+        pool.push({ topicId: topic.id, subRuleId: rule.id, topicName: topic.name, subRuleName: rule.name, explanation: rule.explanation });
       }
     }
   }
@@ -269,9 +270,20 @@ export default function GrammarQuizPage() {
           return (
             <button key={opt} onClick={() => handleAnswer(opt)} className={cls} disabled={selected !== null && !isCorrect && !isSelected}>
               {opt}
+              {selected !== null && (isCorrect || isSelected) && (
+                <span className="ml-2 font-sans text-sm font-semibold">{isCorrect ? "✓ Đáp án đúng" : "✗ Bạn chọn"}</span>
+              )}
             </button>
           );
         })}
+      </div>
+      <div aria-live="polite" className="mt-4">
+        {selected !== null && (
+          <p className={`text-sm font-medium ${selected === currentQ.question.answer ? "text-ok" : "text-margin"}`}>
+            {selected === currentQ.question.answer ? "Đúng!" : `Sai. Đáp án đúng: ${currentQ.question.answer}`}
+            {currentQ.explanation && <span className="mt-1 block font-normal text-muted">{currentQ.explanation}</span>}
+          </p>
+        )}
       </div>
       {selected !== null && (
         <button onClick={handleNext} className="btn btn-primary mt-6 w-full">

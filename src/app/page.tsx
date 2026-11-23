@@ -51,6 +51,28 @@ function parseReadingData(payload: unknown): ReadingData | null {
   return questions.length > 0 ? { passage: candidate.passage, questions } : null;
 }
 
+// The cards on screen. Their words are already marked seen in the bank, so losing them on navigation lost them for good.
+const CARDS_KEY = "currentCards";
+type SavedCards = { langs: string; topic: string; words: Word[]; concepts: Concept[] };
+
+function loadCards(): SavedCards | null {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CARDS_KEY) ?? "null");
+    return saved && Array.isArray(saved.words) && Array.isArray(saved.concepts) && typeof saved.topic === "string" ? saved : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveCards(cards: SavedCards | null) {
+  try {
+    if (cards) localStorage.setItem(CARDS_KEY, JSON.stringify(cards));
+    else localStorage.removeItem(CARDS_KEY);
+  } catch {
+    // Storage blocked: the cards simply are not kept across pages.
+  }
+}
+
 export default function HomePage() {
   const { fetchWithProvider } = useApiFetch();
   const [topic, setTopic] = useState("Daily Communication");
@@ -76,18 +98,35 @@ export default function HomePage() {
     setStreak(getStreak());
   }, []);
 
-  // A different set of languages makes the cards on screen stale.
+  // Restore the cards shown for these languages; a different set of languages makes them stale.
   useEffect(() => {
-    setWords([]);
-    setConcepts([]);
+    const saved = loadCards();
+    if (saved && saved.langs === langs.join(",")) {
+      setTopic(saved.topic);
+      setWords(saved.words);
+      setConcepts(saved.concepts);
+    } else {
+      setWords([]);
+      setConcepts([]);
+    }
     setFlippedCount(0);
   }, [langs]);
+
+  function showWords(next: Word[]) {
+    setWords(next);
+    saveCards({ langs: langs.join(","), topic, words: next, concepts: [] });
+  }
+
+  function showConcepts(next: Concept[]) {
+    setConcepts(next);
+    saveCards({ langs: langs.join(","), topic, words: [], concepts: next });
+  }
 
   async function generateConcepts() {
     const ready = getUnseenConcepts(topic, langs, 5);
     if (ready.length === 5) {
       markConceptsSeen(ready);
-      setConcepts(ready);
+      showConcepts(ready);
       return;
     }
     setLoading(true);
@@ -109,7 +148,7 @@ export default function HomePage() {
         return;
       }
       markConceptsSeen(picked);
-      setConcepts(picked);
+      showConcepts(picked);
     } catch {
       setError("Không thể sinh từ mới lúc này. Vui lòng thử lại.");
     } finally {
@@ -131,7 +170,7 @@ export default function HomePage() {
     const ready = getUnseen(topic, 5);
     if (ready.length === 5) {
       markBankWordsSeen(ready.map((entry) => entry.word));
-      setWords(ready.map(({ word, meaning }) => ({ word, meaning })));
+      showWords(ready.map(({ word, meaning }) => ({ word, meaning })));
       return;
     }
 
@@ -159,7 +198,7 @@ export default function HomePage() {
         setError(emptyBatchMessage(received.length, persisted));
         return;
       }
-      setWords(picked.map(({ word, meaning }) => ({ word, meaning })));
+      showWords(picked.map(({ word, meaning }) => ({ word, meaning })));
     } catch {
       setError("Không thể sinh từ mới lúc này. Vui lòng thử lại.");
     } finally {
@@ -169,6 +208,7 @@ export default function HomePage() {
 
   function handleTopicChange(nextTopic: string) {
     setTopic(nextTopic);
+    saveCards(null);
     setWords([]);
     setConcepts([]);
     setError(null);

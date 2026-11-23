@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { logActivity } from "@/lib/sessions";
 import {
   MAX_TRANSLATE_CHARS,
   TONES,
@@ -89,6 +90,7 @@ export default function TranslatePage() {
       at: new Date().toISOString(),
     });
     setHistory(getHistory());
+    logActivity("translation", "translate");
   }
 
   // Only the polite tone first (~2 s); casual and formal take ~2x longer and most phrases never need them.
@@ -151,7 +153,12 @@ export default function TranslatePage() {
           aria-label="Ngôn ngữ nguồn"
           value={pair.from}
           onChange={(event) =>
-            setPair((prev) => ({ ...prev, from: event.target.value as TranslatePair["from"] }))
+            setPair((prev) => {
+              const from = event.target.value as TranslatePair["from"];
+              // Picking the target language as the source swaps the pair instead of allowing vi→vi.
+              if (from !== prev.to) return { ...prev, from };
+              return { from, to: prev.from !== "auto" ? prev.from : from === "vi" ? "en" : "vi" };
+            })
           }
           className="field w-auto"
         >
@@ -175,7 +182,10 @@ export default function TranslatePage() {
           aria-label="Ngôn ngữ đích"
           value={pair.to}
           onChange={(event) =>
-            setPair((prev) => ({ ...prev, to: event.target.value as TranslateLang }))
+            setPair((prev) => {
+              const to = event.target.value as TranslateLang;
+              return to === prev.from ? { from: prev.to, to } : { ...prev, to };
+            })
           }
           className="field w-auto"
         >

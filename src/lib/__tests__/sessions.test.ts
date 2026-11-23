@@ -1,6 +1,6 @@
 import {
   startSession, updateSession, finishSession, cancelSession,
-  getSessions, getSessionsForDate, getRecentSessions,
+  getSessions, getSessionsForDate, getRecentSessions, logActivity,
 } from "../sessions";
 
 beforeEach(() => {
@@ -71,4 +71,16 @@ test("returns empty for missing or malformed storage", () => {
   expect(getSessions()).toEqual([]);
   localStorage.setItem("learningSessions", "not json");
   expect(getSessions()).toEqual([]);
+});
+
+test("logActivity merges items within 30 minutes, then starts a new session", () => {
+  logActivity("translation", "translate");
+  jest.setSystemTime(new Date("2026-09-17T10:10:00.000+07:00"));
+  logActivity("translation", "translate");
+  expect(getSessions()).toHaveLength(1);
+  expect(getSessions()[0]).toMatchObject({ type: "translation", totalItems: 2, durationSeconds: 600 });
+  jest.setSystemTime(new Date("2026-09-17T11:00:00.000+07:00"));
+  logActivity("translation", "translate");
+  expect(getSessions()).toHaveLength(2);
+  expect(getSessions()[0]).toMatchObject({ totalItems: 1, durationSeconds: 0 });
 });

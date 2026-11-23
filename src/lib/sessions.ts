@@ -1,7 +1,7 @@
 import { track } from "./track";
 
 export type LearningActivityType =
-  | "vocabulary" | "review" | "grammar" | "exam" | "speaking" | "writing";
+  | "vocabulary" | "review" | "grammar" | "exam" | "speaking" | "writing" | "translation";
 
 export interface LearningSession {
   id: string;
@@ -72,6 +72,30 @@ export function finishSession(
   if (totals?.correctItems !== undefined) session.correctItems = totals.correctItems;
   save(sessions);
   track("done", session.type);
+}
+
+const MERGE_MS = 30 * 60 * 1000;
+
+/**
+ * Records one item of work that has no start/finish of its own (saving a flashcard, a translation).
+ * Items from the same source within 30 minutes of the last one extend that session instead of adding rows.
+ */
+export function logActivity(type: LearningActivityType, source: string): void {
+  const sessions = load();
+  const now = new Date();
+  const last = sessions.find((s) => s.type === type && s.metadata?.source === source);
+  if (last?.finishedAt && now.getTime() - new Date(last.finishedAt).getTime() < MERGE_MS) {
+    last.finishedAt = now.toISOString();
+    last.durationSeconds = Math.round((now.getTime() - new Date(last.startedAt).getTime()) / 1000);
+    last.totalItems = (last.totalItems ?? 0) + 1;
+    save(sessions);
+    return;
+  }
+  save([...sessions, {
+    id: crypto.randomUUID(), type, startedAt: now.toISOString(), finishedAt: now.toISOString(),
+    durationSeconds: 0, totalItems: 1, metadata: { source },
+  }]);
+  track("done", type);
 }
 
 export function cancelSession(id: string): void {

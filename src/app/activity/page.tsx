@@ -12,6 +12,7 @@ const labels: Record<LearningActivityType, string> = {
   exam: "Luyện thi",
   speaking: "Luyện nói",
   writing: "Luyện viết",
+  translation: "Dịch",
 };
 
 const badgeColors: Record<LearningActivityType, string> = {
@@ -21,6 +22,7 @@ const badgeColors: Record<LearningActivityType, string> = {
   exam: "bg-margin-soft text-margin",
   speaking: "bg-soil/15 text-ink",
   writing: "bg-warn-soft text-warn",
+  translation: "bg-primary-soft text-primary-text",
 };
 
 function localDate(iso: string): string {
@@ -36,7 +38,7 @@ function duration(seconds: number): string {
 }
 
 export default function ActivityPage() {
-  const [groups, setGroups] = useState<[string, LearningSession[]][]>([]);
+  const [groups, setGroups] = useState<[string, LearningSession[]][] | null>(null);
 
   useEffect(() => {
     const byDate = new Map<string, LearningSession[]>();
@@ -47,6 +49,9 @@ export default function ActivityPage() {
     }
     setGroups(Array.from(byDate.entries()).sort(([a], [b]) => b.localeCompare(a)));
   }, []);
+
+  // null until localStorage is read: the server HTML must not claim there is no activity.
+  if (groups === null) return <main className="page"><p className="text-center text-sm text-muted" role="status">Đang tải hoạt động…</p></main>;
 
   if (groups.length === 0) {
     return (

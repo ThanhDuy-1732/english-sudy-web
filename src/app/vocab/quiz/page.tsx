@@ -200,10 +200,16 @@ export default function VocabQuizPage() {
               return (
                 <button key={opt} onClick={() => handleAnswer(opt)} className={cls} disabled={selected !== null && opt !== q.answer && opt !== selected}>
                   {opt}
+                  {selected !== null && (opt === q.answer || opt === selected) && (
+                    <span className="ml-2 text-sm font-semibold">{opt === q.answer ? "✓ Đáp án đúng" : "✗ Bạn chọn"}</span>
+                  )}
                 </button>
               );
             })}
           </div>
+          <p aria-live="polite" className={`mt-3 text-sm font-medium ${selected === q.answer ? "text-ok" : "text-margin"}`}>
+            {selected === null ? "" : selected === q.answer ? "Đúng!" : `Sai. Đáp án đúng: ${q.answer}`}
+          </p>
         </>
       )}
 

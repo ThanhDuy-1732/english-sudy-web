@@ -25,17 +25,22 @@ export async function POST(req: NextRequest) {
     disabledProviders?: string[];
   } = await req.json();
 
-  const prompt = buildItemPrompt({ kind, part, level, topic });
-  const { text, providerId } = await callTask({ task: "exam-generation", prompt, provider, disabledProviders });
+  // Provider failures and JSON that fails the schema even after repair used to escape as a bare 500.
+  try {
+    const prompt = buildItemPrompt({ kind, part, level, topic });
+    const { text, providerId } = await callTask({ task: "exam-generation", prompt, provider, disabledProviders });
 
-  const parsed = await parseAiJson(text, ExamItemSchema, {
-    // retry once: send zod error back to the model to self-correct
-    repair: (err) =>
-      callTask({ task: "exam-generation", prompt: `${prompt}\n\nOutput trước bị lỗi schema: ${err}\nTrả lại JSON hợp lệ, KHÔNG giải thích.`, provider: providerId, disabledProviders: disabledProviders, repair: true }).then((r) => r.text),
-  });
+    const parsed = await parseAiJson(text, ExamItemSchema, {
+      // retry once: send zod error back to the model to self-correct
+      repair: (err) =>
+        callTask({ task: "exam-generation", prompt: `${prompt}\n\nOutput trước bị lỗi schema: ${err}\nTrả lại JSON hợp lệ, KHÔNG giải thích.`, provider: providerId, disabledProviders: disabledProviders, repair: true }).then((r) => r.text),
+    });
 
-  const item = { ...parsed, providerUsed: providerId };
-  return NextResponse.json(item, {
-    headers: { "X-Provider-Used": providerId },
-  });
+    const item = { ...parsed, providerUsed: providerId };
+    return NextResponse.json(item, {
+      headers: { "X-Provider-Used": providerId },
+    });
+  } catch {
+    return NextResponse.json({ error: "Unable to generate exam item" }, { status: 502 });
+  }
 }
