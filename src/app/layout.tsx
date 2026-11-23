@@ -68,12 +68,11 @@ export default function RootLayout({
             <TimerContextProvider>
               <div className="flex min-h-svh min-w-0 flex-col lg:flex-row">
                 <AppNavigation />
-                <div className="app-content min-w-0 flex-1"><WordJobStripConnected /><StudyReminder /><BackupReminder />{children}</div>
+                <div className="app-content min-w-0 flex-1"><WordJobStripConnected /><StudyReminder /><BackupReminder />{children}<ServiceWorkerRegistration /></div>
               </div>
               <FirebaseInitializer />
               <DataRetention />
               <UsageTracker />
-              <ServiceWorkerRegistration />
             </TimerContextProvider>
           </WordJobProvider>
         </ProviderContextProvider>

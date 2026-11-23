@@ -233,7 +233,7 @@ export default function Flashcard({
         >
           <span className="pr-20 text-sm text-muted">{topicLabel(topic)}</span>
           <span className="stamp absolute right-3 top-3 h-[5.25rem] w-[4.5rem]"><span><Plant stage={stage} size={40} />{STAGE_NAMES[stage].toLowerCase()}</span></span>
-          <span lang={loading ? undefined : LANG_INFO[lang].htmlLang} className={`mt-auto break-words ${english ? "font-en" : "font-sans"} text-[2.5rem] font-semibold leading-tight tracking-tight text-ink [overflow-wrap:anywhere]`}>
+          <span lang={loading ? undefined : LANG_INFO[lang].htmlLang} className={`mt-auto break-words ${english ? "font-en" : "font-sans"} ${word.length > 18 ? "text-[1.5rem]" : word.length > 12 ? "text-[1.875rem]" : "text-[2.5rem]"} font-semibold leading-tight tracking-tight text-ink [overflow-wrap:anywhere]`}>
             {loading ? <span className="text-xl font-normal text-muted">Đang tạo câu ví dụ...</span> : word}
           </span>
           {!loading && reading && <span className="mt-0.5 text-base text-muted">{reading}</span>}
