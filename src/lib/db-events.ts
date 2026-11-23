@@ -15,7 +15,7 @@ export interface EventInput {
 }
 
 // Lazy import: the driver needs Node/edge globals and must not load in jsdom tests or client bundles.
-async function db() {
+export async function db() {
   const url = process.env.DATABASE_URL;
   if (!url) return null;
   const { neon } = await import("@neondatabase/serverless");
