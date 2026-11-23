@@ -107,6 +107,8 @@ async function cachePageAssets(cache, response) {
 }
 
 self.addEventListener("install", (event) => {
+  // Updates activate on their own; the page reloads at its next navigation (ServiceWorkerRegistration).
+  self.skipWaiting();
   event.waitUntil(
     (async () => {
       const cache = await caches.open(CACHE_NAME);
@@ -128,10 +130,6 @@ self.addEventListener("activate", (event) => {
       await self.clients.claim();
     })(),
   );
-});
-
-self.addEventListener("message", (event) => {
-  if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
 });
 
 async function networkFirstNavigation(request, event) {

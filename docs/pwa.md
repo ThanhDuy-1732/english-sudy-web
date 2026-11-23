@@ -20,7 +20,7 @@ Các trang bổ sung được precache theo best effort; mạng lỗi khi cài c
 
 - Android/Chrome: nút **Cài English Study** khi trình duyệt cho phép, hoặc menu trình duyệt → Cài ứng dụng. Khung hướng dẫn có nút ✕ để ẩn (nhớ trong `pwaInstallDismissed`).
 - iPhone/iPad: Safari → Chia sẻ → Thêm vào Màn hình chính.
-- Khi có worker mới: banner **Cập nhật và tải lại**. Không tự tải lại giữa bài học. Nút bị vô hiệu khi offline.
+- Khi có worker mới: worker tự kích hoạt (`skipWaiting` lúc install), trang tự tải lại ở lần chuyển trang kế tiếp để chạy bản mới. Không tải lại giữa bài học; cache của bản trước được giữ để tab cũ vẫn tải được JS/CSS.
 - Cache theo `NEXT_PUBLIC_PWA_VERSION` (mặc định tạo tại build); giữ thêm cache phiên bản trước để các tab cũ còn dùng asset.
 - Worker cache offline không thay thế sao lưu dữ liệu. Dữ liệu local vẫn có thể bị xóa bởi người dùng/hệ điều hành. App yêu cầu persistent storage nếu API hỗ trợ trong chế độ standalone; trình duyệt quyết định chấp thuận.
 

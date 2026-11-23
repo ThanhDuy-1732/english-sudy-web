@@ -1,6 +1,9 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import ServiceWorkerRegistration from "../ServiceWorkerRegistration";
 
+let mockPathname = "/";
+jest.mock("next/navigation", () => ({ usePathname: () => mockPathname }));
+
 beforeEach(() => {
   localStorage.clear();
   Object.defineProperty(window, "matchMedia", { configurable: true, value: () => ({ matches: false, addEventListener: jest.fn(), removeEventListener: jest.fn() }) });
@@ -30,20 +33,31 @@ test("shows and clears the offline notice on connectivity changes", () => {
   expect(screen.queryByRole("status")).not.toBeInTheDocument();
 });
 
-test("a waiting update is activated only when the user requests it", async () => {
+test("an update reloads the page at the next navigation, not before", async () => {
   const previous = process.env.NODE_ENV;
   Object.defineProperty(process.env, "NODE_ENV", { configurable: true, writable: true, value: "production" });
-  const postMessage = jest.fn();
-  const registration = { waiting: { postMessage }, installing: null, addEventListener: jest.fn(), removeEventListener: jest.fn(), update: jest.fn().mockResolvedValue(undefined) };
-  Object.defineProperty(navigator, "serviceWorker", { configurable: true, value: { controller: {}, register: jest.fn().mockResolvedValue(registration), addEventListener: jest.fn(), removeEventListener: jest.fn() } });
+  const reload = jest.fn();
+  const originalLocation = window.location;
+  Object.defineProperty(window, "location", { configurable: true, value: { ...originalLocation, reload } });
+  const listeners: Record<string, () => void> = {};
+  const registration = { addEventListener: jest.fn(), removeEventListener: jest.fn(), update: jest.fn().mockResolvedValue(undefined) };
+  const register = jest.fn().mockResolvedValue(registration);
+  Object.defineProperty(navigator, "serviceWorker", { configurable: true, value: {
+    controller: {}, register, addEventListener: (name: string, fn: () => void) => { listeners[name] = fn; }, removeEventListener: jest.fn(),
+  } });
   try {
+    mockPathname = "/vocab";
     const view = render(<ServiceWorkerRegistration />);
-    const button = await screen.findByRole("button", { name: "Cập nhật và tải lại" });
-    expect(postMessage).not.toHaveBeenCalled();
-    fireEvent.click(button);
-    expect(postMessage).toHaveBeenCalledWith({ type: "SKIP_WAITING" });
+    await waitFor(() => expect(register).toHaveBeenCalled());
+    act(() => listeners.controllerchange());
+    expect(reload).not.toHaveBeenCalled();
+    mockPathname = "/translate";
+    view.rerender(<ServiceWorkerRegistration />);
+    expect(reload).toHaveBeenCalledTimes(1);
     view.unmount();
   } finally {
+    mockPathname = "/";
+    Object.defineProperty(window, "location", { configurable: true, value: originalLocation });
     Object.defineProperty(process.env, "NODE_ENV", { configurable: true, writable: true, value: previous });
   }
 });

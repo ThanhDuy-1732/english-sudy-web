@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 type InstallPrompt = Event & {
@@ -12,12 +13,18 @@ const DISMISS_KEY = "pwaInstallDismissed";
 export default function ServiceWorkerRegistration() {
   const [installPrompt, setInstallPrompt] = useState<InstallPrompt | null>(null);
   const [installed, setInstalled] = useState(false);
-  const [waiting, setWaiting] = useState<ServiceWorker | null>(null);
   const [offline, setOffline] = useState(false);
   const [installing, setInstalling] = useState(false);
   // Hidden until storage is read, so a dismissed banner never flashes on load.
   const [dismissed, setDismissed] = useState(true);
-  const reloadRequested = useRef(false);
+  // Set when a new worker took over this page: the next navigation loads the new build.
+  const updated = useRef(false);
+  const pathname = usePathname();
+
+  // Reload on route change, never mid-lesson: the page being left loses nothing.
+  useEffect(() => {
+    if (updated.current) window.location.reload();
+  }, [pathname]);
 
   useEffect(() => {
     try { setDismissed(localStorage.getItem(DISMISS_KEY) === "1"); } catch { setDismissed(false); }
@@ -55,25 +62,12 @@ export default function ServiceWorkerRegistration() {
   useEffect(() => {
     if (process.env.NODE_ENV !== "production" || !("serviceWorker" in navigator)) return;
     let registration: ServiceWorkerRegistration | undefined;
-    let disposed = false;
-    let worker: ServiceWorker | null = null;
-    const checkWaiting = () => {
-      const ready = registration?.waiting ?? (worker?.state === "installed" ? worker : null);
-      if (!disposed && ready && navigator.serviceWorker.controller) setWaiting(ready);
-    };
-    const updateFound = () => {
-      worker?.removeEventListener("statechange", checkWaiting);
-      worker = registration?.installing ?? null;
-      worker?.addEventListener("statechange", checkWaiting);
-    };
+    // First install also fires controllerchange (clients.claim); only a replaced worker is an update.
+    const hadController = !!navigator.serviceWorker.controller;
     const register = async () => {
       try {
         const version = encodeURIComponent(process.env.NEXT_PUBLIC_PWA_VERSION ?? "development");
         registration = await navigator.serviceWorker.register(`/sw.js?v=${version}`, { scope: "/", updateViaCache: "none" });
-        if (disposed) return;
-        registration.addEventListener("updatefound", updateFound);
-        updateFound();
-        checkWaiting();
       } catch (error) {
         console.error("Không thể đăng ký chế độ offline.", error);
       }
@@ -82,18 +76,15 @@ export default function ServiceWorkerRegistration() {
       if (document.visibilityState === "visible") void registration?.update().catch(() => {});
     };
     const controllerChanged = () => {
-      if (reloadRequested.current) window.location.reload();
+      if (hadController) updated.current = true;
     };
     // Hydration can happen after load; register once without waiting for another event.
     void register();
     document.addEventListener("visibilitychange", updateWhenVisible);
     navigator.serviceWorker.addEventListener("controllerchange", controllerChanged);
     return () => {
-      disposed = true;
       document.removeEventListener("visibilitychange", updateWhenVisible);
       navigator.serviceWorker.removeEventListener("controllerchange", controllerChanged);
-      registration?.removeEventListener("updatefound", updateFound);
-      worker?.removeEventListener("statechange", checkWaiting);
     };
   }, []);
 
@@ -134,16 +125,9 @@ export default function ServiceWorkerRegistration() {
           <button type="button" aria-label="Ẩn hướng dẫn cài đặt" onClick={dismiss} className="min-h-11 min-w-11 rounded-full bg-ink/5">✕</button>
         </div>
       )}
-      {(offline || waiting) && (
+      {offline && (
         <aside role="status" className="pwa-status fixed inset-x-0 bottom-0 z-50 flex flex-wrap items-center justify-center gap-3 border-t border-rule bg-paper canvas-surface px-4 pt-3 text-sm text-white shadow-lg">
-          {offline && <p>Đang ngoại tuyến. Bạn có thể ôn từ đã lưu, đọc ngữ pháp và viết nháp. Chức năng AI cần mạng.</p>}
-          {waiting && <>
-            <p>Có phiên bản mới. Lưu bài đang làm trước khi tải lại.</p>
-            <button type="button" disabled={offline} className="min-h-11 rounded-full bg-ink/5 px-4 disabled:opacity-50" onClick={() => {
-              reloadRequested.current = true;
-              waiting.postMessage({ type: "SKIP_WAITING" });
-            }}>Cập nhật và tải lại</button>
-          </>}
+          <p>Đang ngoại tuyến. Bạn có thể ôn từ đã lưu, đọc ngữ pháp và viết nháp. Chức năng AI cần mạng.</p>
         </aside>
       )}
     </>
