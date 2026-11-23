@@ -1,0 +1,3916 @@
+[
+  {
+    "model": "muse-spark-1.3-contributor",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 620,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 431,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 784,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 332,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 334,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 305,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "words",
+        "ms": 298,
+        "status": 503,
+        "body": {
+          "error": "Không thể sinh từ mới lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "context",
+        "ms": 306,
+        "status": 0,
+        "body": {
+          "error": "Error: 400 This OpenCode Go model trains on request data. Turn on \"Allow paid endpoints that train on request data\" at h"
+        }
+      }
+    ]
+  },
+  {
+    "model": "muse-spark-1.2-contributor",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 829,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 1300,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 332,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 320,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 304,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 305,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "words",
+        "ms": 312,
+        "status": 503,
+        "body": {
+          "error": "Không thể sinh từ mới lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "context",
+        "ms": 347,
+        "status": 0,
+        "body": {
+          "error": "Error: 400 This OpenCode Go model trains on request data. Turn on \"Allow paid endpoints that train on request data\" at h"
+        }
+      }
+    ]
+  },
+  {
+    "model": "glm-5.3-flash",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 3933,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Cho tôi hỏi nhà ga gần nhất ở đâu? (Xin hỏi nhà ga gần nhất ở đâu?)",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "ねえ、一番近い駅ってどこにあるの?",
+              "reading": "ねえ、いちばんちかいえきってどこにあるの?",
+              "note": "Dùng khi hỏi bạn bè hoặc người thân quen, thân mật và không trang trọng."
+            },
+            {
+              "tone": "polite",
+              "text": "すみません、一番近い駅はどこですか?",
+              "reading": "すみません、いちばんちかいえきはどこですか?",
+              "note": "Dùng trong giao tiếp hàng ngày với người lạ, lịch sự nhưng không quá trang trọng."
+            },
+            {
+              "tone": "formal",
+              "text": "恐れ入りますが、最寄りの駅はどちらでございますか?",
+              "reading": "おそれいりますが、もよりのえきはどちらでございますか?",
+              "note": "Dùng trong tình huống trang trọng hoặc khi hỏi những người cần đặc biệt tôn trọng như nhân viên lễ tân."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 4200,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Tôi bị dị ứng đậu phộng, món này có không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "나 땅콩 알레르기 있는데, 이거에 땅콩 들어갔어?",
+              "reading": "na ttangkkong allereugi itneunde, igeo-e ttangkkong deureogasseo?",
+              "note": "Dùng khi nói với bạn bè hoặc người thân quen, thân mật và không trang trọng."
+            },
+            {
+              "tone": "polite",
+              "text": "저 땅콩 알레르기가 있는데, 이 요리에 땅콩이 들어가 있나요?",
+              "reading": "jeo ttangkkong allereugiga itneunde, i yori-e ttangkkongi deureoga itnayo?",
+              "note": "Dùng trong giao tiếp hàng ngày lịch sự, ví dụ với nhân viên nhà hàng quen thuộc."
+            },
+            {
+              "tone": "formal",
+              "text": "저는 땅콩 알레르기가 있습니다. 이 요리에 땅콩이 들어가 있습니까?",
+              "reading": "jeoneun ttangkkong allereugiga itseumnida. i yori-e ttangkkongi deureoga itseumnikka?",
+              "note": "Dùng trong tình huống trang trọng hoặc với người lạ cần thể hiện sự tôn trọng tối đa."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 5141,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Làm ơn giảm giá một chút được không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "能便宜点吗？",
+              "reading": "néng piányi diǎn ma?",
+              "note": "Dùng với bạn bè hoặc người bán quen thuộc, thân mật."
+            },
+            {
+              "tone": "polite",
+              "text": "请问可以便宜一点吗？",
+              "reading": "qǐngwèn kěyǐ piányi yīdiǎn ma?",
+              "note": "Dùng lịch sự khi mặc cả với người bán hàng thường ngày."
+            },
+            {
+              "tone": "formal",
+              "text": "您好，请问价格能否再优惠一些？",
+              "reading": "nín hǎo, qǐngwèn jiàgé néng fǒu zài yōuhuì yīxiē?",
+              "note": "Dùng trong tình huống trang trọng hoặc với người bán cần thể hiện sự tôn trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 3205,
+        "status": 200,
+        "body": {
+          "detected": "ko",
+          "vietnamese": "Xe buýt này có đi đến sân bay không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Xe buýt này có đi tới sân bay không?",
+              "note": "Dùng với bạn bè hoặc người thân quen trong văn nói hằng ngày."
+            },
+            {
+              "tone": "polite",
+              "text": "Cho tôi hỏi, xe buýt này có đi đến sân bay không ạ?",
+              "note": "Dùng trong giao tiếp lịch sự thường ngày, ví dụ hỏi người lạ một cách thân thiện."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin hỏi, xe buýt này có hoạt động đến sân bay không ạ?",
+              "note": "Dùng trong tình huống trang trọng hoặc khi cần thể hiện sự tôn trọng cao, ví dụ với người lớn tuổi hay trong công việc."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 3245,
+        "status": 200,
+        "body": {
+          "detected": "ja",
+          "vietnamese": "Xin lỗi, khách sạn nhận phòng từ mấy giờ ạ?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Cho mình hỏi, nhận phòng từ mấy giờ vậy?",
+              "note": "Dùng khi hỏi người bạn thân hoặc đồng nghiệp thân thiết một cách thoải mái."
+            },
+            {
+              "tone": "polite",
+              "text": "Xin lỗi, cho tôi hỏi nhận phòng là từ mấy giờ ạ?",
+              "note": "Dùng trong giao tiếp hàng ngày với người lạ hoặc nhân viên một cách lịch sự."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin lỗi quý khách, xin hỏi thủ tục nhận phòng bắt đầu từ giờ nào ạ?",
+              "note": "Dùng trong tình huống trang trọng hoặc với người cần tôn trọng cao."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 3629,
+        "status": 200,
+        "body": {
+          "detected": "en",
+          "vietnamese": "Bạn có thể giới thiệu một chỗ làm việc yên tĩnh ở gần đây không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Gần đây có chỗ nào yên tĩnh để làm việc không, chỉ mình với đi?",
+              "note": "Dùng khi hỏi bạn bè thân thiết hoặc người quen, giọng thoải mái tự nhiên."
+            },
+            {
+              "tone": "polite",
+              "text": "Bạn có thể gợi ý cho mình chỗ làm việc yên tĩnh gần đây không?",
+              "note": "Dùng trong giao tiếp hàng ngày lịch sự với đồng nghiệp, người quen hoặc người lạ thân thiện."
+            },
+            {
+              "tone": "formal",
+              "text": "Quý vị có thể giới thiệu giúp tôi một địa điểm yên tĩnh để làm việc ở gần đây được không ạ?",
+              "note": "Dùng khi nói chuyện với người lạ, cấp trên hoặc trong tình huống trang trọng cần thể hiện sự tôn trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "words",
+        "ms": 1782,
+        "status": 200,
+        "body": [
+          {
+            "word": "itinerary",
+            "meaning": "lịch trình"
+          },
+          {
+            "word": "passport",
+            "meaning": "hộ chiếu"
+          },
+          {
+            "word": "souvenir",
+            "meaning": "quà lưu niệm"
+          },
+          {
+            "word": "excursion",
+            "meaning": "chuyến tham quan"
+          },
+          {
+            "word": "accommodation",
+            "meaning": "chỗ ở / chỗ lưu trú"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 1634,
+        "status": 200,
+        "body": {
+          "text": "**A:** Did you check our **itinerary**? Our flight leaves at 3:15.\n**B:** Yeah, but the app just showed a two-hour **delay**.\n**A:** Ugh, seriously? At least we already have our **boarding pass**.\n**B:** True—so we can grab coffee instead of rushing to the gate.\n**A:** Fine, but let's keep an eye on the time just in case it changes again."
+        }
+      }
+    ]
+  },
+  {
+    "model": "gpt-5.6-luna",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 4514,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Cho tôi hỏi nhà ga gần nhất ở đâu?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "いちばん近い駅ってどこ？",
+              "reading": "いちばんちかいえきってどこ？",
+              "note": "Dùng khi hỏi bạn bè hoặc người thân một cách thân mật."
+            },
+            {
+              "tone": "polite",
+              "text": "すみません、いちばん近い駅はどこですか。",
+              "reading": "すみません、いちばんちかいえきはどこですか。",
+              "note": "Dùng khi hỏi người lạ trong giao tiếp hằng ngày một cách lịch sự."
+            },
+            {
+              "tone": "formal",
+              "text": "恐れ入りますが、最寄りの駅はどちらでしょうか。",
+              "reading": "おそれいりますが、もよりのえきはどちらでしょうか。",
+              "note": "Dùng trong tình huống trang trọng hoặc khi cần thể hiện sự kính trọng cao."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 6236,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Tôi bị dị ứng đậu phộng, món này có không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "나 땅콩 알레르기 있는데, 이거 땅콩 들어가?",
+              "reading": "Na ttangkong allerugi inneunde, igeo ttangkong deureoga?",
+              "note": "Dùng với bạn bè hoặc người thân trong hoàn cảnh thân mật."
+            },
+            {
+              "tone": "polite",
+              "text": "저 땅콩 알레르기가 있는데, 이 음식에 땅콩이 들어가요?",
+              "reading": "Jeo ttangkong allerugiga inneunde, i eumsige ttangkongi deureogayo?",
+              "note": "Dùng khi hỏi nhân viên hoặc người không quá thân một cách lịch sự hằng ngày."
+            },
+            {
+              "tone": "formal",
+              "text": "저는 땅콩 알레르기가 있습니다. 이 음식에 땅콩이 들어가는지 확인해 주시겠습니까?",
+              "reading": "Jeoneun ttangkong allerugiga itseumnida. I eumsige ttangkongi deureoganeunji hwaginhae jusigetseumnikka?",
+              "note": "Dùng trong tình huống trang trọng hoặc khi cần nói chuyện đặc biệt lịch sự với người lạ."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 5359,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Làm ơn giảm giá một chút được không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "可以便宜一点吗？",
+              "reading": "Kěyǐ piányi yìdiǎn ma?",
+              "note": "Dùng khi hỏi người bán một cách thân mật, tự nhiên."
+            },
+            {
+              "tone": "polite",
+              "text": "麻烦您便宜一点，可以吗？",
+              "reading": "Máfan nín piányi yìdiǎn, kěyǐ ma?",
+              "note": "Dùng khi mặc cả lịch sự với người bán."
+            },
+            {
+              "tone": "formal",
+              "text": "请问可以给我优惠一些吗？",
+              "reading": "Qǐngwèn kěyǐ gěi wǒ yōuhuì yìxiē ma?",
+              "note": "Dùng trong tình huống trang trọng hoặc khi muốn đưa ra lời đề nghị lịch sự hơn."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 3104,
+        "status": 200,
+        "body": {
+          "detected": "ko",
+          "vietnamese": "Xe buýt này có đi đến sân bay không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Xe buýt này có đi đến sân bay không?",
+              "note": "Dùng khi hỏi bạn bè hoặc người thân một cách thân mật."
+            },
+            {
+              "tone": "polite",
+              "text": "Cho tôi hỏi, xe buýt này có đi đến sân bay không ạ?",
+              "note": "Dùng khi hỏi người không quen trong giao tiếp hằng ngày một cách lịch sự."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin cho hỏi, xe buýt này có đi đến sân bay không ạ?",
+              "note": "Dùng trong tình huống trang trọng hoặc khi cần thể hiện sự tôn trọng cao."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 4387,
+        "status": 200,
+        "body": {
+          "detected": "ja",
+          "vietnamese": "Xin lỗi, cho tôi hỏi mấy giờ bắt đầu làm thủ tục nhận phòng?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Xin lỗi, mấy giờ bắt đầu nhận phòng vậy?",
+              "note": "Dùng khi hỏi bạn bè, người thân hoặc trong tình huống thân mật."
+            },
+            {
+              "tone": "polite",
+              "text": "Xin lỗi, cho tôi hỏi mấy giờ có thể làm thủ tục nhận phòng ạ?",
+              "note": "Dùng khi hỏi nhân viên một cách lịch sự trong giao tiếp hằng ngày."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin cho hỏi, thủ tục nhận phòng bắt đầu từ mấy giờ ạ?",
+              "note": "Dùng trong bối cảnh trang trọng hoặc khi muốn thể hiện sự tôn trọng cao với người đối diện."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 4897,
+        "status": 200,
+        "body": {
+          "detected": "en",
+          "vietnamese": "Bạn có thể giới thiệu một nơi yên tĩnh gần đây để làm việc không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Gần đây có chỗ nào yên tĩnh để làm việc không? Bạn giới thiệu mình với!",
+              "note": "Dùng khi hỏi bạn bè hoặc người thân một cách thân mật."
+            },
+            {
+              "tone": "polite",
+              "text": "Anh/chị có thể giới thiệu cho tôi một nơi yên tĩnh gần đây để làm việc được không ạ?",
+              "note": "Dùng khi hỏi người lạ hoặc người quen trong giao tiếp hằng ngày một cách lịch sự."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin ông/bà vui lòng giới thiệu giúp tôi một địa điểm yên tĩnh gần đây để làm việc được không ạ?",
+              "note": "Dùng trong hoàn cảnh trang trọng hoặc khi giao tiếp với người cần thể hiện sự kính trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "words",
+        "ms": 1846,
+        "status": 200,
+        "body": [
+          {
+            "word": "destination",
+            "meaning": "điểm đến"
+          },
+          {
+            "word": "itinerary",
+            "meaning": "lịch trình"
+          },
+          {
+            "word": "luggage",
+            "meaning": "hành lý"
+          },
+          {
+            "word": "passport",
+            "meaning": "hộ chiếu"
+          },
+          {
+            "word": "souvenir",
+            "meaning": "quà lưu niệm"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 2217,
+        "status": 200,
+        "body": {
+          "text": "Maya: Did you print our **itinerary** for the trip?  \nLeo: Yes, and I saved my **boarding pass** on my phone.  \nMaya: Great—hopefully there won’t be a **delay**.  \nLeo: If there is, we’ll grab coffee and wait."
+        }
+      }
+    ]
+  },
+  {
+    "model": "claude-haiku-5-5",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 3894,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Cho tôi hỏi nhà ga gần nhất ở đâu?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "一番近い駅ってどこ？",
+              "reading": "いちばんちかいえきってどこ？",
+              "note": "Dùng khi nói chuyện với bạn bè hoặc người thân quen, hoặc với người nhỏ tuổi hơn."
+            },
+            {
+              "tone": "polite",
+              "text": "すみません、一番近い駅はどこですか？",
+              "reading": "すみません、いちばんちかいえきはどこですか？",
+              "note": "Dùng trong giao tiếp hằng ngày với người lạ như nhân viên cửa hàng hay người qua đường để hỏi đường một cách lịch sự."
+            },
+            {
+              "tone": "formal",
+              "text": "恐れ入りますが、最寄りの駅はどちらでしょうか。",
+              "reading": "おそれいりますが、もよりのえきはどちらでしょうか。",
+              "note": "Dùng khi hỏi người lớn tuổi, người có địa vị cao hơn, hoặc nhân viên trong các tình huống trang trọng cần thể hiện sự tôn trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 4213,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Tôi bị dị ứng đậu phộng, món này có không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "나 땅콩 알레르기 있어. 이 음식에 들어가 있어?",
+              "reading": "na ttangkong allereugi isseo. i eumsige deureoga isseo?",
+              "note": "Dùng với bạn bè hoặc người thân thân thiết khi hỏi về thành phần món ăn."
+            },
+            {
+              "tone": "polite",
+              "text": "저는 땅콩 알레르기가 있는데요, 이 음식에 땅콩이 들어 있나요?",
+              "reading": "jeoneun ttangkong allereugiga inneundeyo, i eumsige ttangkongi deureo innayo?",
+              "note": "Dùng trong giao tiếp lịch sự hằng ngày, chẳng hạn khi gọi món ở quán ăn hoặc hỏi nhân viên phục vụ."
+            },
+            {
+              "tone": "formal",
+              "text": "저는 땅콩 알레르기가 있습니다. 이 음식에 땅콩이 들어 있습니까?",
+              "reading": "jeoneun ttangkong allereugiga itseumnida. i eumsige ttangkongi deureo itseumnikka?",
+              "note": "Dùng với người lạ hoặc trong bối cảnh trang trọng như nhà hàng sang trọng, khách sạn, hay khi làm việc với đối tác."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 3970,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Làm ơn giảm giá một chút được không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "便宜一点儿行不行？",
+              "reading": "Piányi yìdiǎnr xíng bu xíng?",
+              "note": "Dùng với bạn bè hoặc người thân khi mặc cả hoặc nhờ giảm giá một cách thoải mái, thân mật."
+            },
+            {
+              "tone": "polite",
+              "text": "能便宜一点儿吗？",
+              "reading": "Néng piányi yìdiǎnr ma?",
+              "note": "Dùng trong giao tiếp hằng ngày với người bán hàng hoặc người lạ khi muốn nhờ giảm giá một cách lịch sự."
+            },
+            {
+              "tone": "formal",
+              "text": "可以请您再便宜一些吗？",
+              "reading": "Kěyǐ qǐng nín zài piányi yìxiē ma?",
+              "note": "Dùng khi nói với khách hàng lớn, đối tác hoặc người có vai trò cao hơn, thể hiện sự tôn trọng bằng cách dùng \"您\"."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 3346,
+        "status": 200,
+        "body": {
+          "detected": "ko",
+          "vietnamese": "Xe buýt này có đi đến sân bay không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Xe này có đi sân bay không?",
+              "note": "Dùng với bạn bè hoặc người thân thân thiết khi hỏi đường một cách thoải mái."
+            },
+            {
+              "tone": "polite",
+              "text": "Xe buýt này có đi đến sân bay không ạ?",
+              "note": "Dùng trong giao tiếp hằng ngày với người lạ như nhân viên, người qua đường hoặc người lớn tuổi hơn một cách lịch sự."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin hỏi, xe buýt này có đi đến sân bay không ạ?",
+              "note": "Dùng khi nói với nhân viên phục vụ, người có vai trò hoặc người cần được tôn trọng trong bối cảnh trang trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 4424,
+        "status": 200,
+        "body": {
+          "detected": "ja",
+          "vietnamese": "Xin lỗi, giờ check-in bắt đầu từ mấy giờ vậy ạ?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Ê, check-in từ mấy giờ vậy?",
+              "note": "Dùng khi nói chuyện với bạn bè hoặc người thân thân thiết, ví dụ khi hỏi nhanh điều gì đó trong chuyến đi cùng nhau."
+            },
+            {
+              "tone": "polite",
+              "text": "Xin lỗi, cho tôi hỏi giờ check-in bắt đầu từ mấy giờ ạ?",
+              "note": "Dùng trong giao tiếp hằng ngày với người lạ như nhân viên cửa hàng hay khách sạn, khi muốn lịch sự nhưng không quá trang trọng."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin hỏi, thời gian nhận phòng (check-in) bắt đầu từ mấy giờ ạ?",
+              "note": "Dùng trong môi trường công việc, hành chính hoặc khi giao tiếp với người cần tôn trọng như lễ tân cao cấp, đối tác hay cơ quan chức năng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 3783,
+        "status": 200,
+        "body": {
+          "detected": "en",
+          "vietnamese": "Bạn có thể gợi ý giúp mình một nơi yên tĩnh gần đây để làm việc không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Bạn gợi ý giúp mình chỗ nào yên tĩnh gần đây để làm việc với?",
+              "note": "Dùng khi nói chuyện với bạn bè hoặc người thân thân quen."
+            },
+            {
+              "tone": "polite",
+              "text": "Bạn có thể gợi ý giúp tôi một nơi yên tĩnh gần đây để làm việc không?",
+              "note": "Dùng trong giao tiếp hằng ngày với người mới quen hoặc người lớn tuổi hơn một chút nhưng không quá trang trọng."
+            },
+            {
+              "tone": "formal",
+              "text": "Anh/Chị có thể vui lòng giới thiệu giúp tôi một địa điểm yên tĩnh gần đây để làm việc được không ạ?",
+              "note": "Dùng khi nói với người lạ, đối tác hoặc trong bối cảnh công việc, cần thể hiện sự tôn trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "words",
+        "ms": 1053,
+        "status": 200,
+        "body": [
+          {
+            "word": "itinerary",
+            "meaning": "lịch trình"
+          },
+          {
+            "word": "luggage",
+            "meaning": "hành lý"
+          },
+          {
+            "word": "destination",
+            "meaning": "điểm đến"
+          },
+          {
+            "word": "passport",
+            "meaning": "hộ chiếu"
+          },
+          {
+            "word": "accommodation",
+            "meaning": "chỗ ở"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 1645,
+        "status": 200,
+        "body": {
+          "text": "**Maya:** Did you check the new **itinerary** the airline sent? Our flight's been pushed back two hours.\n\n**Leo:** Ugh, another **delay**? That throws off our whole connection in Denver.\n\n**Maya:** Hold on, I'll grab my **boarding pass** so we're ready to move the moment they call us.\n\n**Leo:** Good idea. Let's head to the gate now before the crowd builds up."
+        }
+      }
+    ]
+  },
+  {
+    "model": "gpt-6-luna",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 3417,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Cho tôi hỏi nhà ga gần nhất ở đâu?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "一番近い駅ってどこ？",
+              "reading": "いちばんちかいえきってどこ？",
+              "note": "Dùng khi hỏi bạn bè hoặc người thân một cách thân mật."
+            },
+            {
+              "tone": "polite",
+              "text": "一番近い駅はどこですか？",
+              "reading": "いちばんちかいえきはどこですか？",
+              "note": "Dùng khi hỏi lịch sự trong những tình huống giao tiếp thông thường."
+            },
+            {
+              "tone": "formal",
+              "text": "恐れ入りますが、最寄りの駅はどちらでしょうか。",
+              "reading": "おそれいりますが、もよりのえきはどちらでしょうか。",
+              "note": "Dùng khi hỏi người lạ hoặc trong tình huống cần thể hiện sự kính trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 6460,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Tôi bị dị ứng đậu phộng, món này có không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "나 땅콩 알레르기 있는데, 이 음식에 땅콩 들어 있어?",
+              "reading": "Na ttangkong allereugi inneunde, i eumsige ttangkong deureo isseo?",
+              "note": "Bạn có thể dùng cách nói này khi hỏi bạn bè hoặc người thân thân thiết."
+            },
+            {
+              "tone": "polite",
+              "text": "저 땅콩 알레르기가 있는데, 이 음식에 땅콩이 들어 있어요?",
+              "reading": "Jeo ttangkong allereugiga inneunde, i eumsige ttangkongi deureo isseoyo?",
+              "note": "Dùng cách nói này khi hỏi nhân viên phục vụ hoặc người chưa thân một cách lịch sự."
+            },
+            {
+              "tone": "formal",
+              "text": "제가 땅콩 알레르기가 있습니다. 이 요리에 땅콩이 들어 있습니까?",
+              "reading": "Jega ttangkong allereugiga itseumnida. I yorie ttangkongi deureo itseumnikka?",
+              "note": "Dùng cách nói này trong tình huống trang trọng hoặc khi cần thể hiện sự tôn trọng cao."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 3224,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Làm ơn giảm giá một chút được không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "能便宜一点吗？",
+              "reading": "Néng piányi yìdiǎn ma?",
+              "note": "Dùng khi hỏi bạn bè hoặc người thân một cách thân mật."
+            },
+            {
+              "tone": "polite",
+              "text": "您能给我便宜一点吗？",
+              "reading": "Nín néng gěi wǒ piányi yìdiǎn ma?",
+              "note": "Dùng khi lịch sự hỏi người bán trong giao tiếp hằng ngày."
+            },
+            {
+              "tone": "formal",
+              "text": "请问您是否可以稍微降低一下价格？",
+              "reading": "Qǐngwèn nín shìfǒu kěyǐ shāowēi jiàngdī yíxià jiàgé?",
+              "note": "Dùng trong tình huống trang trọng hoặc khi cần thể hiện sự tôn trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 3304,
+        "status": 200,
+        "body": {
+          "detected": "ko",
+          "vietnamese": "Xe buýt này có đi đến sân bay không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Xe này có chạy đến sân bay không?",
+              "note": "Dùng khi hỏi bạn bè hoặc người thân một cách thoải mái."
+            },
+            {
+              "tone": "polite",
+              "text": "Cho tôi hỏi, xe buýt này có đi đến sân bay không ạ?",
+              "note": "Dùng khi hỏi người lạ trong giao tiếp hằng ngày một cách lịch sự."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin hỏi, chuyến xe buýt này có đi đến sân bay không ạ?",
+              "note": "Dùng trong hoàn cảnh trang trọng hoặc khi cần thể hiện sự kính trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 3123,
+        "status": 200,
+        "body": {
+          "detected": "ja",
+          "vietnamese": "Xin lỗi, cho tôi hỏi từ mấy giờ có thể nhận phòng?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Xin lỗi, mấy giờ thì nhận phòng được vậy?",
+              "note": "Dùng khi hỏi bạn bè hoặc người thân trong tình huống thoải mái."
+            },
+            {
+              "tone": "polite",
+              "text": "Xin lỗi, cho tôi hỏi từ mấy giờ có thể nhận phòng ạ?",
+              "note": "Dùng khi hỏi nhân viên khách sạn trong giao tiếp lịch sự hằng ngày."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin vui lòng cho biết thời gian bắt đầu nhận phòng là từ mấy giờ ạ?",
+              "note": "Dùng trong giao tiếp trang trọng với nhân viên hoặc người cần thể hiện sự kính trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 4202,
+        "status": 200,
+        "body": {
+          "detected": "en",
+          "vietnamese": "Bạn có thể gợi ý một nơi yên tĩnh gần đây để làm việc không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Có chỗ nào gần đây yên tĩnh để làm việc không?",
+              "note": "Dùng khi hỏi bạn bè hoặc người thân một cách thân mật."
+            },
+            {
+              "tone": "polite",
+              "text": "Anh/chị có thể giới thiệu một nơi yên tĩnh gần đây để làm việc được không?",
+              "note": "Dùng khi hỏi lịch sự trong giao tiếp hằng ngày."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin hỏi, ông/bà có thể giới thiệu một địa điểm yên tĩnh gần đây để làm việc được không ạ?",
+              "note": "Dùng trong hoàn cảnh trang trọng hoặc khi hỏi người cần thể hiện sự kính trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "words",
+        "ms": 7657,
+        "status": 200,
+        "body": [
+          {
+            "word": "itinerary",
+            "meaning": "lịch trình"
+          },
+          {
+            "word": "destination",
+            "meaning": "điểm đến"
+          },
+          {
+            "word": "luggage",
+            "meaning": "hành lý"
+          },
+          {
+            "word": "reservation",
+            "meaning": "sự đặt chỗ"
+          },
+          {
+            "word": "sightseeing",
+            "meaning": "tham quan"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 2579,
+        "status": 200,
+        "body": {
+          "text": "Maya: Did you finish the **itinerary** for our trip?\nLeo: Yes, but there’s a **delay** on our flight.\nMaya: I’ve got my **boarding pass** ready—let’s check the updates.\nLeo: Good idea. We’ll adjust our plans if we need to."
+        }
+      }
+    ]
+  },
+  {
+    "model": "deepseek-v4.1-flash",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 9334,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Cho tôi hỏi nhà ga gần nhất ở đâu?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "ねえ、一番近い駅はどこ？",
+              "reading": "ねえ、いちばんちかいえきはどこ？",
+              "note": "Dùng khi nói với bạn bè hoặc người thân trong tình huống thân mật."
+            },
+            {
+              "tone": "polite",
+              "text": "すみません、一番近い駅はどこですか？",
+              "reading": "すみません、いちばんちかいえきはどこですか？",
+              "note": "Dùng trong giao tiếp hằng ngày một cách lịch sự với người không quá thân."
+            },
+            {
+              "tone": "formal",
+              "text": "恐れ入りますが、最寄り駅はどちらでしょうか。",
+              "reading": "おそれいりますが、もよりえきはどちらでしょうか。",
+              "note": "Dùng trong tình huống trang trọng, công vụ hoặc khi nói với người lạ cần thể hiện sự kính trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 15003,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 15003,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 6429,
+        "status": 200,
+        "body": {
+          "detected": "ko",
+          "vietnamese": "Xe buýt này có đi đến sân bay không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Xe buýt này có đi sân bay không?",
+              "note": "Dùng khi nói chuyện thân mật với bạn bè hoặc người trong gia đình."
+            },
+            {
+              "tone": "polite",
+              "text": "Xe buýt này có đi đến sân bay không ạ?",
+              "note": "Dùng trong giao tiếp hằng ngày một cách lịch sự với người chưa thân lắm."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin hỏi, xe buýt này có đi đến sân bay không ạ?",
+              "note": "Dùng trong tình huống trang trọng, công việc hoặc khi cần thể hiện sự tôn trọng với người lạ."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 15002,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 11474,
+        "status": 200,
+        "body": {
+          "detected": "en",
+          "vietnamese": "Bạn có thể giới thiệu một nơi yên tĩnh để làm việc gần đây không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Gợi ý giúp mình chỗ nào yên tĩnh để làm việc gần đây với?",
+              "note": "Dùng khi nói với bạn bè hoặc người thân thiết trong tình huống thoải mái."
+            },
+            {
+              "tone": "polite",
+              "text": "Bạn có thể giới thiệu giúp mình một nơi yên tĩnh để làm việc gần đây không?",
+              "note": "Dùng khi nhờ người quen hoặc người mới gặp trong giao tiếp hằng ngày một cách lịch sự."
+            },
+            {
+              "tone": "formal",
+              "text": "Anh/Chị có thể vui lòng giới thiệu giúp tôi một địa điểm yên tĩnh để làm việc gần đây không ạ?",
+              "note": "Dùng trong ngữ cảnh công việc, hành chính hoặc khi cần thể hiện sự tôn trọng với người lạ."
+            }
+          ]
+        }
+      },
+      {
+        "case": "words",
+        "ms": 3174,
+        "status": 200,
+        "body": [
+          {
+            "word": "itinerary",
+            "meaning": "lịch trình chuyến đi"
+          },
+          {
+            "word": "destination",
+            "meaning": "điểm đến"
+          },
+          {
+            "word": "luggage",
+            "meaning": "hành lý"
+          },
+          {
+            "word": "accommodation",
+            "meaning": "chỗ ở"
+          },
+          {
+            "word": "sightseeing",
+            "meaning": "tham quan ngắm cảnh"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 3719,
+        "status": 200,
+        "body": {
+          "text": "A: Did you check our **itinerary** for tomorrow?\nB: Yeah, but there’s a **delay** on the first flight.\nA: How long? We need to show our **boarding pass** at the gate by 7.\nB: Two hours, so we should still make the connection.\nA: Good, let’s keep the **itinerary** handy just in case.\nB: And don’t lose your **boarding pass** again."
+        }
+      }
+    ]
+  },
+  {
+    "model": "grok-4.7",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 15008,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 15003,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 15001,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 11676,
+        "status": 200,
+        "body": {
+          "detected": "ko",
+          "vietnamese": "Xe buýt này có đi đến sân bay không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Xe này có đi sân bay không?",
+              "note": "Dùng khi hỏi bạn bè hoặc người thân trong lúc nói chuyện thoải mái."
+            },
+            {
+              "tone": "polite",
+              "text": "Xe buýt này có đi đến sân bay không ạ?",
+              "note": "Dùng trong giao tiếp hàng ngày khi cần lịch sự với người lạ hoặc người lớn hơn."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin phép hỏi, xe buýt này có đi đến sân bay không ạ?",
+              "note": "Dùng khi nói chuyện trang trọng với người lạ cần tôn trọng hoặc trong bối cảnh công việc."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 15009,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 15005,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "words",
+        "ms": 3391,
+        "status": 200,
+        "body": [
+          {
+            "word": "passport",
+            "meaning": "hộ chiếu"
+          },
+          {
+            "word": "luggage",
+            "meaning": "hành lý"
+          },
+          {
+            "word": "destination",
+            "meaning": "điểm đến"
+          },
+          {
+            "word": "itinerary",
+            "meaning": "lịch trình"
+          },
+          {
+            "word": "departure",
+            "meaning": "sự khởi hành"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 4503,
+        "status": 200,
+        "body": {
+          "text": "Alex: Have you looked over the **itinerary** yet?\nJordan: I did, but the airline just posted a **delay**.\nAlex: Great. At least I already have my **boarding pass**.\nJordan: Same here—let’s grab coffee while we wait."
+        }
+      }
+    ]
+  },
+  {
+    "model": "deepseek-v4-pro",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 12525,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Cho tôi hỏi nhà ga gần nhất ở đâu?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "ねえ、一番近い駅ってどこ？",
+              "reading": "ねえ、いちばんちかいえきってどこ？",
+              "note": "Dùng khi nói với bạn bè hoặc người thân thiết."
+            },
+            {
+              "tone": "polite",
+              "text": "すみません、一番近い駅はどこですか？",
+              "reading": "すみません、いちばんちかいえきはどこですか？",
+              "note": "Dùng trong giao tiếp lịch sự hằng ngày với người không quá thân."
+            },
+            {
+              "tone": "formal",
+              "text": "恐れ入りますが、最寄りの駅はどちらでしょうか。",
+              "reading": "おそれいりますが、もよりのえきはどちらでしょうか。",
+              "note": "Dùng trong bối cảnh trang trọng, với người lạ hoặc khách hàng cần tôn trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 14978,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Tôi bị dị ứng đậu phộng, món này có không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "나 땅콩 알레르기 있는데, 이거 땅콩 들어 있어?",
+              "reading": "na ttangkong allereugi inneunde, igeo ttangkong deureo isseo?",
+              "note": "Dùng khi nói với bạn bè hoặc người thân thiết."
+            },
+            {
+              "tone": "polite",
+              "text": "저 땅콩 알레르기가 있는데요, 이 음식에 땅콩 들어 있나요?",
+              "reading": "jeo ttangkong allereugiga inneundeyo, i eumsige ttangkong deureo innayo?",
+              "note": "Dùng khi nói chuyện lịch sự hằng ngày với người quen hoặc người lạ."
+            },
+            {
+              "tone": "formal",
+              "text": "저는 땅콩 알레르기가 있습니다. 이 음식에 땅콩이 들어 있습니까?",
+              "reading": "jeoneun ttangkong allereugiga itseumnida. i eumsige ttangkongi deureo itseumnikka?",
+              "note": "Dùng trong tình huống trang trọng, kinh doanh hoặc với người cần kính trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 15007,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 15001,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 15005,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 15007,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "words",
+        "ms": 4647,
+        "status": 200,
+        "body": [
+          {
+            "word": "itinerary",
+            "meaning": "lịch trình"
+          },
+          {
+            "word": "destination",
+            "meaning": "điểm đến"
+          },
+          {
+            "word": "accommodation",
+            "meaning": "chỗ ở"
+          },
+          {
+            "word": "passport",
+            "meaning": "hộ chiếu"
+          },
+          {
+            "word": "luggage",
+            "meaning": "hành lý"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 5053,
+        "status": 200,
+        "body": {
+          "text": "A: Did you check the **itinerary**? I think our gate changed.  \nB: No, but there’s a **delay** posted on the screen.  \nA: Ugh, okay. At least we already have our **boarding pass** ready.  \nB: True. Let’s grab coffee while we wait."
+        }
+      }
+    ]
+  },
+  {
+    "model": "glm-5.3",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 7590,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Cho tôi hỏi nhà ga gần nhất ở đâu?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "一番近い駅ってどこ？",
+              "reading": "いちばんちかいえきってどこ？",
+              "note": "Dùng khi hỏi bạn bè hoặc người thân thiết, giọng điệu thoải mái, không cần lễ phép."
+            },
+            {
+              "tone": "polite",
+              "text": "すみません、一番近い駅はどこですか？",
+              "reading": "すみません、いちばんちかいえきはどこですか？",
+              "note": "Dùng khi hỏi người lạ hoặc nhân viên trong đời thường, lịch sự và thân thiện, phù hợp hầu hết tình huống hàng ngày."
+            },
+            {
+              "tone": "formal",
+              "text": "恐れ入りますが、最寄りの駅はどちらでしょうか。",
+              "reading": "おそれいりますが、もよりのえきはどちらでしょうか。",
+              "note": "Dùng trong tình huống trang trọng, với người cần tỏ ra kính trọng như khách hàng, cấp trên hoặc người lớn tuổi, có dùng kính ngữ."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 15008,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 15003,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 12357,
+        "status": 200,
+        "body": {
+          "detected": "ko",
+          "vietnamese": "Chiếc xe buýt này có chạy đến sân bay không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Xe buýt này có chạy tới sân bay không?",
+              "note": "Dùng khi hỏi bạn bè hoặc người thân quen, câu nói ngắn gọn, không cần thêm từ lễ phép."
+            },
+            {
+              "tone": "polite",
+              "text": "Cho hỏi xe buýt này có chạy đến sân bay không ạ?",
+              "note": "Dùng khi hỏi người lạ, người lớn tuổi hoặc nhân viên phục vụ trong giao tiếp hàng ngày, có thêm 'cho hỏi' và 'ạ' để lịch sự."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin phép hỏi quý vị, chiếc xe buýt này có tuyến đường đến sân bay không ạ?",
+              "note": "Dùng trong tình huống trang trọng hoặc khi hỏi người phụ trách, người có vị trí cao, thể hiện sự tôn trọng đặc biệt."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 15002,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 15011,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "words",
+        "ms": 8805,
+        "status": 200,
+        "body": [
+          {
+            "word": "itinerary",
+            "meaning": "lịch trình"
+          },
+          {
+            "word": "destination",
+            "meaning": "điểm đến"
+          },
+          {
+            "word": "souvenir",
+            "meaning": "đồ lưu niệm"
+          },
+          {
+            "word": "excursion",
+            "meaning": "chuyến tham quan ngắn"
+          },
+          {
+            "word": "accommodation",
+            "meaning": "chỗ ở, nơi lưu trú"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 10001,
+        "status": 0,
+        "body": {
+          "error": "Error: opencode timed out after 10000ms"
+        }
+      }
+    ]
+  },
+  {
+    "model": "hy3",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 15012,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 15008,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 15005,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 15007,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 15004,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 15004,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "words",
+        "ms": 9856,
+        "status": 200,
+        "body": [
+          {
+            "word": "passport",
+            "meaning": "hộ chiếu"
+          },
+          {
+            "word": "luggage",
+            "meaning": "hành lý"
+          },
+          {
+            "word": "flight",
+            "meaning": "chuyến bay"
+          },
+          {
+            "word": "hotel",
+            "meaning": "khách sạn"
+          },
+          {
+            "word": "destination",
+            "meaning": "điểm đến"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 8573,
+        "status": 200,
+        "body": {
+          "text": "A: Have you checked our **itinerary** for the trip?\nB: Yes, but there's a **delay** on the flight.\nA: That's fine, as long as I have my **boarding pass**.\nB: Let's head to the gate then."
+        }
+      }
+    ]
+  },
+  {
+    "model": "mimo-v2.6-flash",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 14687,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Cho tôi hỏi nhà ga gần nhất ở đâu?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "最近の駅はどこ？",
+              "reading": "さいきんの えきは どこ？",
+              "note": "Dùng khi nói chuyện với bạn bè hoặc người thân, thoải mái và ngắn gọn."
+            },
+            {
+              "tone": "polite",
+              "text": "最近の駅はどこですか？",
+              "reading": "さいきんの えきは どこですか？",
+              "note": "Dùng trong giao tiếp hàng ngày với người quen hoặc người lạ ở mức lịch sự vừa phải."
+            },
+            {
+              "tone": "formal",
+              "text": "失礼ですが、最寄りの駅はどちらにございますか？",
+              "reading": "しつれいですが、もよりのえきは どちらに ございますか？",
+              "note": "Dùng khi hỏi người lớn tuổi, sếp hoặc trong tình huống cần tỏ ra kính trọng và trang trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 15009,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 15003,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 7796,
+        "status": 200,
+        "body": {
+          "detected": "ko",
+          "vietnamese": "Chuyến xe buýt này có đi đến sân bay không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Chuyến xe buýt này có đi tới sân bay không?",
+              "note": "Dùng khi bạn hỏi người quen hoặc bạn bè một cách thoải mái, ngắn gọn."
+            },
+            {
+              "tone": "polite",
+              "text": "Xin hỏi, chuyến xe buýt này có đi đến sân bay không ạ?",
+              "note": "Dùng trong giao tiếp lịch sự hàng ngày với người lạ hoặc người lớn tuổi."
+            },
+            {
+              "tone": "formal",
+              "text": "Thưa quý vị, xin cho hỏi liệu chuyến xe buýt này có đi đến sân bay hay không ạ?",
+              "note": "Dùng trong ngữ cảnh trang trọng, chẳng hạn khi hỏi tại quầy thông tin hoặc với người có địa vị cao."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 7024,
+        "status": 200,
+        "body": {
+          "detected": "ja",
+          "vietnamese": "Xin lỗi, check-in bắt đầu từ mấy giờ?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Check-in từ mấy giờ thế?",
+              "note": "Dùng khi hỏi bạn bè hoặc người thân về giờ check-in một cách thoải mái."
+            },
+            {
+              "tone": "polite",
+              "text": "Xin lỗi, cho hỏi check-in bắt đầu từ mấy giờ ạ?",
+              "note": "Dùng khi hỏi lễ tân hoặc nhân viên khách sạn một cách lịch sự trong giao tiếp hàng ngày."
+            },
+            {
+              "tone": "formal",
+              "text": "Kính gửi quý khách, xin cho biết dịch vụ check-in của khách sạn bắt đầu từ mấy giờ ạ?",
+              "note": "Dùng trong văn bản chính thức, email hoặc khi cần thể hiện sự tôn trọng tối đa đối với đối tác hay khách hàng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 5952,
+        "status": 200,
+        "body": {
+          "detected": "en",
+          "vietnamese": "Bạn có thể giới thiệu cho mình một chỗ yên tĩnh để làm việc gần đây không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Ê, mày biết chỗ nào yên tĩnh để làm việc gần đây không?",
+              "note": "Dùng khi nói chuyện với bạn bè thân hoặc người cùng trang lứa."
+            },
+            {
+              "tone": "polite",
+              "text": "Bạn có thể giới thiệu cho mình một chỗ yên tĩnh để làm việc gần đây không?",
+              "note": "Dùng trong giao tiếp hàng ngày với người quen hoặc đồng nghiệp bình thường."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin lỗi, anh/chị có thể giới thiệu cho tôi một nơi yên tĩnh để làm việc ở gần đây được không?",
+              "note": "Dùng khi nói chuyện với người lớn tuổi, khách hàng hoặc người lạ cần tỏ lòng kính trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "words",
+        "ms": 4438,
+        "status": 200,
+        "body": [
+          {
+            "word": "itinerary",
+            "meaning": "lịch trình du lịch"
+          },
+          {
+            "word": "excursion",
+            "meaning": "chuyến tham quan ngắn"
+          },
+          {
+            "word": "destination",
+            "meaning": "điểm đến"
+          },
+          {
+            "word": "souvenir",
+            "meaning": "quà lưu niệm"
+          },
+          {
+            "word": "accommodation",
+            "meaning": "nơi lưu trú / chỗ ở"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 5764,
+        "status": 200,
+        "body": {
+          "text": "**Passenger**: Excuse me, could you check if there's a **delay** for the 3 PM flight to Tokyo?\n\n**Agent**: Yes, it's been pushed to 4:30 due to weather. Here's your updated **boarding pass** — it already reflects the new time.\n\n**Passenger**: Thank you. I hope the rest of my **itinerary** won't be affected — I have a hotel reservation I need to reach by evening.\n\n**Agent**: The delay is only an hour and a half, so you should still make it comfortably. Safe travels!"
+        }
+      }
+    ]
+  },
+  {
+    "model": "kimi-k2.7-code",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 15011,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 15006,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 15003,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 15002,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 15005,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 15005,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "words",
+        "ms": 5429,
+        "status": 200,
+        "body": [
+          {
+            "word": "itinerary",
+            "meaning": "lịch trình"
+          },
+          {
+            "word": "accommodation",
+            "meaning": "chỗ ở"
+          },
+          {
+            "word": "boarding pass",
+            "meaning": "thẻ lên máy bay"
+          },
+          {
+            "word": "reservation",
+            "meaning": "sự đặt chỗ"
+          },
+          {
+            "word": "destination",
+            "meaning": "điểm đến"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 4824,
+        "status": 200,
+        "body": {
+          "text": "Alex: Have you checked the updated **itinerary**? There's a slight **delay** on our flight.\n\nJordan: Yes, but I can't find my **boarding pass** anywhere.\n\nAlex: Don't worry—it's saved in the airline app.\n\nJordan: Oh, right. Thanks for reminding me."
+        }
+      }
+    ]
+  },
+  {
+    "model": "hy4-preview",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 15013,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 15002,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 15006,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 15004,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 15004,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 15002,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "words",
+        "ms": 25004,
+        "status": 503,
+        "body": {
+          "error": "Không thể sinh từ mới lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "context",
+        "ms": 10002,
+        "status": 0,
+        "body": {
+          "error": "Error: opencode timed out after 10000ms"
+        }
+      }
+    ]
+  },
+  {
+    "model": "kimi-k3",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 13905,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Cho tôi hỏi nhà ga gần nhất ở đâu?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "ねえ、一番近い駅ってどこ?",
+              "reading": "ねえ、いちばんちかいえきってどこ?",
+              "note": "Dùng khi hỏi bạn bè hoặc người thân, giọng thân mật không cần khách sáo."
+            },
+            {
+              "tone": "polite",
+              "text": "すみません、一番近い駅はどこですか?",
+              "reading": "すみません、いちばんちかいえきはどこですか?",
+              "note": "Dùng trong giao tiếp hàng ngày với người không quá thân, lịch sự vừa phải như khi hỏi đường người đi qua."
+            },
+            {
+              "tone": "formal",
+              "text": "恐れ入りますが、最寄りの駅はどちらでしょうか?",
+              "reading": "おそれいりますが、もよりのえきはどちらでしょうか?",
+              "note": "Dùng khi hỏi người lạ, người lớn tuổi hoặc trong môi trường trang trọng, công sở, thể hiện sự tôn trọng cao nhất."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 15012,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 15006,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 10438,
+        "status": 200,
+        "body": {
+          "detected": "ko",
+          "vietnamese": "Xe buýt này có đến sân bay không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Xe này có ra sân bay không hả?",
+              "note": "Dùng khi nói chuyện với bạn bè hoặc người thân thiết, giọng thân mật."
+            },
+            {
+              "tone": "polite",
+              "text": "Xe buýt này có đến sân bay không ạ?",
+              "note": "Dùng trong giao tiếp hằng ngày với người lạ hoặc người lớn tuổi, lịch sự vừa phải."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin lỗi, cho tôi hỏi xe buýt này có tới sân bay không ạ?",
+              "note": "Dùng khi hỏi nhân viên xe buýt, nhà ga hoặc trong tình huống trang trọng cần thể hiện sự tôn trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 15007,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 15003,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "words",
+        "ms": 6752,
+        "status": 200,
+        "body": [
+          {
+            "word": "itinerary",
+            "meaning": "lịch trình (chuyến đi)"
+          },
+          {
+            "word": "destination",
+            "meaning": "điểm đến"
+          },
+          {
+            "word": "luggage",
+            "meaning": "hành lý"
+          },
+          {
+            "word": "accommodation",
+            "meaning": "chỗ ở, nơi lưu trú"
+          },
+          {
+            "word": "souvenir",
+            "meaning": "quà lưu niệm"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 7608,
+        "status": 200,
+        "body": {
+          "text": "A: Did you check our **itinerary**? I think our flight time changed.\nB: Yes, there's a two-hour **delay** because of the storm.\nA: Ugh. At least I already downloaded my **boarding pass** to my phone.\nB: Smart—I'll print mine at the kiosk just in case the Wi-Fi's down."
+        }
+      }
+    ]
+  },
+  {
+    "model": "mimo-v2.6-pro",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 15017,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 15003,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 14908,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Làm ơn giảm giá một chút được không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "能便宜点儿吗？",
+              "reading": "Néng piányi diǎnr ma?",
+              "note": "Dùng khi nói chuyện với bạn bè hoặc người quen thân khi mặc cả mua sắm."
+            },
+            {
+              "tone": "polite",
+              "text": "请问，可以便宜一点吗？",
+              "reading": "Qǐngwèn, kěyǐ piányi yīdiǎn ma?",
+              "note": "Dùng trong giao tiếp thường ngày khi mua bán với người bán hàng, lịch sự mà không quá trang trọng."
+            },
+            {
+              "tone": "formal",
+              "text": "请问，是否可以适当给予一些价格上的优惠？",
+              "reading": "Qǐngwèn, shìfǒu kěyǐ shìdàng jǐyǔ yīxiē jiàgé shàng de yōuhuì?",
+              "note": "Dùng trong bối cảnh kinh doanh, đàm phán chính thức hoặc khi nói chuyện với người lạ cần kính trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 9027,
+        "status": 200,
+        "body": {
+          "detected": "ko",
+          "vietnamese": "Xe buýt này có đi đến sân bay không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Xe buýt này có chạy đến sân bay không vậy?",
+              "note": "Dùng khi nói chuyện với bạn bè hoặc người quen."
+            },
+            {
+              "tone": "polite",
+              "text": "Xe buýt này có đi đến sân bay không ạ?",
+              "note": "Dùng khi hỏi người lạ hoặc tài xế xe buýt một cách lịch sự."
+            },
+            {
+              "tone": "formal",
+              "text": "Xe buýt này có đi đến sân bay không, thưa quý ông/bà?",
+              "note": "Dùng trong tình huống trang trọng hoặc khi cần thể hiện sự kính trọng tối đa."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 15005,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 15002,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "words",
+        "ms": 3545,
+        "status": 200,
+        "body": [
+          {
+            "word": "Itinerary",
+            "meaning": "Lịch trình"
+          },
+          {
+            "word": "Luggage",
+            "meaning": "Hành lý"
+          },
+          {
+            "word": "Destination",
+            "meaning": "Điểm đến"
+          },
+          {
+            "word": "Accommodation",
+            "meaning": "Chỗ ở"
+          },
+          {
+            "word": "Customs",
+            "meaning": "Hải quan"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 10003,
+        "status": 0,
+        "body": {
+          "error": "Error: opencode timed out after 10000ms"
+        }
+      }
+    ]
+  },
+  {
+    "model": "minimax-m3.1-flash",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 7678,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Cho tôi hỏi nhà ga gần nhất ở đâu?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "一番近い駅はどこ？",
+              "reading": "いちばんちかいてえきはどこ",
+              "note": "Dùng khi nói với bạn bè hoặc người thân."
+            },
+            {
+              "tone": "polite",
+              "text": "すみません、最寄りの駅はどこですか？",
+              "reading": "すみません、さいよりのえきはどこですか",
+              "note": "Dùng trong giao tiếp lịch sự hàng ngày với người lạ hoặc trong các tình huống thông thường."
+            },
+            {
+              "tone": "formal",
+              "text": "お尋ねいたします。最寄りの駅はどこでしょうか。",
+              "reading": "おたずねいたします。さいよりのえきはどこでしょうか",
+              "note": "Dùng khi giao tiếp công sở, với người lạ cần tôn trọng hoặc trong văn bản trang trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 15007,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 15006,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 9673,
+        "status": 200,
+        "body": {
+          "detected": "ko",
+          "vietnamese": "Xe buýt này có đi đến sân bay không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Xe buýt này có đến sân bay không?",
+              "note": "Dùng khi hỏi người quen hoặc người mà bạn thân mật."
+            },
+            {
+              "tone": "polite",
+              "text": "Xin hỏi, xe buýt này có đến sân bay không?",
+              "note": "Dùng trong hội thoại lịch sự với người lạ hoặc nhân viên giao thông."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin hỏi, tuyến xe buýt này có đi đến sân bay không?",
+              "note": "Dùng khi trao đổi với người lạ trong tình huống chính thức hoặc cần sự tôn trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 6139,
+        "status": 200,
+        "body": {
+          "detected": "ja",
+          "vietnamese": "Xin lỗi, làm thủ tục nhận phòng bắt đầu từ mấy giờ?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Cho mình hỏi, làm thủ tục nhận phòng bắt đầu từ mấy giờ vậy?",
+              "note": "Dùng khi nói chuyện với bạn bè hoặc người thân trong tình huống gần gũi."
+            },
+            {
+              "tone": "polite",
+              "text": "Xin lỗi, làm thủ tục nhận phòng bắt đầu từ mấy giờ ạ?",
+              "note": "Dùng khi hỏi nhân viên lễ tân hoặc người phục vụ trong giao tiếp thông thường."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin lỗi, thời gian bắt đầu làm thủ tục nhận phòng là từ mấy giờ?",
+              "note": "Dùng khi trao đổi với khách hàng, đối tác hoặc người cần sự tôn trọng trong tình huống công sức."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 3976,
+        "status": 200,
+        "body": {
+          "detected": "en",
+          "vietnamese": "Bạn có thể giới thiệu một nơi yên tĩnh ở gần để làm việc không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Bạn biết chỗ nào ở gần yên tĩnh để làm việc không?",
+              "note": "Dùng khi nói chuyện với bạn bè hoặc người thân."
+            },
+            {
+              "tone": "polite",
+              "text": "Bạn có thể giới thiệu giúp tôi một nơi yên tĩnh ở gần để làm việc không?",
+              "note": "Dùng trong giao tiếp lịch sự hằng ngày với người quen hoặc đồng nghiệp."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin vui lòng gợi ý một địa điểm yên tĩnh ở gần để tôi có thể làm việc.",
+              "note": "Dùng trong các tình huống trang trọng, công việc hoặc khi giao tiếp với người lạ."
+            }
+          ]
+        }
+      },
+      {
+        "case": "words",
+        "ms": 1838,
+        "status": 200,
+        "body": [
+          {
+            "word": "itinerary",
+            "meaning": "lịch trình, hành trình du lịch"
+          },
+          {
+            "word": "luggage",
+            "meaning": "hành lý"
+          },
+          {
+            "word": "boarding pass",
+            "meaning": "thẻ lên máy bay"
+          },
+          {
+            "word": "accommodation",
+            "meaning": "chỗ ở, nơi lưu trú"
+          },
+          {
+            "word": "souvenir",
+            "meaning": "quà lưu niệm"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 2856,
+        "status": 200,
+        "body": {
+          "text": "A: My **itinerary** says we leave at noon, but the flight has a two-hour **delay**.  \nB: No problem, as long as we have our **boarding pass** ready.  \nA: Mine is in my email, so we’re covered.  \nB: Great, let’s check the gate before things get confusing."
+        }
+      }
+    ]
+  },
+  {
+    "model": "beam-free",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 6660,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Cho tôi hỏi nhà ga gần nhất ở đâu?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "最寄りの駅ってどこ？",
+              "reading": "もよりのえきってどこ？",
+              "note": "Dùng với bạn bè hoặc người thân thiết."
+            },
+            {
+              "tone": "polite",
+              "text": "すみません、最寄りの駅はどこですか？",
+              "reading": "すみません、もよりのえきはどこですか？",
+              "note": "Dùng trong giao tiếp lịch sự hằng ngày."
+            },
+            {
+              "tone": "formal",
+              "text": "恐れ入りますが、最寄り駅はどちらでしょうか？",
+              "reading": "おそれいりますが、もよりえきはどちらでしょうか？",
+              "note": "Dùng trong công việc, với người lạ hoặc khi cần tôn trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 10714,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Tôi bị dị ứng đậu phộng, món này có không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "땅콩 알레르기 있는데, 이 요리에 땅콩 들어가?",
+              "reading": "ttangkong allerugi inneunde, i yorie ttangkong deureoga?",
+              "note": "Dùng với bạn bè hoặc người thân."
+            },
+            {
+              "tone": "polite",
+              "text": "땅콩 알레르기가 있는데, 이 요리에 땅콩이 들어가나요?",
+              "reading": "ttangkong allerugiga inneunde, i yorie ttangkongi deureoganayo?",
+              "note": "Dùng trong giao tiếp lịch sự hằng ngày."
+            },
+            {
+              "tone": "formal",
+              "text": "땅콩 알레르기가 있는데, 이 요리에 땅콩이 포함되어 있습니까?",
+              "reading": "ttangkong allerugiga inneunde, i yorie ttangkongi pohamdoeeo itseumnikka?",
+              "note": "Dùng trong ngữ cảnh trang trọng, công việc hoặc với người cần kính trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 9225,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Làm ơn giảm giá một chút được không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "能不能便宜点？",
+              "reading": "néng bù néng piányi diǎn?",
+              "note": "Dùng với bạn bè hoặc người thân, tự nhiên và không quá khách sáo."
+            },
+            {
+              "tone": "polite",
+              "text": "请便宜一点可以吗？",
+              "reading": "qǐng piányi yīdiǎn kěyǐ ma?",
+              "note": "Lịch sự cho giao tiếp hằng ngày, phù hợp với người lạ hoặc nhân viên bán hàng."
+            },
+            {
+              "tone": "formal",
+              "text": "请问能否优惠一点？",
+              "reading": "qǐngwèn néngfǒu yōuhuì yīdiǎn?",
+              "note": "Trang trọng, dùng trong kinh doanh, với người cần tôn trọng hoặc tình huống chính thức."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 9098,
+        "status": 200,
+        "body": {
+          "detected": "ko",
+          "vietnamese": "Xe buýt này có đi đến sân bay không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Xe này có đi sân bay không?",
+              "note": "Dùng với bạn bè hoặc người thân."
+            },
+            {
+              "tone": "polite",
+              "text": "Xe buýt này có đi đến sân bay không ạ?",
+              "note": "Dùng trong giao tiếp lịch sự thường ngày."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin cho hỏi xe buýt này có đi đến sân bay không?",
+              "note": "Dùng trong môi trường trang trọng hoặc với người cần kính trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 5605,
+        "status": 200,
+        "body": {
+          "detected": "ja",
+          "vietnamese": "Xin lỗi, mấy giờ nhận phòng?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Xin lỗi, mấy giờ nhận phòng vậy?",
+              "note": "Dùng với bạn bè hoặc người thân."
+            },
+            {
+              "tone": "polite",
+              "text": "Xin lỗi, xin hỏi mấy giờ nhận phòng ạ?",
+              "note": "Dùng trong giao tiếp lịch sự hàng ngày."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin lỗi, xin cho hỏi thời gian nhận phòng bắt đầu từ mấy giờ?",
+              "note": "Dùng trong môi trường trang trọng hoặc với người lạ cần tôn trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 4867,
+        "status": 200,
+        "body": {
+          "detected": "en",
+          "vietnamese": "Bạn có thể gợi ý một nơi yên tĩnh để làm việc gần đây không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Gợi ý mình một chỗ yên tĩnh để làm việc gần đây nhé?",
+              "note": "Dùng với bạn bè hoặc người thân trong gia đình."
+            },
+            {
+              "tone": "polite",
+              "text": "Bạn có thể gợi ý cho tôi một nơi yên tĩnh để làm việc gần đây không?",
+              "note": "Dùng trong giao tiếp lịch sự hằng ngày."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin anh/chị vui lòng gợi ý cho tôi một địa điểm yên tĩnh để làm việc gần đây được không ạ?",
+              "note": "Dùng trong công việc, với người lạ hoặc khi cần thể hiện sự tôn trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "words",
+        "ms": 1541,
+        "status": 200,
+        "body": [
+          {
+            "word": "itinerary",
+            "meaning": "lịch trình"
+          },
+          {
+            "word": "destination",
+            "meaning": "điểm đến"
+          },
+          {
+            "word": "luggage",
+            "meaning": "hành lý"
+          },
+          {
+            "word": "excursion",
+            "meaning": "chuyến du ngoạn"
+          },
+          {
+            "word": "passport",
+            "meaning": "hộ chiếu"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 1656,
+        "status": 200,
+        "body": {
+          "text": "A: \"Here's my **itinerary** and **boarding pass**.\"\nB: \"There's a **delay** at gate 12.\"\nA: \"Will the **delay** affect our **itinerary**?\"\nB: \"Keep your **boarding pass** ready.\""
+        }
+      }
+    ]
+  },
+  {
+    "model": "minimax-m3",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 11275,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Cho tôi hỏi nhà ga gần nhất ở đâu?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "ちょっと聞くけど、最寄りの駅どこ？",
+              "reading": "ちょっときくけど、さいよりのえきどこ？",
+              "note": "Dùng khi nói chuyện thân mật với bạn bè hoặc người thân."
+            },
+            {
+              "tone": "polite",
+              "text": "すみません、一番近い駅はどこですか？",
+              "reading": "すみません、いちばんちかいえきはどこですか？",
+              "note": "Dùng trong giao tiếp lịch sự hằng ngày với người quen hoặc người lạ."
+            },
+            {
+              "tone": "formal",
+              "text": "恐れ入りますが、最寄りの駅はどこでしょうか。",
+              "reading": "おそれいりますが、さいよりのえきはどこでしょうか。",
+              "note": "Dùng trong tình huống trang trọng, khi làm việc hoặc nói với người cần tôn trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 15008,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 15004,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 3039,
+        "status": 200,
+        "body": {
+          "detected": "ko",
+          "vietnamese": "Xe buýt này có đến sân bay không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Xe buýt này có đi sân bay không?",
+              "note": "Dùng khi nói chuyện thân mật với bạn bè hoặc người quen."
+            },
+            {
+              "tone": "polite",
+              "text": "Xin hỏi, xe buýt này có đến sân bay không?",
+              "note": "Dùng trong giao tiếp lịch sự hằng ngày với người lạ hoặc nhân viên."
+            },
+            {
+              "tone": "formal",
+              "text": "Kính hỏi, xe buýt này có đến sân bay không?",
+              "note": "Dùng trong tình huống trang trọng, công sở hoặc khi cần thể hiện sự tôn trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 15004,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 7578,
+        "status": 200,
+        "body": {
+          "detected": "en",
+          "vietnamese": "Bạn có thể giới thiệu một nơi yên tĩnh gần đây để làm việc không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Có chỗ nào gần đây yên tĩnh để làm việc không?",
+              "note": "Dùng khi nói chuyện với bạn bè hoặc người thân."
+            },
+            {
+              "tone": "polite",
+              "text": "Bạn có thể chỉ giúp tôi một nơi yên tĩnh gần đây để làm việc không?",
+              "note": "Dùng khi đưa ra yêu cầu lịch sự trong giao tiếp hằng ngày."
+            },
+            {
+              "tone": "formal",
+              "text": "Bạn có thể vui lòng giới thiệu một địa điểm yên tĩnh gần đây để làm việc không?",
+              "note": "Dùng trong công việc hoặc khi giao tiếp với người lạ cần sự tôn trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "words",
+        "ms": 4477,
+        "status": 200,
+        "body": [
+          {
+            "word": "journey",
+            "meaning": "chuyến đi, hành trình"
+          },
+          {
+            "word": "luggage",
+            "meaning": "hành lý"
+          },
+          {
+            "word": "passport",
+            "meaning": "hộ chiếu"
+          },
+          {
+            "word": "destination",
+            "meaning": "điểm đến"
+          },
+          {
+            "word": "accommodation",
+            "meaning": "chỗ ở"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 6547,
+        "status": 200,
+        "body": {
+          "text": "<think>We need answer only text, 4-6 lines, dialogue two people, naturally uses all target words itinerary, delay, boarding pass, each bold. Need ensure exactly perhaps 4 lines. Need return only text no explanation. Let's craft:\n\nPerson A: My **itinerary** says we leave at noon, but there’s been a **delay**.\nPerson B: Do you still have your **boarding pass**?\nPerson A: Yes, I printed it before the **delay**.\nPerson B: Great—let’s head to the gate and check the monitors.\n\nNeed naturally use all, bold each target. 4 lines. Is \"boarding pass\" bold formatting around phrase? Requirement Mark each target word with **bold** formatting. Could bold each word separately or phrase. They specifically words, likely **boarding pass** perhaps phrase bold. Need only text. Could make dialogue clear. 4 lines. Let's ensure \"itinerary\", \"delay\", \"boarding pass\" all bold. First line delay, second boarding pass. Fine.</think>\n\nA: My **itinerary** says we leave at noon, but there’s been a **delay**.  \nB: Do you still have your **boarding pass**?  \nA: Yes, I printed it before the **delay**.  \nB: Great—let’s head to the gate and check the monitors."
+        }
+      }
+    ]
+  },
+  {
+    "model": "iceman-contributor-free",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 567,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 538,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 315,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 310,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 425,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 495,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "words",
+        "ms": 315,
+        "status": 503,
+        "body": {
+          "error": "Không thể sinh từ mới lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "context",
+        "ms": 324,
+        "status": 0,
+        "body": {
+          "error": "Error: 400 This OpenCode Go model trains on request data. Turn on \"Allow paid endpoints that train on request data\" at h"
+        }
+      }
+    ]
+  },
+  {
+    "model": "step-5-preview",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 15014,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 15003,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 15006,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 15003,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 15006,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 15003,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "words",
+        "ms": 4912,
+        "status": 200,
+        "body": [
+          {
+            "word": "itinerary",
+            "meaning": "lịch trình"
+          },
+          {
+            "word": "departure",
+            "meaning": "sự khởi hành"
+          },
+          {
+            "word": "accommodation",
+            "meaning": "chỗ ở"
+          },
+          {
+            "word": "destination",
+            "meaning": "điểm đến"
+          },
+          {
+            "word": "passport",
+            "meaning": "hộ chiếu"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 5586,
+        "status": 200,
+        "body": {
+          "text": "\"Did you print the **boarding pass** for our morning flight?\"\n\n\"I did, but the airline just announced a two-hour **delay**.\"\n\n\"That means we need to adjust our **itinerary** for the rest of the trip.\"\n\n\"Already done—I moved our lunch reservation to 2 p.m.\""
+        }
+      }
+    ]
+  },
+  {
+    "model": "qwen3.8-flash",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 15009,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 15007,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 15004,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 13083,
+        "status": 200,
+        "body": {
+          "detected": "ko",
+          "vietnamese": "Xe buýt này có đi đến sân bay không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Xe buýt này có đi sân bay không?",
+              "note": "Dùng khi hỏi bạn bè hoặc người quen thân."
+            },
+            {
+              "tone": "polite",
+              "text": "Chuyến xe buýt này có đi đến sân bay không ạ?",
+              "note": "Dùng khi hỏi tài xế, nhân viên hoặc người lạ với phép lịch sự thông thường."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin hỏi, chuyến xe buýt này có phục vụ tuyến đến sân bay không ạ?",
+              "note": "Dùng trong tình huống trang trọng hoặc cần thể hiện sự tôn trọng cao."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 15005,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 15003,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "words",
+        "ms": 3971,
+        "status": 200,
+        "body": [
+          {
+            "word": "itinerary",
+            "meaning": "hành trình, lịch trình"
+          },
+          {
+            "word": "passport",
+            "meaning": "hộ chiếu"
+          },
+          {
+            "word": "luggage",
+            "meaning": "hành lý"
+          },
+          {
+            "word": "accommodation",
+            "meaning": "chỗ ở"
+          },
+          {
+            "word": "departure",
+            "meaning": "sự khởi hành"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 4136,
+        "status": 200,
+        "body": {
+          "text": "“Did you print the **itinerary** for our flight?”\n\n“Yes, but there’s a two-hour **delay** at the gate.”\n\n“Good thing I already have my **boarding pass** on my phone.”\n\n“Me too, so we can at least wait comfortably.”"
+        }
+      }
+    ]
+  },
+  {
+    "model": "qwen3.8-max",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 15010,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 15008,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 15007,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 15003,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 15003,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 15005,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "words",
+        "ms": 5937,
+        "status": 200,
+        "body": [
+          {
+            "word": "destination",
+            "meaning": "điểm đến"
+          },
+          {
+            "word": "itinerary",
+            "meaning": "lịch trình"
+          },
+          {
+            "word": "luggage",
+            "meaning": "hành lý"
+          },
+          {
+            "word": "passport",
+            "meaning": "hộ chiếu"
+          },
+          {
+            "word": "souvenir",
+            "meaning": "quà lưu niệm"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 6545,
+        "status": 200,
+        "body": {
+          "text": "Anna: Did you check the **itinerary** before we left for the airport?  \nBen: Yes, but there’s a **delay**, so we have extra time.  \nAnna: Good, I still need to print my **boarding pass**.  \nBen: You can do it at the kiosk near gate B."
+        }
+      }
+    ]
+  },
+  {
+    "model": "gemini-4-argon",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 8621,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Cho tôi hỏi nhà ga gần nhất ở đâu?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "一番近い駅ってどこ？",
+              "reading": "いちばんちかいえきってどこ？",
+              "note": "Dùng khi hỏi bạn bè thân thiết hoặc người trong gia đình khi đang đi cùng nhau."
+            },
+            {
+              "tone": "polite",
+              "text": "すみません、一番近い駅はどこですか？",
+              "reading": "すみません、いちばんちかいえきはどこですか？",
+              "note": "Cách nói lịch sự thông dụng nhất khi hỏi đường người lạ trên phố."
+            },
+            {
+              "tone": "formal",
+              "text": "恐れ入りますが、最寄りの駅はどちらでしょうか？",
+              "reading": "おそれいりますが、もよりのえきはどちらでしょうか？",
+              "note": "Dùng trong ngữ cảnh trang trọng, lịch sự cao độ như khi hỏi nhân viên lễ tân hoặc đối tác."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 7175,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Tôi bị dị ứng đậu phộng, món này có không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "나 땅콩 알레르기 있는데, 여기에 땅콩 들어있어?",
+              "reading": "Na ttangkong allereugi inneunde, yeogie ttangkong deureoisseo?",
+              "note": "Sử dụng khi hỏi bạn bè thân thiết hoặc người trong gia đình về món ăn họ chuẩn bị."
+            },
+            {
+              "tone": "polite",
+              "text": "제가 땅콩 알레르기가 있는데, 이 음식에 땅콩이 들어가요?",
+              "reading": "Jega ttangkong allereugiga inneunde, i eumsige ttangkong-i deureogayo?",
+              "note": "Sử dụng phổ biến nhất khi hỏi nhân viên phục vụ tại nhà hàng hoặc quán ăn hàng ngày."
+            },
+            {
+              "tone": "formal",
+              "text": "제가 땅콩 알레르기가 있는데, 이 음식에 땅콩이 들어가 있습니까?",
+              "reading": "Jega ttangkong allereugiga inneunde, i eumsige ttangkong-i deureoga isseumnikka?",
+              "note": "Sử dụng trong các nhà hàng sang trọng, bữa tiệc trang trọng hoặc khi cần thể hiện sự lịch sự tối đa."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 9927,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Làm ơn giảm giá một chút được không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "便宜点儿行吗？",
+              "reading": "piányi diǎnr xíng ma?",
+              "note": "Dùng khi mặc cả ở chợ hoặc với người bán hàng quen thuộc, mang sắc thái thân mật, tự nhiên."
+            },
+            {
+              "tone": "polite",
+              "text": "请问可以便宜一点吗？",
+              "reading": "qǐngwèn kěyǐ piányi yīdiǎn ma?",
+              "note": "Dùng trong giao tiếp mua sắm hàng ngày, thể hiện sự lịch sự với người bán."
+            },
+            {
+              "tone": "formal",
+              "text": "麻烦您，能不能给优惠一些？",
+              "reading": "máfan nín, néng bù néng gěi yōuhuì yīxiē?",
+              "note": "Dùng trong bối cảnh trang trọng, giao dịch lớn hoặc khi muốn thể hiện sự tôn trọng cao đối với người bán."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 6362,
+        "status": 200,
+        "body": {
+          "detected": "ko",
+          "vietnamese": "Xe buýt này có đi đến sân bay không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Xe buýt này có tới sân bay không?",
+              "note": "Sử dụng khi hỏi bạn bè, người thân hoặc người nhỏ tuổi hơn một cách thân mật."
+            },
+            {
+              "tone": "polite",
+              "text": "Xe buýt này có đi đến sân bay không ạ?",
+              "note": "Sử dụng trong giao tiếp hàng ngày để hỏi tài xế hoặc người đi đường một cách lịch sự."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin hỏi, chuyến xe buýt này có đi đến sân bay không ạ?",
+              "note": "Sử dụng khi muốn thể hiện sự tôn trọng cao đối với người lạ hoặc người lớn tuổi."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 5407,
+        "status": 200,
+        "body": {
+          "detected": "ja",
+          "vietnamese": "Xin lỗi, mấy giờ thì bắt đầu nhận phòng ạ?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Cho hỏi mấy giờ nhận phòng vậy?",
+              "note": "Dùng khi hỏi bạn bè hoặc chủ nhà nghỉ quen biết, trong không khí thân mật, thoải mái."
+            },
+            {
+              "tone": "polite",
+              "text": "Xin lỗi, cho mình hỏi mấy giờ thì được nhận phòng ạ?",
+              "note": "Dùng phổ biến nhất trong giao tiếp hàng ngày khi hỏi nhân viên lễ tân khách sạn."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin lỗi, vui lòng cho tôi hỏi thời gian nhận phòng là từ mấy giờ ạ?",
+              "note": "Dùng trong các tình huống trang trọng, tại các khách sạn cao cấp hoặc khi cần thể hiện sự lịch sự tối đa."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 9933,
+        "status": 200,
+        "body": {
+          "detected": "en",
+          "vietnamese": "Bạn có thể gợi ý một nơi yên tĩnh gần đây để làm việc được không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Cậu biết chỗ nào yên tĩnh gần đây để làm việc không, chỉ tớ với?",
+              "note": "Dùng khi hỏi bạn bè thân thiết hoặc người bằng tuổi."
+            },
+            {
+              "tone": "polite",
+              "text": "Bạn có thể gợi ý giúp mình một nơi yên tĩnh gần đây để làm việc được không?",
+              "note": "Dùng trong giao tiếp lịch sự hàng ngày với đồng nghiệp hoặc người mới quen."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin vui lòng gợi ý giúp tôi một địa điểm yên tĩnh ở gần đây để làm việc được không ạ?",
+              "note": "Dùng trong môi trường công sở trang trọng, hỏi nhân viên dịch vụ hoặc người lớn tuổi cần sự tôn kính."
+            }
+          ]
+        }
+      },
+      {
+        "case": "words",
+        "ms": 5680,
+        "status": 200,
+        "body": [
+          {
+            "word": "Itinerary",
+            "meaning": "Lịch trình"
+          },
+          {
+            "word": "Destination",
+            "meaning": "Điểm đến"
+          },
+          {
+            "word": "Luggage",
+            "meaning": "Hành lý"
+          },
+          {
+            "word": "Accommodation",
+            "meaning": "Chỗ ở"
+          },
+          {
+            "word": "Souvenir",
+            "meaning": "Quà lưu niệm"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 5941,
+        "status": 200,
+        "body": {
+          "text": "**Mark:** I just checked the departure screens, and it looks like our flight has a two-hour **delay**.\n**Sarah:** Oh no, that is going to completely ruin our **itinerary** for the first day in Rome!\n**Mark:** Don't worry, I'll call the hotel to let them know we're arriving late.\n**Sarah:** Good idea, and while you do that, I'll print out my **boarding pass** at this kiosk.\n**Mark:** Meet you at the coffee shop near Gate 12 when you're done."
+        }
+      }
+    ]
+  },
+  {
+    "model": "kimi-k3.1-pro",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 9324,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Cho tôi hỏi nhà ga gần nhất ở đâu?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "一番近い駅ってどこ？",
+              "reading": "いちばんちかいえきってどこ？",
+              "note": "Dùng khi hỏi bạn bè hoặc người thân thân thiết trong tình huống thoải mái."
+            },
+            {
+              "tone": "polite",
+              "text": "すみません、一番近い駅はどこですか？",
+              "reading": "すみません、いちばんちかいえきはどこですか？",
+              "note": "Dùng trong giao tiếp lịch sự hằng ngày khi hỏi người không quá thân quen."
+            },
+            {
+              "tone": "formal",
+              "text": "恐れ入りますが、最寄りの駅はどちらでしょうか。",
+              "reading": "おそれいりますが、もよりのえきはどちらでしょうか。",
+              "note": "Dùng khi cần nói chuyện trang trọng với người lạ, khách hàng hoặc trong môi trường công sở."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 15007,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 15003,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 15007,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 15004,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 12036,
+        "status": 200,
+        "body": {
+          "detected": "en",
+          "vietnamese": "Bạn có thể giới thiệu cho tôi một nơi yên tĩnh để làm việc ở gần đây không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Giới thiệu mình chỗ nào yên tĩnh quanh đây để làm việc với?",
+              "note": "Dùng khi hỏi bạn bè hoặc người thân thiết theo cách thoải mái, gần gũi."
+            },
+            {
+              "tone": "polite",
+              "text": "Bạn có thể giới thiệu cho tôi một nơi yên tĩnh để làm việc ở gần đây không?",
+              "note": "Dùng trong giao tiếp hằng ngày khi muốn hỏi người khác một cách lịch sự."
+            },
+            {
+              "tone": "formal",
+              "text": "Anh/chị có thể giới thiệu cho tôi một địa điểm yên tĩnh để làm việc ở gần đây không ạ?",
+              "note": "Dùng với người lạ, người lớn tuổi hoặc trong môi trường công việc cần thể hiện sự tôn trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "words",
+        "ms": 3253,
+        "status": 200,
+        "body": [
+          {
+            "word": "itinerary",
+            "meaning": "lịch trình chuyến đi"
+          },
+          {
+            "word": "accommodation",
+            "meaning": "chỗ ở"
+          },
+          {
+            "word": "destination",
+            "meaning": "điểm đến"
+          },
+          {
+            "word": "departure",
+            "meaning": "sự khởi hành"
+          },
+          {
+            "word": "sightseeing",
+            "meaning": "tham quan, ngắm cảnh"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 2602,
+        "status": 200,
+        "body": {
+          "text": "**Maya:** Did you check our **itinerary**? I thought the flight left at noon.  \n**Leo:** It did, but there’s a one-hour **delay**, so we have extra time.  \n**Maya:** Perfect. Do you have my **boarding pass**?  \n**Leo:** Right here—let’s grab coffee before heading to the gate."
+        }
+      }
+    ]
+  },
+  {
+    "model": "qwen3.7-plus",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 15011,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 15005,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 15002,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 15007,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 15003,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 15006,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "words",
+        "ms": 12605,
+        "status": 200,
+        "body": [
+          {
+            "word": "Itinerary",
+            "meaning": "Lịch trình chi tiết"
+          },
+          {
+            "word": "Destination",
+            "meaning": "Điểm đến"
+          },
+          {
+            "word": "Accommodation",
+            "meaning": "Chỗ ở, nơi lưu trú"
+          },
+          {
+            "word": "Souvenir",
+            "meaning": "Quà lưu niệm"
+          },
+          {
+            "word": "Excursion",
+            "meaning": "Chuyến tham quan ngắn ngày"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 10006,
+        "status": 0,
+        "body": {
+          "error": "Error: opencode timed out after 10000ms"
+        }
+      }
+    ]
+  },
+  {
+    "model": "qwen4-max",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 10906,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Cho tôi hỏi nhà ga gần nhất ở đâu?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "ちょっと聞くけど、一番近い駅ってどこ？",
+              "reading": "ちょっときくけど、いちばんちかいえきってどこ？",
+              "note": "Dùng khi hỏi bạn bè, người thân hoặc người cùng trang lứa mà bạn đã thân."
+            },
+            {
+              "tone": "polite",
+              "text": "すみません、一番近い駅はどこですか？",
+              "reading": "すみません、いちばんちかいえきはどこですか？",
+              "note": "Dùng khi hỏi người lạ trên đường, nhân viên cửa hàng hoặc trong giao tiếp lịch sự hằng ngày."
+            },
+            {
+              "tone": "formal",
+              "text": "恐れ入りますが、最寄りの駅はどちらでしょうか。",
+              "reading": "おそれいりますが、もよりのえきはどちらでしょうか。",
+              "note": "Dùng trong công việc, khi hỏi người lớn tuổi, cấp trên hoặc tại quầy thông tin, nơi cần sự trang trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 15007,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 15002,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 11991,
+        "status": 200,
+        "body": {
+          "detected": "ko",
+          "vietnamese": "Xe buýt này có đi đến sân bay không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Xe buýt này có ra tới sân bay không?",
+              "note": "Dùng khi hỏi bạn bè, người thân hoặc người ngang hàng mà mình đã thân."
+            },
+            {
+              "tone": "polite",
+              "text": "Cho mình hỏi, xe buýt này có đến sân bay không ạ?",
+              "note": "Dùng hằng ngày khi hỏi tài xế, nhân viên hoặc người lạ một cách lịch sự, nhẹ nhàng."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin vui lòng cho tôi hỏi, xe buýt này có đi đến sân bay không ạ?",
+              "note": "Dùng trong tình huống trang trọng, khi hỏi nhân viên hãng xe, người lớn tuổi hoặc người cần tỏ rõ sự kính trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 8347,
+        "status": 200,
+        "body": {
+          "detected": "ja",
+          "vietnamese": "Xin lỗi, mấy giờ thì bắt đầu được nhận phòng (check-in) ạ?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Này, mấy giờ thì nhận phòng được vậy?",
+              "note": "Dùng khi nói với bạn bè hoặc người thân đi cùng, trong tình huống thoải mái không cần giữ ý."
+            },
+            {
+              "tone": "polite",
+              "text": "Xin lỗi, cho mình hỏi mấy giờ thì được nhận phòng ạ?",
+              "note": "Dùng khi hỏi nhân viên khách sạn hoặc người lạ trong giao tiếp hằng ngày, lịch sự mà vẫn tự nhiên."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin lỗi, xin vui lòng cho tôi biết thời gian nhận phòng bắt đầu từ mấy giờ ạ?",
+              "note": "Dùng khi gọi điện cho khách sạn, viết email hoặc trao đổi trong bối cảnh trang trọng, cần thể hiện sự kính trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 8420,
+        "status": 200,
+        "body": {
+          "detected": "en",
+          "vietnamese": "Bạn có thể gợi ý giúp một chỗ yên tĩnh để làm việc ở gần đây được không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Ê, quanh đây có chỗ nào yên yên để làm việc không, chỉ tớ với?",
+              "note": "Dùng khi hỏi bạn bè thân, người thân hoặc người ngang tuổi mà mình đã quen."
+            },
+            {
+              "tone": "polite",
+              "text": "Bạn có thể gợi ý giúp mình một chỗ yên tĩnh để làm việc ở gần đây được không?",
+              "note": "Dùng trong giao tiếp hằng ngày với đồng nghiệp, nhân viên quán hoặc người mới gặp ở mức thân thiện, lịch sự."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin anh/chị vui lòng giới thiệu giúp tôi một địa điểm yên tĩnh để làm việc ở khu vực gần đây được không ạ?",
+              "note": "Dùng trong môi trường công việc, khi hỏi lễ tân, đối tác hoặc người lớn tuổi, người cần thể hiện sự kính trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "words",
+        "ms": 3434,
+        "status": 200,
+        "body": [
+          {
+            "word": "itinerary",
+            "meaning": "lịch trình chuyến đi"
+          },
+          {
+            "word": "destination",
+            "meaning": "điểm đến"
+          },
+          {
+            "word": "accommodation",
+            "meaning": "chỗ ở, nơi lưu trú"
+          },
+          {
+            "word": "luggage",
+            "meaning": "hành lý"
+          },
+          {
+            "word": "sightseeing",
+            "meaning": "việc tham quan, ngắm cảnh"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 3792,
+        "status": 200,
+        "body": {
+          "text": "**Maya:** Did you print the **itinerary**, or is it still buried in your inbox?\n\n**Dev:** It's on my phone — though there's a two-hour **delay** on our first flight now.\n\n**Maya:** Great. So much for the museum tour I booked.\n\n**Dev:** We'll make the evening one instead. Here, take my **boarding pass** too, so you can hold both while I grab coffee.\n\n**Maya:** Fine, but you're buying the croissant as compensation."
+        }
+      }
+    ]
+  },
+  {
+    "model": "hy4-flash-free",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 13293,
+        "status": 200,
+        "body": {
+          "detected": "vi",
+          "vietnamese": "Cho tôi hỏi nhà ga gần nhất ở đâu?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "ねえ、一番近い駅どこ？",
+              "reading": "ねえ、いちばんちかいえきどこ？",
+              "note": "Dùng khi hỏi bạn bè hoặc người thân thân thiết, không cần lễ nghi."
+            },
+            {
+              "tone": "polite",
+              "text": "すみません、一番近い駅はどこですか？",
+              "reading": "すみません、いちばんちかいえきはどこですか？",
+              "note": "Dùng khi hỏi người lạ hoặc người quen ở mức độ vừa phải trong đời sống hằng ngày."
+            },
+            {
+              "tone": "formal",
+              "text": "恐れ入りますが、最寄り駅を教えていただけますでしょうか。",
+              "reading": "おそれいりますが、もよりえきをおしえていただけますでしょうか。",
+              "note": "Dùng trong tình huống trang trọng, với người cần tôn trọng đặc biệt hoặc khi liên hệ cơ quan, dịch vụ."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 15007,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 15002,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 12738,
+        "status": 200,
+        "body": {
+          "detected": "ko",
+          "vietnamese": "Xe buýt này có đi đến sân bay không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Xe buýt này đi sân bay hả?",
+              "note": "Dùng khi nói với bạn bè hoặc người thân đi cùng, kiểu nói tự nhiên, gọn và không cần khách sáo."
+            },
+            {
+              "tone": "polite",
+              "text": "Cho hỏi xe buýt này có đi đến sân bay không ạ?",
+              "note": "Dùng khi hỏi người lạ hoặc nhân viên tại trạm trong đời thường, thêm từ ạ để nghe lịch sự."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin lỗi, cho tôi hỏi liệu chuyến xe buýt này có đi đến sân bay không ạ?",
+              "note": "Dùng khi cần tôn trọng người đối diện, ví dụ hỏi tài xế, nhân viên sân bay hoặc trong tình huống trang trọng, dùng tôi, xin và ạ."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 12486,
+        "status": 200,
+        "body": {
+          "detected": "ja",
+          "vietnamese": "Xin lỗi, cho hỏi nhận phòng từ mấy giờ ạ?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Ơ, chỗ này mấy giờ nhận phòng thế nhỉ?",
+              "note": "Dùng khi hỏi bạn bè hoặc người thân đi cùng, giọng thoải mái, không cần trang trọng."
+            },
+            {
+              "tone": "polite",
+              "text": "Xin lỗi, cho hỏi nhận phòng từ mấy giờ ạ?",
+              "note": "Dùng khi hỏi lễ tân hoặc người lạ trong tình huống hàng ngày."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin lỗi, cho tôi hỏi thời gian nhận phòng bắt đầu từ mấy giờ ạ?",
+              "note": "Dùng khi liên hệ khách sạn hoặc trao đổi với người cần thể hiện sự tôn trọng đặc biệt."
+            }
+          ]
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 11213,
+        "status": 200,
+        "body": {
+          "detected": "en",
+          "vietnamese": "Bạn có thể gợi ý một nơi yên tĩnh gần chỗ này để làm việc không?",
+          "results": [
+            {
+              "tone": "casual",
+              "text": "Ê, có chỗ nào yên tĩnh gần chỗ này để làm việc không? Giới thiệu mình với.",
+              "note": "Dùng khi nói với bạn bè hoặc người thân quen, giọng điệu thân mật và không cần trang trọng."
+            },
+            {
+              "tone": "polite",
+              "text": "Bạn có thể gợi ý cho mình một nơi yên tĩnh gần chỗ này để làm việc không?",
+              "note": "Dùng khi hỏi người quen, đồng nghiệp hoặc người lạ trong tình huống hằng ngày, với thái độ lịch sự vừa phải."
+            },
+            {
+              "tone": "formal",
+              "text": "Xin lỗi, quý vị có thể gợi ý giúp tôi một địa điểm yên tĩnh gần chỗ này để làm việc không?",
+              "note": "Dùng khi nói với người lạ cần tôn trọng, cấp trên, đối tác hoặc trong môi trường công việc trang trọng."
+            }
+          ]
+        }
+      },
+      {
+        "case": "words",
+        "ms": 5025,
+        "status": 200,
+        "body": [
+          {
+            "word": "passport",
+            "meaning": "hộ chiếu"
+          },
+          {
+            "word": "luggage",
+            "meaning": "hành lý"
+          },
+          {
+            "word": "destination",
+            "meaning": "điểm đến"
+          },
+          {
+            "word": "itinerary",
+            "meaning": "lịch trình"
+          },
+          {
+            "word": "souvenir",
+            "meaning": "quà lưu niệm"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 4635,
+        "status": 200,
+        "body": {
+          "text": "A: Did you check the **itinerary** for our connecting flight?\nB: Yes, but the app says there’s a short **delay** out of Chicago.\nA: Okay, can you still pull up my **boarding pass**?\nB: Yep, it’s in my wallet; we’ll make it if we hurry.\nA: Great, let’s head to Gate B12."
+        }
+      }
+    ]
+  },
+  {
+    "model": "hy4",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 15010,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 15003,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 15003,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 15004,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 15003,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 15003,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "words",
+        "ms": 6571,
+        "status": 200,
+        "body": [
+          {
+            "word": "itinerary",
+            "meaning": "Lịch trình"
+          },
+          {
+            "word": "boarding pass",
+            "meaning": "Thẻ lên máy bay"
+          },
+          {
+            "word": "accommodation",
+            "meaning": "Nơi lưu trú"
+          },
+          {
+            "word": "souvenir",
+            "meaning": "Quà lưu niệm"
+          },
+          {
+            "word": "departure",
+            "meaning": "Sự khởi hành"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 10002,
+        "status": 0,
+        "body": {
+          "error": "Error: opencode timed out after 10000ms"
+        }
+      }
+    ]
+  },
+  {
+    "model": "longcat-2.5",
+    "results": [
+      {
+        "case": "tr vi→ja",
+        "ms": 15007,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→ko",
+        "ms": 15002,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr vi→zh",
+        "ms": 15002,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ko→vi",
+        "ms": 15002,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr ja→vi",
+        "ms": 15003,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "tr en→vi",
+        "ms": 15005,
+        "status": 503,
+        "body": {
+          "error": "Không dịch được lúc này. Vui lòng thử lại."
+        }
+      },
+      {
+        "case": "words",
+        "ms": 5920,
+        "status": 200,
+        "body": [
+          {
+            "word": "itinerary",
+            "meaning": "lịch trình"
+          },
+          {
+            "word": "destination",
+            "meaning": "điểm đến"
+          },
+          {
+            "word": "luggage",
+            "meaning": "hành lý"
+          },
+          {
+            "word": "excursion",
+            "meaning": "chuyến tham quan, chuyến du lịch ngày"
+          },
+          {
+            "word": "departure",
+            "meaning": "sự khởi hành"
+          }
+        ]
+      },
+      {
+        "case": "context",
+        "ms": 8401,
+        "status": 200,
+        "body": {
+          "text": "Maya: Did you check the itinerary? Our flight leaves at 3:00.\nSam: Yes, but there's a two-hour delay, so we have plenty of time.\nMaya: Good. I just need to pull up my boarding pass on my phone.\nSam: It's in your email. Want to grab coffee while we wait?\nMaya: Sure, as long as we're back before they call our gate."
+        }
+      }
+    ]
+  }
+]
