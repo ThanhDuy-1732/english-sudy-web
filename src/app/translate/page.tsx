@@ -136,9 +136,14 @@ export default function TranslatePage() {
     <main className="page">
       <div className="mb-4 flex items-center justify-between gap-2">
         <h1 className="page-title">Dịch</h1>
-        <Link href="/translate/conversation" className="chip">
-          Hội thoại hai chiều
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/translate/phrases" className="chip">
+            Sổ câu du lịch
+          </Link>
+          <Link href="/translate/conversation" className="chip">
+            Hội thoại hai chiều
+          </Link>
+        </div>
       </div>
 
       <section aria-label="Ngôn ngữ" className="mb-4 flex flex-wrap items-center gap-2">

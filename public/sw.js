@@ -5,6 +5,7 @@ const pendingAssets = new Map();
 const PAGE_URLS = [
   "/", "/history", "/review", "/import", "/stats", "/diary", "/activity", "/today", "/path", "/library", "/mistakes", "/settings",
   "/grammar", "/grammar/quiz", "/vocab/quiz", "/vocab/context", "/exam", "/exam/mock", "/exam/mistakes",
+  "/translate", "/translate/conversation", "/translate/phrases",
   "/speak", "/speak/history", "/speak/shadowing", "/write", "/write/history",
   ...["RC5", "RC6", "RC7", "LC2", "LC3", "LC4", "READ_P3", "LISTEN_S1"].map((part) => `/exam/drill/${part}`),
   ...["p1", "p2", "p3"].map((part) => `/speak/ielts/${part}`),
