@@ -1,4 +1,5 @@
 import { getProviderById } from "@/lib/providers";
+import { blockedProviderIds } from "@/lib/provider-lock";
 import { NextRequest, NextResponse } from "next/server";
 
 // Vercel: AI providers are tried in turn (25 s each) plus a JSON repair call; 300 s is the Hobby maximum with Fluid compute.
@@ -15,6 +16,10 @@ export async function POST(req: NextRequest) {
 
   if (!providerId) {
     return NextResponse.json({ error: "providerId is required" }, { status: 400 });
+  }
+
+  if ((await blockedProviderIds()).includes(providerId)) {
+    return NextResponse.json({ error: "Cần mật khẩu để dùng mô hình này." }, { status: 403 });
   }
 
   const provider = getProviderById(providerId);

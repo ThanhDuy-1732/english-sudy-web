@@ -48,3 +48,14 @@ test("translation prefers the fastest provider (groq) unless a provider is passe
   await callTask({ task: "translation", prompt: "p", provider: "gemini" });
   expect(callWithFallback.mock.calls[1][1]).toBe("gemini");
 });
+
+test("callTask keeps locked providers out of the chain without the unlock cookie", async () => {
+  const { callWithFallback } = jest.requireMock("../providers") as { callWithFallback: jest.Mock };
+  process.env.OPENCODE_LOCK_PASSWORD = "secret";
+  try {
+    await callTask({ task: "translation", prompt: "x", provider: "opencode-haiku", disabledProviders: ["groq"] });
+    expect(callWithFallback.mock.calls.at(-1)?.[2]).toEqual(["groq", "opencode-gpt6", "opencode-haiku"]);
+  } finally {
+    delete process.env.OPENCODE_LOCK_PASSWORD;
+  }
+});

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useProvider } from "@/contexts/ProviderContext";
 
 export function ProviderBadge() {
-  const { currentProvider, availableProviders, setProvider } = useProvider();
+  const { currentProvider, availableProviders, setProvider, unlocked } = useProvider();
   const [open, setOpen] = useState(false);
 
   const current = availableProviders.find((p) => p.id === currentProvider);
@@ -26,7 +26,7 @@ export function ProviderBadge() {
         <>
           <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
           <div className="absolute bottom-full right-0 z-40 mb-1 min-w-[180px] rounded-2xl border border-rule bg-card shadow-xl">
-            {availableProviders.map((p) => (
+            {availableProviders.filter((p) => !p.locked || unlocked).map((p) => (
               <button
                 key={p.id}
                 onClick={() => {

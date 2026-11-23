@@ -1,6 +1,7 @@
 import { GeminiProvider } from "./gemini";
 import { OpenAICompatProvider } from "./openai-compat";
 import type { AIProvider, GenerateOpts, ProviderInfo, VisionProvider } from "./types";
+import { LOCKED_PROVIDER_IDS } from "../provider-lock";
 
 const PROVIDER_TIMEOUT_MS = Number(process.env.AI_PROVIDER_TIMEOUT_MS) || 25_000;
 
@@ -157,6 +158,28 @@ function buildRegistry(): AIProvider[] {
     );
   }
 
+  // More OpenCode Go models on the same key, last so they never change the default fallback order.
+  // GPT-6 Luna and Claude Haiku 5.5 are locked behind OPENCODE_LOCK_PASSWORD (see provider-lock.ts) and are
+  // only registered when it is set. Benchmarks: docs/opencode-go-models-2026-11-23.md.
+  if (process.env.OPENCODE_API_KEY) {
+    const extra = [
+      { id: "opencode-glm53", name: "OpenCode GLM-5.3", model: "glm-5.3" },
+      { id: "opencode-gpt6", name: "OpenCode GPT-6 Luna", model: "gpt-6-luna" },
+      { id: "opencode-haiku", name: "OpenCode Claude Haiku 5.5", model: "claude-haiku-5-5" },
+    ];
+    for (const p of extra) {
+      if (LOCKED_PROVIDER_IDS.includes(p.id) && !process.env.OPENCODE_LOCK_PASSWORD) continue;
+      providers.push(
+        new OpenAICompatProvider({
+          ...p,
+          apiKey: process.env.OPENCODE_API_KEY,
+          baseURL: process.env.OPENCODE_BASE_URL ?? "https://opencode.ai/inference/go/openai/v1",
+          defaultHeaders: { "x-opencode-session": OPENCODE_SESSION_ID },
+        })
+      );
+    }
+  }
+
   // HuggingFace provider removed: Inference Providers requires paid credits; this
   // account has none and every call returns 402. Re-add the block if credits are bought.
 
@@ -168,7 +191,7 @@ const registry = buildRegistry();
 export const callWithFallback = createCallWithFallback(registry);
 
 export function getRegisteredProviders(): ProviderInfo[] {
-  return registry.map(({ id, name, model }) => ({ id, name, model }));
+  return registry.map(({ id, name, model }) => ({ id, name, model, ...(LOCKED_PROVIDER_IDS.includes(id) && { locked: true }) }));
 }
 
 export function getProviderById(id: string): AIProvider | undefined {

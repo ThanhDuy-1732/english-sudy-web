@@ -1,6 +1,7 @@
 import { callWithFallback } from "./providers";
 import { recordMetric } from "./ai-metrics";
 import { logEventAfter } from "./db-events";
+import { blockedProviderIds } from "./provider-lock";
 
 export type AITaskName =
   | "word-generation"
@@ -96,7 +97,10 @@ export async function callTask(opts: CallTaskOptions): Promise<{ text: string; p
       ...(timeoutMs !== undefined && { timeoutMs }),
       ...(LOW_EFFORT_TASKS.has(opts.task) && { effort: "low" as const }),
     };
-    const result = await callWithFallback(opts.prompt, preferred, opts.disabledProviders, callOpts, (id, err) => {
+    // Locked providers are dropped here, so no route can reach them without the unlock cookie.
+    const blocked = await blockedProviderIds();
+    const disabled = blocked.length ? [...(opts.disabledProviders ?? []), ...blocked] : opts.disabledProviders;
+    const result = await callWithFallback(opts.prompt, preferred, disabled, callOpts, (id, err) => {
       const status = (err as { status?: number }).status;
       failed.push(status ? `${id}:${status}` : id);
     });

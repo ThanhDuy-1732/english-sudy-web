@@ -3,6 +3,8 @@ export interface ProviderInfo {
   id: string;
   name: string;
   model: string;
+  /** Needs OPENCODE_LOCK_PASSWORD before requests may use it. */
+  locked?: boolean;
 }
 
 export interface GenerateOpts {

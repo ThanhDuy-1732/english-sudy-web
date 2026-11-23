@@ -187,3 +187,23 @@ test("callWithFallback aborts a provider that runs past its timeout", async () =
     jest.useRealTimers();
   }
 });
+
+test("extra opencode models share the key; the locked ones need OPENCODE_LOCK_PASSWORD", () => {
+  process.env.OPENCODE_API_KEY = "oc_test_key";
+  const ids = (password?: string) => {
+    if (password) process.env.OPENCODE_LOCK_PASSWORD = password;
+    else delete process.env.OPENCODE_LOCK_PASSWORD;
+    let list: { id: string; locked?: boolean }[] = [];
+    jest.isolateModules(() => {
+      list = (require("../index") as typeof import("../index")).getRegisteredProviders();
+    });
+    return list.filter((p) => p.id.startsWith("opencode")).map((p) => `${p.id}${p.locked ? ":locked" : ""}`);
+  };
+  try {
+    expect(ids()).toEqual(["opencode", "opencode-glm53"]);
+    expect(ids("pw")).toEqual(["opencode", "opencode-glm53", "opencode-gpt6:locked", "opencode-haiku:locked"]);
+  } finally {
+    delete process.env.OPENCODE_API_KEY;
+    delete process.env.OPENCODE_LOCK_PASSWORD;
+  }
+});

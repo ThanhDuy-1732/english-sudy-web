@@ -68,7 +68,8 @@ Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Jest (jsdom) 
 | `/api/grammar-examples` | `{ topic, subRule, provider?, disabledProviders? }` | `{ examples: string[] }` |
 | `/api/grammar-exercise` | `{ topic, subRule, provider?, disabledProviders? }` | `{ type: "fill"|"mcq", question, options?, answer }` |
 | `/api/providers` | GET | `{ id, name, model }[]` of configured providers; CDN cache `s-maxage=86400` (đổi khi deploy) |
-| `/api/providers/test` | `{ providerId }` | `{ ok, latency, error? }` |
+| `/api/providers/test` | `{ providerId }` | `{ ok, latency, error? }`; 403 "Cần mật khẩu…" cho provider khoá khi chưa mở khoá |
+| `/api/providers/unlock` | GET / POST `{ password }` / DELETE | `{ unlocked }` (`no-store`). POST đúng `OPENCODE_LOCK_PASSWORD` → set cookie httpOnly `provider_unlock` = HMAC của mật khẩu (30 ngày; đổi mật khẩu = mọi trình duyệt bị khoá lại); sai → 401 "Sai mật khẩu."; chưa set env → 503. DELETE xoá cookie. Không rate-limit: dùng mật khẩu dài |
 | `/api/exam/generate-item` | `{ kind, part, level, topic? }` | `ExamItem` (zod validated, 1 auto-repair); provider or schema failure → 502 `{ error }` |
 | `/api/exam/grade-open` | `{ question, userAnswer, correctAnswer }` | `{ correct, feedback }` |
 | `/api/exam/explain` | `{ question, userAnswer, correctAnswer, explanation? }` | `{ explanation }` |
@@ -356,6 +357,7 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 - `MISTRAL_API_KEY` → `mistral-small-latest`
 - `COHERE_API_KEY` → `command-r7b-12-2024`
 - `OPENCODE_API_KEY` → `glm-5.3-flash` (OpenCode Go gateway `https://opencode.ai/inference/go/openai/v1`; sends `x-opencode-session` from `OPENCODE_SESSION_ID` or a per-process generated id; override the API base with `OPENCODE_BASE_URL` — pay-as-you-go uses `https://opencode.ai/inference/openai/v1`)
+- Cùng `OPENCODE_API_KEY`, thêm 3 provider (đăng ký sau `mistral`, nên không đổi thứ tự fallback mặc định): `opencode-glm53` (`glm-5.3`, mở), `opencode-gpt6` (`gpt-6-luna`) và `opencode-haiku` (`claude-haiku-5-5`). Hai cái sau **khoá**: chỉ đăng ký khi có `OPENCODE_LOCK_PASSWORD`, `/api/providers` trả `locked: true`, và `callTask` gộp chúng vào `disabledProviders` khi request không có cookie mở khoá hợp lệ (`blockedProviderIds()` trong `src/lib/provider-lock.ts`, đọc cookie qua `next/headers`) — mọi route AI đều đi qua đây nên chặn ở một chỗ. Số đo: `docs/opencode-go-models-2026-11-23.md`
 - HuggingFace đã bị bỏ khỏi registry: account hiện tại không có credit (`canPay:false`, không PRO) nên mọi call trả 402. Thêm lại block trong `buildRegistry` nếu mua credit.
 
 Model can be overridden via env: `GEMINI_MODEL`, `GROQ_MODEL`, etc.
@@ -549,6 +551,9 @@ Không cần server. `studyNudge(reminderTime, now?)` trả `{ dueWords, streak 
 - `setProvider(id)` — sets preferred provider (persisted to localStorage)
 - `disabledProviders` — list of opted-out provider ids
 - `toggleProvider(id)` — enable/disable; auto-switches away if current is disabled
+- `unlocked` — có cookie mở khoá (chỉ hỏi `GET /api/providers/unlock` khi danh sách có provider `locked`)
+- `unlock(password)` → `null` hoặc thông báo lỗi; `lock()` — xoá cookie, chuyển khỏi provider khoá nếu đang dùng
+- Settings hiện form mật khẩu cho dòng khoá (`UnlockForm`) và nút "Khoá lại"; `ProviderBadge` ẩn provider khoá khi chưa mở khoá
 
 ### `WordJobContext` (`src/contexts/WordJobContext.tsx`)
 

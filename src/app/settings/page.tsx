@@ -3,7 +3,7 @@
 import Segmented from "@/components/Segmented";
 import { buildReminderIcs } from "@/lib/reminders";
 
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useId, useState, type ChangeEvent } from "react";
 import { getThemePref, setThemePref, type ThemePref } from "@/lib/theme";
 import VoiceSettingsTab from "@/components/VoiceSettingsTab";
 import { useProvider } from "@/contexts/ProviderContext";
@@ -18,7 +18,45 @@ const ALL_PROVIDERS = [
   { id: "mistral", name: "Mistral", model: "mistral-small-latest", envKey: "MISTRAL_API_KEY" },
   { id: "cohere", name: "Cohere", model: "command-r7b-12-2024", envKey: "COHERE_API_KEY" },
   { id: "opencode", name: "OpenCode Go", model: "glm-5.3-flash", envKey: "OPENCODE_API_KEY" },
+  { id: "opencode-glm53", name: "OpenCode GLM-5.3", model: "glm-5.3", envKey: "OPENCODE_API_KEY" },
+  { id: "opencode-gpt6", name: "OpenCode GPT-6 Luna", model: "gpt-6-luna", envKey: "OPENCODE_API_KEY + OPENCODE_LOCK_PASSWORD" },
+  { id: "opencode-haiku", name: "OpenCode Claude Haiku 5.5", model: "claude-haiku-5-5", envKey: "OPENCODE_API_KEY + OPENCODE_LOCK_PASSWORD" },
 ];
+
+function UnlockForm({ unlock }: { unlock: (password: string) => Promise<string | null> }) {
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const inputId = useId();
+  return (
+    <form
+      className="flex flex-wrap items-center gap-2"
+      onSubmit={async (event) => {
+        event.preventDefault();
+        setBusy(true);
+        setError(await unlock(password));
+        setBusy(false);
+        setPassword("");
+      }}
+    >
+      <label className="sr-only" htmlFor={inputId}>Mật khẩu mô hình khoá</label>
+      <input
+        id={inputId}
+        type="password"
+        autoComplete="current-password"
+        required
+        value={password}
+        onChange={(event) => setPassword(event.target.value)}
+        placeholder="Mật khẩu"
+        className="min-h-9 rounded-lg border border-rule bg-card px-3 text-sm"
+      />
+      <button type="submit" disabled={busy} className="btn btn-secondary min-h-9 px-3 text-sm">
+        {busy ? "Đang mở…" : "Mở khoá"}
+      </button>
+      {error && <span role="alert" className="text-sm text-margin">{error}</span>}
+    </form>
+  );
+}
 
 type TestResult = "loading" | { ok: boolean; latency?: number; error?: string };
 type Tab = "providers" | "voice" | "data" | "profile";
@@ -31,7 +69,7 @@ const TAB_LABELS: Record<Tab, string> = {
 };
 
 export default function SettingsPage() {
-  const { currentProvider, availableProviders, setProvider, disabledProviders, toggleProvider } =
+  const { currentProvider, availableProviders, setProvider, disabledProviders, toggleProvider, unlocked, unlock, lock } =
     useProvider();
   const [activeTab, setActiveTab] = useState<Tab>("providers");
   const [dataMessage, setDataMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
@@ -142,6 +180,7 @@ export default function SettingsPage() {
               const active = isActive(provider.id);
               const disabled = isDisabled(provider.id);
               const isCurrent = provider.id === currentProvider;
+              const locked = active && availableProviders.find((available) => available.id === provider.id)?.locked === true;
               const testResult = testResults[provider.id];
               const model = active ? availableProviders.find((available) => available.id === provider.id)?.model ?? provider.model : provider.model;
 
@@ -151,6 +190,7 @@ export default function SettingsPage() {
                     <div className="min-w-0 flex-1">
                       <p className="flex flex-wrap items-center gap-2 font-medium text-ink">
                         {provider.name}
+                        {locked && <span className="rounded-full bg-ink/[0.06] px-2 py-0.5 text-xs font-semibold text-muted">{unlocked ? "Đã mở khoá" : "🔒 Cần mật khẩu"}</span>}
                         {isCurrent && active && !disabled && <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-semibold text-primary">Đang dùng</span>}
                       </p>
                       <p className="mt-0.5 break-all font-mono text-xs text-muted">{model}</p>
@@ -170,7 +210,8 @@ export default function SettingsPage() {
                       </span>
                     </button>
                   </div>
-                  {active && (
+                  {locked && !unlocked && <UnlockForm unlock={unlock} />}
+                  {active && (!locked || unlocked) && (
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                       {!testResult && (
                         <button type="button" onClick={() => void handleTest(provider.id)} className="btn btn-secondary min-h-9 px-3 text-sm">
@@ -181,6 +222,11 @@ export default function SettingsPage() {
                       {!disabled && !isCurrent && (
                         <button type="button" onClick={() => setProvider(provider.id)} className="text-sm font-medium text-primary hover:underline">
                           Dùng mô hình này trước
+                        </button>
+                      )}
+                      {locked && (
+                        <button type="button" onClick={() => void lock()} className="text-sm font-medium text-muted hover:underline">
+                          Khoá lại
                         </button>
                       )}
                     </div>
