@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import ExamRunner from "@/components/exam/ExamRunner";
-import { getExamSettings, getExamBank, bankKey } from "@/lib/exam/exam-storage";
+import { getExamSettings, getExamBank, getAttempts, bankKey } from "@/lib/exam/exam-storage";
 import { getTagAccuracies } from "@/lib/exam/exam-tags";
 import { startSession, finishSession, cancelSession } from "@/lib/sessions";
 import type { ExamPart, ExamAttempt, ExamKind } from "@/lib/exam/types";
@@ -59,7 +59,9 @@ export default function DrillPage() {
   const effectiveBankKey = grammarSlug
     ? `${kind}:${part}:${settings.level}:grammar=${grammarSlug}`
     : bankKey(kind, part as ExamPart, settings.level);
-  const cachedItems = getExamBank()[effectiveBankKey] ?? [];
+  // Only banked items the user has not answered yet: reusing a seen one repeats questions. With none left the runner generates (and refills the bank).
+  const seen = new Set(getAttempts().flatMap((a) => a.answers.map((r) => r.itemId)));
+  const cachedItems = (getExamBank()[effectiveBankKey] ?? []).filter((item) => !seen.has(item.id));
 
   if (done && attempt) {
     const tagStats = sessionTags.length > 0

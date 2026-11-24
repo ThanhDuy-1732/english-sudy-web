@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { callTask } from "@/lib/ai-tasks";
-import { parseAiJson } from "@/lib/ai-json";
+import { gradeStream } from "@/lib/grade-stream";
 import { buildSpeakingAnchorBlock } from "@/lib/grading/anchors";
 import { z } from "zod";
 
@@ -73,19 +72,12 @@ Return ONLY JSON:
   "newVocabulary": ["..."]
 }`;
 
-  const { text, providerId } = await callTask({ task: "speaking-grade", prompt, temperature: GRADING_OPTS.temperature });
-
-  const parsed = await parseAiJson(text, FeedbackSchema, {
-    repair: (err) =>
-      callTask({ task: "speaking-grade", prompt: `${prompt}\n\nOutput trước bị lỗi schema: ${err}\nTrả lại JSON hợp lệ.`, provider: providerId, temperature: GRADING_OPTS.temperature, repair: true }).then((r) => r.text),
+  return gradeStream({
+    task: "speaking-grade",
+    prompt,
+    schema: FeedbackSchema,
+    temperature: GRADING_OPTS.temperature,
+    extra: { transcript, durationSec, wordsPerMinute: wpm, fillerCount },
+    repairPrompt: (err) => `${prompt}\n\nOutput trước bị lỗi schema: ${err}\nTrả lại JSON hợp lệ.`,
   });
-
-  return NextResponse.json({
-    ...parsed,
-    transcript,
-    durationSec,
-    wordsPerMinute: wpm,
-    fillerCount,
-    gradedBy: providerId,
-  }, { headers: { "X-Provider-Used": providerId } });
 }

@@ -10,6 +10,7 @@ import { startSession, finishSession, cancelSession } from "@/lib/sessions";
 import { saveSpeaking } from "@/lib/speech/speaking-storage";
 import type { SpeakingRecord } from "@/lib/speech/speaking-storage";
 import { saveAudio, loadAudio } from "@/lib/speech/audio-store";
+import { readGradeStream } from "@/lib/read-grade-stream";
 
 const PART_CONFIG: Record<string, { title: string; prepSec: number; speakSec: number; prompt: string }> = {
   p1: {
@@ -40,6 +41,8 @@ export default function IeltsSpeakingPage() {
   type Phase = "ready" | "prep" | "recording" | "processing" | "result";
   const [phase, setPhase] = useState<Phase>("ready");
   const [feedback, setFeedback] = useState<SpeakingFeedback | null>(null);
+  // Fields of the feedback as the grader finishes them, shown while the rest is still being written.
+  const [partial, setPartial] = useState<{ overall?: number; strengths?: string[] }>({});
   const [textMode, setTextMode] = useState(false);
   const [textInput, setTextInput] = useState("");
   const [currentAudioId, setCurrentAudioId] = useState<string | null>(null);
@@ -140,7 +143,11 @@ export default function IeltsSpeakingPage() {
       }),
     });
     if (!gradeRes.ok) throw new Error("grading failed");
-    const fb: SpeakingFeedback = await gradeRes.json();
+    setPartial({});
+    const fb = await readGradeStream<SpeakingFeedback>(gradeRes, (k, v) => {
+      if (k === "overall" && typeof v === "number") setPartial((p) => ({ ...p, overall: v }));
+      if (k === "strengths" && Array.isArray(v)) setPartial((p) => ({ ...p, strengths: v as string[] }));
+    });
     setFeedback(fb);
     const record: SpeakingRecord = {
       id: crypto.randomUUID(),
@@ -337,6 +344,12 @@ export default function IeltsSpeakingPage() {
             </div>
           )}
           {phase === "processing" && <p className="processing">⏳ Đang xử lý…</p>}
+          {phase === "processing" && partial.overall !== undefined && (
+            <div role="status" className="processing">
+              <p>Band ước tính: {partial.overall}</p>
+              {partial.strengths?.map((t, i) => <p key={i}>✓ {t}</p>)}
+            </div>
+          )}
         </div>
       ) : (
         <div className="text-section">

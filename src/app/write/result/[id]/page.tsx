@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { saveLearnedWord } from "@/lib/storage";
-import { getWriting } from "@/lib/write/writing-storage";
+import { getWriting, setWritingModelAnswer } from "@/lib/write/writing-storage";
 
 interface WritingFeedback {
   bands: { task: number; coherence: number; lexical: number; grammar: number };
@@ -15,7 +15,7 @@ interface WritingFeedback {
     category: string;
     suggestion: string;
   }[];
-  modelAnswer: string;
+  modelAnswer?: string;
   nextFocus: string;
 }
 
@@ -41,12 +41,15 @@ export default function WritingResultPage() {
     content: string;
     config: { title: string; prompt: string };
     taskId?: string;
+    kind?: string;
+    chartData?: unknown;
   } | null>(null);
+  const [modelFailed, setModelFailed] = useState(false);
 
   useEffect(() => {
     const record = getWriting().find((item) => item.id === id);
     if (record) {
-      setData({ feedback: record.feedback, content: record.content, config: { title: KIND_TITLES[record.kind] ?? record.kind, prompt: record.prompt }, taskId: record.taskId });
+      setData({ feedback: record.feedback, content: record.content, config: { title: KIND_TITLES[record.kind] ?? record.kind, prompt: record.prompt }, taskId: record.taskId, kind: record.kind, chartData: record.chartData });
       return;
     }
     try {
@@ -55,6 +58,26 @@ export default function WritingResultPage() {
       if (stored) setData({ ...JSON.parse(stored), taskId: id });
     } catch { /* Ignore invalid legacy result data. */ }
   }, [id]);
+
+  // Grading returns without the band 8 model answer (it is slow to write); fetch it here, once, and keep it on the record.
+  const needsModel = !!data && !!data.kind && !data.feedback.modelAnswer;
+  useEffect(() => {
+    if (!needsModel || !data) return;
+    let cancelled = false;
+    fetch("/api/write/model-answer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind: data.kind, prompt: data.config.prompt, chartData: data.chartData }),
+    })
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error("model answer failed"))))
+      .then(({ modelAnswer }: { modelAnswer: string }) => {
+        setWritingModelAnswer(id, modelAnswer);
+        if (!cancelled) setData((d) => (d ? { ...d, feedback: { ...d.feedback, modelAnswer } } : d));
+      })
+      .catch(() => { if (!cancelled) setModelFailed(true); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [needsModel, id]);
 
   if (!data) {
     return (
@@ -139,7 +162,9 @@ export default function WritingResultPage() {
       {/* Model answer */}
       <section>
         <h2>Bài mẫu band 8</h2>
-        <div className="model-answer postcard">{feedback.modelAnswer}</div>
+        <div className="model-answer postcard">
+          {feedback.modelAnswer ?? (modelFailed ? "Không tạo được bài mẫu. Tải lại trang để thử lại." : "Đang viết bài mẫu…")}
+        </div>
       </section>
 
       <div className="result-actions">

@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import RoleplayPage from "../roleplay/[id]/page";
 import IeltsSpeakingPage from "../ielts/[part]/page";
 import { getSessions } from "@/lib/sessions";
+import { gradeStreamResponse } from "@/lib/test-support/grade-stream-mock";
 
 jest.mock("next/navigation", () => ({ useRouter: () => ({ push: jest.fn() }), useParams: () => ({ id: "hotel", part: "p1" }) }));
 jest.mock("@/lib/speech/recorder", () => ({ createRecorder: () => ({ start: jest.fn(), stop: jest.fn(), dispose: jest.fn() }) }));
@@ -28,12 +29,12 @@ test("IELTS speaking finishes after feedback and cancels on early exit", async (
   early.unmount();
   expect(getSessions()).toEqual([]);
 
-  global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({
+  global.fetch = jest.fn().mockResolvedValue(gradeStreamResponse({
     bands: { fluency: 6, lexical: 6, grammar: 6 }, overall: 6,
     durationSec: 10, wordsPerMinute: 120, fillerCount: 0,
     strengths: [], improvements: [], transcript: "Hello there", upgradedVersion: "Hello there",
     newVocabulary: [],
-  }) });
+  }));
   const completed = render(<IeltsSpeakingPage />);
   fireEvent.click(screen.getByRole("button", { name: "Gõ câu trả lời" }));
   fireEvent.change(screen.getByPlaceholderText("Nhập câu trả lời của bạn bằng tiếng Anh…"), { target: { value: "Hello there" } });

@@ -6,6 +6,7 @@ const KB = 1024;
 // Request body size per route. Essays and roleplay histories are long; everything else is a word, a topic or a short answer.
 export const BODY_LIMITS: Record<string, number> = {
   "/api/write/grade": 64 * KB,
+  "/api/write/model-answer": 16 * KB,
   "/api/speak/roleplay": 64 * KB,
   "/api/speech/grade": 32 * KB,
   "/api/exam/generate-item": 8 * KB,

@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import WritingTaskPage from "../task/[id]/page";
 import { getSessions } from "@/lib/sessions";
+import { gradeStreamResponse } from "@/lib/test-support/grade-stream-mock";
 
 const mockPush = jest.fn();
 jest.mock("next/navigation", () => ({ useRouter: () => ({ push: mockPush }), useParams: () => ({ id: "toeic-email" }) }));
@@ -19,7 +20,7 @@ test("starts once, cancels on early exit, and finishes after saving feedback", a
   early.unmount();
   expect(getSessions()).toEqual([]);
 
-  global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ overall: 7, bands: { task: 7, coherence: 7, lexical: 7, grammar: 7 }, annotations: [], modelAnswer: "Example", nextFocus: "Grammar", wordCount: 100 }) });
+  global.fetch = jest.fn().mockResolvedValue(gradeStreamResponse({ overall: 7, bands: { task: 7, coherence: 7, lexical: 7, grammar: 7 }, annotations: [], nextFocus: "Grammar", wordCount: 100 }));
   const completed = render(<WritingTaskPage />);
   fireEvent.click(screen.getByRole("button", { name: /Bắt đầu viết/ }));
   fireEvent.change(screen.getByPlaceholderText("Bắt đầu viết bài của bạn ở đây…"), {

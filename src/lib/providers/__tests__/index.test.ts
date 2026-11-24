@@ -1,5 +1,5 @@
 // src/lib/providers/__tests__/index.test.ts
-import { createCallWithFallback, getRegisteredProviders, getProviderById } from "../index";
+import { createCallWithFallback, createStreamWithFallback, getRegisteredProviders, getProviderById } from "../index";
 import type { AIProvider } from "../types";
 
 const makeProvider = (id: string, fn: jest.Mock): AIProvider => ({
@@ -206,4 +206,33 @@ test("extra opencode models share the key; the locked ones need OPENCODE_LOCK_PA
     delete process.env.OPENCODE_API_KEY;
     delete process.env.OPENCODE_LOCK_PASSWORD;
   }
+});
+
+async function collect(stream: AsyncIterable<string>) {
+  let out = "";
+  for await (const chunk of stream) out += chunk;
+  return out;
+}
+
+test("streamWithFallback streams chunks from the first provider and reads a non-streaming provider whole", async () => {
+  const streaming: AIProvider = { ...makeProvider("a", jest.fn()), streamContent: async function* () { yield "he"; yield "llo"; } };
+  expect(await collect((await createStreamWithFallback([streaming])("p")).stream)).toBe("hello");
+  const whole = await createStreamWithFallback([makeProvider("b", jest.fn().mockResolvedValue("whole"))])("p");
+  expect(whole.providerId).toBe("b");
+  expect(await collect(whole.stream)).toBe("whole");
+});
+
+test("streamWithFallback falls back when a provider fails before its first chunk, not after", async () => {
+  const failing: AIProvider = { ...makeProvider("a", jest.fn()), streamContent: async function* () { throw Object.assign(new Error("down"), { status: 503 }); } };
+  const ok: AIProvider = { ...makeProvider("b", jest.fn()), streamContent: async function* () { yield "ok"; } };
+  const failed: string[] = [];
+  const r = await createStreamWithFallback([failing, ok])("p", undefined, undefined, {}, (id) => failed.push(id));
+  expect(r.providerId).toBe("b");
+  expect(failed).toEqual(["a"]);
+  expect(await collect(r.stream)).toBe("ok");
+
+  const broken: AIProvider = { ...makeProvider("c", jest.fn()), streamContent: async function* () { yield "part"; throw new Error("cut"); } };
+  const committed = await createStreamWithFallback([broken, ok])("p");
+  expect(committed.providerId).toBe("c");
+  await expect(collect(committed.stream)).rejects.toThrow("cut");
 });

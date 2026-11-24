@@ -50,4 +50,18 @@ export class OpenAICompatProvider implements AIProvider {
     }, { signal: opts?.signal });
     return response.choices[0]?.message?.content ?? "";
   }
+
+  async *streamContent(prompt: string, opts?: GenerateOpts): AsyncGenerator<string> {
+    const stream = await this.client.chat.completions.create({
+      model: this.model,
+      messages: [{ role: "user", content: prompt }],
+      stream: true,
+      ...(opts?.temperature !== undefined && { temperature: opts.temperature }),
+      ...(opts?.effort && this.supportsEffort && { reasoning_effort: opts.effort }),
+    }, { signal: opts?.signal });
+    for await (const chunk of stream) {
+      const delta = chunk.choices[0]?.delta?.content;
+      if (delta) yield delta;
+    }
+  }
 }

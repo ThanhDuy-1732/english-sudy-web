@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { startSession, finishSession, cancelSession } from "@/lib/sessions";
 import { saveWriting } from "@/lib/write/writing-storage";
-import type { WritingKind } from "@/lib/write/writing-storage";
+import type { WritingKind, WritingFeedbackShape } from "@/lib/write/writing-storage";
+import { readGradeStream } from "@/lib/read-grade-stream";
 import { useCountdown } from "@/lib/useCountdown";
 import {
   Bar,
@@ -102,6 +103,8 @@ export default function WritingTaskPage() {
   const [deadline, setDeadline] = useState<number | null>(null);
   const [started, setStarted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  // Fields of the feedback as the grader finishes them, shown while the rest is still being written.
+  const [partial, setPartial] = useState<{ overall?: number; annotations?: unknown[] }>({});
   const [draftReady, setDraftReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const draftKey = `writingTaskDraft:${id}`;
@@ -169,7 +172,10 @@ export default function WritingTaskPage() {
         }),
       });
       if (!res.ok) throw new Error("grading failed");
-      const feedback = await res.json();
+      const feedback = await readGradeStream<WritingFeedbackShape>(res, (k, v) => {
+        if (k === "overall" && typeof v === "number") setPartial((p) => ({ ...p, overall: v }));
+        if (k === "annotations" && Array.isArray(v)) setPartial((p) => ({ ...p, annotations: v }));
+      });
       if (!feedback.bands || !Array.isArray(feedback.annotations) || typeof feedback.overall !== "number") {
         throw new Error("invalid feedback");
       }
@@ -258,6 +264,12 @@ export default function WritingTaskPage() {
                 {submitting ? "Đang chấm…" : "Nộp bài"}
               </button>
             </div>
+            {submitting && partial.overall !== undefined && (
+              <p role="status" className="mt-2 text-sm text-muted">
+                Band ước tính {partial.overall}
+                {partial.annotations ? ` · ${partial.annotations.length} điểm cần sửa` : " · đang tìm lỗi…"}
+              </p>
+            )}
           </div>
         </>
       )}

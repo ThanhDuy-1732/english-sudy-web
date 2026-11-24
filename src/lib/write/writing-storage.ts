@@ -7,7 +7,8 @@ export interface WritingFeedbackShape {
   overall: number;
   wordCount: number;
   annotations: { excerpt: string; issue: string; category: string; suggestion: string }[];
-  modelAnswer: string;
+  /** Written by a separate call after grading; missing until it arrives. */
+  modelAnswer?: string;
   nextFocus: string;
 }
 
@@ -52,6 +53,15 @@ export function saveWriting(r: WritingRecord): void {
   all.unshift(updated);
   localStorage.setItem(KEY, JSON.stringify(all.slice(0, MAX)));
   localStorage.setItem("lastWritingAt", r.createdAt);
+}
+
+export function setWritingModelAnswer(id: string, modelAnswer: string): void {
+  if (typeof window === "undefined") return;
+  const all = getWriting();
+  const record = all.find((r) => r.id === id);
+  if (!record) return;
+  record.feedback = { ...record.feedback, modelAnswer };
+  localStorage.setItem(KEY, JSON.stringify(all));
 }
 
 export function addWritingVersion(id: string, draft: Omit<WritingDraft, "version">): void {

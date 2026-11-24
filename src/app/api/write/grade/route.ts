@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { callTask } from "@/lib/ai-tasks";
-import { parseAiJson } from "@/lib/ai-json";
+import { gradeStream } from "@/lib/grade-stream";
 import { buildWritingAnchorBlock } from "@/lib/grading/anchors";
 import { z } from "zod";
 
@@ -29,7 +28,6 @@ const WritingFeedbackSchema = z.object({
       })
     )
     .max(8),
-  modelAnswer: z.string(),
   nextFocus: z.string(),
 });
 
@@ -59,7 +57,6 @@ Grading rules:
 - Score Task Achievement/Response, Coherence & Cohesion, Lexical Resource, Grammatical Range & Accuracy on 0-9 scale.
 - overall = average of the 4 bands, rounded to nearest 0.5.
 - annotations: quote VERBATIM from the student's text in "excerpt". Max 6 annotations.
-- modelAnswer: a band 8 response to the same task.
 - nextFocus: ONE specific skill for the student to improve next.
 - Be strict. A band 6 response must not be called band 7.
 
@@ -69,15 +66,15 @@ Return ONLY JSON:
   "overall": 0-9,
   "wordCount": ${wordCount},
   "annotations": [{"excerpt": "exact quote", "issue": "...", "category": "grammar|vocab|cohesion|task|style", "suggestion": "..."}],
-  "modelAnswer": "...",
   "nextFocus": "..."
 }`;
 
-  const { text, providerId } = await callTask({ task: "writing-grade", prompt, temperature: GRADING_OPTS.temperature });
-  const parsed = await parseAiJson(text, WritingFeedbackSchema, {
-    repair: (err) =>
-      callTask({ task: "writing-grade", prompt: `${prompt}\n\nSchema error: ${err}\nReturn valid JSON only.`, provider: providerId, temperature: GRADING_OPTS.temperature, repair: true }).then((r) => r.text),
+  // The band 8 model answer is the longest part of the output; /api/write/model-answer writes it separately.
+  return gradeStream({
+    task: "writing-grade",
+    prompt,
+    schema: WritingFeedbackSchema,
+    temperature: GRADING_OPTS.temperature,
+    repairPrompt: (err) => `${prompt}\n\nSchema error: ${err}\nReturn valid JSON only.`,
   });
-
-  return NextResponse.json({ ...parsed, gradedBy: providerId }, { headers: { "X-Provider-Used": providerId } });
 }

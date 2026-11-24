@@ -39,6 +39,64 @@ function withTimeout<T>(run: (signal: AbortSignal) => Promise<T>, id: string, ms
   return Promise.race([run(controller.signal), timeout]).finally(() => clearTimeout(timer));
 }
 
+function orderProviders(providers: AIProvider[], preferredId?: string, disabledIds?: string[]): AIProvider[] {
+  const active = disabledIds?.length ? providers.filter((p) => !disabledIds.includes(p.id)) : providers;
+  const ordered = preferredId
+    ? [...active.filter((p) => p.id === preferredId), ...active.filter((p) => p.id !== preferredId)]
+    : active;
+  if (ordered.length === 0) throw new Error("No AI providers configured");
+  return ordered;
+}
+
+/**
+ * Like callWithFallback, but returns the text as it is written. The fallback chain only runs until a provider
+ * produces its first chunk; after that the stream is committed to that provider and an error ends it.
+ * One timeout covers the whole stream.
+ */
+export function createStreamWithFallback(providers: AIProvider[]) {
+  return async function streamWithFallback(
+    prompt: string,
+    preferredId?: string,
+    disabledIds?: string[],
+    opts: GenerateOpts & { timeoutMs?: number } = {},
+    onFail?: (providerId: string, error: unknown) => void
+  ): Promise<{ stream: AsyncGenerator<string>; providerId: string }> {
+    const ordered = orderProviders(providers, preferredId, disabledIds);
+    const { timeoutMs = PROVIDER_TIMEOUT_MS, ...genOpts } = opts;
+    let lastError: unknown;
+    for (const provider of ordered) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const callOpts = { ...genOpts, signal: controller.signal };
+        const source = provider.streamContent
+          ? provider.streamContent(prompt, callOpts)
+          : (async function* () { yield await provider.generateContent(prompt, callOpts); })();
+        const iterator = source[Symbol.asyncIterator]();
+        const first = await iterator.next();
+        if (first.done) throw new Error(`${provider.id} returned an empty stream`);
+        const stream = (async function* () {
+          try {
+            yield first.value;
+            for (let next = await iterator.next(); !next.done; next = await iterator.next()) yield next.value;
+          } finally {
+            clearTimeout(timer);
+            controller.abort();
+          }
+        })();
+        return { stream, providerId: provider.id };
+      } catch (error) {
+        clearTimeout(timer);
+        controller.abort();
+        onFail?.(provider.id, error);
+        if (!isRetryableError(error)) throw error;
+        lastError = error;
+      }
+    }
+    throw lastError;
+  };
+}
+
 export function createCallWithFallback(providers: AIProvider[]) {
   return async function callWithFallback(
     prompt: string,
@@ -47,21 +105,7 @@ export function createCallWithFallback(providers: AIProvider[]) {
     opts: GenerateOpts & { timeoutMs?: number } = {},
     onFail?: (providerId: string, error: unknown) => void
   ): Promise<{ text: string; providerId: string }> {
-    const active = disabledIds?.length
-      ? providers.filter((p) => !disabledIds.includes(p.id))
-      : providers;
-
-    const ordered = preferredId
-      ? [
-          ...active.filter((p) => p.id === preferredId),
-          ...active.filter((p) => p.id !== preferredId),
-        ]
-      : active;
-
-    if (ordered.length === 0) {
-      throw new Error("No AI providers configured");
-    }
-
+    const ordered = orderProviders(providers, preferredId, disabledIds);
     const { timeoutMs = PROVIDER_TIMEOUT_MS, ...genOpts } = opts;
     let lastError: unknown;
     for (const provider of ordered) {
@@ -95,6 +139,8 @@ function buildRegistry(): AIProvider[] {
         model: process.env.OPENCODE_MODEL ?? "glm-5.3-flash",
         baseURL: process.env.OPENCODE_BASE_URL ?? "https://opencode.ai/inference/go/openai/v1",
         defaultHeaders: { "x-opencode-session": OPENCODE_SESSION_ID },
+        // Only the default model is known to take `reasoning_effort` (glm-5.3-flash, measured Nov 2026); a model chosen by env might reject it.
+        supportsEffort: !process.env.OPENCODE_MODEL,
       })
     );
   }
@@ -189,6 +235,7 @@ function buildRegistry(): AIProvider[] {
 const registry = buildRegistry();
 
 export const callWithFallback = createCallWithFallback(registry);
+export const streamWithFallback = createStreamWithFallback(registry);
 
 export function getRegisteredProviders(): ProviderInfo[] {
   return registry.map(({ id, name, model }) => ({ id, name, model, ...(LOCKED_PROVIDER_IDS.includes(id) && { locked: true }) }));
