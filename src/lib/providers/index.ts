@@ -127,8 +127,7 @@ function buildRegistry(): AIProvider[] {
 
   // Fallback order = measured speed for a short prompt (p50, Nov 2026): groq ~0.9 s, cohere ~0.5 s
   // (fast, but a small model), openrouter ~1.4 s (free models, slow on longer output),
-  // gemini ~7 s (queue on the free tier; it stays registered mainly for photo translation),
-  // mistral dead last, after the extra OpenCode models (402/429 on this account until billing is set up).
+  // gemini ~7 s (queue on the free tier; it stays registered mainly for photo translation).
 
   if (process.env.OPENCODE_API_KEY) {
     providers.push(
@@ -214,21 +213,9 @@ function buildRegistry(): AIProvider[] {
     }
   }
 
-  // Dead last: this account answers 402/429 until billing is set up, so every earlier try would be wasted.
-  if (process.env.MISTRAL_API_KEY) {
-    providers.push(
-      new OpenAICompatProvider({
-        id: "mistral",
-        name: "Mistral",
-        apiKey: process.env.MISTRAL_API_KEY,
-        model: process.env.MISTRAL_MODEL ?? "mistral-small-latest",
-        baseURL: "https://api.mistral.ai/v1",
-      })
-    );
-  }
-
   // HuggingFace provider removed: Inference Providers requires paid credits; this
   // account has none and every call returns 402. Re-add the block if credits are bought.
+  // Mistral removed for the same reason: 402/429 on every call until billing is set up.
 
   return providers;
 }

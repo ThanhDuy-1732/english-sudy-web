@@ -341,7 +341,7 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 
 **Implementations**:
 - `gemini.ts` — Google Gemini (via `@google/generative-ai`)
-- `openai-compat.ts` — OpenAI-compatible (Groq, OpenRouter, Mistral, Cohere, OpenCode Go; accepts optional `defaultHeaders`, used by OpenCode Go for `x-opencode-session`)
+- `openai-compat.ts` — OpenAI-compatible (Groq, OpenRouter, Cohere, OpenCode Go; accepts optional `defaultHeaders`, used by OpenCode Go for `x-opencode-session`)
 
 **Registry** (`src/lib/providers/index.ts`):
 - Built from env vars at module load time
@@ -360,15 +360,15 @@ Key `examTagAccuracies` — `{tag, correct, total}[]`. `recordTagResult`, `getTa
 - `GEMINI_API_KEY` → `gemini-flash-lite-latest`
 - `GROQ_API_KEY` → `openai/gpt-oss-120b`
 - `OPENROUTER_API_KEY` → `nvidia/nemotron-3-ultra-550b-a55b:free`
-- `MISTRAL_API_KEY` → `mistral-small-latest`
 - `COHERE_API_KEY` → `command-r7b-12-2024`
 - `OPENCODE_API_KEY` → `glm-5.3-flash` (OpenCode Go gateway `https://opencode.ai/inference/go/openai/v1`; sends `x-opencode-session` from `OPENCODE_SESSION_ID` or a per-process generated id; override the API base with `OPENCODE_BASE_URL` — pay-as-you-go uses `https://opencode.ai/inference/openai/v1`)
-- Cùng `OPENCODE_API_KEY`, thêm 3 provider (đăng ký sau `gemini`, trước `mistral`): `opencode-glm53` (`glm-5.3`, mở), `opencode-gpt6` (`gpt-6-luna`) và `opencode-haiku` (`claude-haiku-5-5`). Hai cái sau **khoá**: chỉ đăng ký khi có `OPENCODE_LOCK_PASSWORD`, `/api/providers` trả `locked: true`, và `callTask` gộp chúng vào `disabledProviders` khi request không có cookie mở khoá hợp lệ (`blockedProviderIds()` trong `src/lib/provider-lock.ts`, đọc cookie qua `next/headers`) — mọi route AI đều đi qua đây nên chặn ở một chỗ. Số đo: `docs/opencode-go-models-2026-11-23.md`
+- Cùng `OPENCODE_API_KEY`, thêm 3 provider (đăng ký sau `gemini`): `opencode-glm53` (`glm-5.3`, mở), `opencode-gpt6` (`gpt-6-luna`) và `opencode-haiku` (`claude-haiku-5-5`). Hai cái sau **khoá**: chỉ đăng ký khi có `OPENCODE_LOCK_PASSWORD`, `/api/providers` trả `locked: true`, và `callTask` gộp chúng vào `disabledProviders` khi request không có cookie mở khoá hợp lệ (`blockedProviderIds()` trong `src/lib/provider-lock.ts`, đọc cookie qua `next/headers`) — mọi route AI đều đi qua đây nên chặn ở một chỗ. Số đo: `docs/opencode-go-models-2026-11-23.md`
+- Mistral đã bị bỏ khỏi registry: tài khoản chưa bật billing nên mọi call trả 402/429. Thêm lại block trong `buildRegistry` nếu bật billing.
 - HuggingFace đã bị bỏ khỏi registry: account hiện tại không có credit (`canPay:false`, không PRO) nên mọi call trả 402. Thêm lại block trong `buildRegistry` nếu mua credit.
 
 Model can be overridden via env: `GEMINI_MODEL`, `GROQ_MODEL`, etc.
 
-Registry order (= thứ tự fallback, theo tốc độ đo 11/2026): `opencode` → `groq` → `cohere` → `openrouter` → `gemini` (~7 s, giữ chủ yếu cho dịch ảnh) → các model OpenCode phụ → `mistral` (cuối cùng; 402/429 khi chưa bật billing). `opencode` đứng đầu khi `OPENCODE_API_KEY` có mặt, nên nó là fallback mặc định khi client không gửi `provider`. `ProviderContext` cũng mặc định chọn `opencode` nếu localStorage chưa có `preferredProvider` (hoặc provider đó bị tắt); nếu không có OpenCode thì giữ thứ tự cũ.
+Registry order (= thứ tự fallback, theo tốc độ đo 11/2026): `opencode` → `groq` → `cohere` → `openrouter` → `gemini` (~7 s, giữ chủ yếu cho dịch ảnh) → các model OpenCode phụ. `opencode` đứng đầu khi `OPENCODE_API_KEY` có mặt, nên nó là fallback mặc định khi client không gửi `provider`. `ProviderContext` cũng mặc định chọn `opencode` nếu localStorage chưa có `preferredProvider` (hoặc provider đó bị tắt); nếu không có OpenCode thì giữ thứ tự cũ.
 
 **Client-side flow**: `useApiFetch` hook (reads `ProviderContext`) → POST with `{ provider, disabledProviders }` → API route → `callWithFallback` → sets `X-Provider-Used` header → `useApiFetch` updates context if provider changed.
 

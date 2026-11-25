@@ -30,7 +30,7 @@ Năng lực hiện có:
 
 ## 2. Tech stack
 
-Next.js 15 App Router · React 19 · TypeScript · Tailwind · Jest + Testing Library · `localStorage` (nguồn chính) + IndexedDB (audio) + file JSON (backup) · Firebase **chỉ hosting** · PWA (`public/sw.js`) · AI: OpenCode Go, Gemini, Groq (+ Whisper STT), OpenRouter, Mistral, Cohere với fallback chain.
+Next.js 15 App Router · React 19 · TypeScript · Tailwind · Jest + Testing Library · `localStorage` (nguồn chính) + IndexedDB (audio) + file JSON (backup) · Firebase **chỉ hosting** · PWA (`public/sw.js`) · AI: OpenCode Go, Gemini, Groq (+ Whisper STT), OpenRouter, Cohere với fallback chain.
 
 ---
 

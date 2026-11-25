@@ -19,7 +19,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT = process.env.PERF_OUT ?? join(__dirname, "results.json");
 // PERF_PROVIDER=opencode: send that provider and disable every other one, so a failure is not hidden by the fallback chain.
 const ONLY = process.env.PERF_PROVIDER;
-const ALL_PROVIDERS = ["opencode", "groq", "cohere", "openrouter", "gemini", "mistral"];
+const ALL_PROVIDERS = ["opencode", "groq", "cohere", "openrouter", "gemini"];
 
 const PAGES = [
   "/",
