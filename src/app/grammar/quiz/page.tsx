@@ -85,8 +85,9 @@ export default function GrammarQuizPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ topic: item.topicName, subRule: item.subRuleName }),
     });
+    if (!res.ok) throw new Error("invalid question");
     const q = await res.json() as { type: string; question: string; options?: string[]; answer: string };
-    if (!res.ok || typeof q.question !== "string" || typeof q.answer !== "string") throw new Error("invalid question");
+    if (typeof q.question !== "string" || typeof q.answer !== "string") throw new Error("invalid question");
     return { ...item, question: q };
   }
 

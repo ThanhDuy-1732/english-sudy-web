@@ -2,18 +2,20 @@ import { gradeSentence } from "@/lib/gemini";
 import { isLearnLang } from "@/lib/languages";
 import { callTask } from "@/lib/ai-tasks";
 import { NextRequest, NextResponse } from "next/server";
+import { badJson, readJson } from "@/lib/read-json";
 
 // Vercel: AI providers are tried in turn (25 s each) plus a JSON repair call; 300 s is the Hobby maximum with Fluid compute.
 export const maxDuration = 300;
 
 export async function POST(request: NextRequest) {
-  const body = (await request.json()) as {
+  const body = await readJson<{
     lang?: unknown;
     word?: string;
     sentence?: string;
     provider?: string;
     disabledProviders?: string[];
-  };
+  }>(request);
+  if (!body) return badJson();
 
   if (!body.word?.trim() || !body.sentence?.trim()) {
     return NextResponse.json({ error: "Missing word or sentence" }, { status: 400 });

@@ -13,7 +13,7 @@ import { startSession, finishSession } from "@/lib/sessions";
 type QuizMode = "meaning" | "fill";
 type Phase = "setup" | "quiz" | "done";
 
-interface FillQuestion { type: "fill"; word: string; sentence: string; answer: string; isLoading: boolean; reading?: string; translation?: string }
+interface FillQuestion { type: "fill"; word: string; sentence: string; answer: string; isLoading: boolean; failed?: boolean; reading?: string; translation?: string }
 type Question = MCQQuestion | FillQuestion;
 
 export default function VocabQuizPage() {
@@ -74,15 +74,18 @@ export default function VocabQuizPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ word, ...(quizLang === "en" ? {} : { lang: quizLang }) }),
       });
+      if (!res.ok) throw new Error("fill sentence failed");
       const data = await res.json() as { sentence?: string; reading?: string; translation?: string };
+      const sentence = data.sentence;
+      if (!sentence) throw new Error("fill sentence missing");
       setQuestions((prev) => prev.map((q, i) =>
         i === idx && q.type === "fill"
-          ? { ...q, sentence: data.sentence ?? word, reading: data.reading, translation: data.translation, isLoading: false }
+          ? { ...q, sentence, reading: data.reading, translation: data.translation, isLoading: false }
           : q
       ));
     } catch {
       setQuestions((prev) => prev.map((q, i) =>
-        i === idx && q.type === "fill" ? { ...q, isLoading: false } : q
+        i === idx && q.type === "fill" ? { ...q, isLoading: false, failed: true } : q
       ));
     }
   }
@@ -217,6 +220,17 @@ export default function VocabQuizPage() {
         <>
           {q.isLoading ? (
             <p className="py-8 text-center text-muted">Đang tạo câu hỏi...</p>
+          ) : q.failed ? (
+            <div role="alert" className="py-8 text-center">
+              <p className="mb-3 text-margin">Không tạo được câu hỏi.</p>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => setQuestions((prev) => prev.map((item, i) => (i === currentIdx && item.type === "fill" ? { ...item, isLoading: true, failed: false } : item)))}
+              >
+                Thử lại
+              </button>
+            </div>
           ) : (
             <>
               <p lang={LANG_INFO[quizLang].htmlLang} className={`postcard mb-4 px-6 py-8 ${quizLang === "en" ? "font-en" : "font-sans"} text-xl leading-relaxed`}>{blankOut(q.sentence, q.word)}</p>

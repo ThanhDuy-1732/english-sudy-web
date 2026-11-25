@@ -25,7 +25,7 @@ import { useApiFetch } from "@/lib/useApiFetch";
 
 export default function TranslatePage() {
   // localStorage is read in effects only: server HTML renders the defaults, hydration then applies the stored pair.
-  const [pair, setPair] = useState<TranslatePair>({ from: "vi", to: "en" });
+  const [pair, setPair] = useState<TranslatePair>({ from: "auto", to: "en" });
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

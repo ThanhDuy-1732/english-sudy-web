@@ -128,7 +128,7 @@ function buildRegistry(): AIProvider[] {
   // Fallback order = measured speed for a short prompt (p50, Nov 2026): groq ~0.9 s, cohere ~0.5 s
   // (fast, but a small model), openrouter ~1.4 s (free models, slow on longer output),
   // gemini ~7 s (queue on the free tier; it stays registered mainly for photo translation),
-  // mistral last (402 on this account until billing is set up).
+  // mistral dead last, after the extra OpenCode models (402/429 on this account until billing is set up).
 
   if (process.env.OPENCODE_API_KEY) {
     providers.push(
@@ -192,18 +192,6 @@ function buildRegistry(): AIProvider[] {
     );
   }
 
-  if (process.env.MISTRAL_API_KEY) {
-    providers.push(
-      new OpenAICompatProvider({
-        id: "mistral",
-        name: "Mistral",
-        apiKey: process.env.MISTRAL_API_KEY,
-        model: process.env.MISTRAL_MODEL ?? "mistral-small-latest",
-        baseURL: "https://api.mistral.ai/v1",
-      })
-    );
-  }
-
   // More OpenCode Go models on the same key, last so they never change the default fallback order.
   // GPT-6 Luna and Claude Haiku 5.5 are locked behind OPENCODE_LOCK_PASSWORD (see provider-lock.ts) and are
   // only registered when it is set. Benchmarks: docs/opencode-go-models-2026-11-23.md.
@@ -224,6 +212,19 @@ function buildRegistry(): AIProvider[] {
         })
       );
     }
+  }
+
+  // Dead last: this account answers 402/429 until billing is set up, so every earlier try would be wasted.
+  if (process.env.MISTRAL_API_KEY) {
+    providers.push(
+      new OpenAICompatProvider({
+        id: "mistral",
+        name: "Mistral",
+        apiKey: process.env.MISTRAL_API_KEY,
+        model: process.env.MISTRAL_MODEL ?? "mistral-small-latest",
+        baseURL: "https://api.mistral.ai/v1",
+      })
+    );
   }
 
   // HuggingFace provider removed: Inference Providers requires paid credits; this

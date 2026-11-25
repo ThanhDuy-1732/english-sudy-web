@@ -37,7 +37,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "scenario, history and userText are required" }, { status: 400 });
   }
 
+  // Only the latest turns go into the prompt: the whole conversation grows the cost of every reply.
   const historyText = history
+    .slice(-30)
     .map((t) => `${t.role === "user" ? "User" : scenario.aiRole}: ${t.text}`)
     .join("\n");
 

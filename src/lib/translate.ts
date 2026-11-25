@@ -84,7 +84,8 @@ export interface TranslatePair {
 }
 
 export const TRANSLATE_PAIR_KEY = "translatePair";
-const DEFAULT_PAIR: TranslatePair = { from: "vi", to: "en" };
+// Source "auto": typing in the target language then gets a "same language" warning instead of a paraphrase.
+const DEFAULT_PAIR: TranslatePair = { from: "auto", to: "en" };
 
 export function getTranslatePair(): TranslatePair {
   const stored = readStored<Partial<TranslatePair> | null>(TRANSLATE_PAIR_KEY, null);

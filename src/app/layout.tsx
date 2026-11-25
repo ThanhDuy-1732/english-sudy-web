@@ -22,7 +22,7 @@ const display = Baloo_2({ subsets: ["latin", "vietnamese"], weight: ["600", "700
 const en = Fraunces({ subsets: ["latin", "vietnamese"], variable: "--font-en" });
 
 export const metadata: Metadata = {
-  title: "ThankZ English",
+  title: { default: "ThankZ English", template: "%s · ThankZ English" },
   description: "Website tự học tiếng Anh cá nhân",
   applicationName: "ThankZ English",
   manifest: "/manifest.webmanifest",

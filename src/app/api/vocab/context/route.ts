@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isLearnLang } from "@/lib/languages";
 import { callTask } from "@/lib/ai-tasks";
+import { badJson, readJson } from "@/lib/read-json";
 
 // Vercel: AI providers are tried in turn (25 s each) plus a JSON repair call; 300 s is the Hobby maximum with Fluid compute.
 export const maxDuration = 300;
@@ -16,11 +17,13 @@ const FORMAT_PROMPTS: Record<string, string> = {
 };
 
 export async function POST(req: Request) {
-  const { words, format = "dialogue", lang: rawLang } = await req.json() as {
+  const json = await readJson<{
     words: string[];
     format?: string;
     lang?: unknown;
-  };
+  }>(req);
+  if (!json) return badJson();
+  const { words, format = "dialogue", lang: rawLang } = json;
   const lang = isLearnLang(rawLang) ? rawLang : "en";
 
   if (!words?.length) {

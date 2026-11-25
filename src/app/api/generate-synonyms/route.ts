@@ -2,6 +2,7 @@ import { generateSynonyms } from "@/lib/gemini";
 import { callTask } from "@/lib/ai-tasks";
 import { NextRequest, NextResponse } from "next/server";
 import { isLearnLang } from "@/lib/languages";
+import { badJson, readJson } from "@/lib/read-json";
 
 // Vercel: AI providers are tried in turn (25 s each) plus a JSON repair call; 300 s is the Hobby maximum with Fluid compute.
 export const maxDuration = 300;
@@ -9,12 +10,14 @@ export const maxDuration = 300;
 const NO_STORE = { "Cache-Control": "no-store" };
 
 export async function POST(req: NextRequest) {
-  const { word, provider, disabledProviders, lang: rawLang } = (await req.json()) as {
+  const json = await readJson<{
     word?: string;
     lang?: unknown;
     provider?: string;
     disabledProviders?: string[];
-  };
+  }>(req);
+  if (!json) return badJson();
+  const { word, provider, disabledProviders, lang: rawLang } = json;
 
   if (!word) {
     return NextResponse.json({ error: "word is required" }, { status: 400, headers: NO_STORE });

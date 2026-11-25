@@ -36,6 +36,8 @@ export function clientIp(headers: Headers): string {
   return forwarded?.at(-1) || headers.get("x-real-ip") || "local";
 }
 
+export const RATE_LIMIT_MESSAGE = "Gửi quá nhiều yêu cầu. Đợi một phút rồi thử lại.";
+
 export type LimitResult = { ok: true } | { ok: false; status: 411 | 413 | 429; error: string; retryAfterSec?: number };
 
 export function checkApiRequest(input: { path: string; ip: string; contentLength: string | null; now?: number }): LimitResult {
@@ -58,7 +60,7 @@ export function checkApiRequest(input: { path: string; ip: string; contentLength
   const recent = (hits.get(input.ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
   if (recent.length >= RATE_LIMIT) {
     hits.set(input.ip, recent);
-    return { ok: false, status: 429, error: "Gửi quá nhiều yêu cầu. Đợi một phút rồi thử lại.", retryAfterSec: Math.ceil((recent[0] + RATE_WINDOW_MS - now) / 1000) };
+    return { ok: false, status: 429, error: RATE_LIMIT_MESSAGE, retryAfterSec: Math.ceil((recent[0] + RATE_WINDOW_MS - now) / 1000) };
   }
   recent.push(now);
   hits.set(input.ip, recent);

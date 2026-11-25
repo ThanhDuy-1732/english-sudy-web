@@ -101,8 +101,8 @@ test("lịch sử giữ 20 mục mới nhất trước và thay thế cùng văn
   expect(after.filter((item) => item.id === "id3")).toHaveLength(1);
 });
 
-test("cặp ngôn ngữ mặc định Việt → Anh và được ghi nhớ", () => {
-  expect(getTranslatePair()).toEqual({ from: "vi", to: "en" });
+test("cặp ngôn ngữ mặc định Tự nhận → Anh và được ghi nhớ", () => {
+  expect(getTranslatePair()).toEqual({ from: "auto", to: "en" });
   setTranslatePair({ from: "auto", to: "zh" });
   expect(getTranslatePair()).toEqual({ from: "auto", to: "zh" });
 });

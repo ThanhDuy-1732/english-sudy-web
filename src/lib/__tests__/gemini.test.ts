@@ -110,7 +110,7 @@ test("gradeSentence returns parsed result", async () => {
 test("gradeSentence throws on malformed JSON", async () => {
   mockFn.mockResolvedValue("bad");
   await expect(gradeSentence("negotiate", "We negotiate.", mockFn)).rejects.toThrow(
-    "Gemini returned invalid JSON for gradeSentence"
+    "AI returned invalid JSON for gradeSentence"
   );
 });
 

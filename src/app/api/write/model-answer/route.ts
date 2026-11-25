@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callTask } from "@/lib/ai-tasks";
+import { badJson, readJson } from "@/lib/read-json";
 
 export const maxDuration = 300;
 
 // The band 8 model answer, split out of /api/write/grade: it is the longest part of the grading output,
 // so the scores and annotations no longer wait for it. It needs only the task, not the learner's essay.
 export async function POST(req: NextRequest) {
-  const { kind, prompt: taskPrompt, chartData } = await req.json();
+  const json = await readJson<Record<string, any>>(req);
+  if (!json) return badJson();
+  const { kind, prompt: taskPrompt, chartData } = json;
   if (!taskPrompt || typeof taskPrompt !== "string") {
     return NextResponse.json({ error: "prompt is required" }, { status: 400 });
   }

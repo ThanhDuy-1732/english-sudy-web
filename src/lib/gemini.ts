@@ -1,6 +1,7 @@
 // src/lib/gemini.ts
 import { RANDOM_TOPIC } from "./topics";
 import type { LearnLang } from "./languages";
+import { stripFences } from "./ai-json";
 export interface GeneratedWord {
   word: string;
   meaning: string;
@@ -26,6 +27,20 @@ export interface GenerateWordsOptions {
   exclude?: string[];
   count?: number;
   knownCount?: number;
+}
+
+/** Parses the model's JSON, ignoring fences and surrounding text, and asks once more when it still is not JSON. */
+async function askJson<T>(prompt: string, generateContentFn: GenerateFn, label: string): Promise<T> {
+  let text = "";
+  for (const content of [prompt, `${prompt}\n\nYour previous answer was not valid JSON. Return ONLY the JSON.`]) {
+    text = await generateContentFn(content);
+    try {
+      return JSON.parse(stripFences(text)) as T;
+    } catch {
+      // asked once more
+    }
+  }
+  throw new Error(`AI returned invalid JSON for ${label}: ${text.slice(0, 100)}`);
 }
 
 export async function generateWords(
@@ -154,12 +169,7 @@ export async function gradeSentence(
   lang: LearnLang = "en"
 ): Promise<{ score: number; feedback: string; corrected: string }> {
   const prompt = `Grade this ${LANGUAGE_NAME[lang]} sentence that uses the word "${word}":\n"${sentence}"\n\nReturn JSON only:\n{"score": <number from 1 to 10>, "feedback": "<short Vietnamese feedback, one sentence>", "corrected": "<corrected sentence, same as input if no errors>"}`;
-  const text = stripJsonCodeFence(await generateContentFn(prompt));
-  try {
-    return JSON.parse(text) as { score: number; feedback: string; corrected: string };
-  } catch {
-    throw new Error(`Gemini returned invalid JSON for gradeSentence: ${text.slice(0, 100)}`);
-  }
+  return askJson<{ score: number; feedback: string; corrected: string }>(prompt, generateContentFn, "gradeSentence");
 }
 
 export async function generateFillBlank(
@@ -254,12 +264,7 @@ export async function generateWordsBatch(
 ): Promise<BatchGeneratedWord[]> {
   const wordList = words.slice(0, 20).join(", ");
   const prompt = `For each of these English words: ${wordList}\nProvide a concise Vietnamese meaning and one natural English example sentence.\nReturn JSON array only: [{"word":"...","meaning":"...","example":"..."}]`;
-  const text = stripJsonCodeFence(await generateContentFn(prompt));
-  try {
-    return JSON.parse(text) as BatchGeneratedWord[];
-  } catch {
-    throw new Error(`Gemini returned invalid JSON for generateWordsBatch: ${text.slice(0, 100)}`);
-  }
+  return askJson<BatchGeneratedWord[]>(prompt, generateContentFn, "generateWordsBatch");
 }
 
 export async function generateReading(
@@ -271,10 +276,5 @@ export async function generateReading(
     lang === "en"
       ? `Write a short English paragraph (80-100 words) that naturally uses all of these words: ${words.join(", ")}.\nThen write 2 comprehension questions, each with 3 multiple choice options (A, B, C).\nReturn JSON only: {"passage":"...","questions":[{"question":"...","options":["A. ...","B. ...","C. ..."],"answer":"A"}]}`
       : `Write a short, simple ${LANGUAGE_NAME[lang]} paragraph (about 4-6 sentences) that naturally uses all of these words: ${words.join(", ")}.\nThen write 2 comprehension questions in ${LANGUAGE_NAME[lang]}, each with 3 multiple choice options (A, B, C).\nAlso give a Vietnamese translation of the paragraph.\nReturn JSON only: {"passage":"...","translation":"<Vietnamese>","questions":[{"question":"...","options":["A. ...","B. ...","C. ..."],"answer":"A"}]}`;
-  const text = stripJsonCodeFence(await generateContentFn(prompt));
-  try {
-    return JSON.parse(text) as { passage: string; questions: ReadingQuestion[]; translation?: string };
-  } catch {
-    throw new Error(`Gemini returned invalid JSON for generateReading: ${text.slice(0, 100)}`);
-  }
+  return askJson<{ passage: string; questions: ReadingQuestion[]; translation?: string }>(prompt, generateContentFn, "generateReading");
 }

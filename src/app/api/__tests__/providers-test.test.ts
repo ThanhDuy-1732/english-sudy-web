@@ -54,6 +54,6 @@ test("returns { ok: false, error, latency } on provider error", async () => {
   expect(res.status).toBe(200);
   const data = await res.json();
   expect(data.ok).toBe(false);
-  expect(data.error).toBe("rate limited");
+  expect(data.error).toBe("Không kết nối được tới nhà cung cấp"); // the raw provider message stays in the server log
   expect(typeof data.latency).toBe("number");
 });

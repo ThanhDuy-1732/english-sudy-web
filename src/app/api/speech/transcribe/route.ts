@@ -52,7 +52,10 @@ export async function POST(req: NextRequest) {
   });
 
   if (!res.ok) {
-    return NextResponse.json({ error: await res.text() }, { status: res.status });
+    // The provider's raw error stays in the server log. Its auth failures are ours, not the client's, so they read as 502.
+    console.error("transcribe failed", res.status, await res.text());
+    const status = [400, 413, 429].includes(res.status) ? res.status : 502;
+    return NextResponse.json({ error: "Không nhận dạng được bản ghi âm. Vui lòng thử lại." }, { status });
   }
 
   const data = await res.json();

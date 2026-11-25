@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { gradeStream } from "@/lib/grade-stream";
 import { buildSpeakingAnchorBlock } from "@/lib/grading/anchors";
 import { z } from "zod";
+import { badJson, readJson } from "@/lib/read-json";
 
 // Vercel: AI providers are tried in turn (25 s each) plus a JSON repair call; 300 s is the Hobby maximum with Fluid compute.
 export const maxDuration = 300;
@@ -32,7 +33,9 @@ const FeedbackSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const { task, transcript, durationSec } = await req.json();
+  const json = await readJson<Record<string, any>>(req);
+  if (!json) return badJson();
+  const { task, transcript, durationSec } = json;
 
   if (!transcript || typeof transcript !== "string") {
     return NextResponse.json({ error: "transcript is required" }, { status: 400 });

@@ -41,7 +41,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, latency: Date.now() - start });
   } catch (error) {
     clearTimeout(timeoutHandle);
-    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error(`provider test failed: ${providerId}`, error);
+    const status = (error as { status?: number }).status;
+    const message =
+      error instanceof Error && error.message === "timeout" ? "Hết thời gian chờ"
+        : status === 429 ? "Hết hạn mức hoặc gửi quá nhanh (429)"
+        : status === 401 || status === 403 ? `Khoá API bị từ chối (${status})`
+        : status ? `Nhà cung cấp báo lỗi (${status})` : "Không kết nối được tới nhà cung cấp";
     return NextResponse.json({ ok: false, error: message, latency: Date.now() - start });
   }
 }

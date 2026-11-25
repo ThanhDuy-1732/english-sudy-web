@@ -34,6 +34,7 @@ test("Chinese fill mode shows the sentence reading and translation and accepts t
   localStorage.setItem("learnedWords", JSON.stringify(zh));
   const originalFetch = global.fetch;
   global.fetch = jest.fn().mockResolvedValue({
+    ok: true,
     json: async () => ({ sentence: "我爱吃_____。", reading: "wǒ ài chī _____.", translation: "Tôi thích ăn trái cây." }),
   }) as unknown as typeof fetch;
   try {
