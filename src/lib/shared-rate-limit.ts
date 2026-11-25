@@ -21,6 +21,10 @@ export async function countSharedRequest(ip: string): Promise<number> {
         fails = CASE WHEN unlock_attempts.since <= now() - make_interval(secs => ${secs}) THEN 1 ELSE unlock_attempts.fails + 1 END,
         since = CASE WHEN unlock_attempts.since <= now() - make_interval(secs => ${secs}) THEN now() ELSE unlock_attempts.since END
       RETURNING fails, since`) as { fails: number; since: string }[];
+    // Rows are only reset when their client comes back, so now and then drop the stale ones.
+    if (row.fails === 1 && Math.random() < 0.01) {
+      await sql`DELETE FROM unlock_attempts WHERE key LIKE 'api:%' AND since < now() - interval '1 hour'`;
+    }
     if (row.fails <= RATE_LIMIT) return 0;
     return Math.max(1, Math.ceil((new Date(row.since).getTime() + RATE_WINDOW_MS - Date.now()) / 1000));
   } catch (err) {

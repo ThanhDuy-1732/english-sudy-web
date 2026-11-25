@@ -38,7 +38,7 @@ test("clientKey takes the first forwarded hop and cuts IPv6 to its /64", () => {
   const key = (ip: string) => clientKey(new Request("http://x", { headers: { "x-forwarded-for": `${ip}, 10.0.0.1` } }));
   expect(key("1.2.3.4")).toBe("ip:1.2.3.4");
   expect(key("2001:db8:1:2:aaaa::1")).toBe(key("2001:db8:1:2:bbbb::9"));
-  expect(key("2001:db8:1:2:aaaa::1")).toBe("ip6:2001:db8:1:2");
+  expect(key("2001:db8:1:2:aaaa::1")).toBe("ip:2001:db8:1:2::/64");
 });
 
 test("blocks after MAX_PER_IP attempts, not before", async () => {

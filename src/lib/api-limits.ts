@@ -36,6 +36,20 @@ export function clientIp(headers: Headers): string {
   return forwarded?.at(-1) || headers.get("x-real-ip") || "local";
 }
 
+/**
+ * What a rate limit counts: an IPv4 address as is, an IPv6 address cut to its /64, since one host can switch
+ * addresses inside that prefix for free. `::` is expanded first, so every spelling of a prefix gives the same key.
+ */
+export function ipBucket(ip: string): string {
+  // No colon: IPv4 or a placeholder. A dot as well: IPv4-mapped IPv6, where the /64 would lump every IPv4 client together.
+  if (!ip.includes(":") || ip.includes(".")) return ip;
+  const [head, tail] = ip.toLowerCase().split("::");
+  const start = head ? head.split(":") : [];
+  const end = tail ? tail.split(":") : [];
+  const groups = tail === undefined ? start : [...start, ...Array<string>(Math.max(0, 8 - start.length - end.length)).fill("0"), ...end];
+  return `${groups.slice(0, 4).map((g) => g.replace(/^0+(?=.)/, "")).join(":")}::/64`;
+}
+
 export const RATE_LIMIT_MESSAGE = "Gửi quá nhiều yêu cầu. Đợi một phút rồi thử lại.";
 
 export type LimitResult = { ok: true } | { ok: false; status: 411 | 413 | 429; error: string; retryAfterSec?: number };

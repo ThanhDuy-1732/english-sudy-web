@@ -1,6 +1,7 @@
 // Server-only: caps wrong passwords on /api/providers/unlock, counted in Neon (`unlock_attempts`, db/schema.sql)
 // because serverless instances share no memory.
 import { db } from "./db-events";
+import { ipBucket } from "./api-limits";
 
 export const WINDOW_MIN = 15;
 export const MAX_PER_IP = 5;
@@ -13,7 +14,7 @@ export const MAX_PER_IP = 5;
  */
 export function clientKey(req: Request): string {
   const ip = req.headers.get("x-real-ip") ?? req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  return ip.includes(":") && !ip.includes(".") ? "ip6:" + ip.split(":").slice(0, 4).join(":") : "ip:" + ip;
+  return "ip:" + ipBucket(ip);
 }
 
 /**

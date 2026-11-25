@@ -1,4 +1,4 @@
-import { BODY_LIMITS, DEFAULT_BODY_LIMIT, RATE_LIMIT, RATE_WINDOW_MS, checkApiRequest, clientIp, resetApiLimits } from "../api-limits";
+import { BODY_LIMITS, DEFAULT_BODY_LIMIT, RATE_LIMIT, RATE_WINDOW_MS, checkApiRequest, clientIp, resetApiLimits, ipBucket } from "../api-limits";
 
 beforeEach(() => resetApiLimits());
 
@@ -39,4 +39,12 @@ test("pruning many clients keeps the counters of active ones", () => {
 test("photo translation allows a 4 MB body", () => {
   expect(checkApiRequest({ path: "/api/translate/image", ip: "a", contentLength: String(3 * 1024 * 1024) })).toEqual({ ok: true });
   expect(checkApiRequest({ path: "/api/translate/image", ip: "a", contentLength: String(4 * 1024 * 1024 + 1) })).toMatchObject({ status: 413 });
+});
+
+test("ipBucket keys IPv6 by /64 whatever the spelling, and leaves IPv4 alone", () => {
+  const same = ["2001:db8::1", "2001:db8::ffff:2", "2001:0db8:0000:0000:1:2:3:4", "2001:DB8:0:0::9"];
+  expect(new Set(same.map(ipBucket)).size).toBe(1);
+  expect(ipBucket("2001:db8:0:1::1")).not.toBe(ipBucket("2001:db8::1"));
+  expect(ipBucket("203.0.113.9")).toBe("203.0.113.9");
+  expect(ipBucket("::ffff:203.0.113.9")).toBe("::ffff:203.0.113.9");
 });
