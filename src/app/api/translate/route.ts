@@ -85,6 +85,10 @@ ${
 3. "formal" — ${TONE_GUIDE.formal}.`
   }
 
+If the text is a single word or a short phrase, not a full sentence, translate it as a word or phrase, like a dictionary would:
+keep its part of speech, never add a subject or verb to turn it into a sentence (e.g. "vô tri" → "mindless", not "I am not knowledgeable.").
+For each tone, pick the word or phrase that register would use (slang for casual, the plain word for polite, the formal word for formal).
+
 Make each natural for the target culture: use honorifics and register correctly for Japanese and Korean, and the 您 vs 你 distinction for Chinese.
 ${reading}
 Each result gets a "note": one sentence in Vietnamese explaining when to use that tone.
